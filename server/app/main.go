@@ -16,6 +16,9 @@ import (
 	_articleRepo "github.com/bxcodec/go-clean-arch/article/repository/mysql"
 	_articleUcase "github.com/bxcodec/go-clean-arch/article/usecase"
 	_authorRepo "github.com/bxcodec/go-clean-arch/author/repository/mysql"
+	
+	_userRepo "server/authorization/user/repository/pgsql"
+	_githubRepo "server/authorization/github/repository/pgsql"
 )
 
 func init() {
@@ -59,10 +62,17 @@ func main() {
 	}()
 
 	e := echo.New()
+	// middleware
 	middL := _articleHttpDeliveryMiddleware.InitMiddleware()
 	e.Use(middL.CORS)
+	
+	// database connection pool provides connection pipeline to the reposioties
 	authorRepo := _authorRepo.NewMysqlAuthorRepository(dbConn)
 	ar := _articleRepo.NewMysqlArticleRepository(dbConn)
+	
+	// Here are the repositories for the authorization layer
+	userRepo := _userRepo.NewPgsqlUserRepository(dbConn)
+	githubRepo := _githubRepo.NewPgsqlGithubRepository(dbConn)
 
 	timeoutContext := time.Duration(viper.GetInt("context.timeout")) * time.Second
 	au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)

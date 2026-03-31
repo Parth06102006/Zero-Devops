@@ -27,4 +27,40 @@ UserID (for a User type)
 InstalltionID	
 AccountName	
 
-And then storing the information in the Postgres Database 
+And then storing the information in the Postgres Database
+
+## 1 April 2026 
+
+Today I have addeed repository functions here for the defined repositories in the domain defined for the user and the github these have been defined here
+
+Now there is the following things you should know before proceeding to the next part : 
+
+## The documentation needed for reference here is given below : 
+https://go.dev/doc/database/manage-connections#dedicated_connections
+https://go.dev/doc/database/querying
+https://pkg.go.dev/database/sql
+
+These are the main docs used for implementing the queries , dedicated Connection and then these are implemented as per given in the Domain
+
+### In authorization/user/repository/pgsql/pgsql_user.go
+
+There is the detected connection of the database there is the connection pipeline set up for the completetion of the queries and there connection pool is managed by Open and then we use Conn for dedicated detection then there are the following the below functions : 
+
+GetById 
+To get the user by id and return User,error
+
+GetByUsername
+To get the user by usernamr and return User,error
+
+Store 
+Insert the values User in the pg db and then return err
+
+### In authorization/github/repository/pgsql/pgsql_github.go
+
+There is the detected connection of the database there is the connection pipeline set up for the completetion of the queries and there connection pool is managed by Open and then we use Conn for dedicated detection then there are the following the below functions : 
+
+StoreInstallation 
+To store the installation id for the installed github app and then return error
+
+GetInstallationByUserID 
+Here it returns a unique row then there is has the userId as params and returns the GithubInstllation

@@ -4,7 +4,7 @@ import "context"
 
 type GithubInstalltion struct {
 	ID				int64		`json:"id"`
-	UserID			int64		`json:"user_id"`
+	UserID			User		`json:"user_id"`
 	InstalltionID	int64		`json:"installtion_id"`
 	AccountName		string		`json:"acount_name"`	
 }
