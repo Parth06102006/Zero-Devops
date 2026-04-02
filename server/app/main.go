@@ -4,11 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"net/url"
 	"time"
 
-	_ "github.com/lib/pq"
 	"github.com/labstack/echo"
+	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 
 	_articleHttpDelivery "github.com/bxcodec/go-clean-arch/article/delivery/http"
@@ -16,9 +15,9 @@ import (
 	_articleRepo "github.com/bxcodec/go-clean-arch/article/repository/mysql"
 	_articleUcase "github.com/bxcodec/go-clean-arch/article/usecase"
 	_authorRepo "github.com/bxcodec/go-clean-arch/author/repository/mysql"
-	
-	_userRepo "server/authorization/user/repository/pgsql"
+
 	_githubRepo "server/authorization/github/repository/pgsql"
+	_userRepo "server/authorization/user/repository/pgsql"
 )
 
 func init() {
@@ -39,12 +38,9 @@ func main() {
 	dbUser := viper.GetString(`database.user`)
 	dbPass := viper.GetString(`database.pass`)
 	dbName := viper.GetString(`database.name`)
-	connection := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPass, dbHost, dbPort, dbName)
-	val := url.Values{}
-	val.Add("parseTime", "1")
-	val.Add("loc", "Asia/Jakarta")
-	dsn := fmt.Sprintf("%s?%s", connection, val.Encode())
-	dbConn, err := sql.Open(`mysql`, dsn)
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+      dbHost, dbPort, dbUser, dbPass, dbName)
+  dbConn, err := sql.Open("postgres", dsn)
 
 	if err != nil {
 		log.Fatal(err)
