@@ -8,14 +8,32 @@ type TokenResponse struct {
 	RefreshToken	string	`json:"refreshToken"`
 }
 
-type LoginApps struct {
-	Apps map[string]string `json:"apps"`
+type OAuthUser struct {
+	Provider	string
+	Username	string
+	Email		string
+	Avatar	string
+	RawToken string
+}
+
+type OAuthProvider interface {
+	ExchangeCode(ctx context.Context, code string) (string,error)
+	GetUser(ctx context.Context , accessToken string)(*OAuthUser, error)
+}
+supportedProviders := map[string]bool{
+	"google": false,
+	"github": true,
 }
 
 //  Oauth Methods
 type AuthUsecase interface {
-	Signup(ctx context.Context , provider string) error
-	Login(ctx context.Context, provider string) error
+	
+	HandleOAuthCallback(ctx context.Context, code string, provider string) (*TokenResponse, error)
+	
+	// FUTURE : CUSTOM AUTH
+	// RegisterCustom(ctx context.Context , username string , email string , password string) error
+	// LoginCustom(ctx context.Context, email string , password string) (*TokenResponse, error)
+	
 	RefreshToken(ctx context.Context, refreshToken string) error
 	Logout(ctx context.Context, accessToken string) error
 }

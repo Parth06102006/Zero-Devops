@@ -10,11 +10,13 @@ type GithubInstalltion struct {
 }
 
 type GithubUsecase interface {
-	InstallGithubApp(ctx context.Context) (*TokenResponse , error)
+	InstallGithubApp(ctx context.Context) (error)
 	DeleteGithubApp(ctx context.Context) error
+	GetInstallation(ctx context.Context, userID int64) (*GithubInstallation, error
 }
 
 type GithubRepositry interface {
 	StoreInstalltion(ctx context.Context , inst *GithubInstallation) error
 	GetInstallationByUserID(ctx context.Context , userID int64) (*GithubInstallation, error)
+	DeleteInstallationByUserID(ctx context.Context, userID int64) error
 }

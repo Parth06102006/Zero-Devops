@@ -59,3 +59,31 @@ func (m *pgSqlGithubRepository) GetInstallationByUserID(ctx context.Context , us
 	
 	return &inst , nil
 }
+
+func (m *pgSqlGithubRepository) DeleteInstallationByUserID(ctx context.Context , userId int64) (*domain.GithubInstallation, error) {
+	query := `DELETE FROM Github WHERE UserID = $1`
+	stmt,err := m.Conn.PrepareContext(ctx , query)
+	
+	if err != nil {
+		logrus.Error(err)
+		return nil , err
+	}
+	
+	res , err = stmt.ExecContext(ctx , userId)
+	if err != nil {
+		logrus.Error(err)
+		return nil , err
+	}
+	
+	rowsAffected,err = res.rowsAffected()
+	if err!=nil{
+		return err
+	}
+	
+	if rowsAffected != 1 {
+		err = fmt.Errorf("weird  Behavior. Total Affected: %d", rowsAfected)
+		return nil, err
+	}
+	
+	return nil
+}

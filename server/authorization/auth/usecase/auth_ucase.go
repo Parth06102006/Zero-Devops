@@ -11,24 +11,25 @@ import (
 
 type authUsecase struct {
 	userRepo domain.UserRepository
-	githubRepo domain.GithubRepository
+	supportedProviders domain.supportedProviders
 	contextTimeout time.Duration
 }
 
 func NewUserUsecase(u domain.UserRepository, g domain.GithubRepository, timeout time.Duration) domain.AuthUsecase {
 	return &authUsecase{
 		userRepo: u,
-		githubRepo: g,
 		contextTimeout: timeout,
 	}
 }
 
-func (a *authUsecase) Signup(ctx context.Context, provider string) error {
-	g, ctx := errgroup.WithContext(ctx)
-	switch provider {
-	case "custom":
-		
-	default:
-		return nil
+func (a *authUsecase) HandleOAuthCallback(ctx context.Context , code string ,provider string) (*domain.TokenResponse, error) {
+	if _, ok := a.supportedProviders[provider]; !ok {
+		return nil, ErrProviderNotSupported
 	}
+	
+	p,ok = 
+	
+	
+	
+	
 }

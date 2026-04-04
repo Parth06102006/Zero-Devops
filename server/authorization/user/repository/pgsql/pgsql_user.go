@@ -32,7 +32,8 @@ func (m *pqSqlUserRepository) GetByID (ctx context.Context , id int64) (domain.U
 	var u domain.User
 	err = row.Scan(
 		&u.ID,
-		&u.GithubID,
+		&u.ProviderId,
+		&u.Provider,
 		&u.Username,
 		&u.Email,
 		&u.AvatarURL,
@@ -64,7 +65,8 @@ func (m *pqSqlUserRepository) GetByUsername (ctx context.Context , username stri
 	u = domain.User{}
 	err = row.Scan(
 		&u.ID,
-		&u.GithubID,
+		&u.ProviderId,
+		&u.Provider,
 		&u.Username,
 		&u.Email,
 		&u.AvatarURL,
@@ -88,7 +90,7 @@ func (m *pqSqlUserRepository) Store(ctx context.Context , user *domain.User) (er
 		return err
 	}
 	
-	res, err := stmt.ExecContext(ctx, user.GithubID, user.Username, user.Email, user.AvatarURL, user.CreatedAt)
+	res, err := stmt.ExecContext(ctx, user.ProviderId,user.Provider, user.Username, user.Email, user.AvatarURL, user.CreatedAt)
 	if err != nil {
 		logrus.Error(err)
 		return err
