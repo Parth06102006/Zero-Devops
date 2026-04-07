@@ -16,7 +16,6 @@ type User struct {
 	Email 		string	`json:"email"`
 	AvatarURL 	string	`json:"avatarURL"`
 	CreatedAt 	time.Time	`json:"createdAt"`
-	ProviderAccessToken string	`json:"providerAccessToken"`
 	RefreshToken string `json:"refreshToken"`
 }
 
@@ -25,5 +24,5 @@ type UserRepository interface {
 	GetByUsername(ctx context.Context , username string) (User , error)
 	GetProviderById(ctx context.Context , providerId int64) (User,error)
 	Store(ctx context.Context,u *User) error
-	Update(ctx context.Context, id int64, providerToken string , refreshToken string) error
+	Update(ctx context.Context, id int64, refreshToken string) error
 }

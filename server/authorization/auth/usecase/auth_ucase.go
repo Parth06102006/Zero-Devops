@@ -5,10 +5,7 @@ import (
 	"server/domain"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"golang.org/x/sync/errgroup"
 )
 
 type authUsecase struct {
@@ -51,24 +48,23 @@ func (a *authUsecase) HandleOAuthCallback(ctx context.Context, code string, prov
 	appAccessToken , appRefreshToken := generateTokens(oauthUser)
 
 	if existingUser.ID == 0 {
-userToSave := domain.User{
-		ProviderID: oauthUser.ProviderId,
-		Provider: oauthUser.Provider,
-		Username: oauthUser.Username,
-		Email: oauthUser.Email,
-		AvatarURL: oauthUser.AvatarURL,
-		CreatedAt : time.Now(),
-		ProviderAccessToken: providerToken,
-		RefreshToken: appRefreshToken,
-	}
-		err := a.userRepo.Store(ctx,&userToSave)
-		if err != nil{
-			return nil,err
+		userToSave := domain.User{
+			ProviderID: oauthUser.ProviderId,
+			Provider:   oauthUser.Provider,
+			Username:   oauthUser.Username,
+			Email:      oauthUser.Email,
+			AvatarURL:  oauthUser.AvatarURL,
+			CreatedAt:  time.Now(),
+			RefreshToken: appRefreshToken,
 		}
-	}else{
-		err := a.userRepo.Update(ctx,existingUser.ID,providerToken,appRefreshToken)
-		if err != nil{
-			return nil,err
+		err := a.userRepo.Store(ctx, &userToSave)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		err := a.userRepo.Update(ctx, existingUser.ID, appRefreshToken)
+		if err != nil {
+			return nil, err
 		}
 	}
 

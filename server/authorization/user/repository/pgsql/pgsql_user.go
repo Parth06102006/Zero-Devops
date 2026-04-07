@@ -38,7 +38,6 @@ func (m *pqSqlUserRepository) GetByID (ctx context.Context , id int64) (domain.U
 		&u.Email,
 		&u.AvatarURL,
 		&u.CreatedAt,
-		&u.ProviderAccessToken,
 		&u.RefreshToken,
 	)
 	if err != nil {
@@ -73,7 +72,6 @@ func (m *pqSqlUserRepository) GetByUsername (ctx context.Context , username stri
 		&u.Email,
 		&u.AvatarURL,
 		&u.CreatedAt,
-		&u.ProviderAccessToken,
 		&u.RefreshToken,
 	)
 	
@@ -110,7 +108,6 @@ func (m* pqSqlUserRepository) GetProviderById(ctx context.Context , providerId i
 		&u.Email,
 		&u.AvatarURL,
 		&u.CreatedAt,
-		&u.ProviderAccessToken,
 		&u.RefreshToken,
 	)
 
@@ -123,9 +120,9 @@ func (m* pqSqlUserRepository) GetProviderById(ctx context.Context , providerId i
 }
 
 func (m *pqSqlUserRepository) Store(ctx context.Context , user *domain.User) (error){
-	query := `INSERT INTO users (ProviderId , Provider , Username , Email , AvatarURL , CreatedAt , ProviderAccessToken , RefreshToken) VALUES ($1, $2, $3, $4, $5 , $6 , $7 , $8) RETURNING ID`
+	query := `INSERT INTO users (ProviderId , Provider , Username , Email , AvatarURL , CreatedAt , RefreshToken) VALUES ($1, $2, $3, $4, $5 , $6 , $7 ) RETURNING ID`
 
-	err := m.Conn.QueryRowContext(ctx,query,user.ProviderId,user.Provider, user.Username, user.Email, user.AvatarURL, user.CreatedAt,user.ProviderAccessToken,user.RefreshToken).Scan(&user.ID)
+	err := m.Conn.QueryRowContext(ctx,query,user.ProviderId,user.Provider, user.Username, user.Email, user.AvatarURL, user.CreatedAt,user.RefreshToken).Scan(&user.ID)
 	
 	if err != nil {
 		return err
@@ -134,7 +131,7 @@ func (m *pqSqlUserRepository) Store(ctx context.Context , user *domain.User) (er
 	return nil
 }
 
-func (m* pgSqlUserRepository) Update(ctx context.Context , id int64 , providerToken string , refreshToken string) error {
+func (m* pgSqlUserRepository) Update(ctx context.Context , id int64 , refreshToken string) error {
 	query := `UPDATE users SET AccessToken = $1 , RefreshToken = $2 WHERE ID = $3`
 	
 	stmt,err := m.Conn.PrepareContext(ctx,query)
@@ -144,7 +141,7 @@ func (m* pgSqlUserRepository) Update(ctx context.Context , id int64 , providerTo
 		return nil
 	}
 
-	res,err := stmt.ExecContext(ctx,providerToken,refreshToken,id)
+	res,err := stmt.ExecContext(ctx,refreshToken,id)
 	if err != nil {
 		logrus.Error(err)
 		return nil
