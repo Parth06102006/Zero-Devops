@@ -5,6 +5,7 @@ import (
 	"server/domain"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/viper"
 )
 
@@ -22,9 +23,32 @@ func NewAuthUsecase(u domain.UserRepository, providers map[string]domain.OAuthPr
 	}
 }
 
-func generateTokens(user *domain.User) (string , string){
+func generateTokens(user *domain.User) (string , string,error){
 	var secretKey = []byte(viper.GetString("JWT_SECRET"))
-	// need to wrtie the function to generate the accessToken and the refreshToken
+	accessClaims := jwt.MapClaims{
+		"user_id":user.ID,
+		"email":user.Email,
+		"exp":time.Now().Add(15*time.Minute).Unix(),
+		"iat":time.Now().Unix(),
+	}
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256,accessClaims)
+	signedAccessToken, err := accessToken.SignedString(secretKey)
+	if err != nil {
+		return "", "", err
+	}
+	refreshClaims := jwt.MapClaims{
+		"user_id": user.ID,
+		"exp":     time.Now().Add(7 * 24 * time.Hour).Unix(), 
+		"iat":     time.Now().Unix(),
+	}
+
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
+	signedRefreshToken, err := refreshToken.SignedString(secretKey)
+	if err != nil {
+		return "", "", err
+	}
+
+	return signedAccessToken, signedRefreshToken, nil
 }
 
 func (a *authUsecase) HandleOAuthCallback(ctx context.Context, code string, provider string) (*domain.TokenResponse, error) {
@@ -45,8 +69,10 @@ func (a *authUsecase) HandleOAuthCallback(ctx context.Context, code string, prov
 
 	existingUser,err := a.userRepo.GetByProviderId(ctx,	oauthUser.ProviderId)
 	
-	appAccessToken , appRefreshToken := generateTokens(oauthUser)
-
+	appAccessToken , appRefreshToken,err := generateTokens(oauthUser)
+	if err != nil {
+	return nil, err
+}
 	if existingUser.ID == 0 {
 		userToSave := domain.User{
 			ProviderID: oauthUser.ProviderId,
