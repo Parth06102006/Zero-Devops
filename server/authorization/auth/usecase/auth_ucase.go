@@ -101,6 +101,46 @@ func (a *authUsecase) HandleOAuthCallback(ctx context.Context, code string, prov
 
 }
 
-func (a *authUsecase) RefreshToken(ctx context.Context, refreshToken string) error {
-	
-}
+  func (a *authUsecase) RefreshToken(ctx context.Context, refreshToken string) (*domain.TokenResponse, error) {
+        secretKey := []byte(viper.GetString("JWT_SECRET"))
+
+        token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
+                if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+                        return nil, domain.ErrInvalidToken
+                }
+                return secretKey, nil
+        })
+        if err != nil || !token.Valid {
+                return nil, domain.ErrInvalidToken
+        }
+
+        claims, ok := token.Claims.(jwt.MapClaims)
+        if !ok {
+                return nil, domain.ErrInvalidToken
+        }
+        userID := int64(claims["user_id"].(float64))
+
+        user, err := a.userRepo.GetByID(ctx, userID)
+        if err != nil {
+                return nil, err
+        }
+
+        if user.RefreshToken != refreshToken {
+                return nil, domain.ErrInvalidToken
+        }
+
+        newAccessToken, newRefreshToken, err := generateTokens(&user)
+        if err != nil {
+                return nil, err
+        }
+
+        err = a.userRepo.Update(ctx, user.ID, newRefreshToken)
+        if err != nil {
+                return nil, err
+        }
+
+        return &domain.TokenResponse{
+                AccessToken:  newAccessToken,
+                RefreshToken: newRefreshToken,
+        }, nil
+  }
