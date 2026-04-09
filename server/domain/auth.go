@@ -34,6 +34,6 @@ type AuthUsecase interface {
 	// RegisterCustom(ctx context.Context , username string , email string , password string) error
 	// LoginCustom(ctx context.Context, email string , password string) (*TokenResponse, error)
 	
-	RefreshToken(ctx context.Context, refreshToken string) error
+	RefreshToken(ctx context.Context, refreshToken string) (*TokenResponse, error)
 	Logout(ctx context.Context, accessToken string) error
 }
