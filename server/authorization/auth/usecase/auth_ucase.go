@@ -4,7 +4,7 @@ import (
 	"context"
 	"server/domain"
 	"time"
-
+	"encoding/base64"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/viper"
 )
@@ -24,7 +24,8 @@ func NewAuthUsecase(u domain.UserRepository, providers map[string]domain.OAuthPr
 }
 
 func generateTokens(user *domain.User) (string , string,error){
-	var secretKey = []byte(viper.GetString("JWT_SECRET"))
+	// So here i am using the byte slices for the jwt signin function then I am using the viper to get the environment variables where I am adding the environment variables
+	var secretKey = []byte(viper.GetStrin("JWT_SECRET"))
 	accessClaims := jwt.MapClaims{
 		"user_id":user.ID,
 		"email":user.Email,
@@ -67,12 +68,9 @@ func (a *authUsecase) HandleOAuthCallback(ctx context.Context, code string, prov
 		return nil,err
 	}
 
-	existingUser,err := a.userRepo.GetByProviderId(ctx,	oauthUser.ProviderId)
+	existingUser,err := a.userRepo.GetByProviderById(ctx,	oauthUser.ProviderId)
 	
-	appAccessToken , appRefreshToken,err := generateTokens(oauthUser)
-	if err != nil {
-	return nil, err
-}
+	// Here the logic is incorrect I first need to store the user and then I need to add the tokens 
 	if existingUser.ID == 0 {
 		userToSave := domain.User{
 			ProviderID: oauthUser.ProviderId,
@@ -81,28 +79,40 @@ func (a *authUsecase) HandleOAuthCallback(ctx context.Context, code string, prov
 			Email:      oauthUser.Email,
 			AvatarURL:  oauthUser.AvatarURL,
 			CreatedAt:  time.Now(),
-			RefreshToken: appRefreshToken,
+			// RefreshToken: appRefreshToken,
 		}
 		err := a.userRepo.Store(ctx, &userToSave)
 		if err != nil {
 			return nil, err
 		}
+		appAccessToken , appRefreshToken,err := generateTokens(oauthUser)
+		if err != nil {
+			return nil, err
+		}
+		return &domain.TokenResponse{
+			AccessToken:  appAccessToken,
+			RefreshToken: appRefreshToken,
+		}, nil
 	} else {
+		appAccessToken , appRefreshToken,err := generateTokens(oauthUser)
+		if err != nil {
+			return nil, err
+		}
 		err := a.userRepo.Update(ctx, existingUser.ID, appRefreshToken)
 		if err != nil {
 			return nil, err
 		}
+		return &domain.TokenResponse{
+			AccessToken:  appAccessToken,
+			RefreshToken: appRefreshToken,
+		}, nil
 	}
 
-	return &domain.TokenResponse{
-        AccessToken:  appAccessToken,
-        RefreshToken: appRefreshToken,
-    }, nil
-
+	return nil, domain.ErrInternalServerError
 }
 
   func (a *authUsecase) RefreshToken(ctx context.Context, refreshToken string) (*domain.TokenResponse, error) {
-        secretKey := []byte(viper.GetString("JWT_SECRET"))
+        secretKey := []byte(viper.GetStrin("JWT_SECRET"))
 
         token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
                 if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -144,3 +154,48 @@ func (a *authUsecase) HandleOAuthCallback(ctx context.Context, code string, prov
                 RefreshToken: newRefreshToken,
         }, nil
   }
+
+
+// Logout function
+func (a* authUsecase) Logout(ctx context.Context, accessToken string) error{
+	secretKey := (viper.GetString("JWT_SECRET"))
+	if secretKey == ""{
+		return domain.ErrMissingSecret
+	}
+	// Validate the Token
+	// Get the user detail
+	// After getting the user detail I need to remove the refresh token from the database
+	//The removal of the token from the cookie would be done by the Logout API
+
+	// Parsing And Validating Access Token
+	token, err := jwt.Parse(accessToken, func(token *jwt.Token)(any,error){
+		hmacSecret := []byte(secretKey)
+
+		return hmacSecret,nil
+	},jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
+	if err != nil|| token == nil || !token.Valid {
+		return domain.ErrInvalidToken
+	}
+
+	claims,ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return domain.ErrInvalidToken
+	}
+
+	// We are using the type assertion since claims is of type interference and since userId is stored as string in claims then we check if it is stored as string since it is stored as string then programmaticaly at the run time we would assing the value to the userId otherwise run time panic would occur
+	userId,ok := claims["user_id"].(string)
+
+	if !ok {
+		return domain.ErrInvalidToken
+	}
+
+	// Updating the Refresh Token to Empty String to Not store it anymore
+	err := a.userRepo.Update(ctx,userId,"")
+
+	if err != nil {
+		return domain.ErrLoggingOut
+	}
+
+	return nil
+
+}

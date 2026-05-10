@@ -16,6 +16,8 @@ import (
 	_articleUcase "github.com/bxcodec/go-clean-arch/article/usecase"
 	_authorRepo "github.com/bxcodec/go-clean-arch/author/repository/mysql"
 
+
+	_authUcase "server/authorization/auth/usecase"
 	_githubRepo "server/authorization/github/repository/pgsql"
 	_userRepo "server/authorization/user/repository/pgsql"
 	_config "server/config"

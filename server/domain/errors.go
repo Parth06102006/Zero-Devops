@@ -15,4 +15,8 @@ var (
 	ErrBadParamInput = errors.New("given Param is not valid")
 	
 	ErrInvalidToken = errors.New("invalid or expired token")
+
+	ErrMissingSecret = errors.New("Secret Not Found")
+
+	ErrLoggingOut = errors.New("Error In Logging Out")
 )

@@ -120,9 +120,9 @@ func (m* pqSqlUserRepository) GetProviderById(ctx context.Context , providerId i
 }
 
 func (m *pqSqlUserRepository) Store(ctx context.Context , user *domain.User) (error){
-	query := `INSERT INTO users (ProviderId , Provider , Username , Email , AvatarURL , CreatedAt , RefreshToken) VALUES ($1, $2, $3, $4, $5 , $6 , $7 ) RETURNING ID`
+	query := `INSERT INTO users (ProviderId , Provider , Username , Email , AvatarURL , CreatedAt) VALUES ($1, $2, $3, $4, $5 , $6 ) RETURNING ID`
 
-	err := m.Conn.QueryRowContext(ctx,query,user.ProviderId,user.Provider, user.Username, user.Email, user.AvatarURL, user.CreatedAt,user.RefreshToken).Scan(&user.ID)
+	err := m.Conn.QueryRowContext(ctx,query,user.ProviderId,user.Provider, user.Username, user.Email, user.AvatarURL, user.CreatedAt).Scan(&user.ID)
 	
 	if err != nil {
 		return err
