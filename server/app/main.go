@@ -16,12 +16,14 @@ import (
 	// _articleUcase "github.com/bxcodec/go-clean-arch/article/usecase"
 	// _authorRepo "github.com/bxcodec/go-clean-arch/author/repository/mysql"
 
-	domain "Zero_Devops/server/domain"
+	_authHttp "Zero_Devops/server/authorization/auth/delivery/http"
+	_authMiddleware "Zero_Devops/server/authorization/auth/delivery/http/middleware"
 	_authUcase "Zero_Devops/server/authorization/auth/usecase"
+	_authProvider "Zero_Devops/server/authorization/auth/usecase/auth_provider"
 	_githubRepo "Zero_Devops/server/authorization/github/repository/pgsql"
 	_userRepo "Zero_Devops/server/authorization/user/repository/pgsql"
 	_config "Zero_Devops/server/config"
-	_authProvider "Zero_Devops/server/authorization/auth/usecase/auth_provider"
+	domain "Zero_Devops/server/domain"
 )
 
 func init() {
@@ -39,8 +41,8 @@ func main() {
 	dbPass := viper.GetString(`database.pass`)
 	dbName := viper.GetString(`database.name`)
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-      dbHost, dbPort, dbUser, dbPass, dbName)
-  dbConn, err := sql.Open("postgres", dsn)
+		dbHost, dbPort, dbUser, dbPass, dbName)
+	dbConn, err := sql.Open("postgres", dsn)
 
 	if err != nil {
 		log.Fatal(err)
@@ -61,29 +63,33 @@ func main() {
 	// middleware
 	// middL := _articleHttpDeliveryMiddleware.InitMiddleware()
 	// e.Use(middL.CORS)
-	
+
 	// database connection pool provides connection pipeline to the reposioties
 	// authorRepo := _authorRepo.NewMysqlAuthorRepository(dbConn)
 	// ar := _articleRepo.NewMysqlArticleRepository(dbConn)
-	
+
 	// Here are the repositories for the authorization layer
 	userRepo := _userRepo.NewPgSqlUserRepository(dbConn)
-	githubRepo := _githubRepo.NewPgSqlGithubRepository(dbConn)
-	
-	githubProvider := _authProvider.NewGithubProvider(
-        viper.GetString("OAUTH_GITHUB_CLIENT_ID"),
-        viper.GetString("OAUTH_GITHUB_CLIENT_SECRET"),
-        viper.GetString("OAUTH_GITHUB_REDIRECT_URL"),
-    )
+	authMiddleware := _authMiddleware.NewAuthMiddlewareHandler(userRepo)
+	e.Use(authMiddleware.ToMiddleware())
 
-	providers := map[string]domain.OAuthProvider	{
+	githubRepo := _githubRepo.NewPgSqlGithubRepository(dbConn)
+
+	githubProvider := _authProvider.NewGithubProvider(
+		viper.GetString("OAUTH_GITHUB_CLIENT_ID"),
+		viper.GetString("OAUTH_GITHUB_CLIENT_SECRET"),
+		viper.GetString("OAUTH_GITHUB_REDIRECT_URL"),
+	)
+
+	providers := map[string]domain.OAuthProvider{
 		"github": githubProvider,
 	}
-
 
 	// 2. Pass it to your usecase
 	timeoutContext := time.Duration(viper.GetInt("context.timeout")) * time.Second
 	authUsecase := _authUcase.NewAuthUsecase(userRepo, providers, timeoutContext)
+	_authHttp.NewAuthHandler(e, authUsecase)
+	_ = githubRepo
 
 	log.Fatal(e.Start(viper.GetString("server.address"))) //nolint
 }
