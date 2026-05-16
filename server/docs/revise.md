@@ -411,3 +411,217 @@ Important remaining auth issues:
 Readiness decision:
 
 The auth API implementation is much closer now. Login, refresh, logout, and current-user routes have real handler logic, and the auth packages compile. The next immediate step is wiring the handler in `app/main.go`, then fixing `HandleOAuthCallback` refresh-token persistence for new users.
+
+## Update - 14 May 2026
+
+The previous app-level compile blockers have been cleared. The auth handler is now wired from `app/main.go`, and the server packages get through Go compilation during verification.
+
+Progress completed since the previous update:
+
+- `app/main.go` now creates the user repository, auth middleware, GitHub OAuth provider, auth usecase, and registers the auth HTTP handler with `_authHttp.NewAuthHandler(e, authUsecase)`.
+- `app/main.go` now applies the auth middleware globally with route skipping for login and refresh.
+- The module path is now consistently using `Zero_Devops/server` for the active authorization packages.
+- `authorization/auth/delivery/http/middleware/middleware.go` now validates the `access_token` cookie, verifies the user exists through `UserRepository.GetByID`, and stores `user_id` in Echo context.
+- `authorization/github/repository/pgsql/pgsql_github.go` now compiles against `domain.GithubRepository` with store, lookup, and delete methods.
+- The old `app/main.go` blocker where `authUsecase` was created but not passed to the handler is fixed.
+- The old `githubRepo` unused-variable blocker is temporarily handled with `_ = githubRepo` until the GitHub installation APIs are wired.
+
+Current verification:
+
+```text
+go test ./...
+```
+
+Result: package compilation now succeeds for the server packages, but the command exits with a local Windows Go cache permission error:
+
+```text
+go: failed to trim cache: open C:\Users\Parth garg\AppData\Local\go-build\trim.txt: Access is denied.
+```
+
+This means the code reached the end of package verification without compile errors, but the test command still returns a non-zero exit because Go could not trim its build cache outside the repo.
+
+Packages reached by verification:
+
+- `Zero_Devops/server/app`
+- `Zero_Devops/server/authorization/auth/delivery/http`
+- `Zero_Devops/server/authorization/auth/delivery/http/middleware`
+- `Zero_Devops/server/authorization/auth/usecase`
+- `Zero_Devops/server/authorization/auth/usecase/auth_provider`
+- `Zero_Devops/server/authorization/github/repository/pgsql`
+- `Zero_Devops/server/authorization/github/usercase`
+- `Zero_Devops/server/authorization/user/repository/pgsql`
+- `Zero_Devops/server/config`
+- `Zero_Devops/server/domain`
+
+Important remaining auth issues:
+
+- `HandleOAuthCallback` still ignores the lookup error from `GetProviderById` and decides new-user flow with `existingUser.ID == 0`. It should explicitly handle `domain.ErrNotFound`.
+- New-user login still returns a refresh token without persisting that refresh token to the user row, so the first refresh after signup can fail.
+- Refresh tokens are still stored raw. This is acceptable for early local development, but they should be hashed before production.
+- `getStatusCode` still maps most auth errors to `500 Internal Server Error`; it should map invalid or missing tokens to `401`, bad OAuth/provider input to `400`, not found to `404`, and missing server secrets to `500`.
+- `Logout` and `GetCurrentUser` still duplicate access-token parsing. Extracting a private helper would reduce drift.
+- The current-user route is still `GET /auth/user/me`; the cleaner final route remains `GET /auth/me`.
+- Global middleware protects every route except `/auth/github/login` and `/auth/refresh`. That is fine for now, but future public routes need to be added to the skipper.
+
+Important remaining GitHub installation issues:
+
+- `githubRepo` is compiled but not wired into a GitHub installation usecase or HTTP handler yet.
+- `StoreInstallation` still uses `LastInsertId()`, which is not supported by `lib/pq`. Use `INSERT ... RETURNING id` with `Scan(&inst.ID)`.
+- Installation storage should use an upsert such as `ON CONFLICT (user_id) DO UPDATE` if only one GitHub App installation is allowed per user.
+- `DeleteInstallationByUserID` currently treats any row count other than exactly one as an error. Decide whether deleting a missing installation should return `domain.ErrNotFound` or be idempotent.
+
+Readiness decision:
+
+The backend is now compile-clean at the package level, with the caveat that `go test ./...` exits non-zero because of a local Go build-cache permission problem. The next best step is to fix the new-user refresh-token persistence and `ErrNotFound` handling in `HandleOAuthCallback`, then clean up status-code mapping and route naming before adding the GitHub App installation APIs.
+
+## Current Mermaid Flowchart - 14 May 2026
+
+This is the current backend flow based on the wired code in `app/main.go`, `auth_handler.go`, `auth_ucase.go`, auth middleware, and the partially implemented GitHub installation package.
+
+```mermaid
+flowchart TD
+    Start([Server start]) --> Config[Load config with Viper]
+    Config --> DB[Open Postgres connection]
+    DB --> Echo[Create Echo server]
+
+    Echo --> UserRepo[Create UserRepository]
+    UserRepo --> AuthMiddleware[Create auth middleware]
+    AuthMiddleware --> GlobalMiddleware[Apply middleware globally]
+
+    DB --> GithubRepo[Create GithubRepository]
+    GithubRepo --> GithubRepoParked[Not wired yet: _ = githubRepo]
+
+    Echo --> GithubProvider[Create GitHub OAuth provider]
+    GithubProvider --> Providers[providers map: github]
+    Providers --> AuthUsecase[Create AuthUsecase]
+    AuthUsecase --> AuthHandler[Register auth routes]
+
+    AuthHandler --> LoginRoute[POST /auth/github/login]
+    AuthHandler --> RefreshRoute[POST /auth/refresh]
+    AuthHandler --> LogoutRoute[POST /auth/logout]
+    AuthHandler --> MeRoute[GET /auth/user/me]
+
+    GlobalMiddleware --> SkipCheck{Is route public?}
+    SkipCheck -->|/auth/github/login or /auth/refresh| PublicRoute[Continue without access token]
+    SkipCheck -->|Any other route| ReadAccessCookie[Read access_token cookie]
+    ReadAccessCookie --> ValidateAccessToken[Validate JWT and user_id]
+    ValidateAccessToken --> LoadMiddlewareUser[UserRepository.GetByID]
+    LoadMiddlewareUser --> SetContextUser[Set user_id in Echo context]
+    SetContextUser --> ProtectedRoute[Continue protected request]
+
+    LoginRoute --> ReadCode[Read GitHub OAuth code from query param]
+    ReadCode --> HandleOAuth[AuthUsecase.HandleOAuthCallback]
+    HandleOAuth --> ExchangeCode[OAuthProvider.ExchangeCode]
+    ExchangeCode --> ProviderToken[Receive GitHub provider token]
+    ProviderToken --> FetchGithubUser[OAuthProvider.GetUser]
+    FetchGithubUser --> FindLocalUser[UserRepository.GetProviderById]
+    FindLocalUser --> UserExists{existingUser.ID == 0?}
+    UserExists -->|Yes| CreateUser[UserRepository.Store new local user]
+    CreateUser --> GenerateNewTokens[Generate app access and refresh tokens]
+    GenerateNewTokens --> NewUserGap[Current gap: refresh token not persisted for new user]
+    UserExists -->|No| GenerateExistingTokens[Generate app access and refresh tokens]
+    GenerateExistingTokens --> PersistRefresh[UserRepository.Update refresh token]
+    NewUserGap --> LoginCookies[Write access_token and refresh_token cookies]
+    PersistRefresh --> LoginCookies
+    LoginCookies --> LoginResponse[Return login success]
+
+    RefreshRoute --> ReadRefreshCookie[Read refresh_token cookie]
+    ReadRefreshCookie --> ParseRefresh[Validate refresh JWT]
+    ParseRefresh --> RefreshUserID[Extract user_id]
+    RefreshUserID --> LoadRefreshUser[UserRepository.GetByID]
+    LoadRefreshUser --> CompareRefresh[Compare stored refresh token]
+    CompareRefresh --> GenerateRotatedTokens[Generate new app tokens]
+    GenerateRotatedTokens --> SaveRotatedRefresh[UserRepository.Update new refresh token]
+    SaveRotatedRefresh --> RefreshCookies[Rewrite access and refresh cookies]
+    RefreshCookies --> RefreshResponse[Return refresh success]
+
+    LogoutRoute --> ReadLogoutAccess[Read access_token cookie]
+    ReadLogoutAccess --> ParseLogoutAccess[Validate access JWT]
+    ParseLogoutAccess --> LogoutUserID[Extract user_id]
+    LogoutUserID --> ClearStoredRefresh[UserRepository.Update refresh token to empty string]
+    ClearStoredRefresh --> ClearCookies[Clear access and refresh cookies]
+    ClearCookies --> LogoutResponse[Return logout success]
+
+    MeRoute --> ReadMeAccess[Read access_token cookie]
+    ReadMeAccess --> ParseMeAccess[Validate access JWT]
+    ParseMeAccess --> MeUserID[Extract user_id]
+    MeUserID --> LoadCurrentUser[UserRepository.GetByID]
+    LoadCurrentUser --> SafeUserResponse[Return domain.UserResponse without refresh token]
+
+    subgraph Planned_GitHub_App_Flow[Planned GitHub App installation flow]
+        InstallRoute[Future install endpoint] --> GithubUsecase[GithubUsecase]
+        GithubUsecase --> StoreInstallation[GithubRepository.StoreInstallation]
+        GithubUsecase --> GetInstallation[GithubRepository.GetInstallationByUserID]
+        GithubUsecase --> DeleteInstallation[GithubRepository.DeleteInstallationByUserID]
+        StoreInstallation --> PgGithub[(Github table)]
+        GetInstallation --> PgGithub
+        DeleteInstallation --> PgGithub
+    end
+
+    GithubUsecase -. not fully implemented or wired yet .-> GithubRepoParked
+```
+
+Main flow summary:
+
+- The active flow is cookie-based GitHub OAuth login, refresh, logout, and current-user lookup.
+- The app owns the access and refresh tokens; the GitHub OAuth token is only used to fetch GitHub user identity.
+- The middleware currently protects every route except `/auth/github/login` and `/auth/refresh`.
+- The GitHub App installation repository exists, but the usecase and routes are still planned work.
+
+## Update - 16 May 2026
+
+The authorization implementation remains mostly wired, but the current verification shows the GitHub installation usecase stub is now the immediate compile blocker.
+
+Progress confirmed today:
+
+- `go.mod` uses `module Zero_Devops/server`, and the active authorization packages are importing that module path consistently.
+- `app/main.go` still wires the user repository, auth middleware, GitHub OAuth provider, auth usecase, and auth HTTP handler.
+- The auth middleware still protects all routes except `/auth/github/login` and `/auth/refresh`.
+- `authorization/auth/delivery/http/auth_handler.go` still has working handler methods for login, refresh, logout, and current-user lookup.
+- `authorization/auth/usecase/auth_ucase.go` still generates app-owned access and refresh JWTs, validates refresh tokens, supports logout, and returns a safe `UserResponse` for current-user lookup.
+- `authorization/github/repository/pgsql/pgsql_github.go` still provides store, get-by-user, and delete-by-user methods for GitHub App installation records.
+
+Current verification:
+
+```text
+$env:GOCACHE = (Resolve-Path .gocache).Path; go test ./...
+```
+
+Result: failing only in `Zero_Devops/server/authorization/github/usercase`.
+
+Current compile blockers:
+
+- `authorization/github/usercase/github_ucase.go` imports `net/http` but does not use it.
+- `authorization/github/usercase/github_ucase.go` imports `time` but does not use it.
+- `authorization/github/usercase/github_ucase.go` imports `Zero_Devops/server/domain` but does not use it.
+
+Important remaining auth issues:
+
+- `HandleOAuthCallback` still ignores the error from `GetProviderById` and decides whether to create a user by checking `existingUser.ID == 0`. It should explicitly handle `domain.ErrNotFound` and return other repository errors.
+- New-user login still generates a refresh token but does not persist it to the user row, so the first refresh after a new OAuth signup can fail.
+- Refresh tokens are still stored raw. This is acceptable only for early local development; hash refresh tokens before production.
+- `getStatusCode` still maps most auth errors to `500 Internal Server Error`. It should map invalid or missing tokens to `401`, bad input/provider errors to `400`, not found to `404`, conflict to `409`, and missing server secrets to `500`.
+- `Logout` and `GetCurrentUser` still duplicate access-token parsing. Extract a helper to keep token behavior consistent.
+- The current-user route is still `GET /auth/user/me`; the cleaner final shape is still `GET /auth/me`.
+
+Important remaining GitHub installation issues:
+
+- `authorization/github/usercase/github_ucase.go` is still only a stub and does not use a repository yet.
+- The GitHub installation usecase constructor is misspelled as `NewGiithubAppUsecase`.
+- `githubRepo` is still created in `app/main.go` and parked with `_ = githubRepo`; it is not wired into a GitHub installation usecase or handler.
+- `StoreInstallation` still uses `LastInsertId()`, which is not supported by `lib/pq`. Use `INSERT ... RETURNING id` and `Scan(&inst.ID)`.
+- Installation storage should probably be an upsert with `ON CONFLICT (user_id) DO UPDATE` if one GitHub App installation per user is allowed.
+- `DeleteInstallationByUserID` still treats any row count other than exactly one as an error. Decide whether a missing installation should return `domain.ErrNotFound` or be idempotent.
+
+Recommended next implementation order:
+
+1. Remove the unused imports from `authorization/github/usercase/github_ucase.go` so `go test ./...` can compile all packages again.
+2. Implement the GitHub installation usecase against `domain.GithubRepository` and fix the constructor spelling.
+3. Fix `StoreInstallation` to use Postgres `RETURNING id`, then consider adding upsert behavior.
+4. Fix `HandleOAuthCallback` error handling and persist refresh tokens for new users.
+5. Improve auth status-code mapping and rename `GET /auth/user/me` to `GET /auth/me`.
+6. Add the GitHub installation HTTP handler and wire `githubRepo` through the usecase instead of parking it in `app/main.go`.
+
+Readiness decision:
+
+The auth API is still close, but the repository is not compile-clean with the repo-local Go cache because the GitHub installation usecase stub has unused imports. The fastest path is a small compile cleanup first, then the GitHub installation usecase and handler can be added on top of the existing repository.

@@ -12,7 +12,7 @@ type GithubInstallation struct {
 type GithubUsecase interface {
 	InstallGithubApp(ctx context.Context) (error)
 	DeleteGithubApp(ctx context.Context) error
-	GetInstallation(ctx context.Context, userID int64) (*GithubInstallation, error)
+	GetGithubAppInstallation(ctx context.Context, userID int64) (*GithubInstallation, error)
 }
 
 type GithubRepository interface {

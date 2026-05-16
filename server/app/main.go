@@ -35,11 +35,11 @@ func init() {
 }
 
 func main() {
-	dbHost := viper.GetString(`database.host`)
-	dbPort := viper.GetString(`database.port`)
-	dbUser := viper.GetString(`database.user`)
-	dbPass := viper.GetString(`database.pass`)
-	dbName := viper.GetString(`database.name`)
+	dbHost := viper.GetString("DATABASE_HOST")
+	dbPort := viper.GetString("DATABASE_PORT")
+	dbUser := viper.GetString("DATABASE_USER")
+	dbPass := viper.GetString("DATABASE_PASS")
+	dbName := viper.GetString("DATABASE_NAME")
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		dbHost, dbPort, dbUser, dbPass, dbName)
 	dbConn, err := sql.Open("postgres", dsn)
@@ -90,6 +90,5 @@ func main() {
 	authUsecase := _authUcase.NewAuthUsecase(userRepo, providers, timeoutContext)
 	_authHttp.NewAuthHandler(e, authUsecase)
 	_ = githubRepo
-
-	log.Fatal(e.Start(viper.GetString("server.address"))) //nolint
+	log.Fatal(e.Start(viper.GetString("SERVER_ADDRESS"))) //nolint
 }

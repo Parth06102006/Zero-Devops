@@ -9,6 +9,7 @@ func LoadConfig(){
 
 	// Set up for Enviroment Variables
 	viper.SetConfigFile(".env")
+	viper.SetConfigType("env")
 
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
