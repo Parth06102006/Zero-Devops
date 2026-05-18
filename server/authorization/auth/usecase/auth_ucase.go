@@ -87,6 +87,10 @@ func (a *authUsecase) HandleOAuthCallback(ctx context.Context, code string, prov
 		if err != nil {
 			return nil, err
 		}
+		err = a.userRepo.UpdateRefreshToken(ctx, existingUser.ID, appRefreshToken)
+		if err != nil {
+			return nil, err
+		}
 		return &domain.TokenResponse{
 			AccessToken:  appAccessToken,
 			RefreshToken: appRefreshToken,
@@ -96,7 +100,7 @@ func (a *authUsecase) HandleOAuthCallback(ctx context.Context, code string, prov
 		if err != nil {
 			return nil, err
 		}
-		err = a.userRepo.Update(ctx, existingUser.ID, appRefreshToken)
+		err = a.userRepo.UpdateRefreshToken(ctx, existingUser.ID, appRefreshToken)
 		if err != nil {
 			return nil, err
 		}
@@ -140,7 +144,7 @@ func (a *authUsecase) RefreshToken(ctx context.Context, refreshToken string) (*d
 		return nil, err
 	}
 
-	err = a.userRepo.Update(ctx, user.ID, newRefreshToken)
+	err = a.userRepo.UpdateRefreshToken(ctx, user.ID, newRefreshToken)
 	if err != nil {
 		return nil, err
 	}
@@ -185,8 +189,7 @@ func (a *authUsecase) Logout(ctx context.Context, accessToken string) error {
 	userId := int64(userIDFloat)
 
 	// Updating the Refresh Token to Empty String to Not store it anymore
-	err = a.userRepo.Update(ctx, userId, "")
-
+	err = a.userRepo.UpdateRefreshToken(ctx, userId, "")
 
 	if err != nil {
 		return domain.ErrLoggingOut
@@ -195,10 +198,10 @@ func (a *authUsecase) Logout(ctx context.Context, accessToken string) error {
 	return nil
 }
 
-func (a* authUsecase) GetCurrentUser(ctx context.Context,accessToken string) (domain.UserResponse,error){
+func (a *authUsecase) GetCurrentUser(ctx context.Context, accessToken string) (domain.UserResponse, error) {
 	secretKey := (viper.GetString("JWT_SECRET"))
 	if secretKey == "" {
-		return domain.UserResponse{},domain.ErrMissingSecret
+		return domain.UserResponse{}, domain.ErrMissingSecret
 	}
 
 	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (any, error) {
@@ -207,31 +210,31 @@ func (a* authUsecase) GetCurrentUser(ctx context.Context,accessToken string) (do
 		return hmacSecret, nil
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 	if err != nil || token == nil || !token.Valid {
-		return domain.UserResponse{},domain.ErrInvalidToken
+		return domain.UserResponse{}, domain.ErrInvalidToken
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return domain.UserResponse{},domain.ErrInvalidToken
+		return domain.UserResponse{}, domain.ErrInvalidToken
 	}
 
 	userIDFloat, ok := claims["user_id"].(float64)
 	if !ok {
-		return domain.UserResponse{},domain.ErrInvalidToken
+		return domain.UserResponse{}, domain.ErrInvalidToken
 	}
 	userId := int64(userIDFloat)
 
-	user,err := a.userRepo.GetByID(ctx,userId)
+	user, err := a.userRepo.GetByID(ctx, userId)
 
-	if err != nil{
-		return domain.UserResponse{} , err
+	if err != nil {
+		return domain.UserResponse{}, err
 	}
 
 	return domain.UserResponse{
-		ID:user.ID,
-		Provider: user.Provider,
-		Username : user.Username,
-		Email : user.Email,
+		ID:        user.ID,
+		Provider:  user.Provider,
+		Username:  user.Username,
+		Email:     user.Email,
 		AvatarURL: user.AvatarURL,
-	},nil
+	}, nil
 }

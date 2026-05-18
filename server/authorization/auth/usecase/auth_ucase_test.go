@@ -53,7 +53,7 @@ func (m *mockUserRepository) Store(ctx context.Context, u *domain.User) error {
 	return nil
 }
 
-func (m *mockUserRepository) Update(ctx context.Context, id int64, refreshToken string) error {
+func (m *mockUserRepository) UpdateRefreshToken(ctx context.Context, id int64, refreshToken string) error {
 	if user, ok := m.users[id]; ok {
 		user.RefreshToken = refreshToken
 		m.users[id] = user

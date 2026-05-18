@@ -1,11 +1,11 @@
 package pgsql
 
 import (
+	"Zero_Devops/server/domain"
 	"context"
 	"database/sql"
 	"fmt"
 	"github.com/sirupsen/logrus"
-	"Zero_Devops/server/domain"
 )
 
 type pgSqlGithubRepository struct {
@@ -17,36 +17,27 @@ func NewPgSqlGithubRepository(conn *sql.DB) domain.GithubRepository {
 }
 
 func (m *pgSqlGithubRepository) StoreInstallation(ctx context.Context, inst *domain.GithubInstallation) error {
-	query := `INSERT INTO Github (UserID , InstallationID , AccountName) VALUES ($1 , $2 , $3)`
-	stmt, err := m.Conn.PrepareContext(ctx, query)
+	query := `
+		INSERT INTO github_installations (user_id, installation_id, account_name)
+		VALUES ($1, $2, $3)
+		RETURNING id
+	`
+	err := m.Conn.QueryRowContext(ctx, query, inst.UserID, inst.InstallationID, inst.AccountName).Scan(&inst.ID)
 
 	if err != nil {
 		logrus.Error(err)
 		return err
 	}
-
-	result, err := stmt.ExecContext(ctx, inst.UserID, inst.InstallationID, inst.AccountName)
-
-	if err != nil {
-		logrus.Error(err)
-		return err
-	}
-
-	// This feature is not supported by all the databases sonce here I am using Postgres then I have to check for it
-	new_id,err := result.LastInsertId() // Here is a issue I need to check it
-
-	if err != nil{
-		logrus.Error(err)
-		return err
-	}
-
-	inst.ID = new_id
 
 	return nil
 }
 
 func (m *pgSqlGithubRepository) GetInstallationByUserID(ctx context.Context, userId int64) (*domain.GithubInstallation, error) {
-	query := `SELECT * FROM Github WHERE UserID = $1`
+	query := `
+		SELECT id, user_id, installation_id, account_name
+		FROM github_installations
+		WHERE user_id = $1
+	`
 	res := m.Conn.QueryRowContext(ctx, query, userId)
 
 	inst := domain.GithubInstallation{}
@@ -58,8 +49,8 @@ func (m *pgSqlGithubRepository) GetInstallationByUserID(ctx context.Context, use
 	)
 
 	if err != nil {
-		if err == sql.ErrNoRows{
-			return nil,domain.ErrNotFound
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrNotFound
 		}
 		logrus.Error(err)
 		return nil, err
@@ -69,7 +60,7 @@ func (m *pgSqlGithubRepository) GetInstallationByUserID(ctx context.Context, use
 }
 
 func (m *pgSqlGithubRepository) DeleteInstallationByUserID(ctx context.Context, userId int64) error {
-	query := `DELETE FROM Github WHERE UserID = $1`
+	query := `DELETE FROM github_installations WHERE user_id = $1`
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 
 	if err != nil {

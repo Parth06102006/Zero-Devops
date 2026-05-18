@@ -4,9 +4,9 @@ import "context"
 
 type GithubInstallation struct {
 	ID				int64		`json:"id"`
-	UserID			User		`json:"user_id"`
-	InstallationID	int64		`json:"installtion_id"`
-	AccountName		string		`json:"acount_name"`	
+	UserID			int64		`json:"user_id"`
+	InstallationID	int64		`json:"installation_id"`
+	AccountName		string		`json:"account_name"`	
 }
 
 type GithubUsecase interface {

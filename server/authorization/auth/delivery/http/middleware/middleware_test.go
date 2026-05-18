@@ -14,8 +14,8 @@ import (
 )
 
 type mockUserRepository struct {
-	user  domain.User
-	err   error
+	user domain.User
+	err  error
 }
 
 func (m *mockUserRepository) GetByID(ctx context.Context, id int64) (domain.User, error) {
@@ -37,17 +37,17 @@ func (m *mockUserRepository) Store(ctx context.Context, u *domain.User) error {
 	return nil
 }
 
-func (m *mockUserRepository) Update(ctx context.Context, id int64, refreshToken string) error {
+func (m *mockUserRepository) UpdateRefreshToken(ctx context.Context, id int64, refreshToken string) error {
 	return nil
 }
 
 type middlewareTestContext struct {
 	echo.Context
-	rec        *httptest.ResponseRecorder
-	req        *http.Request
-	cookies    map[string]*http.Cookie
-	pathValue  string
-	values     map[string]interface{}
+	rec       *httptest.ResponseRecorder
+	req       *http.Request
+	cookies   map[string]*http.Cookie
+	pathValue string
+	values    map[string]interface{}
 }
 
 func newMiddlewareTestContext() *middlewareTestContext {
