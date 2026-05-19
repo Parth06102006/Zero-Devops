@@ -18,11 +18,11 @@ func NewPgSqlGithubRepository(conn *sql.DB) domain.GithubRepository {
 
 func (m *pgSqlGithubRepository) StoreInstallation(ctx context.Context, inst *domain.GithubInstallation) error {
 	query := `
-		INSERT INTO github_installations (user_id, installation_id, account_name)
-		VALUES ($1, $2, $3)
+		INSERT INTO github_installations (user_id, installation_id, account_type,account_login,created_at,updated_at)
+		VALUES ($1, $2, $3, $4 , $5, $6)
 		RETURNING id
 	`
-	err := m.Conn.QueryRowContext(ctx, query, inst.UserID, inst.InstallationID, inst.AccountName).Scan(&inst.ID)
+	err := m.Conn.QueryRowContext(ctx, query, inst.UserID, inst.InstallationID, inst.Account_Type,inst.Account_Login,inst.CreatedAt,inst.UpdatedAt).Scan(&inst.ID)
 
 	if err != nil {
 		logrus.Error(err)
@@ -34,7 +34,7 @@ func (m *pgSqlGithubRepository) StoreInstallation(ctx context.Context, inst *dom
 
 func (m *pgSqlGithubRepository) GetInstallationByUserID(ctx context.Context, userId int64) (*domain.GithubInstallation, error) {
 	query := `
-		SELECT id, user_id, installation_id, account_name
+		SELECT id, user_id, installation_id, account_type,account_login,created_at,updated_at
 		FROM github_installations
 		WHERE user_id = $1
 	`
@@ -45,7 +45,10 @@ func (m *pgSqlGithubRepository) GetInstallationByUserID(ctx context.Context, use
 		&inst.ID,
 		&inst.UserID,
 		&inst.InstallationID,
-		&inst.AccountName,
+		&inst.Account_Type,
+		&inst.Account_Login,
+		&inst.CreatedAt,
+		&inst.UpdatedAt,
 	)
 
 	if err != nil {

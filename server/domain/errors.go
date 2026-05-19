@@ -19,4 +19,8 @@ var (
 	ErrMissingSecret = errors.New("Secret Not Found")
 
 	ErrLoggingOut = errors.New("Error In Logging Out")
+
+	ErrInvalidCode = errors.New("Invalid Code")
+
+	ErrGithubInstallationFetchFailed = errors.New("Github Installation Failed.Error Installing Github App")
 )

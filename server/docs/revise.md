@@ -1,6 +1,6 @@
 # Authorization And GitHub App Progress
 
-Updated: 10 May 2026
+Updated: 19 May 2026
 
 This document is a revision note for the current authorization work. It explains what has been built, what the intended flow is, what looks wrong right now, and what should be fixed before adding the final APIs.
 
@@ -687,3 +687,74 @@ Recommended next implementation order:
 Readiness decision:
 
 The auth route implementation is still close, and the token response types are aligned. The next important auth fix is not a type change; it is persisting the new user's refresh token and tightening repository error handling.
+
+## Update - 18 May 2026
+
+The backend auth and GitHub integration work has moved from compile cleanup into database and API verification progress.
+
+Progress completed today:
+
+- Added database migrations for the current authorization and GitHub integration data model.
+- Verified the API flow after adding the migrations.
+- Tested the implemented auth APIs for login, refresh, logout, and current-user lookup.
+- Confirmed the backend wiring is far enough along to validate the API behavior against the migrated database schema.
+
+Current status:
+
+- The migration layer is now part of the implementation progress instead of only being planned.
+- The APIs have been exercised manually and are no longer just route-level placeholders.
+- The next review should focus on whether the migrations fully match the repository queries and whether the GitHub installation API wiring needs any schema adjustments before finalizing.
+
+Recommended next implementation order:
+
+1. Re-run backend verification with the repo-local Go cache after the migration changes.
+2. Compare migration column names and constraints against `authorization/user/repository/pgsql` and `authorization/github/repository/pgsql`.
+3. Keep the auth API test cases documented, especially cookie behavior for login, refresh, logout, and current-user lookup.
+4. Continue wiring and validating the GitHub installation APIs against the new migrations.
+
+## Update - 19 May 2026
+
+The GitHub App installation schema and usecase code were reviewed and tightened after adding the newer GitHub installation fields.
+
+Progress completed today:
+
+- Reviewed the GitHub installation migration, domain model, repository, and usecase together.
+- Confirmed the repository insert now uses the correct number of Postgres placeholders for the six inserted columns.
+- Updated the GitHub usecase constructor pattern so `NewGithubAppUsecase` accepts `domain.GithubRepository` and `domain.UserRepository`, then returns `domain.GithubUsecase`.
+- Clarified that callers should pass repository interfaces into the usecase instead of trying to pass pointers to interfaces.
+- Confirmed that returning `&githubAppUsecase{...}` as `domain.GithubUsecase` is the correct Go pattern; `*domain.GithubUsecase` should not be used.
+- Reviewed the Goose migration command setup and confirmed that `goose -dir migrations status` is valid when `GOOSE_DRIVER` and `GOOSE_DBSTRING` are exported and the command is run from `server`.
+- Confirmed that adding the new `NOT NULL` GitHub installation columns directly is acceptable for the current local database because there are no existing `github_installations` records.
+
+Current GitHub installation schema direction:
+
+- `github_installations.account_name` is being replaced by `account_type` and `account_login`.
+- `created_at` and `updated_at` are being added to align the table with the `domain.GithubInstallation` model.
+- The down migration should restore the old `account_name` column when rolling back.
+
+Recommended down migration shape:
+
+```sql
+-- +goose Down
+ALTER TABLE github_installations
+    DROP COLUMN account_type,
+    DROP COLUMN account_login,
+    DROP COLUMN created_at,
+    DROP COLUMN updated_at,
+    ADD COLUMN account_name TEXT NOT NULL DEFAULT '';
+```
+
+Remaining issues to fix:
+
+- Add HTTP status-code checks after the GitHub OAuth access-token request and after the GitHub installations request.
+- Check the error returned by `http.NewRequest` for the installations request before using `req_installation`.
+- Wire `githubRepo` and `userRepo` into `NewGithubAppUsecase` from `app/main.go` once the GitHub installation HTTP handler is added.
+- Decide whether the rollback `account_name` default should remain an empty string or be rebuilt from `account_login` before dropping the newer columns.
+
+Recommended next implementation order:
+
+1. Add a domain error for failed GitHub installation fetches or return a formatted HTTP-status error from the GitHub usecase.
+2. Add status checks for both GitHub API calls in `authorization/github/usercase/github_ucase.go`.
+3. Finalize the GitHub installation migration rollback behavior.
+4. Add the GitHub installation delivery handler and wire it to the new usecase constructor.
+5. Re-run Goose status/up/down locally after exporting `GOOSE_DRIVER` and `GOOSE_DBSTRING`.
