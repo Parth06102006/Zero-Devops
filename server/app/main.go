@@ -5,17 +5,9 @@ import (
 	"fmt"
 	"log"
 	"time"
-
 	"github.com/labstack/echo"
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
-
-	// _articleHttpDelivery "github.com/bxcodec/go-clean-arch/article/delivery/http"
-	// _articleHttpDeliveryMiddleware "github.com/bxcodec/go-clean-arch/article/delivery/http/middleware"
-	// _articleRepo "github.com/bxcodec/go-clean-arch/article/repository/mysql"
-	// _articleUcase "github.com/bxcodec/go-clean-arch/article/usecase"
-	// _authorRepo "github.com/bxcodec/go-clean-arch/author/repository/mysql"
-
 	_authHttp "Zero_Devops/server/authorization/auth/delivery/http"
 	_authMiddleware "Zero_Devops/server/authorization/auth/delivery/http/middleware"
 	_authUcase "Zero_Devops/server/authorization/auth/usecase"
