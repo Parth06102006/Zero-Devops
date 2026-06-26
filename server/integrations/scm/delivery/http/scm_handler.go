@@ -1,14 +1,15 @@
 package http
 
 import (
+	middleware "Zero_Devops/server/authorization/auth/delivery/http/middleware"
 	"Zero_Devops/server/domain"
+	"errors"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/labstack/echo"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"time"
-	"errors"
-	"strings"
-	middleware "Zero_Devops/server/authorization/auth/delivery/http/middleware"
 )
 
 type ResponseError struct {
@@ -26,8 +27,8 @@ func NewSCMHandler(e *echo.Echo, gh domain.GithubUsecase){
 	}
 
 	e.POST("/integration/scm/github/install",handler.Installation)
-	// e.GET("/integration/scm/github/",handler.GetInstalltion)
-	// e.DELETE("/integration/scm/github/delete",handler.DeleteInstalltion)
+	e.GET("/integration/scm/github/",handler.GetInstallation)
+	e.DELETE("/integration/scm/github/delete",handler.DeleteInstallation)
 }
 
 
@@ -63,13 +64,30 @@ func (inst *SCMHandler) Installation(c echo.Context) error {
 
 }
 
-// func (inst *SCMHandler) GetInstalltion(c echo.Context) error {
-
-// }
-
-// func (inst *SCMHandler) DeleteInstalltion(c echo.Context) error {
-
-// }
+func (inst *SCMHandler) GetInstallation(c echo.Context) error {
+    userID, ok := middleware.GetUserID(c)
+    if !ok {
+        return c.JSON(http.StatusUnauthorized, ResponseError{Message: "user id not found"})
+    }
+    ctx := c.Request().Context()
+    installation, err := inst.scmUsecase.GetGithubAppInstallation(ctx, userID)
+    if err != nil {
+        return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+    }
+    return c.JSON(http.StatusOK, installation)
+}
+func (inst *SCMHandler) DeleteInstallation(c echo.Context) error {
+    userID, ok := middleware.GetUserID(c)
+    if !ok {
+        return c.JSON(http.StatusUnauthorized, ResponseError{Message: "user id not found"})
+    }
+    ctx := c.Request().Context()
+    err := inst.scmUsecase.DeleteGithubApp(ctx, userID)
+    if err != nil {
+        return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+    }
+    return c.JSON(http.StatusOK, map[string]string{"message": "GitHub App uninstalled successfully"})
+}
 
 // Production HTTP client with advanced configuration
 func createProductionClient() *http.Client {

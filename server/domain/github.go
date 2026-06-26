@@ -18,7 +18,7 @@ type GithubInstallation struct {
 
 type GithubUsecase interface {
 	InstallGithubApp(ctx context.Context, client *http.Client,code string,user_id int64) (error)
-	DeleteGithubApp(ctx context.Context) error
+	DeleteGithubApp(ctx context.Context, userID int64) error
 	GetGithubAppInstallation(ctx context.Context, userID int64) (*GithubInstallation, error)
 }
 

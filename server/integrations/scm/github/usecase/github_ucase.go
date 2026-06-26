@@ -138,12 +138,12 @@ func (g *githubAppUsecase) InstallGithubApp(ctx context.Context,client *http.Cli
 	return nil
 }
 
-func (g *githubAppUsecase) GetGithubAppInstallation(ctx context.Context,user_id int64) (*domain.GithubInstallation,error) {
-	/*
+func (g *githubAppUsecase) GetGithubAppInstallation(ctx context.Context, userID int64) (*domain.GithubInstallation, error) {
+/*
 		Here right now I am returning the whole object only but I think this is the issue rather I should just provide the installation_id
 	*/
 
-	githubRepo,err := g.githubRepo.GetInstallationByUserID(ctx,user_id) 
+	githubRepo,err := g.githubRepo.GetInstallationByUserID(ctx,userID) 
 	
 	if err != nil{
 		return nil,err
@@ -152,7 +152,6 @@ func (g *githubAppUsecase) GetGithubAppInstallation(ctx context.Context,user_id 
 	return githubRepo,nil
 }
 
-func (g *githubAppUsecase) DeleteGithubApp(ctx context.Context) error {
-	/*I need to add delete github usecase here right now I would confirm for the deletion here what steps I would require to delete thr github app*/
-	return nil
+func (g *githubAppUsecase) DeleteGithubApp(ctx context.Context, userID int64) error {
+	return g.githubRepo.DeleteInstallationByUserID(ctx, userID)
 }
