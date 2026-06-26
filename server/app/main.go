@@ -12,8 +12,10 @@ import (
 	_authMiddleware "Zero_Devops/server/authorization/auth/delivery/http/middleware"
 	_authUcase "Zero_Devops/server/authorization/auth/usecase"
 	_authProvider "Zero_Devops/server/authorization/auth/usecase/auth_provider"
-	_githubRepo "Zero_Devops/server/authorization/github/repository/pgsql"
+	_githubRepo "Zero_Devops/server/integrations/scm/github/repository/pgsql"
+	_githubUsecase "Zero_Devops/server/integrations/scm/github/usecase"
 	_userRepo "Zero_Devops/server/authorization/user/repository/pgsql"
+	_appHttp "Zero_Devops/server/integrations/scm/delivery/http"
 	_config "Zero_Devops/server/config"
 	domain "Zero_Devops/server/domain"
 )
@@ -81,6 +83,11 @@ func main() {
 	timeoutContext := time.Duration(viper.GetInt("context.timeout")) * time.Second
 	authUsecase := _authUcase.NewAuthUsecase(userRepo, providers, timeoutContext)
 	_authHttp.NewAuthHandler(e, authUsecase)
-	_ = githubRepo
+
+	// 3. Now Intitalize the Github App Installtion for it to integrate
+	githubUsecase := _githubUsecase.NewGithubAppUsecase(githubRepo,userRepo)
+	// ** NEED TO ADD THE APP INTEGRATION HTTP FOR IT TO BE ADDED
+	_appHttp.NewSCMHandler(e,githubUsecase)
+
 	log.Fatal(e.Start(viper.GetString("SERVER_ADDRESS"))) //nolint
 }
