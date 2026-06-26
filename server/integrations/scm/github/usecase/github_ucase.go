@@ -16,13 +16,11 @@ import (
 type githubAppUsecase struct{
 	// Here gitRepo does not identify github repositories it means the github functions 
 	githubRepo domain.GithubRepository
-	userRepo   domain.UserRepository
 }
 
-func NewGithubAppUsecase(githubRepo domain.GithubRepository,userRepo domain.UserRepository) domain.GithubUsecase {
+func NewGithubAppUsecase(githubRepo domain.GithubRepository) domain.GithubUsecase {
 	return &githubAppUsecase{
 		githubRepo: githubRepo,
-		userRepo : userRepo,
 	}
 }
 

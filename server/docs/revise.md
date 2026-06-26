@@ -758,3 +758,38 @@ Recommended next implementation order:
 3. Finalize the GitHub installation migration rollback behavior.
 4. Add the GitHub installation delivery handler and wire it to the new usecase constructor.
 5. Re-run Goose status/up/down locally after exporting `GOOSE_DRIVER` and `GOOSE_DBSTRING`.
+
+## Update - 26 June 2026
+
+The auth and GitHub App integration work has been refined further, and the route behavior is now clearer.
+
+Progress completed today:
+
+- Confirmed that the GitHub OAuth callback must use `GET /auth/github/login`, because GitHub redirects back with a `code` query parameter.
+- Confirmed that `POST /auth/github/login` is not the correct callback route for the OAuth redirect flow.
+- Wired the global auth middleware through `e.Use(authMiddleware.ToMiddleware())` so request-specific `user_id` values are stored in the Echo context.
+- Updated the SCM handler flow so it reads the authenticated `user_id` from middleware context instead of storing it on the handler struct.
+- Added colocated unit tests for the SCM handler, GitHub installation usecase, and GitHub PostgreSQL repository.
+- Fixed the auth usecase new-user branch so the generated refresh token is persisted for the newly created user.
+- Verified that the GitHub repository delete flow removes the installation record for the user from the local database.
+
+Current GitHub integration behavior:
+
+- `POST /integration/scm/github/install` installs the GitHub App using the OAuth `code` query parameter and the authenticated local `user_id`.
+- `GET /integration/scm/github/` returns the stored GitHub installation for the current user.
+- `DELETE /integration/scm/github/delete` removes the stored installation record for the current user.
+- The current delete flow is a local disconnect/uninstall cleanup step; webhook-based GitHub uninstall or suspend handling will be added later.
+
+Current documentation progress:
+
+- Added a future-planning note at `server/docs/future/github_integration_future.md`.
+- That note tracks later work for installation status, suspension, uninstall handling, and webhook support.
+- The future plan is to add a status field such as `active`, `suspended`, and `uninstalled` once webhook support is implemented.
+
+Recommended next implementation order:
+
+1. Add a `status` column to `github_installations` when the status-based flow is ready.
+2. Update the PostgreSQL repository and domain model to store and return installation status.
+3. Add webhook handlers for GitHub installation events.
+4. Keep the current local delete flow as the disconnect path until webhook uninstall handling is added.
+5. Continue using the middleware-backed `user_id` flow for SCM requests.

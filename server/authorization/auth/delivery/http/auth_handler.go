@@ -56,7 +56,7 @@ func NewAuthHandler(e *echo.Echo, us domain.AuthUsecase) {
 	handler := &AuthHandler{
 		AUsecase: us,
 	}
-	e.POST("/auth/github/login", handler.Login)
+	e.GET("/auth/github/login", handler.Login)
 	e.POST("/auth/refresh", handler.Refresh)
 	e.POST("/auth/logout", handler.Logout)
 	e.GET("/auth/user/me", handler.GetUser)

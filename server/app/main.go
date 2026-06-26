@@ -85,7 +85,7 @@ func main() {
 	_authHttp.NewAuthHandler(e, authUsecase)
 
 	// 3. Now Intitalize the Github App Installtion for it to integrate
-	githubUsecase := _githubUsecase.NewGithubAppUsecase(githubRepo,userRepo)
+	githubUsecase := _githubUsecase.NewGithubAppUsecase(githubRepo)
 	// ** NEED TO ADD THE APP INTEGRATION HTTP FOR IT TO BE ADDED
 	_appHttp.NewSCMHandler(e,githubUsecase)
 

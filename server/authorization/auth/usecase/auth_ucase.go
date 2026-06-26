@@ -87,7 +87,7 @@ func (a *authUsecase) HandleOAuthCallback(ctx context.Context, code string, prov
 		if err != nil {
 			return nil, err
 		}
-		err = a.userRepo.UpdateRefreshToken(ctx, existingUser.ID, appRefreshToken)
+		err = a.userRepo.UpdateRefreshToken(ctx, userToSave.ID, appRefreshToken)
 		if err != nil {
 			return nil, err
 		}

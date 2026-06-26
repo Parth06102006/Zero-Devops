@@ -65,27 +65,39 @@ func (inst *SCMHandler) Installation(c echo.Context) error {
 }
 
 func (inst *SCMHandler) GetInstallation(c echo.Context) error {
+
     userID, ok := middleware.GetUserID(c)
+
     if !ok {
         return c.JSON(http.StatusUnauthorized, ResponseError{Message: "user id not found"})
     }
+
     ctx := c.Request().Context()
+
     installation, err := inst.scmUsecase.GetGithubAppInstallation(ctx, userID)
+
     if err != nil {
         return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
     }
+
     return c.JSON(http.StatusOK, installation)
 }
+
 func (inst *SCMHandler) DeleteInstallation(c echo.Context) error {
     userID, ok := middleware.GetUserID(c)
+
     if !ok {
         return c.JSON(http.StatusUnauthorized, ResponseError{Message: "user id not found"})
     }
+
     ctx := c.Request().Context()
+
     err := inst.scmUsecase.DeleteGithubApp(ctx, userID)
+
     if err != nil {
         return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
     }
+	
     return c.JSON(http.StatusOK, map[string]string{"message": "GitHub App uninstalled successfully"})
 }
 
