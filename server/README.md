@@ -1,86 +1,207 @@
-# go-clean-arch
+# Zero DevOps Server
 
-## Changelog
+Backend service for GitHub OAuth authentication, GitHub App installation tracking, and the upcoming repository deployment flow.
 
-- **v1**: checkout to the [v1 branch](https://github.com/bxcodec/go-clean-arch/tree/v1) <br>
-  Proposed on 2017, archived to v1 branch on 2018 <br>
-  Desc: Initial proposal by me. The story can be read here: https://medium.com/@imantumorang/golang-clean-archithecture-efd6d7c43047
+The server is written in Go, uses Echo for HTTP delivery, PostgreSQL for persistence, Viper for configuration, and follows a clean architecture style:
 
-- **v2**: checkout to the [v2 branch](https://github.com/bxcodec/go-clean-arch/tree/v2) <br>
-  Proposed on 2018, archived to v2 branch on 2020 <br>
-  Desc: Improvement from v1. The story can be read here: https://medium.com/@imantumorang/trying-clean-architecture-on-golang-2-44d615bf8fdf
+- `domain`: core entities and interfaces
+- `authorization/auth`: login, refresh, logout, current-user logic
+- `authorization/user`: PostgreSQL user repository
+- `integrations/scm`: GitHub App installation APIs
+- `app`: dependency wiring and server startup
 
-- **v3**: master branch <br>
-  Proposed on 2019, merged to master on 2020. <br>
-  Desc: Introducing Domain package, the details can be seen on this PR [#21](https://github.com/bxcodec/go-clean-arch/pull/21)
+## Current Implementation
 
-## Description
+The backend currently supports:
 
-This is an example of implementation of Clean Architecture in Go (Golang) projects.
+- GitHub OAuth login through a callback-style `GET /auth/github/login`
+- App-owned access and refresh JWT cookies
+- Refresh-token rotation
+- Logout and cookie clearing
+- Current-user lookup
+- Auth middleware that reads `access_token`, validates it, and stores `user_id` in Echo context
+- GitHub App installation storage for the authenticated user
+- GitHub App installation lookup and local disconnect/delete
 
-Rule of Clean Architecture by Uncle Bob
+Status tracking and GitHub webhooks are documented as future work and are not part of the current implementation.
 
-- Independent of Frameworks. The architecture does not depend on the existence of some library of feature laden software. This allows you to use such frameworks as tools, rather than having to cram your system into their limited constraints.
-- Testable. The business rules can be tested without the UI, Database, Web Server, or any other external element.
-- Independent of UI. The UI can change easily, without changing the rest of the system. A Web UI could be replaced with a console UI, for example, without changing the business rules.
-- Independent of Database. You can swap out Oracle or SQL Server, for Mongo, BigTable, CouchDB, or something else. Your business rules are not bound to the database.
-- Independent of any external agency. In fact your business rules simply don’t know anything at all about the outside world.
+## Runtime Flow
 
-More at https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html
+```mermaid
+flowchart TD
+    Start([Server start]) --> Config[Load config from .env]
+    Config --> DB[Open PostgreSQL connection]
+    DB --> Echo[Create Echo server]
 
-This project has 4 Domain layer :
+    Echo --> UserRepo[UserRepository]
+    UserRepo --> AuthMiddleware[Auth middleware]
+    AuthMiddleware --> GlobalMiddleware[e.Use auth middleware]
 
-- Models Layer
-- Repository Layer
-- Usecase Layer
-- Delivery Layer
+    DB --> GithubRepo[GithubRepository]
+    GithubRepo --> GithubUsecase[GithubUsecase]
+    GithubUsecase --> SCMHandler[SCM HTTP handler]
 
-#### The diagram:
+    Echo --> GithubProvider[GitHub OAuth provider]
+    GithubProvider --> Providers[providers map]
+    Providers --> AuthUsecase[AuthUsecase]
+    UserRepo --> AuthUsecase
+    AuthUsecase --> AuthHandler[Auth HTTP handler]
 
-![golang clean architecture](https://github.com/bxcodec/go-clean-arch/raw/master/clean-arch.png)
+    AuthHandler --> Login[GET /auth/github/login]
+    AuthHandler --> Refresh[POST /auth/refresh]
+    AuthHandler --> Logout[POST /auth/logout]
+    AuthHandler --> Me[GET /auth/user/me]
 
-The original explanation about this project's structure can read from this medium's post : https://medium.com/@imantumorang/golang-clean-archithecture-efd6d7c43047.
+    SCMHandler --> Install[POST /integration/scm/github/install]
+    SCMHandler --> GetInstall[GET /integration/scm/github/]
+    SCMHandler --> DeleteInstall[DELETE /integration/scm/github/delete]
 
-It may be different already, but the concept still the same in application level, also you can see the change log from v1 to current version in Master.
-
-### How To Run This Project
-
-> Make Sure you have run the article.sql in your mysql
-
-Since the project already use Go Module, I recommend to put the source code in any folder but GOPATH.
-
-#### Run the Testing
-
-```bash
-$ make tests
+    GlobalMiddleware --> Skip{Public route?}
+    Skip -->|login or refresh| ContinuePublic[Continue request]
+    Skip -->|protected| ReadCookie[Read access_token cookie]
+    ReadCookie --> ValidateJWT[Validate JWT]
+    ValidateJWT --> SetUserID[Set user_id in Echo context]
+    SetUserID --> ContinueProtected[Continue protected request]
 ```
 
-#### Run the Applications
+## Auth APIs
 
-Here is the steps to run it with `docker-compose`
+Base URL locally depends on `SERVER_ADDRESS`. Example: `http://127.0.0.1:8750`.
 
-```bash
-#move to directory
-$ cd workspace
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| `GET` | `/auth/github/login?code=...` | Public | GitHub OAuth callback. Creates app cookies. |
+| `POST` | `/auth/refresh` | `refresh_token` cookie | Rotates access and refresh tokens. |
+| `POST` | `/auth/logout` | `access_token` cookie | Clears stored refresh token and auth cookies. |
+| `GET` | `/auth/user/me` | `access_token` cookie | Returns the current user. |
 
-# Clone into your workspace
-$ git clone https://github.com/bxcodec/go-clean-arch.git
+GitHub OAuth redirects with a `GET` request, so `/auth/github/login` is intentionally registered as `GET`.
 
-#move to project
-$ cd go-clean-arch
+## GitHub App APIs
 
-# Run the application
-$ make up
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| `POST` | `/integration/scm/github/install?code=...` | `access_token` cookie | Installs/stores GitHub App installation for current user. |
+| `GET` | `/integration/scm/github/` | `access_token` cookie | Returns stored installation for current user. |
+| `DELETE` | `/integration/scm/github/delete` | `access_token` cookie | Removes stored installation from local DB. |
 
-# The hot reload will running
+The delete route currently means local disconnect. It removes the installation record from this app's database. GitHub-side uninstall/suspend synchronization is planned later through webhooks.
 
-# Execute the call in another terminal
-$ curl localhost:9090/articles
+## Key Functions
+
+Auth:
+
+- `NewAuthHandler`: registers auth routes.
+- `Login`: exchanges GitHub OAuth code through the auth usecase, then writes `access_token` and `refresh_token` cookies.
+- `Refresh`: reads `refresh_token`, rotates tokens, and rewrites cookies.
+- `Logout`: validates `access_token`, clears the stored refresh token, and deletes cookies.
+- `GetUser`: returns the current authenticated user.
+- `NewAuthUsecase`: wires user repository and OAuth providers.
+- `HandleOAuthCallback`: exchanges provider code, creates or loads local user, generates app tokens.
+- `RefreshToken`: validates refresh JWT and rotates persisted refresh token.
+- `AuthMiddleware`: validates access token and stores `user_id` in request context.
+
+GitHub SCM:
+
+- `NewSCMHandler`: registers GitHub App installation routes.
+- `Installation`: reads GitHub App install code and stores installation data for the current user.
+- `GetInstallation`: returns the current user's stored GitHub installation.
+- `DeleteInstallation`: deletes the current user's local GitHub installation record.
+- `NewGithubAppUsecase`: wires GitHub repository into the SCM usecase.
+- `InstallGithubApp`: exchanges GitHub code, fetches user installations, stores matching app installation.
+- `GetGithubAppInstallation`: loads installation by local user ID.
+- `DeleteGithubApp`: deletes installation by local user ID.
+
+## Configuration
+
+The server expects a `.env` file in `server/`.
+
+Minimum local keys:
+
+```env
+DATABASE_HOST=127.0.0.1
+DATABASE_PORT=5432
+DATABASE_USER=postgres
+DATABASE_PASS=password
+DATABASE_NAME=zero_devops
+SERVER_ADDRESS=:8750
+JWT_SECRET=local-secret
 ```
 
-### Tools Used:
+Common GitHub/OAuth keys:
 
-In this project, I use some tools listed below. But you can use any similar library that have the same purposes. But, well, different library will have different implementation type. Just be creative and use anything that you really need.
+```env
+OAUTH_GITHUB_CLIENT_ID=...
+OAUTH_GITHUB_CLIENT_SECRET=...
+OAUTH_GITHUB_REDIRECT_URL=...
+GITHUB_APP_CLIENT_ID=...
+GITHUB_APP_CLIENT_SECRET=...
+GITHUB_APP_ID=...
+ACCESS_TOKEN_EXPIRY=1
+REFRESH_TOKEN_EXPIRY=720
+IS_PRODUCTION_ENV=false
+context.timeout=2
+```
 
-- All libraries listed in [`go.mod`](https://github.com/bxcodec/go-clean-arch/blob/master/go.mod)
-- ["github.com/vektra/mockery".](https://github.com/vektra/mockery) To Generate Mocks for testing needs.
+## Local Development
+
+Run commands from the `server/` folder.
+
+Start PostgreSQL:
+
+```powershell
+docker compose up -d
+```
+
+Run the server:
+
+```powershell
+go run ./app
+```
+
+Run tests with a repo-local Go cache on Windows:
+
+```powershell
+$env:GOCACHE = Join-Path $PWD '.gocache'
+go test ./... -v
+```
+
+Run focused packages:
+
+```powershell
+go test ./authorization/auth/delivery/http -v
+go test ./authorization/auth/usecase -v
+go test ./integrations/scm/delivery/http -v
+go test ./integrations/scm/github/usecase -v
+go test ./integrations/scm/github/repository/pgsql -v
+```
+
+## Next Implementation
+
+The next implementation should move from "GitHub App is installed" to "the app can inspect deployable repositories."
+
+Recommended first API:
+
+```text
+GET /integration/scm/github/repos
+```
+
+Expected flow:
+
+1. Require `access_token` cookie.
+2. Read `user_id` from auth middleware context.
+3. Load the stored GitHub installation for that user.
+4. Create a GitHub App installation access token from the stored `installation_id`.
+5. Call GitHub to list repositories available to that installation.
+6. Return repository metadata to the frontend.
+7. Let the user select a repository for the deployment flow.
+
+After repository listing works, the next natural steps are:
+
+- store the selected repository for a deployment/project
+- fetch repository branches and default branch
+- prepare clone/build/deploy orchestration
+- add GitHub webhooks later for push, uninstall, suspend, and repository events
+
+See `server/docs/future/issues.md` for prioritized future work.
+
