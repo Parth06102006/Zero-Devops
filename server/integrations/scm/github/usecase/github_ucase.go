@@ -124,6 +124,7 @@ func (g *githubAppUsecase) InstallGithubApp(ctx context.Context,client *http.Cli
 				InstallationID: inst.ID,
 				Account_Type: inst.Account.Type,
 				Account_Login: inst.Account.Login,
+				Status: domain.GithubInstallationStatusActive,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			}
@@ -137,10 +138,6 @@ func (g *githubAppUsecase) InstallGithubApp(ctx context.Context,client *http.Cli
 }
 
 func (g *githubAppUsecase) GetGithubAppInstallation(ctx context.Context, userID int64) (*domain.GithubInstallation, error) {
-/*
-		Here right now I am returning the whole object only but I think this is the issue rather I should just provide the installation_id
-	*/
-
 	githubRepo,err := g.githubRepo.GetInstallationByUserID(ctx,userID) 
 	
 	if err != nil{

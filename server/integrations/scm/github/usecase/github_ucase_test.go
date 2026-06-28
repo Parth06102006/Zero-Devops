@@ -40,6 +40,10 @@ func (m *mockGithubRepository) DeleteInstallationByUserID(ctx context.Context, u
 	return nil
 }
 
+func (m *mockGithubRepository) UpdateInstallationStatus(ctx context.Context, userID int64, status string) error {
+	return nil
+}
+
 type roundTripFunc func(*http.Request) (*http.Response, error)
 
 func (f roundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
@@ -103,6 +107,9 @@ func TestInstallGithubApp_Success(t *testing.T) {
 	if stored.UserID != 77 || stored.InstallationID != 55 || stored.Account_Login != "octocat" {
 		t.Fatalf("unexpected stored installation: %+v", stored)
 	}
+	if stored.Status != domain.GithubInstallationStatusActive {
+		t.Fatalf("expected active status, got %s", stored.Status)
+	}
 	if stored.CreatedAt.IsZero() || stored.UpdatedAt.IsZero() {
 		t.Fatal("expected timestamps to be set")
 	}
@@ -149,7 +156,7 @@ func TestInstallGithubApp_FetchInstallationsError(t *testing.T) {
 }
 
 func TestGetGithubAppInstallation(t *testing.T) {
-	expected := &domain.GithubInstallation{UserID: 11, InstallationID: 22}
+	expected := &domain.GithubInstallation{UserID: 11, InstallationID: 22, Status: domain.GithubInstallationStatusActive}
 	repo := &mockGithubRepository{
 		getFn: func(ctx context.Context, userID int64) (*domain.GithubInstallation, error) {
 			if userID != 11 {
@@ -209,5 +216,39 @@ func TestInstallGithubApp_DecodesTokenAndInstallationResponse(t *testing.T) {
 	uc := NewGithubAppUsecase(repo)
 	if err := uc.InstallGithubApp(context.Background(), client, "code", 1); err != nil {
 		t.Fatalf("expected nil error, got %v", err)
+	}
+}
+
+func TestInstallGithubApp_DefaultsStatusToActive(t *testing.T) {
+	setGithubUsecaseConfig()
+
+	repo := &mockGithubRepository{}
+	var stored *domain.GithubInstallation
+	repo.storeFn = func(ctx context.Context, inst *domain.GithubInstallation) error {
+		stored = inst
+		return nil
+	}
+
+	client := newTestClient(func(req *http.Request) (*http.Response, error) {
+		switch req.URL.String() {
+		case "https://github.com/login/oauth/access_token":
+			return jsonResponse(http.StatusOK, `{"access_token":"token-123","token_type":"bearer","scope":"repo"}`), nil
+		case "https://api.github.com/user/installations":
+			return jsonResponse(http.StatusOK, `{"total_count":1,"installations":[{"id":55,"app_id":1001,"account":{"login":"octocat","type":"User"}}]}`), nil
+		default:
+			return nil, errors.New("unexpected request")
+		}
+	})
+
+	uc := NewGithubAppUsecase(repo)
+	if err := uc.InstallGithubApp(context.Background(), client, "code-abc", 77); err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+
+	if stored == nil {
+		t.Fatal("expected stored installation")
+	}
+	if stored.Status != domain.GithubInstallationStatusActive {
+		t.Fatalf("expected status %s, got %s", domain.GithubInstallationStatusActive, stored.Status)
 	}
 }

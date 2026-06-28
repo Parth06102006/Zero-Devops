@@ -5,8 +5,8 @@ This file lists known follow-up issues after the current auth and GitHub App ins
 Current decision:
 
 - Do not change the current delete flow right now.
-- Do not add installation `status` right now.
-- Treat status and webhook handling as later work.
+- Add installation `status` now so webhook lifecycle events can update it.
+- Treat webhook handling as the next step after the status column is in place.
 - Move next into repository access and deployment flow.
 
 ## Important
@@ -42,13 +42,16 @@ Current decision:
 
 ## Later: Status And Webhooks
 
-These are deliberately not part of the immediate next implementation.
+These are deliberately not part of the repository-listing/deployment implementation, but the status column itself now exists and is ready for webhook-driven updates.
 
-- Add `status` to `github_installations` later if the app needs to preserve `active`, `suspended`, and `uninstalled` states.
-- Add GitHub webhook handling later for installation events.
+- Add GitHub webhook handling for installation lifecycle events.
 - Listen for installation suspend, unsuspend, and uninstall events.
-- Decide later whether uninstall should delete the row or mark it as `uninstalled`.
-- Update repository and handler responses later to include installation status.
+- Mark suspended installations as `suspended` in the database.
+- Mark uninstalled installations as `uninstalled` in the database.
+- Do not delete the user's projects, deployment history, build logs, or environment variables when installation state changes.
+- Continue serving cached application data from the database even when GitHub access is no longer active.
+- Block repository sync, deployments, and other GitHub API-dependent operations when installation status is not `active`.
+- Treat reinstall events as reconnection events and update the existing record instead of blindly creating a duplicate row.
 
 ## Recommended Next Implementation
 
@@ -79,3 +82,30 @@ Expected behavior:
 - Calls GitHub to list repositories accessible to the installation.
 - Returns the repository list to the frontend.
 
+## GitHub Installation Lifecycle Rules
+
+These rules define how webhook-driven status updates should behave once the webhook handler is wired.
+
+- When GitHub sends `installation_suspend`, mark the installation as `suspended`.
+- When GitHub sends `installation.deleted`, mark the installation as `uninstalled`.
+- When GitHub sends `installation_unsuspend`, mark the installation as `active`.
+- Do not make GitHub API calls with a suspended or uninstalled installation.
+- Keep showing data already stored in the application's database.
+- Hidden or stale GitHub data should not erase local project or deployment records.
+- The database should remain the source of truth for user/project history after uninstall.
+- The GitHub installation row should be updated, not deleted, unless a future cleanup policy explicitly says otherwise.
+
+Recommended statuses:
+
+- `active`
+- `suspended`
+- `uninstalled`
+- `error` optional, only for unexpected provider or authentication failures
+
+Reinstall behavior:
+
+- Search for the existing GitHub account or installation first.
+- If the record exists, update the row and set status back to `active`.
+- Refresh the installation ID, permissions, and repository access if GitHub changed them.
+- Only create a new record for a truly new GitHub account that has never connected before.
+- Do not rely only on the setup URL callback; treat the webhook as the authoritative lifecycle source.

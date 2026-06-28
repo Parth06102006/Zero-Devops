@@ -22,5 +22,7 @@ var (
 
 	ErrInvalidCode = errors.New("Invalid Code")
 
+	ErrInvalidStatus = errors.New("Invalid Status")
+
 	ErrGithubInstallationFetchFailed = errors.New("Github Installation Failed.Error Installing Github App")
 )

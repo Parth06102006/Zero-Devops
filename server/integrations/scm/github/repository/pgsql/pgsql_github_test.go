@@ -23,6 +23,8 @@ type githubTestDBState struct {
 	mu             sync.Mutex
 	lastQueryUserID int64
 	lastDeleteUser  int64
+	lastUpdateUser  int64
+	lastUpdateStatus string
 	queryRowErr     error
 	deleteErr       error
 }
@@ -82,13 +84,14 @@ func (c *githubTestConn) QueryContext(ctx context.Context, query string, args []
 		}, nil
 	case queryContains(query, "FROM github_installations"):
 		return &githubTestRows{
-			cols: []string{"id", "user_id", "installation_id", "account_type", "account_login", "created_at", "updated_at"},
+			cols: []string{"id", "user_id", "installation_id", "account_type", "account_login", "status", "created_at", "updated_at"},
 			vals: [][]driver.Value{{
 				int64(1),
 				githubTestState.lastQueryUserID,
 				int64(99),
 				"User",
 				"octocat",
+				domain.GithubInstallationStatusActive,
 				time.Now(),
 				time.Now(),
 			}},
@@ -198,6 +201,8 @@ func resetGithubTestState() {
 	defer githubTestState.mu.Unlock()
 	githubTestState.lastQueryUserID = 0
 	githubTestState.lastDeleteUser = 0
+	githubTestState.lastUpdateUser = 0
+	githubTestState.lastUpdateStatus = ""
 	githubTestState.queryRowErr = nil
 	githubTestState.deleteErr = nil
 }
@@ -213,6 +218,7 @@ func TestStoreInstallation(t *testing.T) {
 		InstallationID: 88,
 		Account_Type:   "User",
 		Account_Login:  "octocat",
+		Status:         domain.GithubInstallationStatusActive,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	}
@@ -241,6 +247,9 @@ func TestGetInstallationByUserID(t *testing.T) {
 	if inst.InstallationID != 99 {
 		t.Fatalf("expected installationID 99, got %d", inst.InstallationID)
 	}
+	if inst.Status != domain.GithubInstallationStatusActive {
+		t.Fatalf("expected status %s, got %s", domain.GithubInstallationStatusActive, inst.Status)
+	}
 }
 
 func TestGetInstallationByUserID_NotFound(t *testing.T) {
@@ -268,3 +277,24 @@ func TestDeleteInstallationByUserID(t *testing.T) {
 	}
 }
 
+func TestUpdateInstallationStatus(t *testing.T) {
+	resetGithubTestState()
+	db := newGithubTestDB(t)
+	defer db.Close()
+
+	repo := NewPgSqlGithubRepository(db)
+	if err := repo.UpdateInstallationStatus(context.Background(), 55, domain.GithubInstallationStatusSuspended); err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+}
+
+func TestUpdateInstallationStatus_InvalidStatus(t *testing.T) {
+	resetGithubTestState()
+	db := newGithubTestDB(t)
+	defer db.Close()
+
+	repo := NewPgSqlGithubRepository(db)
+	if err := repo.UpdateInstallationStatus(context.Background(), 55, "broken"); err != domain.ErrInvalidStatus {
+		t.Fatalf("expected ErrInvalidStatus, got %v", err)
+	}
+}

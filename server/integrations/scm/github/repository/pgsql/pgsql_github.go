@@ -18,11 +18,14 @@ func NewPgSqlGithubRepository(conn *sql.DB) domain.GithubRepository {
 
 func (m *pgSqlGithubRepository) StoreInstallation(ctx context.Context, inst *domain.GithubInstallation) error {
 	query := `
-		INSERT INTO github_installations (user_id, installation_id, account_type,account_login,created_at,updated_at)
-		VALUES ($1, $2, $3, $4 , $5, $6)
+		INSERT INTO github_installations (user_id, installation_id, account_type, account_login, status, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id
 	`
-	err := m.Conn.QueryRowContext(ctx, query, inst.UserID, inst.InstallationID, inst.Account_Type,inst.Account_Login,inst.CreatedAt,inst.UpdatedAt).Scan(&inst.ID)
+	if inst.Status == "" {
+		inst.Status = domain.GithubInstallationStatusActive
+	}
+	err := m.Conn.QueryRowContext(ctx, query, inst.UserID, inst.InstallationID, inst.Account_Type, inst.Account_Login, inst.Status, inst.CreatedAt, inst.UpdatedAt).Scan(&inst.ID)
 
 	if err != nil {
 		logrus.Error(err)
@@ -34,7 +37,7 @@ func (m *pgSqlGithubRepository) StoreInstallation(ctx context.Context, inst *dom
 
 func (m *pgSqlGithubRepository) GetInstallationByUserID(ctx context.Context, userId int64) (*domain.GithubInstallation, error) {
 	query := `
-		SELECT id, user_id, installation_id, account_type,account_login,created_at,updated_at
+		SELECT id, user_id, installation_id, account_type, account_login, status, created_at, updated_at
 		FROM github_installations
 		WHERE user_id = $1
 	`
@@ -47,6 +50,7 @@ func (m *pgSqlGithubRepository) GetInstallationByUserID(ctx context.Context, use
 		&inst.InstallationID,
 		&inst.Account_Type,
 		&inst.Account_Login,
+		&inst.Status,
 		&inst.CreatedAt,
 		&inst.UpdatedAt,
 	)
@@ -85,6 +89,43 @@ func (m *pgSqlGithubRepository) DeleteInstallationByUserID(ctx context.Context, 
 	if rowsAffected != 1 {
 		err = fmt.Errorf("weird  Behavior. Total Affected: %d", rowsAffected)
 		return err
+	}
+
+	return nil
+}
+
+func (m *pgSqlGithubRepository) UpdateInstallationStatus(ctx context.Context, userId int64, status string) error {
+	if status != domain.GithubInstallationStatusActive &&
+		status != domain.GithubInstallationStatusSuspended &&
+		status != domain.GithubInstallationStatusUninstalled {
+		return domain.ErrInvalidStatus
+	}
+
+	query := `UPDATE github_installations SET status = $1 WHERE user_id = $2`
+
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+
+	if err != nil {
+		logrus.Error(err)
+		return err
+	}
+
+	defer stmt.Close()
+
+	res, err := stmt.ExecContext(ctx, status, userId)
+	if err != nil {
+		logrus.Error(err)
+		return err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		logrus.Error(err)
+		return err
+	}
+
+	if rowsAffected != 1 {
+		return fmt.Errorf("weird Behavior. Total Affected: %d", rowsAffected)
 	}
 
 	return nil

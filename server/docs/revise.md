@@ -793,3 +793,29 @@ Recommended next implementation order:
 3. Add webhook handlers for GitHub installation events.
 4. Keep the current local delete flow as the disconnect path until webhook uninstall handling is added.
 5. Continue using the middleware-backed `user_id` flow for SCM requests.
+
+## Update - 29 June 2026
+
+The GitHub installation status path has now moved from planning into implementation, and the future notes were updated to reflect the webhook-driven lifecycle rules.
+
+Progress completed today:
+
+- Added a `status` column to `github_installations`.
+- Standardized the status values as `active`, `suspended`, and `uninstalled`.
+- Updated the PostgreSQL GitHub repository to store, read, and validate installation status.
+- Added repository tests for `UpdateInstallationStatus` and invalid status handling.
+- Updated `server/docs/future/issues.md` so the webhook lifecycle rules are now described as the next implementation step rather than a purely future idea.
+- Clarified that uninstall or suspend should not erase user-owned application data such as projects, deployments, logs, or environment variables.
+
+Current lifecycle rule:
+
+- The database is the source of truth for whether an installation is active, suspended, or uninstalled.
+- GitHub webhooks are the authoritative source for lifecycle changes.
+- The SCM layer should continue to return stored application data even when the GitHub installation is no longer active.
+- GitHub API calls should stop when the installation is suspended or uninstalled.
+
+Recommended next step:
+
+1. Wire the GitHub webhook handler to call `UpdateInstallationStatus`.
+2. Map `installation_suspend`, `installation.deleted`, and `installation_unsuspend` to the corresponding local status values.
+3. Keep local repository and deployment data intact when the installation is no longer active.
