@@ -25,7 +25,7 @@ func NewSCMHandler(e *echo.Echo, gh domain.GithubUsecase){
 	handler := &SCMHandler{
 		scmUsecase : gh,
 	}
-
+e.POST("/integration/scm/github/webhook", handler.HandleWebhook)
 	e.POST("/integration/scm/github/install",handler.Installation)
 	e.GET("/integration/scm/github/",handler.GetInstallation)
 	e.DELETE("/integration/scm/github/delete",handler.DeleteInstallation)
@@ -81,6 +81,22 @@ func (inst *SCMHandler) GetInstallation(c echo.Context) error {
     }
 
     return c.JSON(http.StatusOK, installation)
+}
+
+func (inst *SCMHandler) HandleWebhook(c echo.Context) error {
+    eventType := c.Request().Header.Get("X-GitHub-Event")
+    if eventType == "" {
+        return c.JSON(http.StatusBadRequest, ResponseError{Message: "missing X-GitHub-Event header"})
+    }
+
+    body := make([]byte, c.Request().ContentLength)
+    c.Request().Body.Read(body)
+
+    ctx := c.Request().Context()
+    if err := inst.scmUsecase.HandleWebhook(ctx, eventType, body); err != nil {
+        return c.JSON(http.StatusInternalServerError, ResponseError{Message: err.Error()})
+    }
+    return c.JSON(http.StatusOK, map[string]string{"message": "webhook received"})
 }
 
 func (inst *SCMHandler) DeleteInstallation(c echo.Context) error {

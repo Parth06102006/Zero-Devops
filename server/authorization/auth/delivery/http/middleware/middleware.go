@@ -62,7 +62,7 @@ func (a *AuthMiddlewareHandler) Validator(c echo.Context, accessToken string) (i
 
 func (a *AuthMiddlewareHandler) Skipper(c echo.Context) bool {
 	path := c.Path()
-	return path == "/auth/github/login" || path == "/auth/refresh"
+	return path == "/auth/github/login" || path == "/auth/refresh" || path == "/integration/scm/github/webhook"
 }
 
 func (a *AuthMiddlewareHandler) AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {

@@ -22,11 +22,49 @@ type GithubInstallation struct {
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`
 }
-
+type PushEvent struct {
+    Ref        string `json:"ref"`
+    Before     string `json:"before"`
+    After      string `json:"after"`
+    Repository struct {
+        FullName string `json:"full_name"`
+        CloneURL string `json:"clone_url"`
+    } `json:"repository"`
+    Commits []Commit `json:"commits"`
+}
+type Commit struct {
+    ID      string `json:"id"`
+    Message string `json:"message"`
+    Author  struct {
+        Name  string `json:"name"`
+        Email string `json:"email"`
+    } `json:"author"`
+}
+type PullRequestEvent struct {
+    Action      string `json:"action"`
+    Number      int    `json:"number"`
+    PullRequest struct {
+        Title string `json:"title"`
+        Body  string `json:"body"`
+        State string `json:"state"`
+        Head  struct {
+            Ref  string `json:"ref"`
+            Sha  string `json:"sha"`
+        } `json:"head"`
+        Base struct {
+            Ref  string `json:"ref"`
+            Sha  string `json:"sha"`
+        } `json:"base"`
+    } `json:"pull_request"`
+    Repository struct {
+        FullName string `json:"full_name"`
+    } `json:"repository"`
+}
 type GithubUsecase interface {
 	InstallGithubApp(ctx context.Context, client *http.Client, code string, user_id int64) error
 	DeleteGithubApp(ctx context.Context, userID int64) error
 	GetGithubAppInstallation(ctx context.Context, userID int64) (*GithubInstallation, error)
+	HandleWebhook(ctx context.Context, eventType string, payload []byte) error
 }
 
 type GithubRepository interface {
