@@ -150,3 +150,16 @@ func (g *githubAppUsecase) GetGithubAppInstallation(ctx context.Context, userID 
 func (g *githubAppUsecase) DeleteGithubApp(ctx context.Context, userID int64) error {
 	return g.githubRepo.DeleteInstallationByUserID(ctx, userID)
 }
+func (g *githubAppUsecase) HandleWebhook(ctx context.Context, eventType string, payload []byte) error {
+    switch eventType {
+    case "push":
+        var event domain.PushEvent
+        json.Unmarshal(payload, &event)
+        // process push
+    case "pull_request":
+        var event domain.PullRequestEvent
+        json.Unmarshal(payload, &event)
+        // process PR
+    }
+    return nil
+}
