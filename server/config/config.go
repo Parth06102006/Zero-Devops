@@ -1,7 +1,9 @@
 package config
 
 import (
+	"os"
 	"strings"
+
 	"github.com/spf13/viper"
 )
 
@@ -14,8 +16,10 @@ func LoadConfig(){
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	// Check if the env file can be read or not
-	if err := viper.ReadInConfig(); err != nil {
-		panic("Error reading config file: " + err.Error())
+	if _, err := os.Stat(".env"); err == nil {
+		if err := viper.ReadInConfig(); err != nil {
+			panic("Error reading config file: " + err.Error())
+		}
 	}
 
 	viper.AutomaticEnv()

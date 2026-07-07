@@ -157,4 +157,4 @@ func (d *deploymentUsecase) GetDeployments(ctx context.Context, userID int64) ([
 
 func (d *deploymentUsecase) GetDeploymentByID(ctx context.Context, userID, deploymentID int64) (*domain.Deployment, error) {
 	return d.deploymentRepo.GetByID(ctx, userID, deploymentID)
-	}
+}
