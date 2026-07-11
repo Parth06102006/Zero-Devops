@@ -21,7 +21,7 @@ func NewDeploymentHandler(e *echo.Echo, du domain.DeploymentUsecase) {
 	handler := &DeploymentHandler{
 		dUsecase: du,
 	}
-	e.POST("/deployments", handler.CreateDeployment)
+	e.POST("/deploy", handler.CreateDeployment)
 }
 
 type createDeploymentRequest struct {

@@ -7,21 +7,31 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/viper"
 )
 
+type deployJob struct {
+	DeploymentID string `json:"id"`
+	CloneURL     string `json:"clone_url"`
+	RetryCount   int    `json:"retry_count"`
+}
+
 type deploymentUsecase struct {
 	deploymentRepo domain.DeploymentRepository
 	githubRepo     domain.GithubRepository
+	rmq            *amqp.Channel
 }
 
-func NewDeploymentUsecase(deploymentRepo domain.DeploymentRepository, githubRepo domain.GithubRepository) domain.DeploymentUsecase {
+func NewDeploymentUsecase(deploymentRepo domain.DeploymentRepository, githubRepo domain.GithubRepository, rmq *amqp.Channel) domain.DeploymentUsecase {
 	return &deploymentUsecase{
 		deploymentRepo: deploymentRepo,
 		githubRepo:     githubRepo,
+		rmq:            rmq,
 	}
 }
 
@@ -32,6 +42,30 @@ type installationTokenResponse struct {
 
 type githubRepoResponse struct {
 	CloneURL string `json:"clone_url"`
+}
+
+func (d *deploymentUsecase) publishJob(deploymentID int64, cloneURL string) error {
+	job := deployJob{
+		DeploymentID: strconv.FormatInt(deploymentID, 10),
+		CloneURL:     cloneURL,
+		RetryCount:   0,
+	}
+	body, err := json.Marshal(job)
+	if err != nil {
+		return fmt.Errorf("failed to marshal deploy job: %w", err)
+	}
+
+	return d.rmq.Publish(
+		"",
+		"deploy.jobs",
+		false,
+		false,
+		amqp.Publishing{
+			ContentType:  "application/json",
+			DeliveryMode: amqp.Persistent,
+			Body:         body,
+		},
+	)
 }
 
 func (d *deploymentUsecase) CreateDeployment(ctx context.Context, userID int64, repoID int64) (*domain.Deployment, error) {
@@ -73,7 +107,7 @@ func (d *deploymentUsecase) CreateDeployment(ctx context.Context, userID int64, 
 	if err != nil {
 		return nil, fmt.Errorf("failed to get repo info: %w", err)
 	}
-//job creation and ading to the queue logic to be added 
+
 	deployment := &domain.Deployment{
 		UserID:    userID,
 		RepoID:    repoID,
@@ -86,6 +120,10 @@ func (d *deploymentUsecase) CreateDeployment(ctx context.Context, userID int64, 
 	err = d.deploymentRepo.Store(ctx, deployment)
 	if err != nil {
 		return nil, err
+	}
+
+	if err := d.publishJob(deployment.ID, cloneURL); err != nil {
+		return deployment, fmt.Errorf("failed to publish deploy job: %w", err)
 	}
 
 	return deployment, nil

@@ -58,7 +58,7 @@ func TestGetDeployments_PassesThrough(t *testing.T) {
 			}
 			return want, nil
 		},
-	}, &githubRepoMock{})
+	}, &githubRepoMock{}, nil)
 
 	got, err := uc.GetDeployments(context.Background(), 2)
 	if err != nil {
@@ -78,7 +78,7 @@ func TestGetDeploymentByID_PassesThrough(t *testing.T) {
 			}
 			return want, nil
 		},
-	}, &githubRepoMock{})
+	}, &githubRepoMock{}, nil)
 
 	got, err := uc.GetDeploymentByID(context.Background(), 2, 9)
 	if err != nil {
