@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: buildapp-postgres-temp
+    environment:
+      POSTGRES_USER: buildapp
+      POSTGRES_PASSWORD: buildapp
+      POSTGRES_DB: buildapp
+    ports:
+      - "5430:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U buildapp -d buildapp"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: buildapp-rabbitmq-temp
+    environment:
+      RABBITMQ_DEFAULT_USER: buildapp
+      RABBITMQ_DEFAULT_PASS: buildapp
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10

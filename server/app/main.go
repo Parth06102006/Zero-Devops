@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/labstack/echo"
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
@@ -92,9 +94,21 @@ func main() {
 	// ** NEED TO ADD THE APP INTEGRATION HTTP FOR IT TO BE ADDED
 	_appHttp.NewSCMHandler(e,githubUsecase)
 
-	// 4. Initialize the Deployments feature
+	// 4. Setup RabbitMQ connection
+	rmqConn, err := amqp.Dial(viper.GetString("RABBITMQ_CONNECTION_STRING"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rmqConn.Close()
+	rmqCh, err := rmqConn.Channel()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rmqCh.Close()
+
+	// 5. Initialize the Deployments feature
 	deploymentRepo := _deploymentRepo.NewPgSqlDeploymentRepository(dbConn)
-	deploymentUsecase := _deploymentUsecase.NewDeploymentUsecase(deploymentRepo, githubRepo)
+	deploymentUsecase := _deploymentUsecase.NewDeploymentUsecase(deploymentRepo, githubRepo, rmqCh)
 	_deploymentHttp.NewDeploymentHandler(e, deploymentUsecase)
 
 	log.Fatal(e.Start(viper.GetString("SERVER_ADDRESS"))) //nolint
