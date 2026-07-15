@@ -107,7 +107,7 @@ func main() {
 	}
 	defer rmqCh.Close()
 
-	err = _queue.SetUpQueues(rmqCh)
+	err = _queue.SetUpQueues(rmqConn, rmqCh)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -36,9 +36,47 @@ func (r *queueUsecase) Channel() *amqp.Channel {
 	return r.queueClient.Channel
 }
 
-func (r *queueUsecase) SetUpQueues() error{
+func (r *queueUsecase) SetUpQueues() error {
+	conn := r.queueClient.Conn
+	queueChannel := r.queueClient.Channel
 
-		err := r.queueClient.Channel.ExchangeDeclare(		
+	// Helper to check if exchange exists
+	exchangeExists := func(name string, kind string) (bool, error) {
+		ch, err := conn.Channel()
+		if err != nil {
+			return false, err
+		}
+		defer func() { _ = ch.Close() }()
+
+		err = ch.ExchangeDeclarePassive(name, kind, true, false, false, false, nil)
+		if err == nil {
+			return true, nil
+		}
+		return false, nil
+	}
+
+	// Helper to check if queue exists
+	queueExists := func(name string, args amqp.Table) (bool, error) {
+		ch, err := conn.Channel()
+		if err != nil {
+			return false, err
+		}
+		defer func() { _ = ch.Close() }()
+
+		_, err = ch.QueueDeclarePassive(name, true, false, false, false, args)
+		if err == nil {
+			return true, nil
+		}
+		return false, nil
+	}
+
+	// 1. Declare Exchange if missing
+	exists, err := exchangeExists("deploy.dlx", "direct")
+	if err != nil {
+		return err
+	}
+	if !exists {
+		err = queueChannel.ExchangeDeclare(
 			"deploy.dlx",
 			"direct",
 			true,
@@ -47,100 +85,115 @@ func (r *queueUsecase) SetUpQueues() error{
 			false,
 			nil,
 		)
+		if err != nil {
+			failOnError(err, "Failed to create the Exchange")
+			return err
+		}
+	}
 
-	if err != nil{
-		failOnError(err,"Failed to create the Exchange")
+	// 2. Declare DEAD LETTER QUEUE FOR JOBS if missing
+	exists, err = queueExists("deploy.jobs.dlq", nil)
+	if err != nil {
 		return err
-	}	
+	}
+	if !exists {
+		_, err = queueChannel.QueueDeclare(
+			"deploy.jobs.dlq",
+			true,
+			false,
+			false,
+			false,
+			nil,
+		)
+		if err != nil {
+			failOnError(err, "Failed to Create DLQ")
+			return err
+		}
 
-
-	// DEAD LETTER QUEUE FOR JOBS
-	_,err = r.queueClient.Channel.QueueDeclare(
-		"deploy.jobs.dlq",
-		true,
-		false,
-		false,
-		false,
-		nil,
-	)
-
-	if err != nil{
-		failOnError(err,"Failed to  Create DLQ")
-		return err
-	}	
-
-	err = r.queueClient.Channel.QueueBind("deploy.jobs.dlq", "deploy.jobs.dlq", "deploy.dlx", false, nil)
-
-	if err != nil{
-		failOnError(err,"Failed to Bind")
-		return err
-	}	
+		err = queueChannel.QueueBind("deploy.jobs.dlq", "deploy.jobs.dlq", "deploy.dlx", false, nil)
+		if err != nil {
+			failOnError(err, "Failed to Bind")
+			return err
+		}
+	}
 
 	args_jobs := amqp.Table{
 		"x-dead-letter-exchange":    "deploy.dlx",
 		"x-dead-letter-routing-key": "deploy.jobs.dlq",
 	}
 
-	// JOBS QUEUE
-
-	_,err = r.queueClient.Channel.QueueDeclare(
-		"deploy.jobs",
-		true,
-		false,
-		false,
-		false,
-		args_jobs,
-	)
-
-	if err != nil{
-		failOnError(err,"Failed to declare job queue")
+	// 3. Declare JOBS QUEUE if missing
+	exists, err = queueExists("deploy.jobs", args_jobs)
+	if err != nil {
 		return err
 	}
+	if !exists {
+		_, err = queueChannel.QueueDeclare(
+			"deploy.jobs",
+			true,
+			false,
+			false,
+			false,
+			args_jobs,
+		)
+		if err != nil {
+			failOnError(err, "Failed to declare job queue")
+			return err
+		}
+	}
 
-	// DEAD LETTER QUEUE FOR STATUS
-	_,err = r.queueClient.Channel.QueueDeclare(
-		"deploy.status.dlq",
-		true,
-		false,
-		false,
-		false,
-		nil,
-	)
-
-	if err != nil{
-		failOnError(err,"Failed to  Create DLQ")
+	// 4. Declare DEAD LETTER QUEUE FOR STATUS if missing
+	exists, err = queueExists("deploy.status.dlq", nil)
+	if err != nil {
 		return err
-	}	
+	}
+	if !exists {
+		_, err = queueChannel.QueueDeclare(
+			"deploy.status.dlq",
+			true,
+			false,
+			false,
+			false,
+			nil,
+		)
+		if err != nil {
+			failOnError(err, "Failed to Create DLQ")
+			return err
+		}
 
-	err = r.queueClient.Channel.QueueBind("deploy.status.dlq", "deploy.status.dlq", "deploy.dlx", false, nil)
-
-	if err != nil{
-		failOnError(err,"Failed to Bind")
-		return err
-	}	
+		err = queueChannel.QueueBind("deploy.status.dlq", "deploy.status.dlq", "deploy.dlx", false, nil)
+		if err != nil {
+			failOnError(err, "Failed to Bind")
+			return err
+		}
+	}
 
 	args_status := amqp.Table{
 		"x-dead-letter-exchange":    "deploy.dlx",
 		"x-dead-letter-routing-key": "deploy.status.dlq",
 	}
 
-	// STATUS QUEUE
-	_,err = r.queueClient.Channel.QueueDeclare(
-		"deploy.status",
-		true,
-		false,
-		false,
-		false,
-		args_status,
-	)
-
-	if err != nil{
-		failOnError(err,"Failed to declare status queue")
+	// 5. Declare STATUS QUEUE if missing
+	exists, err = queueExists("deploy.status", args_status)
+	if err != nil {
 		return err
+	}
+	if !exists {
+		_, err = queueChannel.QueueDeclare(
+			"deploy.status",
+			true,
+			false,
+			false,
+			false,
+			args_status,
+		)
+		if err != nil {
+			failOnError(err, "Failed to declare status queue")
+			return err
+		}
 	}
 
 	return nil
-
 }
 
 func (r* queueUsecase) PublishJob(job domain.DeployJob) error{
