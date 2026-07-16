@@ -7,7 +7,7 @@ CREATE TYPE deployment_status AS ENUM (
 );
 
 CREATE TABLE deployments (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id              BIGINT PRIMARY KEY,
     clone_url       TEXT NOT NULL,
     status          deployment_status NOT NULL DEFAULT 'queued',
 
@@ -28,8 +28,5 @@ CREATE INDEX idx_deployments_created_at ON deployments(created_at);
 
 -- +goose Down
 
-DROP TYPE IF EXISTS deployment_status;
 DROP TABLE IF EXISTS deployments;
-
-DROP INDEX IF EXISTS idx_deployments_status;
-DROP INDEX IF EXISTS idx_deployments_created_at;
+DROP TYPE IF EXISTS deployment_status;

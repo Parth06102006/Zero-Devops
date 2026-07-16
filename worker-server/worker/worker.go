@@ -48,10 +48,15 @@ func (w *workerUsecase) StartWorker() error {
 		return err
 	}
 
+	log.Println("Worker consumer registered. Listening for 'deploy.jobs' messages on RabbitMQ...")
+
 	for msg := range msgs {
 		var job domain.DeployJob
 
+		log.Printf("Received deploy job message: delivery_tag=%d", msg.DeliveryTag)
+
 		if err := json.Unmarshal(msg.Body, &job); err != nil {
+			log.Printf("Failed to decode deploy job: %v", err)
 			msg.Nack(false, false)
 			continue
 		}
@@ -59,6 +64,7 @@ func (w *workerUsecase) StartWorker() error {
 		err := deployments.ProcessDeployment(context.Background(), w.db, job, w.artifactUploader, w.queueClient)
 
 		if err != nil {
+			log.Printf("Deployment job %d failed: %v", job.DeploymentID, err)
 			job.RetryCount++
 			if job.RetryCount >= 3 {
 				msg.Nack(false, false)
@@ -72,8 +78,10 @@ func (w *workerUsecase) StartWorker() error {
 			continue
 		}
 
+		log.Printf("Deployment job %d completed", job.DeploymentID)
 		msg.Ack(false)
 	}
 
+	log.Println("Worker consumer delivery channel closed")
 	return nil
 }

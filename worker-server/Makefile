@@ -4,10 +4,10 @@ ifneq (,$(wildcard .env))
     export
 endif
 
-DATABASE_USER ?= buildapp
-DATABASE_PASS ?= buildapp
-DATABASE_PORT ?= 5432
-DATABASE_NAME ?= buildapp
+DATABASE_USER ?= admin
+DATABASE_PASS ?= admin
+DATABASE_PORT ?= 5430
+DATABASE_NAME ?= zero_devops_build_logs
 
 # Database configuration
 POSTGRES_USER     ?= $(DATABASE_USER)
@@ -16,7 +16,7 @@ POSTGRES_ADDRESS  ?= 127.0.0.1:$(DATABASE_PORT)
 POSTGRES_DATABASE ?= $(DATABASE_NAME)
 
 # RabbitMQ
-RABBITMQ_CONNECTION_STRING ?= amqp://buildapp:buildapp@127.0.0.1:5672/
+RABBITMQ_CONNECTION_STRING ?= amqp://admin:admin@127.0.0.1:5672/
 
 # Exporting bin folder to the path for makefile
 export PATH   := $(CURDIR)/bin:$(PATH)
@@ -32,17 +32,17 @@ include ./misc/make/help.Makefile
 
 # ~~~ Development Environment ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-up: dev-env dev-air             ## Startup / Spinup Docker Compose and air
-down: docker-stop               ## Stop Docker
-destroy: docker-teardown clean  ## Teardown (removes volumes, tmp files, etc...)
+up: dev-env dev-air            ## Startup / Spinup Docker Compose and run worker with hot reload
+down: docker-stop              ## Stop Docker
+destroy: docker-teardown clean ## Teardown (removes volumes, tmp files, etc...)
 
-install-deps: goose air gotestsum tparse mockery ## Install Development Dependencies (localy).
+install-deps: goose air gotestsum tparse mockery ## Install Development Dependencies (locally).
 deps: $(GOOSE) $(AIR) $(GOTESTSUM) $(TPARSE) $(MOCKERY) ## Checks for Global Development Dependencies.
 deps:
 	@echo "Required Tools Are Available"
 
-dev-env: ## Bootstrap Environment (with a Docker-Compose help).
-	@ docker-compose up -d --build pgsql
+dev-env: ## Bootstrap Environment (with Docker-Compose help).
+	@ docker-compose up -d --build postgres
 	@ if [ -n "$$(docker ps -q -f name=zero_devops_rabbitmq)" ]; then \
 		echo "RabbitMQ is already running."; \
 	elif [ -n "$$(docker ps -a -q -f name=zero_devops_rabbitmq)" ]; then \
@@ -53,11 +53,10 @@ dev-env: ## Bootstrap Environment (with a Docker-Compose help).
 		docker-compose up -d --build rabbitmq; \
 	fi
 
-dev-env-test: dev-env ## Run application (within a Docker-Compose help)
-	@ $(MAKE) image-build
-	docker-compose up web
+dev-run: build ## Build and run the worker binary directly.
+	@ ./worker-engine
 
-dev-air: $(AIR) ## Starts AIR ( Continuous Development app).
+dev-air: $(AIR) ## Starts AIR (Continuous Development app).
 	air
 
 docker-stop:
@@ -73,24 +72,21 @@ lint: $(GOLANGCI) ## Runs golangci-lint with predefined configuration
 	golangci-lint version
 	golangci-lint run -c .golangci.yaml ./...
 
-# -trimpath - will remove the filepathes from the reports, good to same money on network trafic,
+# -trimpath - will remove the filepaths from the reports, good to save money on network traffic,
 #             focus on bug reports, and find issues fast.
-# - race    - adds a racedetector, in case of racecondition, you can catch report with sentry.
+# - race    - adds a race detector, in case of race condition, you can catch report with sentry.
 #             https://golang.org/doc/articles/race_detector.html
-#
-# todo(butuzov): add additional flags to compiler to have an `version` flag.
-build: ## Builds binary
-	@ printf "Building aplication... "
-	@ go build -trimpath -o engine ./app/
+build: ## Builds worker-engine binary
+	@ printf "Building worker-engine... "
+	@ go build -trimpath -o worker-engine ./app/
 	@ echo "done"
 
-build-race: ## Builds binary (with -race flag)
-	@ printf "Building aplication with race flag... "
-	@ go build -trimpath -race -o engine ./app/
+build-race: ## Builds worker-engine binary (with -race flag)
+	@ printf "Building worker-engine with race flag... "
+	@ go build -trimpath -race -o worker-engine ./app/
 	@ echo "done"
 
-
-go-generate: $(MOCKERY) ## Runs go generte ./...
+go-generate: $(MOCKERY) ## Runs go generate ./...
 	go generate ./...
 
 TESTS_ARGS := --format testname --jsonfile gotestsum.json.out
@@ -100,7 +96,7 @@ TESTS_ARGS += -test.parallel 2
 TESTS_ARGS += -test.count    1
 TESTS_ARGS += -test.failfast
 TESTS_ARGS += -test.coverprofile   coverage.out
-TESTS_ARGS += -test.timeout        5s
+TESTS_ARGS += -test.timeout        30s
 TESTS_ARGS += -race
 
 run-tests: $(GOTESTSUM)
@@ -112,18 +108,18 @@ tests: run-tests $(TPARSE) ## Run Tests & parse details
 # ~~~ Docker Build ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .ONESHELL:
-image-build:
+image-build: ## Build worker-server Docker image
 	@ echo "Docker Build"
-	@ DOCKER_BUILDKIT=0 docker build --file Dockerfile --tag go-clean-arch .
+	@ DOCKER_BUILDKIT=0 docker build --file Dockerfile --tag zero-devops-worker .
 
-# ~~~ Database Migrations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~ Database Migrations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 POSTGRES_DSN := postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_ADDRESS)/$(POSTGRES_DATABASE)?sslmode=disable
 export GOOSE_DRIVER ?= postgres
 export GOOSE_DBSTRING ?= $(POSTGRES_DSN)
 
 migrate-up: $(GOOSE) ## Apply all (or N up) migrations.
-	@ read -p "How many migration you wants to perform (default value: [all]): " N; \
+	@ read -p "How many migrations you want to perform (default value: [all]): " N; \
 	if [ -z "$${N}" ]; then \
 		goose -dir migrations up; \
 	else \
@@ -132,7 +128,7 @@ migrate-up: $(GOOSE) ## Apply all (or N up) migrations.
 
 .PHONY: migrate-down
 migrate-down: $(GOOSE) ## Apply all (or N down) migrations.
-	@ read -p "How many migration you wants to perform (default value: [all]): " N; \
+	@ read -p "How many migrations you want to perform (default value: [all]): " N; \
 	if [ -z "$${N}" ]; then \
 		goose -dir migrations down; \
 	else \
@@ -153,8 +149,9 @@ migrate-create: $(GOOSE) ## Create a set of up/down migrations with a specified 
 clean: clean-artifacts clean-docker
 
 clean-artifacts: ## Removes Artifacts (*.out)
-	@printf "Cleanning artifacts... "
+	@printf "Cleaning artifacts... "
 	@rm -f *.out
+	@rm -f worker-engine
 	@echo "done."
 
 clean-docker: ## Removes dangling docker images

@@ -2,3 +2,7 @@
 .agents
 
 .gocache
+build
+
+bin
+tmp

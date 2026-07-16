@@ -7,17 +7,17 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"os"
 )
 
 type deployJob struct {
-	DeploymentID  string `json:"deployment_id"`
+	DeploymentID  int64  `json:"deployment_id"`
 	CloneURL      string `json:"clone_url"`
 	CallbackQueue string `json:"callback_queue"`
 	RetryCount    int    `json:"retry_count"`
@@ -30,7 +30,7 @@ type deploymentUsecase struct {
 }
 
 type deploymentStatusUpdate struct {
-	DeploymentID string `json:"deployment_id"`
+	DeploymentID int64  `json:"deployment_id"`
 	Status       string `json:"status"`
 }
 
@@ -63,7 +63,7 @@ type githubRepoResponse struct {
 
 func (d *deploymentUsecase) publishJob(deploymentID int64, cloneURL string) error {
 	job := deployJob{
-		DeploymentID:  strconv.FormatInt(deploymentID, 10),
+		DeploymentID:  deploymentID,
 		CloneURL:      cloneURL,
 		CallbackQueue: "deploy.status",
 		RetryCount:    0,
@@ -110,28 +110,21 @@ func (d *deploymentUsecase) consumeStatusUpdate() error {
 			continue
 		}
 
-		deploymentID, err := strconv.ParseInt(update.DeploymentID, 10, 64)
-		if err != nil {
-			logrus.Errorf("invalid deployment id %q in status update: %v", update.DeploymentID, err)
-			_ = msg.Nack(false, false)
-			continue
-		}
-
 		status, ok := normalizeDeploymentStatus(update.Status)
 		if !ok {
-			logrus.Errorf("invalid deployment status update %q for deployment %d", update.Status, deploymentID)
+			logrus.Errorf("invalid deployment status update %q for deployment %d", update.Status, update.DeploymentID)
 			_ = msg.Nack(false, false)
 			continue
 		}
 
-		if err := d.deploymentRepo.UpdateStatus(context.Background(), deploymentID, status); err != nil {
-			logrus.Errorf("failed to update deployment %d status to %q: %v", deploymentID, status, err)
+		if err := d.deploymentRepo.UpdateStatus(context.Background(), update.DeploymentID, status); err != nil {
+			logrus.Errorf("failed to update deployment %d status to %q: %v", update.DeploymentID, status, err)
 			_ = msg.Nack(false, true)
 			continue
 		}
 
 		if err := msg.Ack(false); err != nil {
-			logrus.Errorf("failed to ack deployment status update for deployment %d: %v", deploymentID, err)
+			logrus.Errorf("failed to ack deployment status update for deployment %d: %v", update.DeploymentID, err)
 		}
 	}
 
@@ -161,12 +154,17 @@ func (d *deploymentUsecase) CreateDeployment(ctx context.Context, userID int64, 
 		return nil, fmt.Errorf("failed to get github installation: %w", err)
 	}
 
-	privateKeyPEM := viper.GetString("GITHUB_APP_PRIVATE_KEY")
-	if privateKeyPEM == "" {
-		return nil, fmt.Errorf("GITHUB_APP_PRIVATE_KEY not configured")
+	privateKeyPath := viper.GetString("GITHUB_APP_PRIVATE_KEY_PATH")
+	if privateKeyPath == "" {
+		return nil, fmt.Errorf("GITHUB_APP_PRIVATE_KEY_PATH not configured")
 	}
 
-	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(privateKeyPEM))
+	pemBytes, err := os.ReadFile(privateKeyPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read private key: %w", err)
+	}
+
+	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(pemBytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse private key: %w", err)
 	}

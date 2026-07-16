@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: buildapp-postgres-temp
+    container_name: zero_devops_worker-server-postgres
     environment:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASS}
@@ -18,7 +18,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
-    container_name: buildapp-rabbitmq-temp
+    container_name: zero_devops_rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}

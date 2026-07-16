@@ -17,5 +17,21 @@ services:
       retries: 10
       start_period: 10s
 
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: zero_devops_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    ports:
+      - "${RABBITMQ_PORT}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT}:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
 volumes:
   pgdata:
