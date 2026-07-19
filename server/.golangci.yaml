@@ -17,7 +17,6 @@ linters:
     - gocyclo
     - goprintffuncname
     - gosec
-    - gosimple
     - ineffassign
     - lll
     - misspell
@@ -26,8 +25,6 @@ linters:
     - noctx
     - revive
     - staticcheck
-    - stylecheck
-    - typecheck
     - unconvert
     - unparam
     - unused
@@ -82,24 +79,23 @@ linters:
       allow-unused: false
       require-explanation: false
       require-specific: false
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - mnd
+          - dupl
+          - goconst
+      - path: app
+        text: "don't use `init` function"
+    paths:
+      # - */mocks
 
 formatters:
   enable:
     - gofmt
     - goimports
 
-issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - mnd
-        - dupl
-        - goconst
-    - path: app
-      text: "don't use `init` function"
-
 run:
   timeout: 5m
   go: "1.25"
-  skip-dirs:
-    # - */mocks
