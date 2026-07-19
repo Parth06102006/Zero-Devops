@@ -32,7 +32,7 @@ import (
 	"go.uber.org/zap"
 )
 
-//nolint:gochecknoinits // init is used to ensure config is loaded before main
+// init loads application configuration before main starts and reports when debug mode is enabled.
 func init() {
 	_config.LoadConfig()
 

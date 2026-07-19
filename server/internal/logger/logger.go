@@ -3,7 +3,8 @@ package logger
 
 import "go.uber.org/zap"
 
-// New creates a new zap.Logger based on the environment
+// New creates a zap.Logger configured for production when env is "production" and for
+// development otherwise.
 func New(env string) *zap.Logger {
 	if env == "production" {
 		l, _ := zap.NewProduction()

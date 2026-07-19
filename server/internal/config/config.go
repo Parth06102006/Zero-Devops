@@ -8,7 +8,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-// LoadConfig reads the .env file and sets up environment variable overrides
+// LoadConfig configures application settings from an optional .env file and environment variables.
+// It panics if an existing .env file cannot be read.
 func LoadConfig() {
 	viper.SetConfigFile(".env")
 	viper.SetConfigType("env")

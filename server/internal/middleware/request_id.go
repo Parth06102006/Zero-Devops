@@ -11,7 +11,8 @@ const RequestIDContextKey = "request_id"
 // RequestIDHeader is the HTTP header used for request ID propagation
 const RequestIDHeader = "X-Request-Id"
 
-// RequestIDMiddleware is a middleware that assigns a unique request ID to each incoming request
+// RequestIDMiddleware propagates the incoming request ID or generates one when absent.
+// It stores the ID in the Echo context and sets it on the response header before invoking the next handler.
 func RequestIDMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c *echo.Context) error {
 		id := c.Request().Header.Get(RequestIDHeader)
@@ -24,7 +25,7 @@ func RequestIDMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-// GetRequestID retrieves the request ID from the echo context
+// GetRequestID retrieves the request ID stored in the Echo context, or an empty string if none is available.
 func GetRequestID(c *echo.Context) string {
 	id, _ := c.Get(RequestIDContextKey).(string)
 	return id

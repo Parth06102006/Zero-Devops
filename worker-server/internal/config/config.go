@@ -7,7 +7,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-// LoadConfig loads environment configuration from .env file and system environment.
+// LoadConfig loads configuration from the .env file and system environment variables.
+// It panics if the .env file cannot be read.
 func LoadConfig() {
 	// Set up for Environment Variables
 	viper.SetConfigFile(".env")

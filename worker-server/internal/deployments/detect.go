@@ -98,6 +98,8 @@ type packageJSON struct {
 	DevDependencies map[string]string `json:"devDependencies"`
 }
 
+// readPackageJSON reads and parses the package.json file in repoPath.
+// It returns the parsed package data or an error if the file cannot be read or parsed.
 func readPackageJSON(repoPath string) (*packageJSON, error) {
 	//nolint:gosec // path is constructed from a controlled repoPath, not user input
 	data, err := os.ReadFile(filepath.Join(repoPath, "package.json"))
@@ -111,6 +113,7 @@ func readPackageJSON(repoPath string) (*packageJSON, error) {
 	return &pkg, nil
 }
 
+// hasDep reports whether dep is listed in the package's dependencies or development dependencies.
 func hasDep(pkg *packageJSON, dep string) bool {
 	if pkg.Dependencies != nil {
 		if _, ok := pkg.Dependencies[dep]; ok {
@@ -125,11 +128,15 @@ func hasDep(pkg *packageJSON, dep string) bool {
 	return false
 }
 
+// hasConfigFile reports whether configFile exists under repoPath and is a regular file.
 func hasConfigFile(repoPath, configFile string) bool {
 	info, err := os.Stat(filepath.Join(repoPath, configFile))
 	return err == nil && !info.IsDir()
 }
 
+// walkForFile searches root and its traversable subdirectories for a file with the specified name.
+// Directory traversal skips ignored directories, and filename matching is case-insensitive.
+// It returns whether a matching file was found and any error reported by the directory walk.
 func walkForFile(root, filename string) (bool, error) {
 	var found bool
 	err := filepath.WalkDir(root, func(_ string, d os.DirEntry, err error) error {
@@ -148,6 +155,8 @@ func walkForFile(root, filename string) (bool, error) {
 	return found, err
 }
 
+// detectFramework identifies the framework or language associated with a repository.
+// It returns the matching builder, or an error if no supported framework is detected.
 func detectFramework(repoPath string) (*Builder, error) {
 	for _, b := range builders {
 		for _, cfg := range b.ConfigFiles {
@@ -192,6 +201,9 @@ func detectFramework(repoPath string) (*Builder, error) {
 	return nil, errors.New("no framework detected")
 }
 
+// detectPackageManager determines the package manager from the repository's lockfiles.
+// It returns the first matching package manager in the configured detection order, or npm
+// when no supported lockfile is present.
 func detectPackageManager(repoPath string) string {
 	for _, pm := range packageManagers {
 		if hasConfigFile(repoPath, pm.lockFile) {

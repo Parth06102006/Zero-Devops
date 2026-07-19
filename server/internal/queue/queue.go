@@ -3,6 +3,8 @@ package queue
 
 import amqp "github.com/rabbitmq/amqp091-go"
 
+// exchangeExists reports whether the specified exchange exists and has the given type.
+// It returns an error if a channel cannot be created.
 func exchangeExists(conn *amqp.Connection, name, kind string) (bool, error) {
 	ch, err := conn.Channel()
 	if err != nil {
@@ -17,6 +19,7 @@ func exchangeExists(conn *amqp.Connection, name, kind string) (bool, error) {
 	return false, nil
 }
 
+// It returns an error if a channel cannot be opened.
 func queueExists(conn *amqp.Connection, name string, args amqp.Table) (bool, error) {
 	ch, err := conn.Channel()
 	if err != nil {
@@ -31,6 +34,7 @@ func queueExists(conn *amqp.Connection, name string, args amqp.Table) (bool, err
 	return false, nil
 }
 
+// declareExchange declares a durable, non-auto-deleted exchange with the specified name and type.
 func declareExchange(ch *amqp.Channel, name, kind string) error {
 	return ch.ExchangeDeclare(
 		name,
@@ -43,6 +47,8 @@ func declareExchange(ch *amqp.Channel, name, kind string) error {
 	)
 }
 
+// declareQueue declares a durable, non-exclusive queue with the specified arguments.
+// It returns any error encountered while declaring the queue.
 func declareQueue(ch *amqp.Channel, name string, args amqp.Table) error {
 	_, err := ch.QueueDeclare(
 		name,
@@ -55,11 +61,12 @@ func declareQueue(ch *amqp.Channel, name string, args amqp.Table) error {
 	return err
 }
 
+// bindQueue binds a queue to an exchange using the specified routing key.
 func bindQueue(ch *amqp.Channel, name, routingKey, exchange string) error {
 	return ch.QueueBind(name, routingKey, exchange, false, nil)
 }
 
-// SetUpQueues initializes and configures the message queues
+// SetUpQueues ensures the deployment exchanges and queues exist, including dead-letter queues and bindings. It returns the first error encountered.
 func SetUpQueues(conn *amqp.Connection, queueChannel *amqp.Channel) error {
 	exists, err := exchangeExists(conn, "deploy.dlx", "direct")
 	if err != nil {
