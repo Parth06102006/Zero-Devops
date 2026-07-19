@@ -15,27 +15,27 @@ import (
 )
 
 type mockDeploymentUsecase struct {
-	createFn func(ctx context.Context, userID int64, repoID int64, reqID string) (*domain.Deployment, error)
+	createFn func(ctx context.Context, userID, repoID int64, reqID string) (*domain.Deployment, error)
 }
 
-func (m *mockDeploymentUsecase) CreateDeployment(ctx context.Context, userID int64, repoID int64, reqID string) (*domain.Deployment, error) {
+func (m *mockDeploymentUsecase) CreateDeployment(ctx context.Context, userID, repoID int64, reqID string) (*domain.Deployment, error) {
 	if m.createFn != nil {
 		return m.createFn(ctx, userID, repoID, reqID)
 	}
 	return nil, nil
 }
 
-func (m *mockDeploymentUsecase) GetDeployments(ctx context.Context, userID int64) ([]domain.Deployment, error) {
+func (m *mockDeploymentUsecase) GetDeployments(_ context.Context, _ int64) ([]domain.Deployment, error) {
 	return nil, nil
 }
 
-func (m *mockDeploymentUsecase) GetDeploymentByID(ctx context.Context, userID, deploymentID int64) (*domain.Deployment, error) {
+func (m *mockDeploymentUsecase) GetDeploymentByID(_ context.Context, _, _ int64) (*domain.Deployment, error) {
 	return nil, nil
 }
 
 func TestCreateDeployment_Unauthorized(t *testing.T) {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/deployments", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/deployments", http.NoBody)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
@@ -50,7 +50,7 @@ func TestCreateDeployment_Unauthorized(t *testing.T) {
 
 func TestCreateDeployment_InvalidBody(t *testing.T) {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/deployments", bytes.NewBufferString("{"))
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/deployments", bytes.NewBufferString("{"))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -67,7 +67,7 @@ func TestCreateDeployment_InvalidBody(t *testing.T) {
 
 func TestCreateDeployment_Success(t *testing.T) {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/deployments", bytes.NewBufferString(`{"repo_id":42}`))
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/deployments", bytes.NewBufferString(`{"repo_id":42}`))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -76,7 +76,7 @@ func TestCreateDeployment_Success(t *testing.T) {
 	want := &domain.Deployment{ID: 9, UserID: 11, RepoID: 42, Status: domain.DeploymentStatusPending}
 	h := &DeploymentHandler{
 		dUsecase: &mockDeploymentUsecase{
-			createFn: func(ctx context.Context, userID int64, repoID int64, reqID string) (*domain.Deployment, error) {
+			createFn: func(_ context.Context, userID, repoID int64, _ string) (*domain.Deployment, error) {
 				if userID != 11 || repoID != 42 {
 					t.Fatalf("unexpected args userID=%d repoID=%d", userID, repoID)
 				}
@@ -95,7 +95,7 @@ func TestCreateDeployment_Success(t *testing.T) {
 
 func TestCreateDeployment_UsecaseError(t *testing.T) {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/deployments", bytes.NewBufferString(`{"repo_id":42}`))
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/deployments", bytes.NewBufferString(`{"repo_id":42}`))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -103,7 +103,7 @@ func TestCreateDeployment_UsecaseError(t *testing.T) {
 
 	h := &DeploymentHandler{
 		dUsecase: &mockDeploymentUsecase{
-			createFn: func(ctx context.Context, userID int64, repoID int64, reqID string) (*domain.Deployment, error) {
+			createFn: func(_ context.Context, _, _ int64, _ string) (*domain.Deployment, error) {
 				return nil, domain.ErrConflict
 			},
 		},

@@ -45,22 +45,26 @@ type githubRepoMock struct {
 	getInstFn func(ctx context.Context, userID int64) (*domain.GithubInstallation, error)
 }
 
-func (m *githubRepoMock) StoreInstallation(ctx context.Context, inst *domain.GithubInstallation) error { return nil }
+func (m *githubRepoMock) StoreInstallation(_ context.Context, _ *domain.GithubInstallation) error {
+	return nil
+}
 func (m *githubRepoMock) GetInstallationByUserID(ctx context.Context, userID int64) (*domain.GithubInstallation, error) {
 	if m.getInstFn != nil {
 		return m.getInstFn(ctx, userID)
 	}
 	return nil, nil
 }
-func (m *githubRepoMock) DeleteInstallationByUserID(ctx context.Context, userID int64) error { return nil }
-func (m *githubRepoMock) UpdateInstallationStatus(ctx context.Context, userID int64, status string) error {
+func (m *githubRepoMock) DeleteInstallationByUserID(_ context.Context, _ int64) error {
+	return nil
+}
+func (m *githubRepoMock) UpdateInstallationStatus(_ context.Context, _ int64, _ string) error {
 	return nil
 }
 
 func TestGetDeployments_PassesThrough(t *testing.T) {
 	want := []domain.Deployment{{ID: 1, UserID: 2}}
 	uc := NewDeploymentUsecase(&deploymentRepoMock{
-		getUserFn: func(ctx context.Context, userID int64) ([]domain.Deployment, error) {
+		getUserFn: func(_ context.Context, userID int64) ([]domain.Deployment, error) {
 			if userID != 2 {
 				t.Fatalf("unexpected userID %d", userID)
 			}
@@ -80,7 +84,7 @@ func TestGetDeployments_PassesThrough(t *testing.T) {
 func TestGetDeploymentByID_PassesThrough(t *testing.T) {
 	want := &domain.Deployment{ID: 9}
 	uc := NewDeploymentUsecase(&deploymentRepoMock{
-		getIDFn: func(ctx context.Context, userID, id int64) (*domain.Deployment, error) {
+		getIDFn: func(_ context.Context, userID, id int64) (*domain.Deployment, error) {
 			if userID != 2 || id != 9 {
 				t.Fatalf("unexpected args userID=%d id=%d", userID, id)
 			}

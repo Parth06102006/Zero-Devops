@@ -43,7 +43,7 @@ func (m *mockGithubUsecase) DeleteGithubApp(ctx context.Context, userID int64) e
 
 func newSCMTestContext(method, target string) (*httptest.ResponseRecorder, *echo.Context) {
 	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(method, target, nil)
+	req := httptest.NewRequestWithContext(context.Background(), method, target, http.NoBody)
 	e := echo.New()
 	return rec, e.NewContext(req, rec)
 }
@@ -83,7 +83,7 @@ func TestInstallation_Success(t *testing.T) {
 	called := false
 	handler := &SCMHandler{
 		scmUsecase: &mockGithubUsecase{
-			installFn: func(ctx context.Context, client *http.Client, code string, userID int64) error {
+			installFn: func(_ context.Context, client *http.Client, code string, userID int64) error {
 				called = true
 				if code != "test-code" {
 					t.Fatalf("expected code test-code, got %s", code)
@@ -133,13 +133,13 @@ func TestGetInstallation_Success(t *testing.T) {
 		ID:             1,
 		UserID:         99,
 		InstallationID: 12345,
-		Account_Type:   "User",
-		Account_Login:  "octocat",
+		AccountType:    "User",
+		AccountLogin:   "octocat",
 	}
 
 	handler := &SCMHandler{
 		scmUsecase: &mockGithubUsecase{
-			getFn: func(ctx context.Context, userID int64) (*domain.GithubInstallation, error) {
+			getFn: func(_ context.Context, userID int64) (*domain.GithubInstallation, error) {
 				if userID != 99 {
 					t.Fatalf("expected userID 99, got %d", userID)
 				}
@@ -178,7 +178,7 @@ func TestDeleteInstallation_Success(t *testing.T) {
 	called := false
 	handler := &SCMHandler{
 		scmUsecase: &mockGithubUsecase{
-			deleteFn: func(ctx context.Context, userID int64) error {
+			deleteFn: func(_ context.Context, userID int64) error {
 				called = true
 				if userID != 7 {
 					t.Fatalf("expected userID 7, got %d", userID)

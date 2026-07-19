@@ -20,13 +20,13 @@ var (
 )
 
 type deploymentsDBState struct {
-	mu            sync.Mutex
-	lastUserID    int64
-	lastStore     *domain.Deployment
-	queryRowErr   error
-	queryErr      error
-	rowsErr       error
-	getByIDErr    error
+	mu          sync.Mutex
+	lastUserID  int64
+	lastStore   *domain.Deployment
+	queryRowErr error
+	queryErr    error
+	rowsErr     error
+	getByIDErr  error
 }
 
 type deploymentsDriver struct{}
@@ -45,15 +45,15 @@ func registerDeploymentsDriver() {
 	})
 }
 
-func (d *deploymentsDriver) Open(name string) (driver.Conn, error) { return &deploymentsConn{}, nil }
-func (c *deploymentsConn) Close() error                             { return nil }
-func (c *deploymentsConn) Begin() (driver.Tx, error)                { return nil, errors.New("tx not supported") }
-func (c *deploymentsConn) Prepare(query string) (driver.Stmt, error) { return &deploymentsStmt{}, nil }
-func (c *deploymentsConn) PrepareContext(ctx context.Context, query string) (driver.Stmt, error) {
+func (d *deploymentsDriver) Open(_ string) (driver.Conn, error)  { return &deploymentsConn{}, nil }
+func (c *deploymentsConn) Close() error                          { return nil }
+func (c *deploymentsConn) Begin() (driver.Tx, error)             { return nil, errors.New("tx not supported") }
+func (c *deploymentsConn) Prepare(_ string) (driver.Stmt, error) { return &deploymentsStmt{}, nil }
+func (c *deploymentsConn) PrepareContext(_ context.Context, _ string) (driver.Stmt, error) {
 	return &deploymentsStmt{}, nil
 }
 
-func (c *deploymentsConn) QueryContext(ctx context.Context, query string, args []driver.NamedValue) (driver.Rows, error) {
+func (c *deploymentsConn) QueryContext(_ context.Context, query string, args []driver.NamedValue) (driver.Rows, error) {
 	deploymentsState.mu.Lock()
 	defer deploymentsState.mu.Unlock()
 	if deploymentsState.queryErr != nil {
@@ -82,32 +82,37 @@ func (c *deploymentsConn) QueryContext(ctx context.Context, query string, args [
 	return &deploymentsRows{
 		cols: []string{"id", "user_id", "repo_id", "clone_url", "status", "created_at", "updated_at"},
 		vals: [][]driver.Value{{
-			int64(1), deploymentsState.lastUserID, int64(22), "https://example.com/repo.git", domain.DeploymentStatusPending, time.Now(), time.Now(),
+			int64(1), deploymentsState.lastUserID, int64(22),
+			"https://example.com/repo.git", domain.DeploymentStatusPending, time.Now(), time.Now(),
 		}},
 	}, nil
 }
 
-func (c *deploymentsConn) Query(query string, args []driver.Value) (driver.Rows, error) { return &deploymentsRows{}, nil }
-func (c *deploymentsConn) ExecContext(ctx context.Context, query string, args []driver.NamedValue) (driver.Result, error) {
+func (c *deploymentsConn) Query(_ string, _ []driver.Value) (driver.Rows, error) {
+	return &deploymentsRows{}, nil
+}
+func (c *deploymentsConn) ExecContext(_ context.Context, _ string, _ []driver.NamedValue) (driver.Result, error) {
 	return deploymentsResult{rowsAffected: 1}, nil
 }
 
-func (s *deploymentsStmt) Close() error { return nil }
+func (s *deploymentsStmt) Close() error  { return nil }
 func (s *deploymentsStmt) NumInput() int { return -1 }
-func (s *deploymentsStmt) Exec(args []driver.Value) (driver.Result, error) { return deploymentsResult{rowsAffected: 1}, nil }
-func (s *deploymentsStmt) Query(args []driver.Value) (driver.Rows, error) { return &deploymentsRows{}, nil }
+func (s *deploymentsStmt) Exec(_ []driver.Value) (driver.Result, error) {
+	return deploymentsResult{rowsAffected: 1}, nil
+}
+func (s *deploymentsStmt) Query(_ []driver.Value) (driver.Rows, error) {
+	return &deploymentsRows{}, nil
+}
 
 func (r deploymentsResult) LastInsertId() (int64, error) { return 1, nil }
 func (r deploymentsResult) RowsAffected() (int64, error) { return r.rowsAffected, nil }
-func (r *deploymentsRows) Columns() []string               { return r.cols }
-func (r *deploymentsRows) Close() error                    { return nil }
+func (r *deploymentsRows) Columns() []string             { return r.cols }
+func (r *deploymentsRows) Close() error                  { return nil }
 func (r *deploymentsRows) Next(dest []driver.Value) error {
 	if r.idx >= len(r.vals) {
 		return io.EOF
 	}
-	for i, v := range r.vals[r.idx] {
-		dest[i] = v
-	}
+	copy(dest, r.vals[r.idx])
 	r.idx++
 	return nil
 }
@@ -145,10 +150,13 @@ func resetDeploymentsState() {
 func TestStore(t *testing.T) {
 	resetDeploymentsState()
 	db := newDeploymentsTestDB(t)
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
-	repo := NewPgSqlDeploymentRepository(db)
-	d := &domain.Deployment{UserID: 7, RepoID: 8, CloneURL: "https://example.com/x.git", Status: domain.DeploymentStatusPending, CreatedAt: time.Now(), UpdatedAt: time.Now()}
+	repo := NewPgSQLDeploymentRepository(db)
+	d := &domain.Deployment{
+		UserID: 7, RepoID: 8, CloneURL: "https://example.com/x.git",
+		Status: domain.DeploymentStatusPending, CreatedAt: time.Now(), UpdatedAt: time.Now(),
+	}
 	if err := repo.Store(context.Background(), d); err != nil {
 		t.Fatalf("expected nil error, got %v", err)
 	}
@@ -160,9 +168,9 @@ func TestStore(t *testing.T) {
 func TestGetByUserID(t *testing.T) {
 	resetDeploymentsState()
 	db := newDeploymentsTestDB(t)
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
-	repo := NewPgSqlDeploymentRepository(db)
+	repo := NewPgSQLDeploymentRepository(db)
 	got, err := repo.GetByUserID(context.Background(), 44)
 	if err != nil {
 		t.Fatalf("expected nil error, got %v", err)
@@ -177,9 +185,9 @@ func TestGetByID_NotFound(t *testing.T) {
 	deploymentsState.queryRowErr = sql.ErrNoRows
 
 	db := newDeploymentsTestDB(t)
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
-	repo := NewPgSqlDeploymentRepository(db)
+	repo := NewPgSQLDeploymentRepository(db)
 	_, err := repo.GetByID(context.Background(), 1, 2)
 	if err != domain.ErrNotFound {
 		t.Fatalf("expected ErrNotFound, got %v", err)

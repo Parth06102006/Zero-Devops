@@ -1,3 +1,4 @@
+// Package usecase contains the authentication business logic
 package usecase
 
 import (
@@ -12,12 +13,21 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	claimUserID        = "user_id"
+	claimExp           = "exp"
+	claimIat           = "iat"
+	accessTokenExpiry  = 15
+	refreshTokenExpiry = 720
+)
+
 type authUsecase struct {
 	userRepo       domain.UserRepository
 	providers      map[string]domain.OAuthProvider
 	contextTimeout time.Duration
 }
 
+// NewAuthUsecase creates a new auth usecase
 func NewAuthUsecase(u domain.UserRepository, providers map[string]domain.OAuthProvider, timeout time.Duration) domain.AuthUsecase {
 	return &authUsecase{
 		userRepo:       u,
@@ -26,28 +36,27 @@ func NewAuthUsecase(u domain.UserRepository, providers map[string]domain.OAuthPr
 	}
 }
 
-func generateTokens(user *domain.User) (string, string, error) {
-	// So here i am using the byte slices for the jwt signin function then I am using the viper to get the environment variables where I am adding the environment variables
+func generateTokens(user *domain.User) (accessToken, refreshToken string, err error) {
 	var secretKey = []byte(viper.GetString("JWT_SECRET"))
 	accessClaims := jwt.MapClaims{
-		"user_id": user.ID,
-		"email":   user.Email,
-		"exp":     time.Now().Add(15 * time.Minute).Unix(),
-		"iat":     time.Now().Unix(),
+		claimUserID: user.ID,
+		"email":     user.Email,
+		claimExp:    time.Now().Add(accessTokenExpiry * time.Minute).Unix(),
+		claimIat:    time.Now().Unix(),
 	}
-	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
-	signedAccessToken, err := accessToken.SignedString(secretKey)
+	accessTokenSigned := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
+	signedAccessToken, err := accessTokenSigned.SignedString(secretKey)
 	if err != nil {
 		return "", "", err
 	}
 	refreshClaims := jwt.MapClaims{
-		"user_id": user.ID,
-		"exp":     time.Now().Add(7 * 24 * time.Hour).Unix(),
-		"iat":     time.Now().Unix(),
+		claimUserID: user.ID,
+		claimExp:    time.Now().Add(refreshTokenExpiry * time.Hour).Unix(),
+		claimIat:    time.Now().Unix(),
 	}
 
-	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
-	signedRefreshToken, err := refreshToken.SignedString(secretKey)
+	refreshTokenSigned := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
+	signedRefreshToken, err := refreshTokenSigned.SignedString(secretKey)
 	if err != nil {
 		return "", "", err
 	}
@@ -55,7 +64,7 @@ func generateTokens(user *domain.User) (string, string, error) {
 	return signedAccessToken, signedRefreshToken, nil
 }
 
-func (a *authUsecase) HandleOAuthCallback(ctx context.Context, code string, provider string) (*domain.TokenResponse, error) {
+func (a *authUsecase) HandleOAuthCallback(ctx context.Context, code, provider string) (*domain.TokenResponse, error) {
 	log := appmiddleware.LoggerFromContext(ctx)
 	log.Info("Handling OAuth callback", zap.String("provider", provider))
 
@@ -75,11 +84,14 @@ func (a *authUsecase) HandleOAuthCallback(ctx context.Context, code string, prov
 		return nil, err
 	}
 
-	existingUser, err := a.userRepo.GetProviderById(ctx, oauthUser.ProviderId)
+	existingUser, err := a.userRepo.GetProviderByID(ctx, oauthUser.ProviderID)
+	if err != nil && err != domain.ErrNotFound {
+		return nil, err
+	}
 
 	if existingUser.ID == 0 {
 		userToSave := domain.User{
-			ProviderId: oauthUser.ProviderId,
+			ProviderID: oauthUser.ProviderID,
 			Provider:   oauthUser.Provider,
 			Username:   oauthUser.Username,
 			Email:      oauthUser.Email,
@@ -102,20 +114,20 @@ func (a *authUsecase) HandleOAuthCallback(ctx context.Context, code string, prov
 			AccessToken:  appAccessToken,
 			RefreshToken: appRefreshToken,
 		}, nil
-	} else {
-		appAccessToken, appRefreshToken, err := generateTokens(&existingUser)
-		if err != nil {
-			return nil, err
-		}
-		err = a.userRepo.UpdateRefreshToken(ctx, existingUser.ID, appRefreshToken)
-		if err != nil {
-			return nil, err
-		}
-		return &domain.TokenResponse{
-			AccessToken:  appAccessToken,
-			RefreshToken: appRefreshToken,
-		}, nil
 	}
+
+	appAccessToken, appRefreshToken, err := generateTokens(&existingUser)
+	if err != nil {
+		return nil, err
+	}
+	err = a.userRepo.UpdateRefreshToken(ctx, existingUser.ID, appRefreshToken)
+	if err != nil {
+		return nil, err
+	}
+	return &domain.TokenResponse{
+		AccessToken:  appAccessToken,
+		RefreshToken: appRefreshToken,
+	}, nil
 }
 
 func (a *authUsecase) RefreshToken(ctx context.Context, refreshToken string) (*domain.TokenResponse, error) {
@@ -138,7 +150,7 @@ func (a *authUsecase) RefreshToken(ctx context.Context, refreshToken string) (*d
 	if !ok {
 		return nil, domain.ErrInvalidToken
 	}
-	userID := int64(claims["user_id"].(float64))
+	userID := int64(claims[claimUserID].(float64))
 
 	user, err := a.userRepo.GetByID(ctx, userID)
 	if err != nil {
@@ -175,13 +187,8 @@ func (a *authUsecase) Logout(ctx context.Context, accessToken string) error {
 		log.Error("JWT secret missing from configuration")
 		return domain.ErrMissingSecret
 	}
-	// Validate the Token
-	// Get the user detail
-	// After getting the user detail I need to remove the refresh token from the database
-	//The removal of the token from the cookie would be done by the Logout API
 
-	// Parsing And Validating Access Token
-	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (any, error) {
+	token, err := jwt.Parse(accessToken, func(_ *jwt.Token) (any, error) {
 		hmacSecret := []byte(secretKey)
 
 		return hmacSecret, nil
@@ -195,15 +202,13 @@ func (a *authUsecase) Logout(ctx context.Context, accessToken string) error {
 		return domain.ErrInvalidToken
 	}
 
-	// We are using the type assertion since claims is of type interference and since userId is stored as string in claims then we check if it is stored as string since it is stored as string then programmaticaly at the run time we would assing the value to the userId otherwise run time panic would occur
-	userIDFloat, ok := claims["user_id"].(float64)
+	userIDFloat, ok := claims[claimUserID].(float64)
 	if !ok {
 		return domain.ErrInvalidToken
 	}
-	userId := int64(userIDFloat)
+	userID := int64(userIDFloat)
 
-	// Updating the Refresh Token to Empty String to Not store it anymore
-	err = a.userRepo.UpdateRefreshToken(ctx, userId, "")
+	err = a.userRepo.UpdateRefreshToken(ctx, userID, "")
 
 	if err != nil {
 		return domain.ErrLoggingOut
@@ -221,7 +226,7 @@ func (a *authUsecase) GetCurrentUser(ctx context.Context, accessToken string) (d
 		return domain.UserResponse{}, domain.ErrMissingSecret
 	}
 
-	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (any, error) {
+	token, err := jwt.Parse(accessToken, func(_ *jwt.Token) (any, error) {
 		hmacSecret := []byte(secretKey)
 
 		return hmacSecret, nil
@@ -235,13 +240,13 @@ func (a *authUsecase) GetCurrentUser(ctx context.Context, accessToken string) (d
 		return domain.UserResponse{}, domain.ErrInvalidToken
 	}
 
-	userIDFloat, ok := claims["user_id"].(float64)
+	userIDFloat, ok := claims[claimUserID].(float64)
 	if !ok {
 		return domain.UserResponse{}, domain.ErrInvalidToken
 	}
-	userId := int64(userIDFloat)
+	userID := int64(userIDFloat)
 
-	user, err := a.userRepo.GetByID(ctx, userId)
+	user, err := a.userRepo.GetByID(ctx, userID)
 
 	if err != nil {
 		return domain.UserResponse{}, err

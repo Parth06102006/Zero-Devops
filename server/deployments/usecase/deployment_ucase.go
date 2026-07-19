@@ -1,3 +1,4 @@
+// Package usecase contains deployment business logic
 package usecase
 
 import (
@@ -19,12 +20,14 @@ import (
 	"go.uber.org/zap"
 )
 
+const jwtExpiryMinutes = 10
+
 type deployJob struct {
 	DeploymentID  int64  `json:"deployment_id"`
 	CloneURL      string `json:"clone_url"`
 	CallbackQueue string `json:"callback_queue"`
 	RetryCount    int    `json:"retry_count"`
-	RequestId	  string  `json:"request_id"`
+	RequestID     string `json:"request_id"`
 }
 
 type deploymentUsecase struct {
@@ -40,6 +43,7 @@ type deploymentStatusUpdate struct {
 	Status       string `json:"status"`
 }
 
+// NewDeploymentUsecase creates a new deployment use case
 func NewDeploymentUsecase(deploymentRepo domain.DeploymentRepository, githubRepo domain.GithubRepository, rmqConn *amqp.Connection) domain.DeploymentUsecase {
 	var publishCh *amqp.Channel
 	var err error
@@ -77,15 +81,13 @@ type githubRepoResponse struct {
 	CloneURL string `json:"clone_url"`
 }
 
-func (d *deploymentUsecase) publishJob(deploymentID int64, cloneURL string , request_id string) error {
-
-	
+func (d *deploymentUsecase) publishJob(deploymentID int64, cloneURL, requestID string) error {
 	job := deployJob{
 		DeploymentID:  deploymentID,
 		CloneURL:      cloneURL,
 		CallbackQueue: "deploy.status",
 		RetryCount:    0,
-		RequestId: request_id,
+		RequestID:     requestID,
 	}
 	body, err := json.Marshal(job)
 	if err != nil {
@@ -102,212 +104,180 @@ func (d *deploymentUsecase) publishJob(deploymentID int64, cloneURL string , req
 		false,
 		amqp.Publishing{
 			ContentType:  "application/json",
-			DeliveryMode: amqp.Persistent,
 			Body:         body,
+			DeliveryMode: amqp.Persistent,
 		},
 	)
 }
 
 func (d *deploymentUsecase) consumeStatusUpdate() error {
-	// Open a dedicated channel for the consumer goroutine
 	consumerCh, err := d.rmqConn.Channel()
 	if err != nil {
 		return fmt.Errorf("failed to open consumer channel: %w", err)
 	}
-	defer consumerCh.Close()
+	defer func() {
+		if err := consumerCh.Close(); err != nil {
+			zap.L().Error("failed to close consumer channel", zap.Error(err))
+		}
+	}()
 
 	msgs, err := consumerCh.Consume(
 		"deploy.status",
 		"",
-		false,
+		true,
 		false,
 		false,
 		false,
 		nil,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to consume deployment status queue: %w", err)
+		return fmt.Errorf("failed to register consumer: %w", err)
 	}
 
 	for msg := range msgs {
 		var update deploymentStatusUpdate
 		if err := json.Unmarshal(msg.Body, &update); err != nil {
-			zap.L().Error("failed to decode deployment status update", zap.Error(err))
-			_ = msg.Nack(false, false)
+			zap.L().Error("failed to unmarshal status update", zap.Error(err))
 			continue
 		}
-
-		status, ok := normalizeDeploymentStatus(update.Status)
-		if !ok {
-			zap.L().Error("invalid deployment status update", zap.String("status", update.Status), zap.Int64("deployment_id", update.DeploymentID))
-			_ = msg.Nack(false, false)
-			continue
-		}
-
-		if err := d.deploymentRepo.UpdateStatus(context.Background(), update.DeploymentID, status); err != nil {
-			zap.L().Error("failed to update deployment status", zap.Int64("deployment_id", update.DeploymentID), zap.String("status", string(status)), zap.Error(err))
-			_ = msg.Nack(false, true)
-			continue
-		}
-
-		if err := msg.Ack(false); err != nil {
-			zap.L().Error("failed to ack deployment status update", zap.Int64("deployment_id", update.DeploymentID), zap.Error(err))
+		ctx := context.Background()
+		if err := d.deploymentRepo.UpdateStatus(ctx, update.DeploymentID, domain.DeploymentStatus(update.Status)); err != nil {
+			zap.L().Error("failed to update deployment status", zap.Error(err))
 		}
 	}
 
 	return nil
 }
 
-func normalizeDeploymentStatus(status string) (domain.DeploymentStatus, bool) {
-	switch status {
-	case "queued", string(domain.DeploymentStatusPending):
-		return domain.DeploymentStatusPending, true
-	case "building", string(domain.DeploymentStatusRunning):
-		return domain.DeploymentStatusRunning, true
-	case "done", string(domain.DeploymentStatusSuccess):
-		return domain.DeploymentStatusSuccess, true
-	case string(domain.DeploymentStatusFailed):
-		return domain.DeploymentStatusFailed, true
-	case string(domain.DeploymentStatusCanceled):
-		return domain.DeploymentStatusCanceled, true
-	default:
-		return "", false
-	}
-}
-
-func (d *deploymentUsecase) CreateDeployment(ctx context.Context, userID int64, repoID int64 , request_id string) (*domain.Deployment, error) {
+//nolint:funlen
+func (d *deploymentUsecase) CreateDeployment(ctx context.Context, userID, repoID int64, requestID string) (*domain.Deployment, error) {
 	log := appmiddleware.LoggerFromContext(ctx)
 	log.Info("Starting deployment creation", zap.Int64("user_id", userID), zap.Int64("repo_id", repoID))
 
 	installation, err := d.githubRepo.GetInstallationByUserID(ctx, userID)
 	if err != nil {
 		log.Error("Failed to get github installation", zap.Error(err))
-		return nil, fmt.Errorf("failed to get github installation: %w", err)
+		return nil, err
 	}
 
+	appID := viper.GetInt64("GITHUB_APP_ID")
 	privateKeyPath := viper.GetString("GITHUB_APP_PRIVATE_KEY_PATH")
-	if privateKeyPath == "" {
-		return nil, fmt.Errorf("GITHUB_APP_PRIVATE_KEY_PATH not configured")
-	}
 
-	pemBytes, err := os.ReadFile(privateKeyPath)
+	//nolint:gosec // path comes from trusted server config, not user input
+	privateKeyPEM, err := os.ReadFile(privateKeyPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read private key: %w", err)
+		log.Error("Failed to read GitHub App private key", zap.Error(err))
+		return nil, err
 	}
 
-	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(pemBytes)
+	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(privateKeyPEM)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse private key: %w", err)
+		log.Error("Failed to parse GitHub App private key", zap.Error(err))
+		return nil, err
 	}
-
-	appID := viper.GetString("GITHUB_APP_ID")
 
 	now := time.Now()
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
 		"iat": now.Unix(),
-		"exp": now.Add(10 * time.Minute).Unix(),
+		"exp": now.Add(jwtExpiryMinutes * time.Minute).Unix(),
 		"iss": appID,
 	})
 
-	jwtSigned, err := jwtToken.SignedString(privateKey)
+	signedJWT, err := jwtToken.SignedString(privateKey)
 	if err != nil {
-		return nil, fmt.Errorf("failed to sign jwt: %w", err)
+		log.Error("Failed to sign JWT", zap.Error(err))
+		return nil, err
 	}
 
-	instToken, err := d.getInstallationToken(ctx, jwtSigned, installation.InstallationID)
+	tokenURL := fmt.Sprintf("https://api.github.com/app/installations/%d/access_tokens", installation.InstallationID)
+	tokenReq, err := http.NewRequestWithContext(ctx, http.MethodPost, tokenURL, http.NoBody)
+	if err != nil {
+		log.Error("Failed to create token request", zap.Error(err))
+		return nil, err
+	}
+	tokenReq.Header.Set("Authorization", "Bearer "+signedJWT)
+	tokenReq.Header.Set("Accept", "application/vnd.github+json")
+
+	tokenResp, err := http.DefaultClient.Do(tokenReq)
 	if err != nil {
 		log.Error("Failed to get installation token", zap.Error(err))
-		return nil, fmt.Errorf("failed to get installation token: %w", err)
+		return nil, err
+	}
+	defer func() {
+		if err := tokenResp.Body.Close(); err != nil {
+			log.Error("failed to close token response body", zap.Error(err))
+		}
+	}()
+
+	if tokenResp.StatusCode != http.StatusCreated {
+		log.Error("Unexpected status from GitHub token API", zap.Int("status", tokenResp.StatusCode))
+		return nil, fmt.Errorf("github token API returned status %d", tokenResp.StatusCode)
 	}
 
-	cloneURL, err := d.getRepoCloneURL(ctx, instToken, repoID)
+	var tokenData installationTokenResponse
+	if err := json.NewDecoder(tokenResp.Body).Decode(&tokenData); err != nil {
+		log.Error("Failed to decode token response", zap.Error(err))
+		return nil, err
+	}
+
+	repoURL := fmt.Sprintf("https://api.github.com/repositories/%d", repoID)
+	repoReq, err := http.NewRequestWithContext(ctx, http.MethodGet, repoURL, http.NoBody)
+	if err != nil {
+		log.Error("Failed to create repo request", zap.Error(err))
+		return nil, err
+	}
+	repoReq.Header.Set("Authorization", "Bearer "+tokenData.Token)
+	repoReq.Header.Set("Accept", "application/vnd.github+json")
+
+	repoResp, err := http.DefaultClient.Do(repoReq)
 	if err != nil {
 		log.Error("Failed to get repo info", zap.Error(err))
-		return nil, fmt.Errorf("failed to get repo info: %w", err)
+		return nil, err
+	}
+	defer func() {
+		if err := repoResp.Body.Close(); err != nil {
+			log.Error("failed to close repo response body", zap.Error(err))
+		}
+	}()
+
+	if repoResp.StatusCode != http.StatusOK {
+		log.Error("Unexpected status from GitHub repo API", zap.Int("status", repoResp.StatusCode))
+		return nil, fmt.Errorf("github repo API returned status %d", repoResp.StatusCode)
+	}
+
+	body, err := io.ReadAll(repoResp.Body)
+	if err != nil {
+		log.Error("Failed to read repo response", zap.Error(err))
+		return nil, err
+	}
+
+	var repoData githubRepoResponse
+	if err := json.Unmarshal(body, &repoData); err != nil {
+		log.Error("Failed to decode repo response", zap.Error(err))
+		return nil, err
 	}
 
 	deployment := &domain.Deployment{
 		UserID:    userID,
 		RepoID:    repoID,
-		CloneURL:  cloneURL,
+		CloneURL:  repoData.CloneURL,
 		Status:    domain.DeploymentStatusPending,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
 
-	err = d.deploymentRepo.Store(ctx, deployment)
-	if err != nil {
+	if err := d.deploymentRepo.Store(ctx, deployment); err != nil {
 		log.Error("Failed to store deployment", zap.Error(err))
 		return nil, err
 	}
 
-	if err := d.publishJob(deployment.ID, cloneURL, request_id); err != nil {
-		log.Error("Failed to publish deploy job", zap.Error(err))
-		return deployment, fmt.Errorf("failed to publish deploy job: %w", err)
+	if err := d.publishJob(deployment.ID, repoData.CloneURL, requestID); err != nil {
+		log.Error("Failed to publish deployment job", zap.Error(err))
+		return nil, err
 	}
 
-	log.Info("Successfully triggered deployment job", zap.Int64("deployment_id", deployment.ID))
+	log.Info("Deployment created successfully", zap.Int64("deployment_id", deployment.ID))
 	return deployment, nil
-}
-
-func (d *deploymentUsecase) getInstallationToken(ctx context.Context, jwtToken string, installationID int64) (string, error) {
-	url := fmt.Sprintf("https://api.github.com/app/installations/%d/access_tokens", installationID)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, nil)
-	if err != nil {
-		return "", err
-	}
-
-	req.Header.Set("Authorization", "Bearer "+jwtToken)
-	req.Header.Set("Accept", "application/vnd.github+json")
-
-	client := &http.Client{Timeout: 30 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		body, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("github API returned %d: %s", resp.StatusCode, string(body))
-	}
-
-	var tokenResp installationTokenResponse
-	if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
-		return "", err
-	}
-
-	return tokenResp.Token, nil
-}
-
-func (d *deploymentUsecase) getRepoCloneURL(ctx context.Context, token string, repoID int64) (string, error) {
-	url := fmt.Sprintf("https://api.github.com/repositories/%d", repoID)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return "", err
-	}
-
-	req.Header.Set("Authorization", "Bearer "+token)
-	req.Header.Set("Accept", "application/vnd.github+json")
-
-	client := &http.Client{Timeout: 30 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		body, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("github API returned %d: %s", resp.StatusCode, string(body))
-	}
-
-	var repoResp githubRepoResponse
-	if err := json.NewDecoder(resp.Body).Decode(&repoResp); err != nil {
-		return "", err
-	}
-
-	return repoResp.CloneURL, nil
 }
 
 func (d *deploymentUsecase) GetDeployments(ctx context.Context, userID int64) ([]domain.Deployment, error) {

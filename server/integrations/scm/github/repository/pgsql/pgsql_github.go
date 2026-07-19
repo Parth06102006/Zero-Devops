@@ -1,23 +1,26 @@
+// Package pgsql provides PostgreSQL repository implementations
 package pgsql
 
 import (
 	"Zero_Devops/server/domain"
+	appmiddleware "Zero_Devops/server/middleware"
 	"context"
 	"database/sql"
 	"fmt"
-	appmiddleware "Zero_Devops/server/middleware"
+
 	"go.uber.org/zap"
 )
 
-type pgSqlGithubRepository struct {
+type pgSQLGithubRepository struct {
 	Conn *sql.DB
 }
 
-func NewPgSqlGithubRepository(conn *sql.DB) domain.GithubRepository {
-	return &pgSqlGithubRepository{conn}
+// NewPgSQLGithubRepository creates a new GithubRepository backed by PostgreSQL
+func NewPgSQLGithubRepository(conn *sql.DB) domain.GithubRepository {
+	return &pgSQLGithubRepository{conn}
 }
 
-func (m *pgSqlGithubRepository) StoreInstallation(ctx context.Context, inst *domain.GithubInstallation) error {
+func (m *pgSQLGithubRepository) StoreInstallation(ctx context.Context, inst *domain.GithubInstallation) error {
 	query := `
 		INSERT INTO github_installations (user_id, installation_id, account_type, account_login, status, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -26,7 +29,10 @@ func (m *pgSqlGithubRepository) StoreInstallation(ctx context.Context, inst *dom
 	if inst.Status == "" {
 		inst.Status = domain.GithubInstallationStatusActive
 	}
-	err := m.Conn.QueryRowContext(ctx, query, inst.UserID, inst.InstallationID, inst.Account_Type, inst.Account_Login, inst.Status, inst.CreatedAt, inst.UpdatedAt).Scan(&inst.ID)
+	err := m.Conn.QueryRowContext(ctx, query,
+		inst.UserID, inst.InstallationID, inst.AccountType,
+		inst.AccountLogin, inst.Status, inst.CreatedAt, inst.UpdatedAt,
+	).Scan(&inst.ID)
 
 	if err != nil {
 		log := appmiddleware.LoggerFromContext(ctx)
@@ -37,21 +43,21 @@ func (m *pgSqlGithubRepository) StoreInstallation(ctx context.Context, inst *dom
 	return nil
 }
 
-func (m *pgSqlGithubRepository) GetInstallationByUserID(ctx context.Context, userId int64) (*domain.GithubInstallation, error) {
+func (m *pgSQLGithubRepository) GetInstallationByUserID(ctx context.Context, userID int64) (*domain.GithubInstallation, error) {
 	query := `
 		SELECT id, user_id, installation_id, account_type, account_login, status, created_at, updated_at
 		FROM github_installations
 		WHERE user_id = $1
 	`
-	res := m.Conn.QueryRowContext(ctx, query, userId)
+	res := m.Conn.QueryRowContext(ctx, query, userID)
 
 	inst := domain.GithubInstallation{}
 	err := res.Scan(
 		&inst.ID,
 		&inst.UserID,
 		&inst.InstallationID,
-		&inst.Account_Type,
-		&inst.Account_Login,
+		&inst.AccountType,
+		&inst.AccountLogin,
 		&inst.Status,
 		&inst.CreatedAt,
 		&inst.UpdatedAt,
@@ -69,7 +75,7 @@ func (m *pgSqlGithubRepository) GetInstallationByUserID(ctx context.Context, use
 	return &inst, nil
 }
 
-func (m *pgSqlGithubRepository) DeleteInstallationByUserID(ctx context.Context, userId int64) error {
+func (m *pgSQLGithubRepository) DeleteInstallationByUserID(ctx context.Context, userID int64) error {
 	query := `DELETE FROM github_installations WHERE user_id = $1`
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 
@@ -79,7 +85,13 @@ func (m *pgSqlGithubRepository) DeleteInstallationByUserID(ctx context.Context, 
 		return err
 	}
 
-	res, err := stmt.ExecContext(ctx, userId)
+	defer func() {
+		if err := stmt.Close(); err != nil {
+			appmiddleware.LoggerFromContext(ctx).Error("failed to close statement", zap.Error(err))
+		}
+	}()
+
+	res, err := stmt.ExecContext(ctx, userID)
 	if err != nil {
 		log := appmiddleware.LoggerFromContext(ctx)
 		log.Error("failed to delete github installation", zap.Error(err))
@@ -99,7 +111,7 @@ func (m *pgSqlGithubRepository) DeleteInstallationByUserID(ctx context.Context, 
 	return nil
 }
 
-func (m *pgSqlGithubRepository) UpdateInstallationStatus(ctx context.Context, userId int64, status string) error {
+func (m *pgSQLGithubRepository) UpdateInstallationStatus(ctx context.Context, userID int64, status string) error {
 	if status != domain.GithubInstallationStatusActive &&
 		status != domain.GithubInstallationStatusSuspended &&
 		status != domain.GithubInstallationStatusUninstalled {
@@ -116,9 +128,13 @@ func (m *pgSqlGithubRepository) UpdateInstallationStatus(ctx context.Context, us
 		return err
 	}
 
-	defer stmt.Close()
+	defer func() {
+		if err := stmt.Close(); err != nil {
+			appmiddleware.LoggerFromContext(ctx).Error("failed to close statement", zap.Error(err))
+		}
+	}()
 
-	res, err := stmt.ExecContext(ctx, status, userId)
+	res, err := stmt.ExecContext(ctx, status, userID)
 	if err != nil {
 		log := appmiddleware.LoggerFromContext(ctx)
 		log.Error("failed to update status", zap.Error(err))

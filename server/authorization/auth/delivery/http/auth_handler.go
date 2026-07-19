@@ -1,3 +1,4 @@
+// Package http provides HTTP delivery handlers for the authentication system
 package http
 
 import (
@@ -14,31 +15,26 @@ import (
 	"go.uber.org/zap"
 )
 
+// AuthHandler handles authentication-related HTTP requests
 type AuthHandler struct {
 	AUsecase domain.AuthUsecase
 }
 
-func writeCookie(token string, cookie_name string, expiry_time time.Duration) *http.Cookie {
-	cookie := new(http.Cookie)
-	cookie.Name = cookie_name
-	cookie.Value = token
-	cookie.Expires = time.Now().Add(expiry_time)
-
-	IS_PRODUCTION_ENV := viper.GetBool("IS_PRODUCTION_ENV")
-	if IS_PRODUCTION_ENV == false {
-		cookie.Secure = false
-	} else {
-		cookie.Secure = true
+//nolint:gosec
+func writeCookie(token, cookieName string, expiryTime time.Duration) *http.Cookie {
+	return &http.Cookie{
+		Name:     cookieName,
+		Value:    token,
+		Expires:  time.Now().Add(expiryTime),
+		Secure:   viper.GetBool("IS_PRODUCTION_ENV"),
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		Path:     "/",
 	}
-	cookie.HttpOnly = true
-	cookie.SameSite = http.SameSiteLaxMode
-	cookie.Path = "/"
-
-	return cookie
 }
 
-func readCookie(c *echo.Context, cookie_name string) (string, error) {
-	cookie, err := c.Cookie(cookie_name)
+func readCookie(c *echo.Context, cookieName string) (string, error) {
+	cookie, err := c.Cookie(cookieName)
 
 	if err != nil {
 		return "", err
@@ -47,6 +43,7 @@ func readCookie(c *echo.Context, cookie_name string) (string, error) {
 	return cookie.Value, nil
 }
 
+// NewAuthHandler registers authentication routes on the Echo instance
 func NewAuthHandler(e *echo.Echo, us domain.AuthUsecase) {
 	handler := &AuthHandler{
 		AUsecase: us,
@@ -57,6 +54,7 @@ func NewAuthHandler(e *echo.Echo, us domain.AuthUsecase) {
 	e.GET("/auth/user/me", handler.GetUser)
 }
 
+// Login handles the OAuth login callback
 func (a *AuthHandler) Login(c *echo.Context) error {
 	reqID := middleware.GetRequestID(c)
 	log := middleware.LoggerFromContext(c.Request().Context())
@@ -85,16 +83,17 @@ func (a *AuthHandler) Login(c *echo.Context) error {
 		refreshExpiry = 720
 	}
 
-	access_token_cookie := writeCookie(tokens.AccessToken, "access_token", time.Duration(accessExpiry)*time.Hour)
-	refresh_token_cookie := writeCookie(tokens.RefreshToken, "refresh_token", time.Duration(refreshExpiry)*time.Hour)
+	accessTokenCookie := writeCookie(tokens.AccessToken, "access_token", time.Duration(accessExpiry)*time.Hour)
+	refreshTokenCookie := writeCookie(tokens.RefreshToken, "refresh_token", time.Duration(refreshExpiry)*time.Hour)
 
-	c.SetCookie(access_token_cookie)
-	c.SetCookie(refresh_token_cookie)
+	c.SetCookie(accessTokenCookie)
+	c.SetCookie(refreshTokenCookie)
 
 	log.Info("User logged in successfully")
 	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(nil, "", reqID, helper.WithMessage("User Logged in Successfully")))
 }
 
+// Refresh handles token refresh requests
 func (a *AuthHandler) Refresh(c *echo.Context) error {
 	reqID := middleware.GetRequestID(c)
 	log := middleware.LoggerFromContext(c.Request().Context())
@@ -124,16 +123,17 @@ func (a *AuthHandler) Refresh(c *echo.Context) error {
 		refreshExpiry = 720
 	}
 
-	access_token_cookie := writeCookie(tokens.AccessToken, "access_token", time.Duration(accessExpiry)*time.Hour)
-	refresh_token_cookie := writeCookie(tokens.RefreshToken, "refresh_token", time.Duration(refreshExpiry)*time.Hour)
+	accessTokenCookie := writeCookie(tokens.AccessToken, "access_token", time.Duration(accessExpiry)*time.Hour)
+	refreshTokenCookie := writeCookie(tokens.RefreshToken, "refresh_token", time.Duration(refreshExpiry)*time.Hour)
 
-	c.SetCookie(access_token_cookie)
-	c.SetCookie(refresh_token_cookie)
+	c.SetCookie(accessTokenCookie)
+	c.SetCookie(refreshTokenCookie)
 
 	log.Info("User token refreshed successfully")
 	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(nil, "", reqID, helper.WithMessage("User Token Refreshed Successfully")))
 }
 
+// Logout handles user logout
 func (a *AuthHandler) Logout(c *echo.Context) error {
 	reqID := middleware.GetRequestID(c)
 	log := middleware.LoggerFromContext(c.Request().Context())
@@ -151,17 +151,20 @@ func (a *AuthHandler) Logout(c *echo.Context) error {
 		return c.JSON(helper.GetStatusCode(err), helper.BuildErrorResponse(err.Error(), err, reqID))
 	}
 
-	access_token_cookie := writeCookie("", "access_token", time.Duration(0)*time.Hour)
-	refresh_token_cookie := writeCookie("", "refresh_token", time.Duration(0)*time.Hour)
-	access_token_cookie.MaxAge = -1
-	refresh_token_cookie.MaxAge = -1
-	c.SetCookie(access_token_cookie)
-	c.SetCookie(refresh_token_cookie)
+	//nolint:gosec
+	accessTokenCookie := writeCookie("", "access_token", 0)
+	//nolint:gosec
+	refreshTokenCookie := writeCookie("", "refresh_token", 0)
+	accessTokenCookie.MaxAge = -1
+	refreshTokenCookie.MaxAge = -1
+	c.SetCookie(accessTokenCookie)
+	c.SetCookie(refreshTokenCookie)
 
 	log.Info("User logged out successfully")
 	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(nil, "", reqID, helper.WithMessage("User Logged Out Successfully")))
 }
 
+// GetUser returns the current authenticated user's details
 func (a *AuthHandler) GetUser(c *echo.Context) error {
 	reqID := middleware.GetRequestID(c)
 	log := middleware.LoggerFromContext(c.Request().Context())

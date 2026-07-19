@@ -1,3 +1,4 @@
+// Package deployments handles deployment processing including cloning, building, and uploading.
 package deployments
 
 import (
@@ -9,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -17,35 +19,78 @@ import (
 	"time"
 
 	"Zero_Devops/worker_server/domain"
+
 	"github.com/moby/go-archive"
 	"github.com/moby/moby/client"
 	"go.uber.org/zap"
 )
 
-const buildRoot = "C:\\tmp\\build"
+const (
+	buildRoot = "C:\\tmp\\build"
+
+	pkgManagerNPM  = "npm"
+	pkgManagerPNPM = "pnpm"
+	pkgManagerYarn = "yarn"
+	pkgManagerBun  = "bun"
+
+	templateDockerfile = "Dockerfile"
+	builderDocker      = "docker"
+
+	frameworkVite   = "vite"
+	frameworkNextJS = "nextjs"
+	frameworkAstro  = "astro"
+	frameworkReact  = "react"
+	langNode        = "node"
+	langGo          = "go"
+	langPython      = "python"
+)
 
 var pmInstallCommands = map[string]string{
-	"npm":  "npm ci --ignore-scripts",
-	"pnpm": "pnpm install --frozen-lockfile --ignore-scripts",
-	"yarn": "yarn install --frozen-lockfile --ignore-scripts",
-	"bun":  "bun install --frozen-lockfile --ignore-scripts",
+	pkgManagerNPM:  "npm ci --ignore-scripts",
+	pkgManagerPNPM: "pnpm install --frozen-lockfile --ignore-scripts",
+	pkgManagerYarn: "yarn install --frozen-lockfile --ignore-scripts",
+	pkgManagerBun:  "bun install --frozen-lockfile --ignore-scripts",
 }
 
-func cloneRepo(cloneURL string, deploymentID string) (string, error) {
+const gitCloneTimeout = 60 * time.Second
+
+func validateCloneURL(rawURL string) error {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return fmt.Errorf("invalid clone URL: %w", err)
+	}
+	if u.Scheme != "https" {
+		return fmt.Errorf("unsupported clone URL scheme: %s", u.Scheme)
+	}
+	if strings.HasPrefix(rawURL, "-") {
+		return errors.New("clone URL must not start with '-'")
+	}
+	allowedHosts := map[string]bool{"github.com": true}
+	if !allowedHosts[u.Hostname()] {
+		return fmt.Errorf("clone URL host not allowed: %s", u.Hostname())
+	}
+	return nil
+}
+
+func cloneRepo(cloneURL, deploymentID string) (string, error) {
+	if err := validateCloneURL(cloneURL); err != nil {
+		return "", fmt.Errorf("clone rejected: %w", err)
+	}
+
 	destPath := filepath.Join(buildRoot, deploymentID)
 
 	if err := os.RemoveAll(destPath); err != nil {
 		return "", err
 	}
 
-	if err := os.MkdirAll(buildRoot, 0o755); err != nil {
+	if err := os.MkdirAll(buildRoot, 0o750); err != nil { //nolint:mnd // directory permission
 		return "", err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), gitCloneTimeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "git", "clone", "--depth", "1", cloneURL, destPath)
+	cmd := exec.CommandContext(ctx, "git", "clone", "--depth", "1", cloneURL, destPath) //nolint:gosec // cloneURL validated by validateCloneURL above
 
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
@@ -77,7 +122,7 @@ func updateStatus(ctx context.Context, db *sql.DB, job domain.DeployJob, status 
 	if err != nil {
 		return err
 	}
-	defer stmt.Close()
+	defer func() { _ = stmt.Close() }()
 
 	_, err = stmt.ExecContext(ctx, status, job.RetryCount, job.DeploymentID)
 	return err
@@ -100,7 +145,7 @@ func insertDeployment(ctx context.Context, db *sql.DB, job domain.DeployJob) err
 	if err != nil {
 		return err
 	}
-	defer stmt.Close()
+	defer func() { _ = stmt.Close() }()
 
 	_, err = stmt.ExecContext(ctx, job.DeploymentID, job.CloneURL, job.RetryCount, imageTag)
 	return err
@@ -113,7 +158,7 @@ func updateOutputURL(ctx context.Context, db *sql.DB, job domain.DeployJob, outp
 	if err != nil {
 		return err
 	}
-	defer stmt.Close()
+	defer func() { _ = stmt.Close() }()
 
 	_, err = stmt.ExecContext(ctx, outputURL, job.DeploymentID)
 	return err
@@ -121,10 +166,11 @@ func updateOutputURL(ctx context.Context, db *sql.DB, job domain.DeployJob, outp
 
 func writeDockerfile(repoPath string, builder *Builder, pm string) error {
 	templatePath := filepath.Join("templates", builder.Template)
-	if builder.Template == "Dockerfile" {
+	if builder.Template == templateDockerfile {
 		return nil
 	}
 
+	//nolint:gosec // path is constructed internally, not user input
 	data, err := os.ReadFile(templatePath)
 	if err != nil {
 		return err
@@ -132,8 +178,8 @@ func writeDockerfile(repoPath string, builder *Builder, pm string) error {
 
 	content := string(data)
 	installCmd := pmInstallCommands[pm]
-	if installCmd != "" && pm != "npm" {
-		if pm == "bun" {
+	if installCmd != "" && pm != pkgManagerNPM {
+		if pm == pkgManagerBun {
 			content = strings.ReplaceAll(content, "FROM node:20-alpine", "FROM oven/bun:1-alpine")
 			content = strings.ReplaceAll(content, "--omit=dev", "--production")
 		}
@@ -142,18 +188,19 @@ func writeDockerfile(repoPath string, builder *Builder, pm string) error {
 		content = strings.ReplaceAll(content, `"npm`, `"`+pm)
 	}
 
-	return os.WriteFile(filepath.Join(repoPath, "Dockerfile"), []byte(content), 0o644)
+	//nolint:gosec // repoPath is from cloneRepo which returns a controlled path
+	return os.WriteFile(filepath.Join(repoPath, templateDockerfile), []byte(content), 0o600) //nolint:mnd // file permission
 }
 
-func buildImage(ctx context.Context, cli *client.Client, repoPath string, imageTag string) error {
+func buildImage(ctx context.Context, cli *client.Client, repoPath, imageTag string) error {
 	buildCtx, err := archive.TarWithOptions(repoPath, &archive.TarOptions{})
 	if err != nil {
 		return err
 	}
-	defer buildCtx.Close()
+	defer func() { _ = buildCtx.Close() }()
 
 	opts := client.ImageBuildOptions{
-		Dockerfile: "Dockerfile",
+		Dockerfile: templateDockerfile,
 		Tags:       []string{imageTag},
 		Remove:     true,
 	}
@@ -162,7 +209,7 @@ func buildImage(ctx context.Context, cli *client.Client, repoPath string, imageT
 	if err != nil {
 		return err
 	}
-	defer result.Body.Close()
+	defer func() { _ = result.Body.Close() }()
 
 	scanner := bufio.NewScanner(result.Body)
 	var lastLine string
@@ -192,13 +239,14 @@ func saveImageTar(ctx context.Context, cli *client.Client, imageTag, tarPath str
 	if err != nil {
 		return err
 	}
-	defer saveResult.Close()
+	defer func() { _ = saveResult.Close() }()
 
+	//nolint:gosec // path is constructed internally, not user input
 	file, err := os.Create(tarPath)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	if _, err := io.Copy(file, saveResult); err != nil {
 		return err
@@ -207,11 +255,13 @@ func saveImageTar(ctx context.Context, cli *client.Client, imageTag, tarPath str
 	return nil
 }
 
-func ProcessDeployment(ctx context.Context, db *sql.DB, job domain.DeployJob, artifactUploader domain.UploadUsecase, queueUsecase domain.QueueUsecase, retryCount int, logger *zap.Logger) error {
-	deploymentID := strconv.FormatInt(job.DeploymentID, 10)
+func markFailed(ctx context.Context, db *sql.DB, job domain.DeployJob, queueUsecase domain.QueueUsecase) error {
+	_ = updateStatus(ctx, db, job, "failed")
+	return publishStatusUpdate(queueUsecase, job.DeploymentID, "failed")
+}
 
+func prepareAndMarkBuilding(ctx context.Context, db *sql.DB, job domain.DeployJob, queueUsecase domain.QueueUsecase, retryCount int, logger *zap.Logger) error {
 	logger.Info("inserting worker deployment row", zap.Int64("deployment_id", job.DeploymentID))
-
 	if retryCount == 0 {
 		if err := insertDeployment(ctx, db, job); err != nil {
 			return err
@@ -224,95 +274,54 @@ func ProcessDeployment(ctx context.Context, db *sql.DB, job domain.DeployJob, ar
 	}
 
 	logger.Info("publishing building status", zap.Int64("deployment_id", job.DeploymentID))
-	if err := publishStatusUpdate(queueUsecase, job.DeploymentID, "building"); err != nil {
-		return err
-	}
+	return publishStatusUpdate(queueUsecase, job.DeploymentID, "building")
+}
 
-	logger.Info("cloning repository", zap.Int64("deployment_id", job.DeploymentID))
-	repoPath, err := cloneRepo(job.CloneURL, deploymentID)
-	if err != nil {
-		_ = updateStatus(ctx, db, job, "failed")
-		if err := publishStatusUpdate(queueUsecase, job.DeploymentID, "failed"); err != nil {
-			return err
-		}
-		return err
-	}
-
-	defer os.RemoveAll(repoPath)
-
+func cloneAndPrepare(repoPath string, job domain.DeployJob, logger *zap.Logger) (string, error) {
 	logger.Info("detecting framework", zap.Int64("deployment_id", job.DeploymentID))
 	builder, err := detectFramework(repoPath)
 	if err != nil {
-		_ = updateStatus(ctx, db, job, "failed")
-		if err := publishStatusUpdate(queueUsecase, job.DeploymentID, "failed"); err != nil {
-			return err
-		}
-		return err
+		return "", err
 	}
 	pm := detectPackageManager(repoPath)
 	logger.Info("framework detected", zap.Int64("deployment_id", job.DeploymentID), zap.String("framework", builder.Name), zap.String("package_manager", pm))
 
-	if builder.Name != "docker" {
+	if builder.Name != builderDocker {
 		logger.Info("writing Dockerfile from template", zap.Int64("deployment_id", job.DeploymentID), zap.String("template", builder.Template))
 		if err := writeDockerfile(repoPath, builder, pm); err != nil {
-			_ = updateStatus(ctx, db, job, "failed")
-			if err := publishStatusUpdate(queueUsecase, job.DeploymentID, "failed"); err != nil {
-				return err
-			}
-			return err
+			return "", err
 		}
 	}
+	return pm, nil
+}
 
-	logger.Info("creating Docker client", zap.Int64("deployment_id", job.DeploymentID))
-	cli, err := client.New(client.FromEnv)
-	if err != nil {
-		_ = updateStatus(ctx, db, job, "failed")
-		if err := publishStatusUpdate(queueUsecase, job.DeploymentID, "failed"); err != nil {
-			return err
-		}
-		return err
-	}
-
-	imageTag := fmt.Sprintf("deploy-%d:latest", job.DeploymentID)
-	buildCtx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-	defer cancel()
-
+func buildAndSaveImage(ctx context.Context, job domain.DeployJob, cli *client.Client, repoPath, imageTag string, logger *zap.Logger) (string, error) {
 	logger.Info("building Docker image", zap.Int64("deployment_id", job.DeploymentID), zap.String("image_tag", imageTag))
-	if err := buildImage(buildCtx, cli, repoPath, imageTag); err != nil {
-		_ = updateStatus(ctx, db, job, "failed")
-		if err := publishStatusUpdate(queueUsecase, job.DeploymentID, "failed"); err != nil {
-			return err
-		}
-		return err
+	if err := buildImage(ctx, cli, repoPath, imageTag); err != nil {
+		return "", err
 	}
 
 	tarPath := filepath.Join(repoPath, fmt.Sprintf("%d.tar", job.DeploymentID))
 	logger.Info("saving Docker image tar", zap.Int64("deployment_id", job.DeploymentID), zap.String("tar_path", tarPath))
-	if err := saveImageTar(buildCtx, cli, imageTag, tarPath); err != nil {
-		_ = updateStatus(ctx, db, job, "failed")
-		if err := publishStatusUpdate(queueUsecase, job.DeploymentID, "failed"); err != nil {
-			return err
-		}
-		return err
+	if err := saveImageTar(ctx, cli, imageTag, tarPath); err != nil {
+		return "", err
 	}
-	defer os.Remove(tarPath)
+	return tarPath, nil
+}
 
+func uploadAndFinalize(
+	ctx context.Context, db *sql.DB, job domain.DeployJob,
+	artifactUploader domain.UploadUsecase, queueUsecase domain.QueueUsecase,
+	tarPath string, logger *zap.Logger,
+) error {
 	logger.Info("uploading image tar", zap.Int64("deployment_id", job.DeploymentID))
 	outputURL, err := artifactUploader.UploadImage(tarPath)
 	if err != nil {
-		_ = updateStatus(ctx, db, job, "failed")
-		if err := publishStatusUpdate(queueUsecase, job.DeploymentID, "failed"); err != nil {
-			return err
-		}
 		return err
 	}
 
 	logger.Info("saving output URL", zap.Int64("deployment_id", job.DeploymentID))
 	if err := updateOutputURL(ctx, db, job, outputURL); err != nil {
-		_ = updateStatus(ctx, db, job, "failed")
-		if err := publishStatusUpdate(queueUsecase, job.DeploymentID, "failed"); err != nil {
-			return err
-		}
 		return err
 	}
 
@@ -323,4 +332,46 @@ func ProcessDeployment(ctx context.Context, db *sql.DB, job domain.DeployJob, ar
 
 	logger.Info("publishing done status", zap.Int64("deployment_id", job.DeploymentID))
 	return publishStatusUpdate(queueUsecase, job.DeploymentID, "done")
+}
+
+// ProcessDeployment processes a deployment job end-to-end: preparing, cloning, building, and uploading.
+func ProcessDeployment(
+	ctx context.Context, db *sql.DB, job domain.DeployJob,
+	artifactUploader domain.UploadUsecase, queueUsecase domain.QueueUsecase,
+	retryCount int, logger *zap.Logger,
+) error {
+	deploymentID := strconv.FormatInt(job.DeploymentID, 10)
+
+	if err := prepareAndMarkBuilding(ctx, db, job, queueUsecase, retryCount, logger); err != nil {
+		return err
+	}
+
+	repoPath, err := cloneRepo(job.CloneURL, deploymentID)
+	if err != nil {
+		return markFailed(ctx, db, job, queueUsecase)
+	}
+
+	defer func() { _ = os.RemoveAll(repoPath) }()
+
+	if _, err := cloneAndPrepare(repoPath, job, logger); err != nil {
+		return markFailed(ctx, db, job, queueUsecase)
+	}
+
+	cli, err := client.New(client.FromEnv)
+	if err != nil {
+		return markFailed(ctx, db, job, queueUsecase)
+	}
+
+	imageTag := fmt.Sprintf("deploy-%d:latest", job.DeploymentID)
+	const dockerBuildTimeout = 5 * time.Minute
+	buildCtx, cancel := context.WithTimeout(context.Background(), dockerBuildTimeout)
+	defer cancel()
+
+	tarPath, err := buildAndSaveImage(buildCtx, job, cli, repoPath, imageTag, logger)
+	if err != nil {
+		return markFailed(ctx, db, job, queueUsecase)
+	}
+	defer func() { _ = os.Remove(tarPath) }()
+
+	return uploadAndFinalize(ctx, db, job, artifactUploader, queueUsecase, tarPath, logger)
 }

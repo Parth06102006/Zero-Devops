@@ -2,5 +2,5 @@ package main
 
 import "testing"
 
-func TestMainPackageCompiles(t *testing.T) {
+func TestMainPackageCompiles(_ *testing.T) {
 }

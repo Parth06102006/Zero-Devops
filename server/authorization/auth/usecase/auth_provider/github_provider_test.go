@@ -58,13 +58,13 @@ func TestGetUser(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected nil error, got %v", err)
 	}
-	if got.Provider != "github" || got.ProviderId != 99 || got.Username != "octocat" {
+	if got.Provider != "github" || got.ProviderID != 99 || got.Username != "octocat" {
 		t.Fatalf("unexpected user: %+v", got)
 	}
 }
 
 func TestGetUser_DecodeError(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = io.WriteString(w, "{")
 	}))
 	defer srv.Close()

@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Builder describes a detected framework with its config files, dependencies, and Docker template.
 type Builder struct {
 	Name        string
 	ConfigFiles []string
@@ -16,16 +17,16 @@ type Builder struct {
 }
 
 var builders = map[string]*Builder{
-	"vite": {
-		Name: "vite",
+	frameworkVite: {
+		Name: frameworkVite,
 		ConfigFiles: []string{
 			"vite.config.ts", "vite.config.js", "vite.config.mjs",
 		},
-		Deps:     []string{"vite"},
+		Deps:     []string{frameworkVite},
 		Template: "Dockerfile.vite.tmpl",
 	},
-	"nextjs": {
-		Name: "nextjs",
+	frameworkNextJS: {
+		Name: frameworkNextJS,
 		ConfigFiles: []string{
 			"next.config.ts", "next.config.js", "next.config.mjs",
 			"next.config.tsx", "next.config.jsx",
@@ -33,34 +34,34 @@ var builders = map[string]*Builder{
 		Deps:     []string{"next"},
 		Template: "Dockerfile.nextjs.tmpl",
 	},
-	"astro": {
-		Name: "astro",
+	frameworkAstro: {
+		Name: frameworkAstro,
 		ConfigFiles: []string{
 			"astro.config.ts", "astro.config.js", "astro.config.mjs",
 		},
-		Deps:     []string{"astro"},
+		Deps:     []string{frameworkAstro},
 		Template: "Dockerfile.astro.tmpl",
 	},
-	"react": {
-		Name:        "react",
+	frameworkReact: {
+		Name:        frameworkReact,
 		ConfigFiles: nil,
-		Deps:        []string{"react", "react-dom"},
+		Deps:        []string{frameworkReact, "react-dom"},
 		Template:    "Dockerfile.react.tmpl",
 	},
-	"node": {
-		Name:        "node",
+	langNode: {
+		Name:        langNode,
 		ConfigFiles: nil,
 		Deps:        nil,
 		Template:    "Dockerfile.node.tmpl",
 	},
-	"go": {
-		Name:        "go",
+	langGo: {
+		Name:        langGo,
 		ConfigFiles: []string{"go.mod"},
 		Deps:        nil,
 		Template:    "Dockerfile.go.tmpl",
 	},
-	"python": {
-		Name: "python",
+	langPython: {
+		Name: langPython,
 		ConfigFiles: []string{
 			"requirements.txt", "pyproject.toml", "Pipfile",
 		},
@@ -86,10 +87,10 @@ var packageManagers = []struct {
 	lockFile string
 	name     string
 }{
-	{"pnpm-lock.yaml", "pnpm"},
-	{"yarn.lock", "yarn"},
-	{"bun.lockb", "bun"},
-	{"package-lock.json", "npm"},
+	{"pnpm-lock.yaml", pkgManagerPNPM},
+	{"yarn.lock", pkgManagerYarn},
+	{"bun.lockb", pkgManagerBun},
+	{"package-lock.json", pkgManagerNPM},
 }
 
 type packageJSON struct {
@@ -98,6 +99,7 @@ type packageJSON struct {
 }
 
 func readPackageJSON(repoPath string) (*packageJSON, error) {
+	//nolint:gosec // path is constructed from a controlled repoPath, not user input
 	data, err := os.ReadFile(filepath.Join(repoPath, "package.json"))
 	if err != nil {
 		return nil, err
@@ -130,7 +132,7 @@ func hasConfigFile(repoPath, configFile string) bool {
 
 func walkForFile(root, filename string) (bool, error) {
 	var found bool
-	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
+	err := filepath.WalkDir(root, func(_ string, d os.DirEntry, err error) error {
 		if err != nil {
 			return nil
 		}
@@ -168,23 +170,23 @@ func detectFramework(repoPath string) (*Builder, error) {
 			}
 		}
 		if pkg.Dependencies != nil || pkg.DevDependencies != nil {
-			return builders["node"], nil
+			return builders[langNode], nil
 		}
 	}
 
 	if hasConfigFile(repoPath, "go.mod") {
-		return builders["go"], nil
+		return builders[langGo], nil
 	}
 
-	for _, cfg := range builders["python"].ConfigFiles {
+	for _, cfg := range builders[langPython].ConfigFiles {
 		ok, _ := walkForFile(repoPath, cfg)
 		if ok {
-			return builders["python"], nil
+			return builders[langPython], nil
 		}
 	}
 
-	if hasConfigFile(repoPath, "Dockerfile") {
-		return &Builder{Name: "docker", Template: "Dockerfile"}, nil
+	if hasConfigFile(repoPath, templateDockerfile) {
+		return &Builder{Name: builderDocker, Template: templateDockerfile}, nil
 	}
 
 	return nil, errors.New("no framework detected")
@@ -196,5 +198,5 @@ func detectPackageManager(repoPath string) string {
 			return pm.name
 		}
 	}
-	return "npm"
+	return pkgManagerNPM
 }

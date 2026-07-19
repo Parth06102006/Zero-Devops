@@ -1,3 +1,4 @@
+// Package main is the entry point for the worker server.
 package main
 
 import (
@@ -29,16 +30,16 @@ func main() {
 		baseLogger.Warn("logger initialized with non-fatal error", zap.Error(err))
 	}
 	zap.ReplaceGlobals(baseLogger)
-	defer baseLogger.Sync()
-	
+	defer func() { _ = baseLogger.Sync() }()
+
 	bucketName := viper.GetString("CLOUDFLARE_BUCKET_NAME")
-	accountId := viper.GetString("CLOUDFLARE_ACCOUNT_ID")
-	accessKeyId := viper.GetString("CLOUDFLARE_ACCESS_KEY_ID")
+	accountID := viper.GetString("CLOUDFLARE_ACCOUNT_ID")
+	accessKeyID := viper.GetString("CLOUDFLARE_ACCESS_KEY_ID")
 	accessKeySecret := viper.GetString("CLOUDFLARE_ACCESS_KEY_SECRET")
 	publicBaseURL := viper.GetString("CLOUDFLARE_PUBLIC_BASE_URL")
 
 	cfg, err := aws_config.LoadDefaultConfig(context.TODO(),
-		aws_config.WithCredentialsProvider(aws_credentials.NewStaticCredentialsProvider(accessKeyId, accessKeySecret, "")),
+		aws_config.WithCredentialsProvider(aws_credentials.NewStaticCredentialsProvider(accessKeyID, accessKeySecret, "")),
 		aws_config.WithRegion("auto"),
 	)
 	if err != nil {
@@ -46,7 +47,7 @@ func main() {
 	}
 
 	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
-		o.BaseEndpoint = aws.String(fmt.Sprintf("https://%s.r2.cloudflarestorage.com", accountId))
+		o.BaseEndpoint = aws.String(fmt.Sprintf("https://%s.r2.cloudflarestorage.com", accountID))
 	})
 
 	// ArtifactUploader Usecase
@@ -65,7 +66,7 @@ func main() {
 	if err != nil {
 		baseLogger.Fatal("failed to open database", zap.Error(err))
 	}
-	if err := db.Ping(); err != nil {
+	if err := db.PingContext(context.Background()); err != nil {
 		baseLogger.Fatal("failed to ping database", zap.Error(err))
 	}
 	defer func() {
@@ -78,13 +79,21 @@ func main() {
 	if err != nil {
 		baseLogger.Fatal("failed to connect to RabbitMQ", zap.Error(err))
 	}
-	defer rmqConn.Close()
+	defer func() {
+		if cerr := rmqConn.Close(); cerr != nil {
+			baseLogger.Error("failed to close rabbitmq connection", zap.Error(cerr))
+		}
+	}()
 
 	rmqCh, err := rmqConn.Channel()
 	if err != nil {
 		baseLogger.Fatal("failed to open RabbitMQ channel", zap.Error(err))
 	}
-	defer rmqCh.Close()
+	defer func() {
+		if cerr := rmqCh.Close(); cerr != nil {
+			baseLogger.Error("failed to close rabbitmq channel", zap.Error(cerr))
+		}
+	}()
 
 	// Queue Usecase
 	queueClient := queue.NewQueueUsecase(baseLogger, rmqConn, rmqCh)

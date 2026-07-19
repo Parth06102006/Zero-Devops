@@ -1,6 +1,7 @@
 package domain
 
 import "time"
+
 // Event defines a GitHub hook event type
 type Event string
 
@@ -10,7 +11,7 @@ const (
 	InstallationRepositoriesEvent Event = "installation_repositories"
 
 	// need to check the Khushi code pushed has name conflict need to correct it
-	PushEvent_P                    Event = "push"
+	PushEventP Event = "push"
 
 	// Keep the rest of the GitHub event catalog here for later expansion.
 	// CheckRunEvent                            Event = "check_run"
@@ -1831,6 +1832,7 @@ type GollumPayload struct {
 }
 
 */
+//nolint:revive
 // InstallationPayload contains the information for GitHub's installation and integration_installation hook events
 type InstallationPayload struct {
 	Action       string `json:"action"`
@@ -2705,6 +2707,8 @@ type MembershipPayload struct {
 }
 
 // MetaPayload contains the information for GitHub's meta hook event
+//
+//nolint:dupl
 type MetaPayload struct {
 	HookID int `json:"hook_id"`
 	Hook   struct {
@@ -3279,6 +3283,8 @@ type PageBuildPayload struct {
 }
 
 // PingPayload contains the information for GitHub's ping hook event
+//
+//nolint:dupl
 type PingPayload struct {
 	HookID int `json:"hook_id"`
 	Hook   struct {
@@ -4052,6 +4058,7 @@ type PullRequestPayload struct {
 			Color       string `json:"color"`
 			Default     bool   `json:"default"`
 		} `json:"labels"`
+		//nolint:dupl
 		Head struct {
 			Label string `json:"label"`
 			Ref   string `json:"ref"`
@@ -4166,6 +4173,7 @@ type PullRequestPayload struct {
 				DefaultBranch    string    `json:"default_branch"`
 			} `json:"repo"`
 		} `json:"head"`
+		//nolint:dupl
 		Base struct {
 			Label string `json:"label"`
 			Ref   string `json:"ref"`
@@ -5019,7 +5027,8 @@ type PullRequestReviewCommentPayload struct {
 		ReviewCommentURL  string      `json:"review_comment_url"`
 		CommentsURL       string      `json:"comments_url"`
 		StatusesURL       string      `json:"statuses_url"`
-		Head              struct {
+		//nolint:dupl
+		Head struct {
 			Label string `json:"label"`
 			Ref   string `json:"ref"`
 			Sha   string `json:"sha"`
@@ -5133,6 +5142,7 @@ type PullRequestReviewCommentPayload struct {
 				DefaultBranch    string    `json:"default_branch"`
 			} `json:"repo"`
 		} `json:"head"`
+		//nolint:dupl
 		Base struct {
 			Label string `json:"label"`
 			Ref   string `json:"ref"`
@@ -5867,7 +5877,7 @@ type RepositoryPayload struct {
 }
 */
 
-// RepositoryVulnerabilityAlertEvent contains the information for GitHub's repository_vulnerability_alert hook event.
+// RepositoryVulnerabilityAlertPayload contains the information for GitHub's repository_vulnerability_alert hook event.
 type RepositoryVulnerabilityAlertPayload struct {
 	Action string `json:"action"`
 	Alert  struct {
@@ -6574,6 +6584,7 @@ type WorkflowJobPayload struct {
 		RunnerGroupID   int64    `json:"runner_group_id"`
 		RunnerGroupName string   `json:"runner_group_name"`
 	} `json:"workflow_job"`
+	//nolint:dupl
 	Repository struct {
 		ID       int64  `json:"id"`
 		NodeID   string `json:"node_id"`
@@ -6921,6 +6932,7 @@ type WorkflowRunPayload struct {
 		HTMLURL   string    `json:"html_url"`
 		BadgeURL  string    `json:"badge_url"`
 	} `json:"workflow"`
+	//nolint:dupl
 	Repository struct {
 		ID       int64  `json:"id"`
 		NodeID   string `json:"node_id"`
@@ -7263,8 +7275,8 @@ type CodeScanningAlertPayload struct {
 		Number           int         `json:"number"`
 		CreatedAt        time.Time   `json:"created_at"`
 		UpdatedAt        time.Time   `json:"updated_at"`
-		Url              string      `json:"url"`
-		HtmlUrl          string      `json:"html_url"`
+		URL              string      `json:"url"`
+		HTMLURL          string      `json:"html_url"`
 		State            string      `json:"state"`
 		FixedAt          interface{} `json:"fixed_at"`
 		DismissedBy      interface{} `json:"dismissed_by"`
@@ -7272,19 +7284,19 @@ type CodeScanningAlertPayload struct {
 		DismissedReason  interface{} `json:"dismissed_reason"`
 		DismissedComment interface{} `json:"dismissed_comment"`
 		Rule             struct {
-			Id                    string   `json:"id"`
+			ID                    string   `json:"id"`
 			Severity              string   `json:"severity"`
 			Description           string   `json:"description"`
 			Name                  string   `json:"name"`
 			Tags                  []string `json:"tags"`
 			FullDescription       string   `json:"full_description"`
 			Help                  string   `json:"help"`
-			HelpUri               string   `json:"help_uri"`
+			HelpURI               string   `json:"help_uri"`
 			SecuritySeverityLevel string   `json:"security_severity_level"`
 		} `json:"rule"`
 		Tool struct {
 			Name    string      `json:"name"`
-			Guid    interface{} `json:"guid"`
+			GUID    interface{} `json:"guid"`
 			Version string      `json:"version"`
 		} `json:"tool"`
 		MostRecentInstance struct {
@@ -7306,83 +7318,83 @@ type CodeScanningAlertPayload struct {
 			} `json:"location"`
 			Classifications []interface{} `json:"classifications"`
 		} `json:"most_recent_instance"`
-		InstancesUrl string `json:"instances_url"`
+		InstancesURL string `json:"instances_url"`
 	} `json:"alert"`
 	Ref        string `json:"ref"`
 	CommitOid  string `json:"commit_oid"`
 	Repository struct {
-		Id       int    `json:"id"`
-		NodeId   string `json:"node_id"`
+		ID       int    `json:"id"`
+		NodeID   string `json:"node_id"`
 		Name     string `json:"name"`
 		FullName string `json:"full_name"`
 		Private  bool   `json:"private"`
 		Owner    struct {
 			Login             string `json:"login"`
-			Id                int    `json:"id"`
-			NodeId            string `json:"node_id"`
-			AvatarUrl         string `json:"avatar_url"`
-			GravatarId        string `json:"gravatar_id"`
-			Url               string `json:"url"`
-			HtmlUrl           string `json:"html_url"`
-			FollowersUrl      string `json:"followers_url"`
-			FollowingUrl      string `json:"following_url"`
-			GistsUrl          string `json:"gists_url"`
-			StarredUrl        string `json:"starred_url"`
-			SubscriptionsUrl  string `json:"subscriptions_url"`
-			OrganizationsUrl  string `json:"organizations_url"`
-			ReposUrl          string `json:"repos_url"`
-			EventsUrl         string `json:"events_url"`
-			ReceivedEventsUrl string `json:"received_events_url"`
+			ID                int    `json:"id"`
+			NodeID            string `json:"node_id"`
+			AvatarURL         string `json:"avatar_url"`
+			GravatarID        string `json:"gravatar_id"`
+			URL               string `json:"url"`
+			HTMLURL           string `json:"html_url"`
+			FollowersURL      string `json:"followers_url"`
+			FollowingURL      string `json:"following_url"`
+			GistsURL          string `json:"gists_url"`
+			StarredURL        string `json:"starred_url"`
+			SubscriptionsURL  string `json:"subscriptions_url"`
+			OrganizationsURL  string `json:"organizations_url"`
+			ReposURL          string `json:"repos_url"`
+			EventsURL         string `json:"events_url"`
+			ReceivedEventsURL string `json:"received_events_url"`
 			Type              string `json:"type"`
 			SiteAdmin         bool   `json:"site_admin"`
 		} `json:"owner"`
-		HtmlUrl                  string      `json:"html_url"`
+		HTMLURL                  string      `json:"html_url"`
 		Description              string      `json:"description"`
 		Fork                     bool        `json:"fork"`
-		Url                      string      `json:"url"`
-		ForksUrl                 string      `json:"forks_url"`
-		KeysUrl                  string      `json:"keys_url"`
-		CollaboratorsUrl         string      `json:"collaborators_url"`
-		TeamsUrl                 string      `json:"teams_url"`
-		HooksUrl                 string      `json:"hooks_url"`
-		IssueEventsUrl           string      `json:"issue_events_url"`
-		EventsUrl                string      `json:"events_url"`
-		AssigneesUrl             string      `json:"assignees_url"`
-		BranchesUrl              string      `json:"branches_url"`
-		TagsUrl                  string      `json:"tags_url"`
-		BlobsUrl                 string      `json:"blobs_url"`
-		GitTagsUrl               string      `json:"git_tags_url"`
-		GitRefsUrl               string      `json:"git_refs_url"`
-		TreesUrl                 string      `json:"trees_url"`
-		StatusesUrl              string      `json:"statuses_url"`
-		LanguagesUrl             string      `json:"languages_url"`
-		StargazersUrl            string      `json:"stargazers_url"`
-		ContributorsUrl          string      `json:"contributors_url"`
-		SubscribersUrl           string      `json:"subscribers_url"`
-		SubscriptionUrl          string      `json:"subscription_url"`
-		CommitsUrl               string      `json:"commits_url"`
-		GitCommitsUrl            string      `json:"git_commits_url"`
-		CommentsUrl              string      `json:"comments_url"`
-		IssueCommentUrl          string      `json:"issue_comment_url"`
-		ContentsUrl              string      `json:"contents_url"`
-		CompareUrl               string      `json:"compare_url"`
-		MergesUrl                string      `json:"merges_url"`
-		ArchiveUrl               string      `json:"archive_url"`
-		DownloadsUrl             string      `json:"downloads_url"`
-		IssuesUrl                string      `json:"issues_url"`
-		PullsUrl                 string      `json:"pulls_url"`
-		MilestonesUrl            string      `json:"milestones_url"`
-		NotificationsUrl         string      `json:"notifications_url"`
-		LabelsUrl                string      `json:"labels_url"`
-		ReleasesUrl              string      `json:"releases_url"`
-		DeploymentsUrl           string      `json:"deployments_url"`
+		URL                      string      `json:"url"`
+		ForksURL                 string      `json:"forks_url"`
+		KeysURL                  string      `json:"keys_url"`
+		CollaboratorsURL         string      `json:"collaborators_url"`
+		TeamsURL                 string      `json:"teams_url"`
+		HooksURL                 string      `json:"hooks_url"`
+		IssueEventsURL           string      `json:"issue_events_url"`
+		EventsURL                string      `json:"events_url"`
+		AssigneesURL             string      `json:"assignees_url"`
+		BranchesURL              string      `json:"branches_url"`
+		TagsURL                  string      `json:"tags_url"`
+		BlobsURL                 string      `json:"blobs_url"`
+		GitTagsURL               string      `json:"git_tags_url"`
+		GitRefsURL               string      `json:"git_refs_url"`
+		TreesURL                 string      `json:"trees_url"`
+		StatusesURL              string      `json:"statuses_url"`
+		LanguagesURL             string      `json:"languages_url"`
+		StargazersURL            string      `json:"stargazers_url"`
+		ContributorsURL          string      `json:"contributors_url"`
+		SubscribersURL           string      `json:"subscribers_url"`
+		SubscriptionURL          string      `json:"subscription_url"`
+		CommitsURL               string      `json:"commits_url"`
+		GitCommitsURL            string      `json:"git_commits_url"`
+		CommentsURL              string      `json:"comments_url"`
+		IssueCommentURL          string      `json:"issue_comment_url"`
+		ContentsURL              string      `json:"contents_url"`
+		CompareURL               string      `json:"compare_url"`
+		MergesURL                string      `json:"merges_url"`
+		ArchiveURL               string      `json:"archive_url"`
+		DownloadsURL             string      `json:"downloads_url"`
+		IssuesURL                string      `json:"issues_url"`
+		PullsURL                 string      `json:"pulls_url"`
+		MilestonesURL            string      `json:"milestones_url"`
+		NotificationsURL         string      `json:"notifications_url"`
+		LabelsURL                string      `json:"labels_url"`
+		ReleasesURL              string      `json:"releases_url"`
+		DeploymentsURL           string      `json:"deployments_url"`
 		CreatedAt                time.Time   `json:"created_at"`
 		UpdatedAt                time.Time   `json:"updated_at"`
 		PushedAt                 time.Time   `json:"pushed_at"`
-		GitUrl                   string      `json:"git_url"`
-		SshUrl                   string      `json:"ssh_url"`
-		CloneUrl                 string      `json:"clone_url"`
-		SvnUrl                   string      `json:"svn_url"`
+		GitURL                   string      `json:"git_url"`
+		SSHURL                   string      `json:"ssh_url"`
+		CloneURL                 string      `json:"clone_url"`
+		SvnURL                   string      `json:"svn_url"`
 		Homepage                 string      `json:"homepage"`
 		Size                     int         `json:"size"`
 		StargazersCount          int         `json:"stargazers_count"`
@@ -7395,7 +7407,7 @@ type CodeScanningAlertPayload struct {
 		HasPages                 bool        `json:"has_pages"`
 		HasDiscussions           bool        `json:"has_discussions"`
 		ForksCount               int         `json:"forks_count"`
-		MirrorUrl                interface{} `json:"mirror_url"`
+		MirrorURL                interface{} `json:"mirror_url"`
 		Archived                 bool        `json:"archived"`
 		Disabled                 bool        `json:"disabled"`
 		OpenIssuesCount          int         `json:"open_issues_count"`
@@ -7412,47 +7424,47 @@ type CodeScanningAlertPayload struct {
 	} `json:"repository"`
 	Organization struct {
 		Login            string `json:"login"`
-		Id               int    `json:"id"`
-		NodeId           string `json:"node_id"`
-		Url              string `json:"url"`
-		ReposUrl         string `json:"repos_url"`
-		EventsUrl        string `json:"events_url"`
-		HooksUrl         string `json:"hooks_url"`
-		IssuesUrl        string `json:"issues_url"`
-		MembersUrl       string `json:"members_url"`
-		PublicMembersUrl string `json:"public_members_url"`
-		AvatarUrl        string `json:"avatar_url"`
+		ID               int    `json:"id"`
+		NodeID           string `json:"node_id"`
+		URL              string `json:"url"`
+		ReposURL         string `json:"repos_url"`
+		EventsURL        string `json:"events_url"`
+		HooksURL         string `json:"hooks_url"`
+		IssuesURL        string `json:"issues_url"`
+		MembersURL       string `json:"members_url"`
+		PublicMembersURL string `json:"public_members_url"`
+		AvatarURL        string `json:"avatar_url"`
 		Description      string `json:"description"`
 	} `json:"organization"`
 	Enterprise struct {
-		Id          int       `json:"id"`
+		ID          int       `json:"id"`
 		Slug        string    `json:"slug"`
 		Name        string    `json:"name"`
-		NodeId      string    `json:"node_id"`
-		AvatarUrl   string    `json:"avatar_url"`
+		NodeID      string    `json:"node_id"`
+		AvatarURL   string    `json:"avatar_url"`
 		Description string    `json:"description"`
-		WebsiteUrl  string    `json:"website_url"`
-		HtmlUrl     string    `json:"html_url"`
+		WebsiteURL  string    `json:"website_url"`
+		HTMLURL     string    `json:"html_url"`
 		CreatedAt   time.Time `json:"created_at"`
 		UpdatedAt   time.Time `json:"updated_at"`
 	} `json:"enterprise"`
 	Sender struct {
 		Login             string `json:"login"`
-		Id                int    `json:"id"`
-		NodeId            string `json:"node_id"`
-		AvatarUrl         string `json:"avatar_url"`
-		GravatarId        string `json:"gravatar_id"`
-		Url               string `json:"url"`
-		HtmlUrl           string `json:"html_url"`
-		FollowersUrl      string `json:"followers_url"`
-		FollowingUrl      string `json:"following_url"`
-		GistsUrl          string `json:"gists_url"`
-		StarredUrl        string `json:"starred_url"`
-		SubscriptionsUrl  string `json:"subscriptions_url"`
-		OrganizationsUrl  string `json:"organizations_url"`
-		ReposUrl          string `json:"repos_url"`
-		EventsUrl         string `json:"events_url"`
-		ReceivedEventsUrl string `json:"received_events_url"`
+		ID                int    `json:"id"`
+		NodeID            string `json:"node_id"`
+		AvatarURL         string `json:"avatar_url"`
+		GravatarID        string `json:"gravatar_id"`
+		URL               string `json:"url"`
+		HTMLURL           string `json:"html_url"`
+		FollowersURL      string `json:"followers_url"`
+		FollowingURL      string `json:"following_url"`
+		GistsURL          string `json:"gists_url"`
+		StarredURL        string `json:"starred_url"`
+		SubscriptionsURL  string `json:"subscriptions_url"`
+		OrganizationsURL  string `json:"organizations_url"`
+		ReposURL          string `json:"repos_url"`
+		EventsURL         string `json:"events_url"`
+		ReceivedEventsURL string `json:"received_events_url"`
 		Type              string `json:"type"`
 		SiteAdmin         bool   `json:"site_admin"`
 	} `json:"sender"`

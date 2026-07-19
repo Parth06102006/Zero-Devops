@@ -19,28 +19,28 @@ type mockAuthUsecase struct {
 	err      error
 }
 
-func (m *mockAuthUsecase) HandleOAuthCallback(ctx context.Context, code string, provider string) (*domain.TokenResponse, error) {
+func (m *mockAuthUsecase) HandleOAuthCallback(_ context.Context, _, _ string) (*domain.TokenResponse, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
 	return m.tokens, nil
 }
 
-func (m *mockAuthUsecase) RefreshToken(ctx context.Context, refreshToken string) (*domain.TokenResponse, error) {
+func (m *mockAuthUsecase) RefreshToken(_ context.Context, _ string) (*domain.TokenResponse, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
 	return m.tokens, nil
 }
 
-func (m *mockAuthUsecase) GetCurrentUser(ctx context.Context, accessToken string) (domain.UserResponse, error) {
+func (m *mockAuthUsecase) GetCurrentUser(_ context.Context, _ string) (domain.UserResponse, error) {
 	if m.err != nil {
 		return domain.UserResponse{}, m.err
 	}
 	return *m.userResp, nil
 }
 
-func (m *mockAuthUsecase) Logout(ctx context.Context, accessToken string) error {
+func (m *mockAuthUsecase) Logout(_ context.Context, _ string) error {
 	return m.err
 }
 
@@ -59,7 +59,7 @@ func TestLogin_MissingCode(t *testing.T) {
 	}
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/?code=", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/?code=", http.NoBody)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
@@ -86,7 +86,7 @@ func TestLogin_Success(t *testing.T) {
 	}
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/?code=test-code", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/?code=test-code", http.NoBody)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
@@ -114,7 +114,7 @@ func TestLogin_UsecaseError(t *testing.T) {
 	}
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/?code=test-code", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/?code=test-code", http.NoBody)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
@@ -136,7 +136,7 @@ func TestRefresh_MissingCookie(t *testing.T) {
 	}
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/", http.NoBody)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
@@ -163,7 +163,8 @@ func TestRefresh_Success(t *testing.T) {
 	}
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/", http.NoBody)
+	//nolint:gosec
 	req.AddCookie(&http.Cookie{Name: "refresh_token", Value: "test-refresh-token"})
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -188,7 +189,8 @@ func TestRefresh_UsecaseError(t *testing.T) {
 	}
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/", http.NoBody)
+	//nolint:gosec
 	req.AddCookie(&http.Cookie{Name: "refresh_token", Value: "invalid-token"})
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -211,7 +213,7 @@ func TestLogout_MissingCookie(t *testing.T) {
 	}
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/", http.NoBody)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
@@ -233,7 +235,8 @@ func TestLogout_Success(t *testing.T) {
 	}
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/", http.NoBody)
+	//nolint:gosec
 	req.AddCookie(&http.Cookie{Name: "access_token", Value: "test-access-token"})
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -269,7 +272,8 @@ func TestLogout_UsecaseError(t *testing.T) {
 	}
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/", http.NoBody)
+	//nolint:gosec
 	req.AddCookie(&http.Cookie{Name: "access_token", Value: "test-access-token"})
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -292,7 +296,7 @@ func TestGetUser_MissingCookie(t *testing.T) {
 	}
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
@@ -312,17 +316,18 @@ func TestGetUser_Success(t *testing.T) {
 	handler := &AuthHandler{
 		AUsecase: &mockAuthUsecase{
 			userResp: &domain.UserResponse{
-				ID:       1,
-				Provider: "github",
-				Username: "testuser",
-				Email:    "test@example.com",
+				ID:        1,
+				Provider:  "github",
+				Username:  "testuser",
+				Email:     "test@example.com",
 				AvatarURL: "https://example.com/avatar.png",
 			},
 		},
 	}
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
+	//nolint:gosec
 	req.AddCookie(&http.Cookie{Name: "access_token", Value: "test-access-token"})
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -351,7 +356,8 @@ func TestGetUser_UsecaseError(t *testing.T) {
 	}
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
+	//nolint:gosec
 	req.AddCookie(&http.Cookie{Name: "access_token", Value: "test-access-token"})
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)

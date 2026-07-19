@@ -1,3 +1,4 @@
+// Package config provides application configuration loading using viper
 package config
 
 import (
@@ -7,15 +8,13 @@ import (
 	"github.com/spf13/viper"
 )
 
-func LoadConfig(){
-
-	// Set up for Enviroment Variables
+// LoadConfig reads the .env file and sets up environment variable overrides
+func LoadConfig() {
 	viper.SetConfigFile(".env")
 	viper.SetConfigType("env")
 
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-	// Check if the env file can be read or not
 	if _, err := os.Stat(".env"); err == nil {
 		if err := viper.ReadInConfig(); err != nil {
 			panic("Error reading config file: " + err.Error())
@@ -26,4 +25,3 @@ func LoadConfig(){
 
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 }
-

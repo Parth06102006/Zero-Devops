@@ -1,3 +1,4 @@
+// Package worker implements the deployment worker that processes jobs from RabbitMQ.
 package worker
 
 import (
@@ -8,10 +9,11 @@ import (
 	"Zero_Devops/worker_server/deployments"
 	"Zero_Devops/worker_server/domain"
 
-	"github.com/spf13/viper"
-	"github.com/google/uuid"
-	"go.uber.org/zap"
 	appMiddleware "Zero_Devops/worker_server/middleware"
+
+	"github.com/google/uuid"
+	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 type workerUsecase struct {
@@ -20,6 +22,7 @@ type workerUsecase struct {
 	artifactUploader domain.UploadUsecase
 }
 
+// NewWorkerUsecase creates a new WorkerUsecase with the given dependencies.
 func NewWorkerUsecase(queueClient domain.QueueUsecase, db *sql.DB, artifactUploader domain.UploadUsecase) domain.WorkerUsecase {
 	return &workerUsecase{
 		queueClient:      queueClient,
@@ -28,6 +31,7 @@ func NewWorkerUsecase(queueClient domain.QueueUsecase, db *sql.DB, artifactUploa
 	}
 }
 
+// StartWorker starts consuming deploy jobs from RabbitMQ and processing them.
 func (w *workerUsecase) StartWorker(baseLogger *zap.Logger) error {
 	r := w.queueClient.Channel()
 
@@ -57,48 +61,57 @@ func (w *workerUsecase) StartWorker(baseLogger *zap.Logger) error {
 	for msg := range msgs {
 		var job domain.DeployJob
 
-
 		if err := json.Unmarshal(msg.Body, &job); err != nil {
 			baseLogger.Error("failed to decode deploy job", zap.Error(err))
-			msg.Nack(false, false)
+			if nackErr := msg.Nack(false, false); nackErr != nil {
+				baseLogger.Error("failed to nack message", zap.Error(nackErr))
+			}
 			continue
 		}
-		
-		reqID := job.RequestId
+
+		reqID := job.RequestID
 		if reqID == "" {
 			reqID = uuid.NewString() // fallback if somehow missing/came from an untraced source
 		}
-		
+
 		logger := baseLogger.With(zap.String("request_id", reqID))
-		ctx := appMiddleware.WithLogger(context.Background() , logger)
+		ctx := appMiddleware.WithLogger(context.Background(), logger)
 
 		logger.Info("received deploy job message", zap.Uint64("delivery_tag", msg.DeliveryTag))
 
 		err := deployments.ProcessDeployment(ctx, w.db, job, w.artifactUploader, w.queueClient, job.RetryCount, logger)
 
-		MAX_RETRIES_COUNT := viper.GetInt("MAX_RETRIES_COUNT")
+		maxRetriesCount := viper.GetInt("MAX_RETRIES_COUNT")
 
-		if MAX_RETRIES_COUNT == 0 {
-			MAX_RETRIES_COUNT = 3
+		if maxRetriesCount == 0 {
+			maxRetriesCount = 3
 		}
 
 		if err != nil {
 			logger.Error("deployment job failed", zap.Int64("deployment_id", job.DeploymentID), zap.Error(err))
 			job.RetryCount++
-			if job.RetryCount >= MAX_RETRIES_COUNT {
-				msg.Nack(false, false)
+			if job.RetryCount >= maxRetriesCount {
+				if nackErr := msg.Nack(false, false); nackErr != nil {
+					logger.Error("failed to nack message", zap.Error(nackErr))
+				}
 			} else {
 				if err := w.queueClient.PublishJob(job); err != nil {
-					msg.Nack(false, true)
+					if nackErr := msg.Nack(false, true); nackErr != nil {
+						logger.Error("failed to nack message", zap.Error(nackErr))
+					}
 					continue
 				}
-				msg.Ack(false)
+				if ackErr := msg.Ack(false); ackErr != nil {
+					logger.Error("failed to ack message", zap.Error(ackErr))
+				}
 			}
 			continue
 		}
 
 		logger.Info("deployment job completed", zap.Int64("deployment_id", job.DeploymentID))
-		msg.Ack(false)
+		if ackErr := msg.Ack(false); ackErr != nil {
+			logger.Error("failed to ack message", zap.Error(ackErr))
+		}
 	}
 
 	baseLogger.Info("Worker consumer delivery channel closed")

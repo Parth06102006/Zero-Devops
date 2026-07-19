@@ -24,11 +24,11 @@ func (f *fakeQueueUsecase) SetUpQueues() error {
 	return nil
 }
 
-func (f *fakeQueueUsecase) PublishJob(job domain.DeployJob) error {
+func (f *fakeQueueUsecase) PublishJob(_ domain.DeployJob) error {
 	return nil
 }
 
-func (f *fakeQueueUsecase) PublishStatusUpdate(status domain.DeployStatusMessage) error {
+func (f *fakeQueueUsecase) PublishStatusUpdate(_ domain.DeployStatusMessage) error {
 	return nil
 }
 
@@ -36,7 +36,7 @@ type fakeUploadUsecase struct {
 	url string
 }
 
-func (f *fakeUploadUsecase) UploadImage(filePath string) (string, error) {
+func (f *fakeUploadUsecase) UploadImage(_ string) (string, error) {
 	return f.url, nil
 }
 
@@ -62,6 +62,6 @@ func TestNewWorkerUsecaseStoresDependencies(t *testing.T) {
 	}
 }
 
-func TestWorkerUsecaseImplementsDomainInterface(t *testing.T) {
+func TestWorkerUsecaseImplementsDomainInterface(_ *testing.T) {
 	var _ domain.WorkerUsecase = (*workerUsecase)(nil)
 }

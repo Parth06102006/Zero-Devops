@@ -1,13 +1,15 @@
+// Package config provides configuration loading for the worker server.
 package config
 
 import (
 	"strings"
+
 	"github.com/spf13/viper"
 )
 
-func LoadConfig(){
-
-	// Set up for Enviroment Variables
+// LoadConfig loads environment configuration from .env file and system environment.
+func LoadConfig() {
+	// Set up for Environment Variables
 	viper.SetConfigFile(".env")
 	viper.SetConfigType("env")
 
@@ -22,4 +24,3 @@ func LoadConfig(){
 
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 }
-

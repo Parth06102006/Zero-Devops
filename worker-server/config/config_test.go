@@ -23,7 +23,7 @@ func TestLoadConfigReadsDotEnvFile(t *testing.T) {
 	defer viper.Reset()
 
 	tempDir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(tempDir, ".env"), []byte("DATABASE_HOST=localhost\nCLOUDFLARE_BUCKET_NAME=test-bucket\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(tempDir, ".env"), []byte("DATABASE_HOST=localhost\nCLOUDFLARE_BUCKET_NAME=test-bucket\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.Chdir(tempDir); err != nil {

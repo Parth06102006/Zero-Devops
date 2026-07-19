@@ -40,7 +40,7 @@ func (m *mockGithubRepository) DeleteInstallationByUserID(ctx context.Context, u
 	return nil
 }
 
-func (m *mockGithubRepository) UpdateInstallationStatus(ctx context.Context, userID int64, status string) error {
+func (m *mockGithubRepository) UpdateInstallationStatus(_ context.Context, _ int64, _ string) error {
 	return nil
 }
 
@@ -73,7 +73,7 @@ func TestInstallGithubApp_Success(t *testing.T) {
 
 	repo := &mockGithubRepository{}
 	var stored *domain.GithubInstallation
-	repo.storeFn = func(ctx context.Context, inst *domain.GithubInstallation) error {
+	repo.storeFn = func(_ context.Context, inst *domain.GithubInstallation) error {
 		stored = inst
 		return nil
 	}
@@ -104,7 +104,7 @@ func TestInstallGithubApp_Success(t *testing.T) {
 	if stored == nil {
 		t.Fatal("expected installation to be stored")
 	}
-	if stored.UserID != 77 || stored.InstallationID != 55 || stored.Account_Login != "octocat" {
+	if stored.UserID != 77 || stored.InstallationID != 55 || stored.AccountLogin != "octocat" {
 		t.Fatalf("unexpected stored installation: %+v", stored)
 	}
 	if stored.Status != domain.GithubInstallationStatusActive {
@@ -158,7 +158,7 @@ func TestInstallGithubApp_FetchInstallationsError(t *testing.T) {
 func TestGetGithubAppInstallation(t *testing.T) {
 	expected := &domain.GithubInstallation{UserID: 11, InstallationID: 22, Status: domain.GithubInstallationStatusActive}
 	repo := &mockGithubRepository{
-		getFn: func(ctx context.Context, userID int64) (*domain.GithubInstallation, error) {
+		getFn: func(_ context.Context, userID int64) (*domain.GithubInstallation, error) {
 			if userID != 11 {
 				t.Fatalf("expected userID 11, got %d", userID)
 			}
@@ -179,7 +179,7 @@ func TestGetGithubAppInstallation(t *testing.T) {
 func TestDeleteGithubApp(t *testing.T) {
 	called := false
 	repo := &mockGithubRepository{
-		deleteFn: func(ctx context.Context, userID int64) error {
+		deleteFn: func(_ context.Context, userID int64) error {
 			called = true
 			if userID != 99 {
 				t.Fatalf("expected userID 99, got %d", userID)
@@ -224,7 +224,7 @@ func TestInstallGithubApp_DefaultsStatusToActive(t *testing.T) {
 
 	repo := &mockGithubRepository{}
 	var stored *domain.GithubInstallation
-	repo.storeFn = func(ctx context.Context, inst *domain.GithubInstallation) error {
+	repo.storeFn = func(_ context.Context, inst *domain.GithubInstallation) error {
 		stored = inst
 		return nil
 	}

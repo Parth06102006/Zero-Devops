@@ -20,11 +20,11 @@ var (
 )
 
 type userDBState struct {
-	mu          sync.Mutex
-	lastID      int64
-	queryErr    error
-	prepareErr  error
-	execErr     error
+	mu         sync.Mutex
+	lastID     int64
+	queryErr   error
+	prepareErr error
+	execErr    error
 }
 
 type userDriver struct{}
@@ -43,15 +43,15 @@ func registerUserDriver() {
 	})
 }
 
-func (d *userDriver) Open(name string) (driver.Conn, error) { return &userConn{}, nil }
-func (c *userConn) Close() error                             { return nil }
-func (c *userConn) Begin() (driver.Tx, error)                { return nil, errors.New("tx not supported") }
-func (c *userConn) Prepare(query string) (driver.Stmt, error) { return &userStmt{}, nil }
-func (c *userConn) PrepareContext(ctx context.Context, query string) (driver.Stmt, error) {
+func (d *userDriver) Open(_ string) (driver.Conn, error)  { return &userConn{}, nil }
+func (c *userConn) Close() error                          { return nil }
+func (c *userConn) Begin() (driver.Tx, error)             { return nil, errors.New("tx not supported") }
+func (c *userConn) Prepare(_ string) (driver.Stmt, error) { return &userStmt{}, nil }
+func (c *userConn) PrepareContext(_ context.Context, _ string) (driver.Stmt, error) {
 	return &userStmt{}, nil
 }
 
-func (c *userConn) QueryContext(ctx context.Context, query string, args []driver.NamedValue) (driver.Rows, error) {
+func (c *userConn) QueryContext(_ context.Context, query string, args []driver.NamedValue) (driver.Rows, error) {
 	userState.mu.Lock()
 	defer userState.mu.Unlock()
 	if userState.queryErr != nil {
@@ -76,25 +76,25 @@ func (c *userConn) QueryContext(ctx context.Context, query string, args []driver
 	}, nil
 }
 
-func (c *userConn) ExecContext(ctx context.Context, query string, args []driver.NamedValue) (driver.Result, error) {
+func (c *userConn) ExecContext(_ context.Context, _ string, _ []driver.NamedValue) (driver.Result, error) {
 	return userResult{rowsAffected: 1}, nil
 }
 
-func (s *userStmt) Close() error { return nil }
+func (s *userStmt) Close() error  { return nil }
 func (s *userStmt) NumInput() int { return -1 }
-func (s *userStmt) Exec(args []driver.Value) (driver.Result, error) { return userResult{rowsAffected: 1}, nil }
-func (s *userStmt) Query(args []driver.Value) (driver.Rows, error) { return &userRows{}, nil }
-func (r userResult) LastInsertId() (int64, error) { return 1, nil }
-func (r userResult) RowsAffected() (int64, error) { return r.rowsAffected, nil }
-func (r *userRows) Columns() []string { return r.cols }
-func (r *userRows) Close() error { return nil }
+func (s *userStmt) Exec(_ []driver.Value) (driver.Result, error) {
+	return userResult{rowsAffected: 1}, nil
+}
+func (s *userStmt) Query(_ []driver.Value) (driver.Rows, error) { return &userRows{}, nil }
+func (r userResult) LastInsertId() (int64, error)               { return 1, nil }
+func (r userResult) RowsAffected() (int64, error)               { return r.rowsAffected, nil }
+func (r *userRows) Columns() []string                           { return r.cols }
+func (r *userRows) Close() error                                { return nil }
 func (r *userRows) Next(dest []driver.Value) error {
 	if r.idx >= len(r.vals) {
 		return io.EOF
 	}
-	for i, v := range r.vals[r.idx] {
-		dest[i] = v
-	}
+	copy(dest, r.vals[r.idx])
 	r.idx++
 	return nil
 }
@@ -130,9 +130,9 @@ func resetUserState() {
 func TestGetByID(t *testing.T) {
 	resetUserState()
 	db := newUserTestDB(t)
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
-	repo := NewPgSqlUserRepository(db)
+	repo := NewPgSQLUserRepository(db)
 	got, err := repo.GetByID(context.Background(), 123)
 	if err != nil {
 		t.Fatalf("expected nil error, got %v", err)
@@ -147,9 +147,9 @@ func TestGetByID_NotFound(t *testing.T) {
 	userState.queryErr = sql.ErrNoRows
 
 	db := newUserTestDB(t)
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
-	repo := NewPgSqlUserRepository(db)
+	repo := NewPgSQLUserRepository(db)
 	_, err := repo.GetByID(context.Background(), 123)
 	if err != domain.ErrNotFound {
 		t.Fatalf("expected ErrNotFound, got %v", err)
@@ -159,10 +159,10 @@ func TestGetByID_NotFound(t *testing.T) {
 func TestStore(t *testing.T) {
 	resetUserState()
 	db := newUserTestDB(t)
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
-	repo := NewPgSqlUserRepository(db)
-	u := &domain.User{ProviderId: 55, Provider: "github", Username: "octocat", Email: "octo@example.com", CreatedAt: time.Now()}
+	repo := NewPgSQLUserRepository(db)
+	u := &domain.User{ProviderID: 55, Provider: "github", Username: "octocat", Email: "octo@example.com", CreatedAt: time.Now()}
 	if err := repo.Store(context.Background(), u); err != nil {
 		t.Fatalf("expected nil error, got %v", err)
 	}
@@ -174,9 +174,9 @@ func TestStore(t *testing.T) {
 func TestUpdateRefreshToken(t *testing.T) {
 	resetUserState()
 	db := newUserTestDB(t)
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
-	repo := NewPgSqlUserRepository(db)
+	repo := NewPgSQLUserRepository(db)
 	if err := repo.UpdateRefreshToken(context.Background(), 1, "new-token"); err != nil {
 		t.Fatalf("expected nil error, got %v", err)
 	}

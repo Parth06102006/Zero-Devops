@@ -1,3 +1,4 @@
+// Package pgsql provides PostgreSQL repository implementations
 package pgsql
 
 import (
@@ -7,18 +8,20 @@ import (
 	"fmt"
 
 	appmiddleware "Zero_Devops/server/middleware"
+
 	"go.uber.org/zap"
 )
 
-type pqSqlUserRepository struct {
+type pqSQLUserRepository struct {
 	Conn *sql.DB
 }
 
-func NewPgSqlUserRepository(conn *sql.DB) domain.UserRepository {
-	return &pqSqlUserRepository{conn}
+// NewPgSQLUserRepository creates a new UserRepository backed by PostgreSQL
+func NewPgSQLUserRepository(conn *sql.DB) domain.UserRepository {
+	return &pqSQLUserRepository{conn}
 }
 
-func (m *pqSqlUserRepository) GetByID(ctx context.Context, id int64) (domain.User, error) {
+func (m *pqSQLUserRepository) GetByID(ctx context.Context, id int64) (domain.User, error) {
 	query := `
 		SELECT id, provider_id, provider, username, COALESCE(email, ''), COALESCE(avatar_url, ''), created_at, COALESCE(refresh_token, '')
 		FROM users
@@ -29,7 +32,7 @@ func (m *pqSqlUserRepository) GetByID(ctx context.Context, id int64) (domain.Use
 	var u domain.User
 	err := row.Scan(
 		&u.ID,
-		&u.ProviderId,
+		&u.ProviderID,
 		&u.Provider,
 		&u.Username,
 		&u.Email,
@@ -49,7 +52,7 @@ func (m *pqSqlUserRepository) GetByID(ctx context.Context, id int64) (domain.Use
 	return u, nil
 }
 
-func (m *pqSqlUserRepository) GetByUsername(ctx context.Context, username string) (domain.User, error) {
+func (m *pqSQLUserRepository) GetByUsername(ctx context.Context, username string) (domain.User, error) {
 	query := `
 		SELECT id, provider_id, provider, username, COALESCE(email, ''), COALESCE(avatar_url, ''), created_at, COALESCE(refresh_token, '')
 		FROM users
@@ -60,7 +63,7 @@ func (m *pqSqlUserRepository) GetByUsername(ctx context.Context, username string
 	u := domain.User{}
 	err := row.Scan(
 		&u.ID,
-		&u.ProviderId,
+		&u.ProviderID,
 		&u.Provider,
 		&u.Username,
 		&u.Email,
@@ -81,18 +84,18 @@ func (m *pqSqlUserRepository) GetByUsername(ctx context.Context, username string
 	return u, nil
 }
 
-func (m *pqSqlUserRepository) GetProviderById(ctx context.Context, providerId int64) (domain.User, error) {
+func (m *pqSQLUserRepository) GetProviderByID(ctx context.Context, providerID int64) (domain.User, error) {
 	query := `
 		SELECT id, provider_id, provider, username, COALESCE(email, ''), COALESCE(avatar_url, ''), created_at, COALESCE(refresh_token, '')
 		FROM users
 		WHERE provider_id = $1
 	`
-	row := m.Conn.QueryRowContext(ctx, query, providerId)
+	row := m.Conn.QueryRowContext(ctx, query, providerID)
 
 	u := domain.User{}
 	err := row.Scan(
 		&u.ID,
-		&u.ProviderId,
+		&u.ProviderID,
 		&u.Provider,
 		&u.Username,
 		&u.Email,
@@ -113,14 +116,14 @@ func (m *pqSqlUserRepository) GetProviderById(ctx context.Context, providerId in
 	return u, nil
 }
 
-func (m *pqSqlUserRepository) Store(ctx context.Context, user *domain.User) error {
+func (m *pqSQLUserRepository) Store(ctx context.Context, user *domain.User) error {
 	query := `
 		INSERT INTO users (provider_id, provider, username, email, avatar_url, created_at)
 		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id
 	`
 
-	err := m.Conn.QueryRowContext(ctx, query, user.ProviderId, user.Provider, user.Username, user.Email, user.AvatarURL, user.CreatedAt).Scan(&user.ID)
+	err := m.Conn.QueryRowContext(ctx, query, user.ProviderID, user.Provider, user.Username, user.Email, user.AvatarURL, user.CreatedAt).Scan(&user.ID)
 
 	if err != nil {
 		return err
@@ -129,8 +132,7 @@ func (m *pqSqlUserRepository) Store(ctx context.Context, user *domain.User) erro
 	return nil
 }
 
-// Here it does not update the user profile, only the refresh token.
-func (m *pqSqlUserRepository) UpdateRefreshToken(ctx context.Context, id int64, refreshToken string) error {
+func (m *pqSQLUserRepository) UpdateRefreshToken(ctx context.Context, id int64, refreshToken string) error {
 	query := `UPDATE users SET refresh_token = $1 WHERE id = $2`
 
 	stmt, err := m.Conn.PrepareContext(ctx, query)
@@ -141,7 +143,11 @@ func (m *pqSqlUserRepository) UpdateRefreshToken(ctx context.Context, id int64, 
 		return err
 	}
 
-	defer stmt.Close()
+	defer func() {
+		if err := stmt.Close(); err != nil {
+			appmiddleware.LoggerFromContext(ctx).Error("failed to close statement", zap.Error(err))
+		}
+	}()
 
 	res, err := stmt.ExecContext(ctx, refreshToken, id)
 	if err != nil {

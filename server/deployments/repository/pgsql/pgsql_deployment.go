@@ -1,3 +1,4 @@
+// Package pgsql provides PostgreSQL repository implementations
 package pgsql
 
 import (
@@ -10,15 +11,16 @@ import (
 	"go.uber.org/zap"
 )
 
-type pgSqlDeploymentRepository struct {
+type pgSQLDeploymentRepository struct {
 	Conn *sql.DB
 }
 
-func NewPgSqlDeploymentRepository(conn *sql.DB) domain.DeploymentRepository {
-	return &pgSqlDeploymentRepository{conn}
+// NewPgSQLDeploymentRepository creates a new DeploymentRepository backed by PostgreSQL
+func NewPgSQLDeploymentRepository(conn *sql.DB) domain.DeploymentRepository {
+	return &pgSQLDeploymentRepository{conn}
 }
 
-func (m *pgSqlDeploymentRepository) Store(ctx context.Context, d *domain.Deployment) error {
+func (m *pgSQLDeploymentRepository) Store(ctx context.Context, d *domain.Deployment) error {
 	query := `
 		INSERT INTO deployments (user_id, repo_id, clone_url, status, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6)
@@ -37,7 +39,7 @@ func (m *pgSqlDeploymentRepository) Store(ctx context.Context, d *domain.Deploym
 	return nil
 }
 
-func (m *pgSqlDeploymentRepository) GetByUserID(ctx context.Context, userID int64) ([]domain.Deployment, error) {
+func (m *pgSQLDeploymentRepository) GetByUserID(ctx context.Context, userID int64) ([]domain.Deployment, error) {
 	query := `
 		SELECT id, user_id, repo_id, clone_url, status, created_at, updated_at
 		FROM deployments
@@ -50,7 +52,11 @@ func (m *pgSqlDeploymentRepository) GetByUserID(ctx context.Context, userID int6
 		log.Error("failed to query deployments by user ID", zap.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			appmiddleware.LoggerFromContext(ctx).Error("failed to close rows", zap.Error(err))
+		}
+	}()
 
 	var deployments []domain.Deployment
 	for rows.Next() {
@@ -71,7 +77,7 @@ func (m *pgSqlDeploymentRepository) GetByUserID(ctx context.Context, userID int6
 	return deployments, nil
 }
 
-func (m *pgSqlDeploymentRepository) GetByID(ctx context.Context, userID, id int64) (*domain.Deployment, error) {
+func (m *pgSQLDeploymentRepository) GetByID(ctx context.Context, userID, id int64) (*domain.Deployment, error) {
 	query := `
 		SELECT id, user_id, repo_id, clone_url, status, created_at, updated_at
 		FROM deployments
@@ -93,7 +99,7 @@ func (m *pgSqlDeploymentRepository) GetByID(ctx context.Context, userID, id int6
 	return &d, nil
 }
 
-func (m *pgSqlDeploymentRepository) UpdateStatus(ctx context.Context, deploymentID int64, status domain.DeploymentStatus) error {
+func (m *pgSQLDeploymentRepository) UpdateStatus(ctx context.Context, deploymentID int64, status domain.DeploymentStatus) error {
 	query := `
 		UPDATE deployments
 		SET status = $1

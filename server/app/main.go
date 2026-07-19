@@ -1,6 +1,8 @@
+// Package main is the entry point for the Zero DevOps server
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -38,11 +40,14 @@ func init() {
 	}
 }
 
-func main() {
-
+func run() error {
 	baseLogger := logger.New(viper.GetString("APP_ENV"))
-	zap.ReplaceGlobals(baseLogger)  
-	defer baseLogger.Sync()
+	zap.ReplaceGlobals(baseLogger)
+	defer func() {
+		if err := baseLogger.Sync(); err != nil {
+			log.Println("sync failed:", err)
+		}
+	}()
 
 	dbHost := viper.GetString("DATABASE_HOST")
 	dbPort := viper.GetString("DATABASE_PORT")
@@ -54,37 +59,29 @@ func main() {
 	dbConn, err := sql.Open("postgres", dsn)
 
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("failed to open database: %w", err)
 	}
-	err = dbConn.Ping()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	defer func() {
-		err := dbConn.Close()
-		if err != nil {
-			log.Fatal(err)
+		if err := dbConn.Close(); err != nil {
+			log.Println("db close failed:", err)
 		}
 	}()
 
+	ctx := context.Background()
+	if err := dbConn.PingContext(ctx); err != nil {
+		return fmt.Errorf("failed to ping database: %w", err)
+	}
+
 	e := echo.New()
-	// middleware
-	// middL := _articleHttpDeliveryMiddleware.InitMiddleware()
-	// e.Use(middL.CORS)
 
-	// request_id middleware
 	e.Use(middleware.RequestIDMiddleware)
-
-	// logger middleware
 	e.Use(middleware.RequestLoggerMiddleware(baseLogger))
 
-	// Here are the repositories for the authorization layer
-	userRepo := _userRepo.NewPgSqlUserRepository(dbConn)
+	userRepo := _userRepo.NewPgSQLUserRepository(dbConn)
 	authMiddleware := _authMiddleware.NewAuthMiddlewareHandler(userRepo)
 	e.Use(authMiddleware.ToMiddleware())
 
-	githubRepo := _githubRepo.NewPgSqlGithubRepository(dbConn)
+	githubRepo := _githubRepo.NewPgSQLGithubRepository(dbConn)
 
 	githubProvider := _authProvider.NewGithubProvider(
 		viper.GetString("OAUTH_GITHUB_CLIENT_ID"),
@@ -96,37 +93,46 @@ func main() {
 		"github": githubProvider,
 	}
 
-	// 2. Pass it to your usecase
 	timeoutContext := time.Duration(viper.GetInt("context.timeout")) * time.Second
 	authUsecase := _authUcase.NewAuthUsecase(userRepo, providers, timeoutContext)
 	_authHttp.NewAuthHandler(e, authUsecase)
 
-	// 3. Now Intitalize the Github App Installtion for it to integrate
 	githubUsecase := _githubUsecase.NewGithubAppUsecase(githubRepo)
-	// ** NEED TO ADD THE APP INTEGRATION HTTP FOR IT TO BE ADDED
 	_appHttp.NewSCMHandler(e, githubUsecase)
 
-	// 4. Setup RabbitMQ connection
 	rmqConn, err := amqp.Dial(viper.GetString("RABBITMQ_CONNECTION_STRING"))
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("failed to connect to RabbitMQ: %w", err)
 	}
-	defer rmqConn.Close()
+	defer func() {
+		if err := rmqConn.Close(); err != nil {
+			log.Println("rmq conn close failed:", err)
+		}
+	}()
+
 	rmqCh, err := rmqConn.Channel()
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("failed to open RabbitMQ channel: %w", err)
 	}
-	defer rmqCh.Close()
+	defer func() {
+		if err := rmqCh.Close(); err != nil {
+			log.Println("rmq ch close failed:", err)
+		}
+	}()
 
-	err = _queue.SetUpQueues(rmqConn, rmqCh)
-	if err != nil {
-		log.Fatal(err)
+	if err := _queue.SetUpQueues(rmqConn, rmqCh); err != nil {
+		return fmt.Errorf("failed to set up queues: %w", err)
 	}
 
-	// 5. Initialize the Deployments feature
-	deploymentRepo := _deploymentRepo.NewPgSqlDeploymentRepository(dbConn)
+	deploymentRepo := _deploymentRepo.NewPgSQLDeploymentRepository(dbConn)
 	deploymentUsecase := _deploymentUsecase.NewDeploymentUsecase(deploymentRepo, githubRepo, rmqConn)
 	_deploymentHttp.NewDeploymentHandler(e, deploymentUsecase)
 
-	log.Fatal(e.Start(viper.GetString("SERVER_ADDRESS"))) //nolint
+	return e.Start(viper.GetString("SERVER_ADDRESS"))
+}
+
+func main() {
+	if err := run(); err != nil {
+		log.Fatal(err)
+	}
 }
