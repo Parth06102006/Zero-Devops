@@ -23,14 +23,14 @@ func newMockUserRepository() *mockUserRepository {
 	}
 }
 
-func (m *mockUserRepository) GetByID(ctx context.Context, id int64) (domain.User, error) {
+func (m *mockUserRepository) GetByID(_ context.Context, id int64) (domain.User, error) {
 	if user, ok := m.users[id]; ok {
 		return user, nil
 	}
 	return domain.User{}, domain.ErrNotFound
 }
 
-func (m *mockUserRepository) GetByUsername(ctx context.Context, username string) (domain.User, error) {
+func (m *mockUserRepository) GetByUsername(_ context.Context, username string) (domain.User, error) {
 	for _, user := range m.users {
 		if user.Username == username {
 			return user, nil
@@ -39,21 +39,21 @@ func (m *mockUserRepository) GetByUsername(ctx context.Context, username string)
 	return domain.User{}, domain.ErrNotFound
 }
 
-func (m *mockUserRepository) GetProviderByID(ctx context.Context, providerID int64) (domain.User, error) {
+func (m *mockUserRepository) GetProviderByID(_ context.Context, providerID int64) (domain.User, error) {
 	if user, ok := m.providerID[providerID]; ok {
 		return user, nil
 	}
 	return domain.User{}, domain.ErrNotFound
 }
 
-func (m *mockUserRepository) Store(ctx context.Context, u *domain.User) error {
+func (m *mockUserRepository) Store(_ context.Context, u *domain.User) error {
 	u.ID = int64(len(m.users) + 1)
 	m.users[u.ID] = *u
 	m.providerID[u.ProviderID] = *u
 	return nil
 }
 
-func (m *mockUserRepository) UpdateRefreshToken(ctx context.Context, id int64, refreshToken string) error {
+func (m *mockUserRepository) UpdateRefreshToken(_ context.Context, id int64, refreshToken string) error {
 	if user, ok := m.users[id]; ok {
 		user.RefreshToken = refreshToken
 		m.users[id] = user
@@ -69,14 +69,14 @@ type mockOAuthProvider struct {
 	err   error
 }
 
-func (m *mockOAuthProvider) ExchangeCode(ctx context.Context, code string) (string, error) {
+func (m *mockOAuthProvider) ExchangeCode(_ context.Context, _ string) (string, error) {
 	if m.err != nil {
 		return "", m.err
 	}
 	return m.token, nil
 }
 
-func (m *mockOAuthProvider) GetUser(ctx context.Context, accessToken string) (*domain.OAuthUser, error) {
+func (m *mockOAuthProvider) GetUser(_ context.Context, _ string) (*domain.OAuthUser, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
@@ -108,11 +108,11 @@ func TestHandleOAuthCallback_NewUser(t *testing.T) {
 		"github": &mockOAuthProvider{
 			token: "provider-token",
 			user: &domain.OAuthUser{
-				Provider:  "github",
+				Provider:   "github",
 				ProviderID: 12345,
-				Username:  "testuser",
-				Email:     "test@example.com",
-				AvatarURL: "https://example.com/avatar.png",
+				Username:   "testuser",
+				Email:      "test@example.com",
+				AvatarURL:  "https://example.com/avatar.png",
 			},
 		},
 	}
@@ -153,13 +153,13 @@ func TestHandleOAuthCallback_ExistingUser(t *testing.T) {
 
 	mockRepo := newMockUserRepository()
 	existingUser := domain.User{
-		ID:          1,
-		ProviderID:  12345,
-		Provider:    "github",
-		Username:    "testuser",
-		Email:       "test@example.com",
-		AvatarURL:   "https://example.com/avatar.png",
-		CreatedAt:   time.Now(),
+		ID:           1,
+		ProviderID:   12345,
+		Provider:     "github",
+		Username:     "testuser",
+		Email:        "test@example.com",
+		AvatarURL:    "https://example.com/avatar.png",
+		CreatedAt:    time.Now(),
 		RefreshToken: "old-refresh-token",
 	}
 	mockRepo.users[1] = existingUser
@@ -169,11 +169,11 @@ func TestHandleOAuthCallback_ExistingUser(t *testing.T) {
 		"github": &mockOAuthProvider{
 			token: "provider-token",
 			user: &domain.OAuthUser{
-				Provider:  "github",
+				Provider:   "github",
 				ProviderID: 12345,
-				Username:  "testuser",
-				Email:     "test@example.com",
-				AvatarURL: "https://example.com/avatar.png",
+				Username:   "testuser",
+				Email:      "test@example.com",
+				AvatarURL:  "https://example.com/avatar.png",
 			},
 		},
 	}
@@ -312,13 +312,13 @@ func TestGetCurrentUser_Success(t *testing.T) {
 
 	mockRepo := newMockUserRepository()
 	user := domain.User{
-		ID:          1,
-		ProviderID:  12345,
-		Provider:    "github",
-		Username:    "testuser",
-		Email:       "test@example.com",
-		AvatarURL:   "https://example.com/avatar.png",
-		CreatedAt:   time.Now(),
+		ID:         1,
+		ProviderID: 12345,
+		Provider:   "github",
+		Username:   "testuser",
+		Email:      "test@example.com",
+		AvatarURL:  "https://example.com/avatar.png",
+		CreatedAt:  time.Now(),
 	}
 	mockRepo.users[1] = user
 	mockRepo.providerID[12345] = user

@@ -1,3 +1,4 @@
+// Package http provides HTTP handlers for SCM integration
 package http
 
 import (
@@ -15,24 +16,25 @@ import (
 	"go.uber.org/zap"
 )
 
+const maxRedirects = 10
+
+// SCMHandler handles SCM integration HTTP requests
 type SCMHandler struct {
 	scmUsecase domain.GithubUsecase
 }
 
+// NewSCMHandler creates a new SCM handler and registers routes
 func NewSCMHandler(e *echo.Echo, gh domain.GithubUsecase) {
 	handler := &SCMHandler{
 		scmUsecase: gh,
 	}
-	// e.POST("/integration/scm/github/webhook", handler.HandleWebhook)
 	e.POST("/integration/scm/github/install", handler.Installation)
 	e.GET("/integration/scm/github/", handler.GetInstallation)
 	e.DELETE("/integration/scm/github/delete", handler.DeleteInstallation)
 }
 
+// Installation handles GitHub App installation callback
 func (inst *SCMHandler) Installation(c *echo.Context) error {
-	/*
-		I need to add the Github Installtion here since I need to install the github app for now in order to do it how can i perform it
-	*/
 	reqID := middleware.GetRequestID(c)
 	log := middleware.LoggerFromContext(c.Request().Context())
 
@@ -65,6 +67,7 @@ func (inst *SCMHandler) Installation(c *echo.Context) error {
 	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(nil, "", reqID, helper.WithMessage("Github App Installed Successfully")))
 }
 
+// GetInstallation returns the current user's GitHub App installation
 func (inst *SCMHandler) GetInstallation(c *echo.Context) error {
 	reqID := middleware.GetRequestID(c)
 	log := middleware.LoggerFromContext(c.Request().Context())
@@ -88,6 +91,7 @@ func (inst *SCMHandler) GetInstallation(c *echo.Context) error {
 	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(installation, "", reqID))
 }
 
+// DeleteInstallation removes the current user's GitHub App installation
 func (inst *SCMHandler) DeleteInstallation(c *echo.Context) error {
 	reqID := middleware.GetRequestID(c)
 	log := middleware.LoggerFromContext(c.Request().Context())
@@ -112,22 +116,20 @@ func (inst *SCMHandler) DeleteInstallation(c *echo.Context) error {
 	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(nil, "", reqID, helper.WithMessage("GitHub App uninstalled successfully")))
 }
 
-// Production HTTP client with advanced configuration
 func createProductionClient() *http.Client {
 	transport := &http.Transport{
-		MaxIdleConns:        100,              // Maximum idle connections
-		MaxIdleConnsPerHost: 10,               // Maximum idle connections per host
-		IdleConnTimeout:     90 * time.Second, // Idle connection timeout
-		DisableCompression:  false,            // Enable compression
-		DisableKeepAlives:   false,            // Enable keep-alives
+		MaxIdleConns:        100,
+		MaxIdleConnsPerHost: 10,
+		IdleConnTimeout:     90 * time.Second,
+		DisableCompression:  false,
+		DisableKeepAlives:   false,
 	}
 
 	return &http.Client{
 		Transport: transport,
 		Timeout:   30 * time.Second,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			// Custom redirect handling
-			if len(via) >= 10 {
+		CheckRedirect: func(_ *http.Request, via []*http.Request) error {
+			if len(via) >= maxRedirects {
 				return errors.New("stopped after 10 redirects")
 			}
 			return nil

@@ -1,23 +1,26 @@
+// Package domain provides domain models and interfaces for the application
 package domain
 
 import (
 	"context"
 )
 
-// Session Management Tokens
+// TokenResponse represents the session management tokens returned after authentication
 type TokenResponse struct {
-	AccessToken		string 		`json:"accessToken"`
-	RefreshToken	string	`json:"refreshToken"`
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
 }
 
+// OAuthUser represents the user data returned by an OAuth provider
 type OAuthUser struct {
-	Provider	string
-	ProviderID 	int64
-	Username	string
-	Email		string
-	AvatarURL	string
+	Provider   string
+	ProviderID int64
+	Username   string
+	Email      string
+	AvatarURL  string
 }
 
+// UserResponse represents the public user data returned to clients
 type UserResponse struct {
 	ID        int64  `json:"id"`
 	Provider  string `json:"provider"`
@@ -26,20 +29,16 @@ type UserResponse struct {
 	AvatarURL string `json:"avatarURL"`
 }
 
+// OAuthProvider defines the interface for OAuth authentication providers
 type OAuthProvider interface {
-	ExchangeCode(ctx context.Context, code string) (string,error)
-	GetUser(ctx context.Context , accessToken string)(*OAuthUser, error)
+	ExchangeCode(ctx context.Context, code string) (string, error)
+	GetUser(ctx context.Context, accessToken string) (*OAuthUser, error)
 }
 
-//  Oauth Methods
+// AuthUsecase defines the interface for authentication use cases
 type AuthUsecase interface {
-	
 	HandleOAuthCallback(ctx context.Context, code string, provider string) (*TokenResponse, error)
-	
-	// FUTURE : CUSTOM AUTH
-	// RegisterCustom(ctx context.Context , username string , email string , password string) error
-	// LoginCustom(ctx context.Context, email string , password string) (*TokenResponse, error)
 	RefreshToken(ctx context.Context, refreshToken string) (*TokenResponse, error)
-	GetCurrentUser(ctx context.Context,accessToken string) (UserResponse,error)
+	GetCurrentUser(ctx context.Context, accessToken string) (UserResponse, error)
 	Logout(ctx context.Context, accessToken string) error
 }

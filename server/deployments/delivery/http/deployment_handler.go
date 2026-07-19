@@ -1,3 +1,4 @@
+// Package http provides HTTP handlers for deployment endpoints
 package http
 
 import (
@@ -12,10 +13,12 @@ import (
 	"go.uber.org/zap"
 )
 
+// DeploymentHandler handles deployment HTTP requests
 type DeploymentHandler struct {
 	dUsecase domain.DeploymentUsecase
 }
 
+// NewDeploymentHandler creates a new deployment HTTP handler and registers routes
 func NewDeploymentHandler(e *echo.Echo, du domain.DeploymentUsecase) {
 	handler := &DeploymentHandler{
 		dUsecase: du,
@@ -27,6 +30,7 @@ type createDeploymentRequest struct {
 	RepoID int64 `json:"repo_id"`
 }
 
+// CreateDeployment handles deployment creation requests
 func (h *DeploymentHandler) CreateDeployment(c *echo.Context) error {
 	reqID := middleware.GetRequestID(c)
 	log := middleware.LoggerFromContext(c.Request().Context())
@@ -49,7 +53,7 @@ func (h *DeploymentHandler) CreateDeployment(c *echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	deployment, err := h.dUsecase.CreateDeployment(ctx, userID, req.RepoID , reqID)
+	deployment, err := h.dUsecase.CreateDeployment(ctx, userID, req.RepoID, reqID)
 	if err != nil {
 		log.Error("Failed to create deployment", zap.Error(err), zap.Int64("user_id", userID), zap.Int64("repo_id", req.RepoID))
 		return c.JSON(helper.GetStatusCode(err), helper.BuildErrorResponse(err.Error(), err, reqID))

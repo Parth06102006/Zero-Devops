@@ -1,9 +1,11 @@
+// Package AuthProvider provides OAuth authentication providers
 package AuthProvider
 
 import (
 	"Zero_Devops/server/domain"
 	"context"
 	"encoding/json"
+	"net/http"
 
 	appmiddleware "Zero_Devops/server/middleware"
 
@@ -24,12 +26,12 @@ type githubProvider struct {
 }
 
 // NewGithubProvider returns a new github provider
-func NewGithubProvider(clientId, clientSecret, redirectUrl string) domain.OAuthProvider {
+func NewGithubProvider(clientID, clientSecret, redirectURL string) domain.OAuthProvider {
 	return &githubProvider{
 		config: &oauth2.Config{
-			ClientID:     clientId,
+			ClientID:     clientID,
 			ClientSecret: clientSecret,
-			RedirectURL:  redirectUrl,
+			RedirectURL:  redirectURL,
 			Scopes:       []string{"user:email", "read:user"},
 			Endpoint:     github.Endpoint,
 		},
@@ -49,12 +51,19 @@ func (g *githubProvider) ExchangeCode(ctx context.Context, code string) (string,
 func (g *githubProvider) GetUser(ctx context.Context, accessToken string) (*domain.OAuthUser, error) {
 	client := g.config.Client(ctx, &oauth2.Token{AccessToken: accessToken})
 
-	res, err := client.Get("https://api.github.com/user")
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://api.github.com/user", http.NoBody)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer func() {
-		res.Body.Close()
+		if err := res.Body.Close(); err != nil {
+			appmiddleware.LoggerFromContext(ctx).Error("failed to close response body", zap.Error(err))
+		}
 	}()
 
 	ghUser := githubUser{}

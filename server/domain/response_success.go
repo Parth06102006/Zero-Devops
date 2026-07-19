@@ -7,5 +7,3 @@ type ResponseSuccess struct {
 	Data      interface{} `json:"data"`
 	RequestID string      `json:"reqId"`
 }
-
-

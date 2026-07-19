@@ -20,13 +20,13 @@ var (
 )
 
 type githubTestDBState struct {
-	mu             sync.Mutex
-	lastQueryUserID int64
-	lastDeleteUser  int64
-	lastUpdateUser  int64
+	mu               sync.Mutex
+	lastQueryUserID  int64
+	lastDeleteUser   int64
+	lastUpdateUser   int64
 	lastUpdateStatus string
-	queryRowErr     error
-	deleteErr       error
+	queryRowErr      error
+	deleteErr        error
 }
 
 type githubTestDriver struct{}
@@ -50,7 +50,7 @@ func registerGithubTestDriver() {
 	})
 }
 
-func (d *githubTestDriver) Open(name string) (driver.Conn, error) {
+func (d *githubTestDriver) Open(_ string) (driver.Conn, error) {
 	return &githubTestConn{}, nil
 }
 
@@ -60,9 +60,11 @@ func (c *githubTestConn) Prepare(query string) (driver.Stmt, error) {
 
 func (c *githubTestConn) Close() error { return nil }
 
-func (c *githubTestConn) Begin() (driver.Tx, error) { return nil, errors.New("transactions not supported") }
+func (c *githubTestConn) Begin() (driver.Tx, error) {
+	return nil, errors.New("transactions not supported")
+}
 
-func (c *githubTestConn) QueryContext(ctx context.Context, query string, args []driver.NamedValue) (driver.Rows, error) {
+func (c *githubTestConn) QueryContext(_ context.Context, query string, args []driver.NamedValue) (driver.Rows, error) {
 	githubTestState.mu.Lock()
 	defer githubTestState.mu.Unlock()
 
@@ -101,7 +103,7 @@ func (c *githubTestConn) QueryContext(ctx context.Context, query string, args []
 	}
 }
 
-func (c *githubTestConn) ExecContext(ctx context.Context, query string, args []driver.NamedValue) (driver.Result, error) {
+func (c *githubTestConn) ExecContext(_ context.Context, _ string, args []driver.NamedValue) (driver.Result, error) {
 	githubTestState.mu.Lock()
 	defer githubTestState.mu.Unlock()
 
@@ -118,9 +120,9 @@ func (c *githubTestConn) ExecContext(ctx context.Context, query string, args []d
 	return githubTestResult{rowsAffected: 1}, nil
 }
 
-func (c *githubTestConn) Ping(ctx context.Context) error { return nil }
+func (c *githubTestConn) Ping(_ context.Context) error { return nil }
 
-func (c *githubTestConn) PrepareContext(ctx context.Context, query string) (driver.Stmt, error) {
+func (c *githubTestConn) PrepareContext(_ context.Context, query string) (driver.Stmt, error) {
 	return &githubTestStmt{query: query}, nil
 }
 
@@ -145,7 +147,7 @@ func (s *githubTestStmt) Exec(args []driver.Value) (driver.Result, error) {
 	return githubTestResult{rowsAffected: 1}, nil
 }
 
-func (s *githubTestStmt) Query(args []driver.Value) (driver.Rows, error) {
+func (s *githubTestStmt) Query(_ []driver.Value) (driver.Rows, error) {
 	return &githubTestRows{}, nil
 }
 
@@ -161,15 +163,12 @@ func (r *githubTestRows) Next(dest []driver.Value) error {
 	if r.idx >= len(r.vals) {
 		return io.EOF
 	}
-	row := r.vals[r.idx]
-	for i := range row {
-		dest[i] = row[i]
-	}
+	copy(dest, r.vals[r.idx])
 	r.idx++
 	return nil
 }
 
-func queryContains(query string, needle string) bool {
+func queryContains(query, needle string) bool {
 	return len(query) >= len(needle) && (contains(query, needle) || contains(query, needle+"\n"))
 }
 
@@ -193,6 +192,7 @@ func newGithubTestDB(t *testing.T) *sql.DB {
 	if err != nil {
 		t.Fatalf("failed to open test db: %v", err)
 	}
+	t.Cleanup(func() { _ = db.Close() })
 	return db
 }
 
@@ -210,14 +210,13 @@ func resetGithubTestState() {
 func TestStoreInstallation(t *testing.T) {
 	resetGithubTestState()
 	db := newGithubTestDB(t)
-	defer db.Close()
 
-	repo := NewPgSqlGithubRepository(db)
+	repo := NewPgSQLGithubRepository(db)
 	inst := &domain.GithubInstallation{
 		UserID:         7,
 		InstallationID: 88,
-		AccountType:   "User",
-		AccountLogin:  "octocat",
+		AccountType:    "User",
+		AccountLogin:   "octocat",
 		Status:         domain.GithubInstallationStatusActive,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
@@ -234,9 +233,8 @@ func TestStoreInstallation(t *testing.T) {
 func TestGetInstallationByUserID(t *testing.T) {
 	resetGithubTestState()
 	db := newGithubTestDB(t)
-	defer db.Close()
 
-	repo := NewPgSqlGithubRepository(db)
+	repo := NewPgSQLGithubRepository(db)
 	inst, err := repo.GetInstallationByUserID(context.Background(), 123)
 	if err != nil {
 		t.Fatalf("expected nil error, got %v", err)
@@ -257,9 +255,8 @@ func TestGetInstallationByUserID_NotFound(t *testing.T) {
 	githubTestState.queryRowErr = sql.ErrNoRows
 
 	db := newGithubTestDB(t)
-	defer db.Close()
 
-	repo := NewPgSqlGithubRepository(db)
+	repo := NewPgSQLGithubRepository(db)
 	_, err := repo.GetInstallationByUserID(context.Background(), 123)
 	if err != domain.ErrNotFound {
 		t.Fatalf("expected ErrNotFound, got %v", err)
@@ -269,9 +266,8 @@ func TestGetInstallationByUserID_NotFound(t *testing.T) {
 func TestDeleteInstallationByUserID(t *testing.T) {
 	resetGithubTestState()
 	db := newGithubTestDB(t)
-	defer db.Close()
 
-	repo := NewPgSqlGithubRepository(db)
+	repo := NewPgSQLGithubRepository(db)
 	if err := repo.DeleteInstallationByUserID(context.Background(), 55); err != nil {
 		t.Fatalf("expected nil error, got %v", err)
 	}
@@ -280,9 +276,8 @@ func TestDeleteInstallationByUserID(t *testing.T) {
 func TestUpdateInstallationStatus(t *testing.T) {
 	resetGithubTestState()
 	db := newGithubTestDB(t)
-	defer db.Close()
 
-	repo := NewPgSqlGithubRepository(db)
+	repo := NewPgSQLGithubRepository(db)
 	if err := repo.UpdateInstallationStatus(context.Background(), 55, domain.GithubInstallationStatusSuspended); err != nil {
 		t.Fatalf("expected nil error, got %v", err)
 	}
@@ -291,9 +286,8 @@ func TestUpdateInstallationStatus(t *testing.T) {
 func TestUpdateInstallationStatus_InvalidStatus(t *testing.T) {
 	resetGithubTestState()
 	db := newGithubTestDB(t)
-	defer db.Close()
 
-	repo := NewPgSqlGithubRepository(db)
+	repo := NewPgSQLGithubRepository(db)
 	if err := repo.UpdateInstallationStatus(context.Background(), 55, "broken"); err != domain.ErrInvalidStatus {
 		t.Fatalf("expected ErrInvalidStatus, got %v", err)
 	}

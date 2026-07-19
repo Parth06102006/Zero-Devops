@@ -2,22 +2,25 @@ package helper
 
 import "Zero_Devops/server/domain"
 
-func BuildSuccessResponse(data interface{}, message string, reqID string , opts ...SuccessOption) domain.ResponseSuccess {
-    resp := domain.ResponseSuccess{
-        Success:   true,
-        Data:      data,
+// BuildSuccessResponse creates a standardized success API response
+func BuildSuccessResponse(data interface{}, _, reqID string, opts ...SuccessOption) domain.ResponseSuccess {
+	resp := domain.ResponseSuccess{
+		Success:   true,
+		Data:      data,
 		RequestID: reqID,
-    }
-    for _, opt := range opts {
-        opt(&resp)
-    }
-    return resp
+	}
+	for _, opt := range opts {
+		opt(&resp)
+	}
+	return resp
 }
 
-type SuccessOption func(* domain.ResponseSuccess)
+// SuccessOption configures the success response
+type SuccessOption func(*domain.ResponseSuccess)
 
+// WithMessage sets the message on a success response
 func WithMessage(msg string) SuccessOption {
-    return func(r *domain.ResponseSuccess) {
-        r.Message = msg
-    }
+	return func(r *domain.ResponseSuccess) {
+		r.Message = msg
+	}
 }

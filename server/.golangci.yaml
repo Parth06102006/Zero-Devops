@@ -30,6 +30,23 @@ linters:
     - unused
     - whitespace
   settings:
+    depguard:
+        rules:
+          Main:
+            files:
+              - "$all"
+            allow:
+              - "$gostd"
+              - "Zero_Devops"
+              - "github.com/labstack/echo/v5"
+              - "github.com/lib/pq"
+              - "github.com/rabbitmq/amqp091-go"
+              - "github.com/spf13/viper"
+              - "github.com/golang-jwt/jwt/v5"
+              - "golang.org/x/oauth2"
+              - "golang.org/x/oauth2/github"
+              - "go.uber.org/zap"
+              - "github.com/google/uuid"
     dupl:
       threshold: 300
     funlen:

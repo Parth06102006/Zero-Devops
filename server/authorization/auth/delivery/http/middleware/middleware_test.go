@@ -18,26 +18,26 @@ type mockUserRepository struct {
 	err  error
 }
 
-func (m *mockUserRepository) GetByID(ctx context.Context, id int64) (domain.User, error) {
+func (m *mockUserRepository) GetByID(_ context.Context, _ int64) (domain.User, error) {
 	if m.err != nil {
 		return domain.User{}, m.err
 	}
 	return m.user, nil
 }
 
-func (m *mockUserRepository) GetByUsername(ctx context.Context, username string) (domain.User, error) {
+func (m *mockUserRepository) GetByUsername(_ context.Context, _ string) (domain.User, error) {
 	return domain.User{}, domain.ErrNotFound
 }
 
-func (m *mockUserRepository) GetProviderByID(ctx context.Context, providerID int64) (domain.User, error) {
+func (m *mockUserRepository) GetProviderByID(_ context.Context, _ int64) (domain.User, error) {
 	return domain.User{}, domain.ErrNotFound
 }
 
-func (m *mockUserRepository) Store(ctx context.Context, u *domain.User) error {
+func (m *mockUserRepository) Store(_ context.Context, _ *domain.User) error {
 	return nil
 }
 
-func (m *mockUserRepository) UpdateRefreshToken(ctx context.Context, id int64, refreshToken string) error {
+func (m *mockUserRepository) UpdateRefreshToken(_ context.Context, _ int64, _ string) error {
 	return nil
 }
 
@@ -45,10 +45,10 @@ func setMiddlewareTestConfig() {
 	viper.Set("JWT_SECRET", "test-secret-key-for-middleware")
 }
 
-func generateTestAccessToken(userID int64, exp time.Time) string {
+func generateTestAccessToken(exp time.Time) string {
 	secretKey := []byte(viper.GetString("JWT_SECRET"))
 	claims := jwt.MapClaims{
-		"user_id": userID,
+		"user_id": int64(1),
 		"email":   "test@example.com",
 		"exp":     exp.Unix(),
 		"iat":     time.Now().Unix(),
@@ -75,11 +75,11 @@ func TestSkipper(t *testing.T) {
 
 	e := echo.New()
 	for _, tt := range tests {
-		req := httptest.NewRequest(http.MethodGet, tt.path, nil)
+		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, tt.path, http.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath(tt.path)
-		
+
 		result := handler.Skipper(c)
 		if result != tt.expected {
 			t.Errorf("expected %v for path %s, got %v", tt.expected, tt.path, result)
@@ -92,7 +92,7 @@ func TestValidator_MissingSecret(t *testing.T) {
 
 	handler := &AuthMiddlewareHandler{}
 	e := echo.New()
-	c := e.NewContext(httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder())
+	c := e.NewContext(httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody), httptest.NewRecorder())
 
 	_, err := handler.Validator(c, "some-token")
 	if err != domain.ErrMissingSecret {
@@ -105,7 +105,7 @@ func TestValidator_InvalidToken(t *testing.T) {
 
 	handler := &AuthMiddlewareHandler{}
 	e := echo.New()
-	c := e.NewContext(httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder())
+	c := e.NewContext(httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody), httptest.NewRecorder())
 
 	_, err := handler.Validator(c, "invalid-token")
 	if err != domain.ErrInvalidToken {
@@ -118,9 +118,9 @@ func TestValidator_ExpiredToken(t *testing.T) {
 
 	handler := &AuthMiddlewareHandler{}
 	e := echo.New()
-	c := e.NewContext(httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder())
+	c := e.NewContext(httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody), httptest.NewRecorder())
 
-	expiredToken := generateTestAccessToken(1, time.Now().Add(-1*time.Hour))
+	expiredToken := generateTestAccessToken(time.Now().Add(-1 * time.Hour))
 
 	_, err := handler.Validator(c, expiredToken)
 	if err != domain.ErrInvalidToken {
@@ -133,9 +133,9 @@ func TestValidator_ValidToken_NoUserRepo(t *testing.T) {
 
 	handler := &AuthMiddlewareHandler{userRepo: nil}
 	e := echo.New()
-	c := e.NewContext(httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder())
+	c := e.NewContext(httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody), httptest.NewRecorder())
 
-	validToken := generateTestAccessToken(1, time.Now().Add(15*time.Minute))
+	validToken := generateTestAccessToken(time.Now().Add(15 * time.Minute))
 
 	userID, err := handler.Validator(c, validToken)
 	if err != nil {
@@ -158,9 +158,9 @@ func TestValidator_ValidToken_WithUserRepo(t *testing.T) {
 		},
 	}
 	e := echo.New()
-	c := e.NewContext(httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder())
+	c := e.NewContext(httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody), httptest.NewRecorder())
 
-	validToken := generateTestAccessToken(1, time.Now().Add(15*time.Minute))
+	validToken := generateTestAccessToken(time.Now().Add(15 * time.Minute))
 
 	userID, err := handler.Validator(c, validToken)
 	if err != nil {
@@ -180,9 +180,9 @@ func TestValidator_ValidToken_UserNotFound(t *testing.T) {
 		},
 	}
 	e := echo.New()
-	c := e.NewContext(httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder())
+	c := e.NewContext(httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody), httptest.NewRecorder())
 
-	validToken := generateTestAccessToken(1, time.Now().Add(15*time.Minute))
+	validToken := generateTestAccessToken(time.Now().Add(15 * time.Minute))
 
 	_, err := handler.Validator(c, validToken)
 	if err != domain.ErrUserLookupFailed {
@@ -196,7 +196,7 @@ func TestAuthMiddleware_SkipsAuthPaths(t *testing.T) {
 	handler := &AuthMiddlewareHandler{}
 	nextCalled := false
 
-	next := func(c *echo.Context) error {
+	next := func(_ *echo.Context) error {
 		nextCalled = true
 		return nil
 	}
@@ -204,7 +204,7 @@ func TestAuthMiddleware_SkipsAuthPaths(t *testing.T) {
 	middlewareFunc := handler.AuthMiddleware(next)
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/auth/github/login", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/auth/github/login", http.NoBody)
 	c := e.NewContext(req, httptest.NewRecorder())
 	c.SetPath("/auth/github/login")
 
@@ -223,7 +223,7 @@ func TestAuthMiddleware_MissingCookie(t *testing.T) {
 	handler := &AuthMiddlewareHandler{}
 	nextCalled := false
 
-	next := func(c *echo.Context) error {
+	next := func(_ *echo.Context) error {
 		nextCalled = true
 		return nil
 	}
@@ -231,7 +231,7 @@ func TestAuthMiddleware_MissingCookie(t *testing.T) {
 	middlewareFunc := handler.AuthMiddleware(next)
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/auth/user/me", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/auth/user/me", http.NoBody)
 	c := e.NewContext(req, httptest.NewRecorder())
 
 	err := middlewareFunc(c)
@@ -255,7 +255,7 @@ func TestAuthMiddleware_InvalidToken(t *testing.T) {
 	handler := &AuthMiddlewareHandler{}
 	nextCalled := false
 
-	next := func(c *echo.Context) error {
+	next := func(_ *echo.Context) error {
 		nextCalled = true
 		return nil
 	}
@@ -263,7 +263,8 @@ func TestAuthMiddleware_InvalidToken(t *testing.T) {
 	middlewareFunc := handler.AuthMiddleware(next)
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/auth/user/me", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/auth/user/me", http.NoBody)
+	//nolint:gosec
 	req.AddCookie(&http.Cookie{Name: "access_token", Value: "invalid-token"})
 	c := e.NewContext(req, httptest.NewRecorder())
 
@@ -288,7 +289,7 @@ func TestAuthMiddleware_ValidToken(t *testing.T) {
 	handler := &AuthMiddlewareHandler{}
 	nextCalled := false
 
-	next := func(c *echo.Context) error {
+	next := func(_ *echo.Context) error {
 		nextCalled = true
 		return nil
 	}
@@ -296,8 +297,9 @@ func TestAuthMiddleware_ValidToken(t *testing.T) {
 	middlewareFunc := handler.AuthMiddleware(next)
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/auth/user/me", nil)
-	req.AddCookie(&http.Cookie{Name: "access_token", Value: generateTestAccessToken(1, time.Now().Add(15*time.Minute))})
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/auth/user/me", http.NoBody)
+	//nolint:gosec
+	req.AddCookie(&http.Cookie{Name: "access_token", Value: generateTestAccessToken(time.Now().Add(15 * time.Minute))})
 	c := e.NewContext(req, httptest.NewRecorder())
 
 	err := middlewareFunc(c)
@@ -317,7 +319,7 @@ func TestAuthMiddleware_ValidToken(t *testing.T) {
 
 func TestGetUserID_NotSet(t *testing.T) {
 	e := echo.New()
-	c := e.NewContext(httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder())
+	c := e.NewContext(httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody), httptest.NewRecorder())
 
 	_, ok := GetUserID(c)
 	if ok {
@@ -327,7 +329,7 @@ func TestGetUserID_NotSet(t *testing.T) {
 
 func TestGetUserID_Set(t *testing.T) {
 	e := echo.New()
-	c := e.NewContext(httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder())
+	c := e.NewContext(httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody), httptest.NewRecorder())
 	c.Set("user_id", int64(123))
 
 	userID, ok := GetUserID(c)
