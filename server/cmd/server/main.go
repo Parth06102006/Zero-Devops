@@ -32,16 +32,14 @@ import (
 	"go.uber.org/zap"
 )
 
-// init loads application configuration before main starts and reports when debug mode is enabled.
-func init() {
+func run() error {
+
 	_config.LoadConfig()
 
 	if viper.GetBool(`debug`) {
 		log.Println("Service RUN on DEBUG mode")
 	}
-}
 
-func run() error {
 	baseLogger := logger.New(viper.GetString("APP_ENV"))
 	zap.ReplaceGlobals(baseLogger)
 	defer func() {
