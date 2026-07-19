@@ -1,3 +1,4 @@
+// Package upload provides artifact upload to S3-compatible storage.
 package upload
 
 import (
@@ -6,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"Zero_Devops/worker_server/domain"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"go.uber.org/zap"
-	"Zero_Devops/worker_server/domain"
 )
 
 type clientUsecase struct {
@@ -16,6 +17,7 @@ type clientUsecase struct {
 	logger       *zap.Logger
 }
 
+// NewUploadUsecase creates a new UploadUsecase for uploading artifacts to S3.
 func NewUploadUsecase(client *s3.Client, bucketName string, publicBaseURL string, logger *zap.Logger) domain.UploadUsecase {
 	return &clientUsecase{
 		uploadClient: &domain.UploadClient{
@@ -27,6 +29,7 @@ func NewUploadUsecase(client *s3.Client, bucketName string, publicBaseURL string
 	}
 }
 
+// UploadImage uploads a file to S3 and returns the public URL.
 func (c *clientUsecase) UploadImage(filePath string) (string, error) {
 	s3Client := c.uploadClient
 

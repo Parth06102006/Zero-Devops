@@ -6,7 +6,7 @@ func BuildSuccessResponse(data interface{}, message string, reqID string , opts 
     resp := domain.ResponseSuccess{
         Success:   true,
         Data:      data,
-        RequestId: reqID,
+		RequestID: reqID,
     }
     for _, opt := range opts {
         opt(&resp)

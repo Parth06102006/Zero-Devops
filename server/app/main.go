@@ -39,7 +39,6 @@ func init() {
 }
 
 func main() {
-
 	baseLogger := logger.New(viper.GetString("APP_ENV"))
 	zap.ReplaceGlobals(baseLogger)  
 	defer baseLogger.Sync()

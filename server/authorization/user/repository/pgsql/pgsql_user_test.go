@@ -162,7 +162,7 @@ func TestStore(t *testing.T) {
 	defer db.Close()
 
 	repo := NewPgSqlUserRepository(db)
-	u := &domain.User{ProviderId: 55, Provider: "github", Username: "octocat", Email: "octo@example.com", CreatedAt: time.Now()}
+	u := &domain.User{ProviderID: 55, Provider: "github", Username: "octocat", Email: "octo@example.com", CreatedAt: time.Now()}
 	if err := repo.Store(context.Background(), u); err != nil {
 		t.Fatalf("expected nil error, got %v", err)
 	}

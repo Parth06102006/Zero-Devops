@@ -1,4 +1,4 @@
-
+// Package queue handles RabbitMQ queue setup and configuration
 package queue
 
 import amqp "github.com/rabbitmq/amqp091-go"
@@ -78,13 +78,13 @@ func SetUpQueues(conn *amqp.Connection, queueChannel *amqp.Channel) error {
 		}
 	}
 
-	args_jobs := amqp.Table{
+	argsJobs := amqp.Table{
 		"x-dead-letter-exchange":    "deploy.dlx",
 		"x-dead-letter-routing-key": "deploy.jobs.dlq",
 	}
 
 	// 3. Declare JOBS QUEUE if missing
-	exists, err = queueExists("deploy.jobs", args_jobs)
+	exists, err = queueExists("deploy.jobs", argsJobs)
 	if err != nil {
 		return err
 	}
@@ -95,7 +95,7 @@ func SetUpQueues(conn *amqp.Connection, queueChannel *amqp.Channel) error {
 			false,
 			false,
 			false,
-			args_jobs,
+			argsJobs,
 		)
 		if err != nil {
 			return err
@@ -126,13 +126,13 @@ func SetUpQueues(conn *amqp.Connection, queueChannel *amqp.Channel) error {
 		}
 	}
 
-	args_status := amqp.Table{
+	argsStatus := amqp.Table{
 		"x-dead-letter-exchange":    "deploy.dlx",
 		"x-dead-letter-routing-key": "deploy.status.dlq",
 	}
 
 	// 5. Declare STATUS QUEUE if missing
-	exists, err = queueExists("deploy.status", args_status)
+	exists, err = queueExists("deploy.status", argsStatus)
 	if err != nil {
 		return err
 	}
@@ -143,7 +143,7 @@ func SetUpQueues(conn *amqp.Connection, queueChannel *amqp.Channel) error {
 			false,
 			false,
 			false,
-			args_status,
+			argsStatus,
 		)
 		if err != nil {
 			return err

@@ -26,7 +26,7 @@ func (m *pgSqlGithubRepository) StoreInstallation(ctx context.Context, inst *dom
 	if inst.Status == "" {
 		inst.Status = domain.GithubInstallationStatusActive
 	}
-	err := m.Conn.QueryRowContext(ctx, query, inst.UserID, inst.InstallationID, inst.Account_Type, inst.Account_Login, inst.Status, inst.CreatedAt, inst.UpdatedAt).Scan(&inst.ID)
+	err := m.Conn.QueryRowContext(ctx, query, inst.UserID, inst.InstallationID, inst.AccountType, inst.AccountLogin, inst.Status, inst.CreatedAt, inst.UpdatedAt).Scan(&inst.ID)
 
 	if err != nil {
 		log := appmiddleware.LoggerFromContext(ctx)
@@ -50,8 +50,8 @@ func (m *pgSqlGithubRepository) GetInstallationByUserID(ctx context.Context, use
 		&inst.ID,
 		&inst.UserID,
 		&inst.InstallationID,
-		&inst.Account_Type,
-		&inst.Account_Login,
+		&inst.AccountType,
+		&inst.AccountLogin,
 		&inst.Status,
 		&inst.CreatedAt,
 		&inst.UpdatedAt,

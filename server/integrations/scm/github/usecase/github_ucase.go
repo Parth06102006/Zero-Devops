@@ -47,9 +47,9 @@ type GithubInstallationList struct{
 	Installations []Installation `json:"installations"`
 }
 
-func (g *githubAppUsecase) InstallGithubApp(ctx context.Context,client *http.Client ,code string,user_id int64) error {
+func (g *githubAppUsecase) InstallGithubApp(ctx context.Context, client *http.Client, code string, userID int64) error {
 	log := appmiddleware.LoggerFromContext(ctx)
-	log.Info("Starting GitHub App installation", zap.Int64("user_id", user_id))
+	log.Info("Starting GitHub App installation", zap.Int64("user_id", userID))
 
 	GITHUB_APP_CLIENT_ID := viper.GetString("GITHUB_APP_CLIENT_ID")
 	GITHUB_APP_CLIENT_SECRET := viper.GetString("GITHUB_APP_CLIENT_SECRET")
@@ -120,10 +120,10 @@ func (g *githubAppUsecase) InstallGithubApp(ctx context.Context,client *http.Cli
 	for _,inst := range githubAppInstallationList.Installations {
 		if inst.Account.Type == "User" && inst.AppID == GITHUB_APP_ID{
 			githubAppInstallation := domain.GithubInstallation{
-				UserID:user_id,
+				UserID: userID,
 				InstallationID: inst.ID,
-				Account_Type: inst.Account.Type,
-				Account_Login: inst.Account.Login,
+				AccountType: inst.Account.Type,
+				AccountLogin: inst.Account.Login,
 				Status: domain.GithubInstallationStatusActive,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),

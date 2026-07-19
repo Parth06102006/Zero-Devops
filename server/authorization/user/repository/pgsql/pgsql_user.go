@@ -29,7 +29,7 @@ func (m *pqSqlUserRepository) GetByID(ctx context.Context, id int64) (domain.Use
 	var u domain.User
 	err := row.Scan(
 		&u.ID,
-		&u.ProviderId,
+		&u.ProviderID,
 		&u.Provider,
 		&u.Username,
 		&u.Email,
@@ -60,7 +60,7 @@ func (m *pqSqlUserRepository) GetByUsername(ctx context.Context, username string
 	u := domain.User{}
 	err := row.Scan(
 		&u.ID,
-		&u.ProviderId,
+		&u.ProviderID,
 		&u.Provider,
 		&u.Username,
 		&u.Email,
@@ -81,18 +81,18 @@ func (m *pqSqlUserRepository) GetByUsername(ctx context.Context, username string
 	return u, nil
 }
 
-func (m *pqSqlUserRepository) GetProviderById(ctx context.Context, providerId int64) (domain.User, error) {
+func (m *pqSqlUserRepository) GetProviderByID(ctx context.Context, providerID int64) (domain.User, error) {
 	query := `
 		SELECT id, provider_id, provider, username, COALESCE(email, ''), COALESCE(avatar_url, ''), created_at, COALESCE(refresh_token, '')
 		FROM users
 		WHERE provider_id = $1
 	`
-	row := m.Conn.QueryRowContext(ctx, query, providerId)
+	row := m.Conn.QueryRowContext(ctx, query, providerID)
 
 	u := domain.User{}
 	err := row.Scan(
 		&u.ID,
-		&u.ProviderId,
+		&u.ProviderID,
 		&u.Provider,
 		&u.Username,
 		&u.Email,
@@ -120,7 +120,7 @@ func (m *pqSqlUserRepository) Store(ctx context.Context, user *domain.User) erro
 		RETURNING id
 	`
 
-	err := m.Conn.QueryRowContext(ctx, query, user.ProviderId, user.Provider, user.Username, user.Email, user.AvatarURL, user.CreatedAt).Scan(&user.ID)
+	err := m.Conn.QueryRowContext(ctx, query, user.ProviderID, user.Provider, user.Username, user.Email, user.AvatarURL, user.CreatedAt).Scan(&user.ID)
 
 	if err != nil {
 		return err

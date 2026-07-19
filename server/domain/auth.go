@@ -12,7 +12,7 @@ type TokenResponse struct {
 
 type OAuthUser struct {
 	Provider	string
-	ProviderId 	int64
+	ProviderID 	int64
 	Username	string
 	Email		string
 	AvatarURL	string

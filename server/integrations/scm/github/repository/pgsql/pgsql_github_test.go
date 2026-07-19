@@ -216,8 +216,8 @@ func TestStoreInstallation(t *testing.T) {
 	inst := &domain.GithubInstallation{
 		UserID:         7,
 		InstallationID: 88,
-		Account_Type:   "User",
-		Account_Login:  "octocat",
+		AccountType:   "User",
+		AccountLogin:  "octocat",
 		Status:         domain.GithubInstallationStatusActive,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),

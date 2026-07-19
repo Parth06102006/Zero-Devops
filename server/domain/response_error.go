@@ -16,6 +16,6 @@ type ErrorBody struct {
 type ErrorResponse struct {
 	Success bool       `json:"success"`
 	Error   ErrorBody  `json:"error"`
-	RequestId   string `json:"reqId"`
+	RequestID   string `json:"reqId"`
 }
 

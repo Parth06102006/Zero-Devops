@@ -1,7 +1,9 @@
+// Package queue provides RabbitMQ queue operations for the worker server.
 package queue
 
 import (
 	"encoding/json"
+
 	"Zero_Devops/worker_server/domain"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
@@ -12,6 +14,7 @@ type queueUsecase struct {
 	logger      *zap.Logger
 }
 
+// NewQueueUsecase creates a new QueueUsecase with the given logger, connection, and channel.
 func NewQueueUsecase(logger *zap.Logger, conn *amqp.Connection, channel *amqp.Channel) domain.QueueUsecase {
 	return &queueUsecase{
 		queueClient: &domain.RabbitMQ{
@@ -28,16 +31,19 @@ func (r *queueUsecase) failOnError(err error, msg string) {
 	}
 }
 
-func (r *queueUsecase) Close(){
+// Close closes the RabbitMQ connection and channel.
+func (r *queueUsecase) Close() {
 	queueClient := r.queueClient
 	queueClient.Conn.Close()
 	queueClient.Channel.Close()
 }
 
+// Channel returns the RabbitMQ channel.
 func (r *queueUsecase) Channel() *amqp.Channel {
 	return r.queueClient.Channel
 }
 
+// SetUpQueues declares the exchanges and queues required for the worker.
 func (r *queueUsecase) SetUpQueues() error {
 	conn := r.queueClient.Conn
 	queueChannel := r.queueClient.Channel
@@ -119,13 +125,13 @@ func (r *queueUsecase) SetUpQueues() error {
 		}
 	}
 
-	args_jobs := amqp.Table{
+	argsJobs := amqp.Table{
 		"x-dead-letter-exchange":    "deploy.dlx",
 		"x-dead-letter-routing-key": "deploy.jobs.dlq",
 	}
 
 	// 3. Declare JOBS QUEUE if missing
-	exists, err = queueExists("deploy.jobs", args_jobs)
+	exists, err = queueExists("deploy.jobs", argsJobs)
 	if err != nil {
 		return err
 	}
@@ -136,7 +142,7 @@ func (r *queueUsecase) SetUpQueues() error {
 			false,
 			false,
 			false,
-			args_jobs,
+			argsJobs,
 		)
 		if err != nil {
 			r.failOnError(err, "Failed to declare job queue")
@@ -170,13 +176,13 @@ func (r *queueUsecase) SetUpQueues() error {
 		}
 	}
 
-	args_status := amqp.Table{
+	argsStatus := amqp.Table{
 		"x-dead-letter-exchange":    "deploy.dlx",
 		"x-dead-letter-routing-key": "deploy.status.dlq",
 	}
 
 	// 5. Declare STATUS QUEUE if missing
-	exists, err = queueExists("deploy.status", args_status)
+	exists, err = queueExists("deploy.status", argsStatus)
 	if err != nil {
 		return err
 	}
@@ -187,7 +193,7 @@ func (r *queueUsecase) SetUpQueues() error {
 			false,
 			false,
 			false,
-			args_status,
+			argsStatus,
 		)
 		if err != nil {
 			r.failOnError(err, "Failed to declare status queue")
@@ -198,11 +204,12 @@ func (r *queueUsecase) SetUpQueues() error {
 	return nil
 }
 
-func (r* queueUsecase) PublishJob(job domain.DeployJob) error{
+// PublishJob publishes a deploy job to the queue.
+func (r *queueUsecase) PublishJob(job domain.DeployJob) error {
 	body, err := json.Marshal(job)
 
-	if err != nil{
-		r.failOnError(err,"Failed to Receive Jobs")
+	if err != nil {
+		r.failOnError(err, "Failed to Receive Jobs")
 		return err
 	}
 
@@ -212,18 +219,19 @@ func (r* queueUsecase) PublishJob(job domain.DeployJob) error{
 		false,
 		false,
 		amqp.Publishing{
-			ContentType: "application/json",
+			ContentType:  "application/json",
 			DeliveryMode: amqp.Persistent,
-			Body: body,
+			Body:         body,
 		},
 	)
 }
 
-func (r* queueUsecase) PublishStatusUpdate(status domain.DeployStatusMessage) error{
+// PublishStatusUpdate publishes a deployment status message to the queue.
+func (r *queueUsecase) PublishStatusUpdate(status domain.DeployStatusMessage) error {
 	body, err := json.Marshal(status)
 
-	if err != nil{
-		r.failOnError(err,"Failed to Publish Status")
+	if err != nil {
+		r.failOnError(err, "Failed to Publish Status")
 		return err
 	}
 
@@ -233,11 +241,9 @@ func (r* queueUsecase) PublishStatusUpdate(status domain.DeployStatusMessage) er
 		false,
 		false,
 		amqp.Publishing{
-			ContentType: "application/json",
+			ContentType:  "application/json",
 			DeliveryMode: amqp.Persistent,
-			Body: body,
+			Body:         body,
 		},
 	)
 }
-
-

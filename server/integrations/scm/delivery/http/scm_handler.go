@@ -63,7 +63,6 @@ func (inst *SCMHandler) Installation(c *echo.Context) error {
 
 	log.Info("GitHub App installed successfully", zap.Int64("user_id", userID))
 	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(nil, "", reqID, helper.WithMessage("Github App Installed Successfully")))
-
 }
 
 func (inst *SCMHandler) GetInstallation(c *echo.Context) error {

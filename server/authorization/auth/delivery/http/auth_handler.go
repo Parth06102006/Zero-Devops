@@ -24,8 +24,7 @@ func writeCookie(token string, cookie_name string, expiry_time time.Duration) *h
 	cookie.Value = token
 	cookie.Expires = time.Now().Add(expiry_time)
 
-	IS_PRODUCTION_ENV := viper.GetBool("IS_PRODUCTION_ENV")
-	if IS_PRODUCTION_ENV == false {
+	if !viper.GetBool("IS_PRODUCTION_ENV") {
 		cookie.Secure = false
 	} else {
 		cookie.Secure = true

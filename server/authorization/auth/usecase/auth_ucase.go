@@ -75,11 +75,11 @@ func (a *authUsecase) HandleOAuthCallback(ctx context.Context, code string, prov
 		return nil, err
 	}
 
-	existingUser, err := a.userRepo.GetProviderById(ctx, oauthUser.ProviderId)
+	existingUser, err := a.userRepo.GetProviderByID(ctx, oauthUser.ProviderID)
 
 	if existingUser.ID == 0 {
 		userToSave := domain.User{
-			ProviderId: oauthUser.ProviderId,
+			ProviderID: oauthUser.ProviderID,
 			Provider:   oauthUser.Provider,
 			Username:   oauthUser.Username,
 			Email:      oauthUser.Email,

@@ -104,7 +104,7 @@ func TestInstallGithubApp_Success(t *testing.T) {
 	if stored == nil {
 		t.Fatal("expected installation to be stored")
 	}
-	if stored.UserID != 77 || stored.InstallationID != 55 || stored.Account_Login != "octocat" {
+	if stored.UserID != 77 || stored.InstallationID != 55 || stored.AccountLogin != "octocat" {
 		t.Fatalf("unexpected stored installation: %+v", stored)
 	}
 	if stored.Status != domain.GithubInstallationStatusActive {

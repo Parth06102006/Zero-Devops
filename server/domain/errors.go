@@ -16,17 +16,17 @@ var (
 	
 	ErrInvalidToken 				 = errors.New("invalid or expired token")
 
-	ErrMissingSecret 				 = errors.New("Secret Not Found")
+	ErrMissingSecret 				 = errors.New("secret not found")
 
-	ErrLoggingOut 					 = errors.New("Error In Logging Out")
+	ErrLoggingOut 					 = errors.New("error in logging out")
 
-	ErrInvalidCode 					 = errors.New("Invalid Code")
+	ErrInvalidCode 					 = errors.New("invalid code")
 
-	ErrInvalidStatus 				 = errors.New("Invalid Status")
+	ErrInvalidStatus 				 = errors.New("invalid status")
 
-	ErrGithubInstallationFetchFailed = errors.New("Github Installation Failed.Error Installing Github App")
+	ErrGithubInstallationFetchFailed = errors.New("github installation failed: error installing github app")
 
-	ErrUserLookupFailed 			 = errors.New("User Lookup Failed")
+	ErrUserLookupFailed 			 = errors.New("user lookup failed")
 
 	// Github Webhook Errors
 

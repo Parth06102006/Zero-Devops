@@ -15,7 +15,7 @@ func BuildErrorResponse(message string,err error,reqId string , opts ...DebugOpt
 			Code:    GetStatusCode(err),
 			Message: message,
 		},
-		RequestId: reqId,
+		RequestID: reqId,
 	}
 
 	if viper.GetString("APP_ENV") != "production"{

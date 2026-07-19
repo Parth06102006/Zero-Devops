@@ -7350,11 +7350,11 @@ type CodeScanningAlertPayload struct {
 		AssigneesUrl             string      `json:"assignees_url"`
 		BranchesUrl              string      `json:"branches_url"`
 		TagsUrl                  string      `json:"tags_url"`
-		BlobsUrl                 string      `json:"blobs_url"`
-		GitTagsUrl               string      `json:"git_tags_url"`
-		GitRefsUrl               string      `json:"git_refs_url"`
-		TreesUrl                 string      `json:"trees_url"`
-		StatusesUrl              string      `json:"statuses_url"`
+		BlobsURL                 string      `json:"blobs_url"`
+		GitTagsURL               string      `json:"git_tags_url"`
+		GitRefsURL               string      `json:"git_refs_url"`
+		TreesURL                 string      `json:"trees_url"`
+		StatusesURL              string      `json:"statuses_url"`
 		LanguagesUrl             string      `json:"languages_url"`
 		StargazersUrl            string      `json:"stargazers_url"`
 		ContributorsUrl          string      `json:"contributors_url"`

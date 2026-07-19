@@ -1,3 +1,4 @@
+// Package deployments handles deployment processing including cloning, building, and uploading.
 package deployments
 
 import (

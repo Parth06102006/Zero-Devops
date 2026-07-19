@@ -39,8 +39,8 @@ func (m *mockUserRepository) GetByUsername(ctx context.Context, username string)
 	return domain.User{}, domain.ErrNotFound
 }
 
-func (m *mockUserRepository) GetProviderById(ctx context.Context, providerId int64) (domain.User, error) {
-	if user, ok := m.providerID[providerId]; ok {
+func (m *mockUserRepository) GetProviderByID(ctx context.Context, providerID int64) (domain.User, error) {
+	if user, ok := m.providerID[providerID]; ok {
 		return user, nil
 	}
 	return domain.User{}, domain.ErrNotFound
@@ -49,7 +49,7 @@ func (m *mockUserRepository) GetProviderById(ctx context.Context, providerId int
 func (m *mockUserRepository) Store(ctx context.Context, u *domain.User) error {
 	u.ID = int64(len(m.users) + 1)
 	m.users[u.ID] = *u
-	m.providerID[u.ProviderId] = *u
+	m.providerID[u.ProviderID] = *u
 	return nil
 }
 
@@ -57,7 +57,7 @@ func (m *mockUserRepository) UpdateRefreshToken(ctx context.Context, id int64, r
 	if user, ok := m.users[id]; ok {
 		user.RefreshToken = refreshToken
 		m.users[id] = user
-		m.providerID[user.ProviderId] = user
+		m.providerID[user.ProviderID] = user
 		return nil
 	}
 	return domain.ErrNotFound
@@ -109,7 +109,7 @@ func TestHandleOAuthCallback_NewUser(t *testing.T) {
 			token: "provider-token",
 			user: &domain.OAuthUser{
 				Provider:  "github",
-				ProviderId: 12345,
+				ProviderID: 12345,
 				Username:  "testuser",
 				Email:     "test@example.com",
 				AvatarURL: "https://example.com/avatar.png",
@@ -154,7 +154,7 @@ func TestHandleOAuthCallback_ExistingUser(t *testing.T) {
 	mockRepo := newMockUserRepository()
 	existingUser := domain.User{
 		ID:          1,
-		ProviderId:  12345,
+		ProviderID:  12345,
 		Provider:    "github",
 		Username:    "testuser",
 		Email:       "test@example.com",
@@ -170,7 +170,7 @@ func TestHandleOAuthCallback_ExistingUser(t *testing.T) {
 			token: "provider-token",
 			user: &domain.OAuthUser{
 				Provider:  "github",
-				ProviderId: 12345,
+				ProviderID: 12345,
 				Username:  "testuser",
 				Email:     "test@example.com",
 				AvatarURL: "https://example.com/avatar.png",
@@ -197,7 +197,7 @@ func TestRefreshToken_Success(t *testing.T) {
 	mockRepo := newMockUserRepository()
 	user := domain.User{
 		ID:           1,
-		ProviderId:   12345,
+		ProviderID:   12345,
 		Provider:     "github",
 		Username:     "testuser",
 		Email:        "test@example.com",
@@ -264,7 +264,7 @@ func TestLogout_Success(t *testing.T) {
 	mockRepo := newMockUserRepository()
 	user := domain.User{
 		ID:           1,
-		ProviderId:   12345,
+		ProviderID:   12345,
 		Provider:     "github",
 		Username:     "testuser",
 		Email:        "test@example.com",
@@ -313,7 +313,7 @@ func TestGetCurrentUser_Success(t *testing.T) {
 	mockRepo := newMockUserRepository()
 	user := domain.User{
 		ID:          1,
-		ProviderId:  12345,
+		ProviderID:  12345,
 		Provider:    "github",
 		Username:    "testuser",
 		Email:       "test@example.com",

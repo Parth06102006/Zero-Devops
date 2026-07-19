@@ -27,6 +27,6 @@ func TestNewQueueUsecaseStoresConnectionAndChannel(t *testing.T) {
 	}
 }
 
-func TestQueueUsecaseImplementsDomainInterface(t *testing.T) {
+func TestQueueUsecaseImplementsDomainInterface(_ *testing.T) {
 	var _ domain.QueueUsecase = (*queueUsecase)(nil)
 }

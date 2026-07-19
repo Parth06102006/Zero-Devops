@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Builder describes a detected framework with its config files, dependencies, and Docker template.
 type Builder struct {
 	Name        string
 	ConfigFiles []string
@@ -130,7 +131,7 @@ func hasConfigFile(repoPath, configFile string) bool {
 
 func walkForFile(root, filename string) (bool, error) {
 	var found bool
-	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
+	err := filepath.WalkDir(root, func(_ string, d os.DirEntry, err error) error {
 		if err != nil {
 			return nil
 		}

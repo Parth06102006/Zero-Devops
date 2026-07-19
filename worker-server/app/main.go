@@ -30,7 +30,7 @@ func main() {
 	}
 	zap.ReplaceGlobals(baseLogger)
 	defer baseLogger.Sync()
-	
+
 	bucketName := viper.GetString("CLOUDFLARE_BUCKET_NAME")
 	accountId := viper.GetString("CLOUDFLARE_ACCOUNT_ID")
 	accessKeyId := viper.GetString("CLOUDFLARE_ACCESS_KEY_ID")

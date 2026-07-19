@@ -29,7 +29,7 @@ func (m *mockUserRepository) GetByUsername(ctx context.Context, username string)
 	return domain.User{}, domain.ErrNotFound
 }
 
-func (m *mockUserRepository) GetProviderById(ctx context.Context, providerId int64) (domain.User, error) {
+func (m *mockUserRepository) GetProviderByID(ctx context.Context, providerID int64) (domain.User, error) {
 	return domain.User{}, domain.ErrNotFound
 }
 

@@ -67,7 +67,7 @@ func (g *githubProvider) GetUser(ctx context.Context, accessToken string) (*doma
 
 	return &domain.OAuthUser{
 		Provider:   "github",
-		ProviderId: ghUser.ID,
+		ProviderID: ghUser.ID,
 		Username:   ghUser.Login,
 		Email:      ghUser.Email,
 		AvatarURL:  ghUser.AvatarURL,

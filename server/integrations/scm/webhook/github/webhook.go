@@ -97,15 +97,15 @@ func (hook Webhook) Parse(r *http.Request, events ...domain.Event) (interface{},
 	switch gitHubEvent {
 	case domain.InstallationEvent:
 		var pl domain.InstallationPayload
-		err = json.Unmarshal([]byte(payload), &pl)
+		err = json.Unmarshal(payload, &pl)
 		return pl, err
 	case domain.InstallationRepositoriesEvent:
 		var pl domain.InstallationRepositoriesPayload
-		err = json.Unmarshal([]byte(payload), &pl)
+		err = json.Unmarshal(payload, &pl)
 		return pl, err
 	case domain.PushEvent_P:
 		var pl domain.PushPayload
-		err = json.Unmarshal([]byte(payload), &pl)
+		err = json.Unmarshal(payload, &pl)
 		return pl, err
 
 		

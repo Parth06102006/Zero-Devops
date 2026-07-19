@@ -133,8 +133,8 @@ func TestGetInstallation_Success(t *testing.T) {
 		ID:             1,
 		UserID:         99,
 		InstallationID: 12345,
-		Account_Type:   "User",
-		Account_Login:  "octocat",
+		AccountType:   "User",
+		AccountLogin:  "octocat",
 	}
 
 	handler := &SCMHandler{
