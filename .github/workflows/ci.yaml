@@ -53,7 +53,7 @@ jobs:
       - run: go mod download
       - uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.3
+          version: v2.12.2
           working-directory: server
       - run: go vet ./...
       - run: go test ./...
@@ -76,7 +76,7 @@ jobs:
       - run: go mod download
       - uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.3
+          version: v2.12.2
           working-directory: worker-server
       - run: go vet ./...
       - run: go test ./...
