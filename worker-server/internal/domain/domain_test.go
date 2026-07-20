@@ -37,13 +37,13 @@ func (m *workerUsecaseMock) StartWorker(_ *zap.Logger) error { return nil }
 
 func TestDeployJobStruct(t *testing.T) {
 	job := DeployJob{
-		DeploymentID: 42,
+		DeploymentID: "42",
 		CloneURL:     "https://github.com/user/repo.git",
 		RetryCount:   1,
 		RequestID:    "req-123",
 	}
-	if job.DeploymentID != 42 {
-		t.Errorf("expected DeploymentID 42, got %d", job.DeploymentID)
+	if job.DeploymentID != "42" {
+		t.Errorf("expected DeploymentID 42, got %s", job.DeploymentID)
 	}
 	if job.CloneURL != "https://github.com/user/repo.git" {
 		t.Errorf("expected CloneURL 'https://github.com/user/repo.git', got '%s'", job.CloneURL)
@@ -58,11 +58,11 @@ func TestDeployJobStruct(t *testing.T) {
 
 func TestDeployStatusMessageStruct(t *testing.T) {
 	msg := DeployStatusMessage{
-		DeploymentID: 7,
+		DeploymentID: "7",
 		Status:       "done",
 	}
-	if msg.DeploymentID != 7 {
-		t.Errorf("expected DeploymentID 7, got %d", msg.DeploymentID)
+	if msg.DeploymentID != "7" {
+		t.Errorf("expected DeploymentID 7, got %s", msg.DeploymentID)
 	}
 	if msg.Status != "done" {
 		t.Errorf("expected Status 'done', got '%s'", msg.Status)

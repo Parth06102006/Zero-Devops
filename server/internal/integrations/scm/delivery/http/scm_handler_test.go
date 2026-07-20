@@ -15,26 +15,26 @@ import (
 )
 
 type mockGithubUsecase struct {
-	installFn func(ctx context.Context, client *http.Client, code string, userID int64) error
-	getFn     func(ctx context.Context, userID int64) (*domain.GithubInstallation, error)
-	deleteFn  func(ctx context.Context, userID int64) error
+	installFn func(ctx context.Context, client *http.Client, code string, userID string) error
+	getFn     func(ctx context.Context, userID string) (*domain.GithubInstallation, error)
+	deleteFn  func(ctx context.Context, userID string) error
 }
 
-func (m *mockGithubUsecase) InstallGithubApp(ctx context.Context, client *http.Client, code string, userID int64) error {
+func (m *mockGithubUsecase) InstallGithubApp(ctx context.Context, client *http.Client, code, userID string) error {
 	if m.installFn != nil {
 		return m.installFn(ctx, client, code, userID)
 	}
 	return nil
 }
 
-func (m *mockGithubUsecase) GetGithubAppInstallation(ctx context.Context, userID int64) (*domain.GithubInstallation, error) {
+func (m *mockGithubUsecase) GetGithubAppInstallation(ctx context.Context, userID string) (*domain.GithubInstallation, error) {
 	if m.getFn != nil {
 		return m.getFn(ctx, userID)
 	}
 	return nil, nil
 }
 
-func (m *mockGithubUsecase) DeleteGithubApp(ctx context.Context, userID int64) error {
+func (m *mockGithubUsecase) DeleteGithubApp(ctx context.Context, userID string) error {
 	if m.deleteFn != nil {
 		return m.deleteFn(ctx, userID)
 	}
@@ -48,14 +48,14 @@ func newSCMTestContext(method, target string) (*httptest.ResponseRecorder, *echo
 	return rec, e.NewContext(req, rec)
 }
 
-func setUserID(c *echo.Context, userID int64) {
+func setUserID(c *echo.Context, userID string) {
 	c.Set(middleware.UserIDContextKey, userID)
 }
 
 func TestInstallation_MissingCode(t *testing.T) {
 	handler := &SCMHandler{scmUsecase: &mockGithubUsecase{}}
 	rec, c := newSCMTestContext(http.MethodPost, "/integration/scm/github/install")
-	setUserID(c, 1)
+	setUserID(c, "1")
 
 	if err := handler.Installation(c); err != nil {
 		t.Fatalf("expected nil error, got %v", err)
@@ -83,13 +83,13 @@ func TestInstallation_Success(t *testing.T) {
 	called := false
 	handler := &SCMHandler{
 		scmUsecase: &mockGithubUsecase{
-			installFn: func(_ context.Context, client *http.Client, code string, userID int64) error {
+			installFn: func(_ context.Context, client *http.Client, code string, userID string) error {
 				called = true
 				if code != "test-code" {
 					t.Fatalf("expected code test-code, got %s", code)
 				}
-				if userID != 42 {
-					t.Fatalf("expected userID 42, got %d", userID)
+				if userID != "42" {
+					t.Fatalf("expected userID 42, got %s", userID)
 				}
 				if client == nil {
 					t.Fatal("expected non-nil client")
@@ -100,7 +100,7 @@ func TestInstallation_Success(t *testing.T) {
 	}
 
 	rec, c := newSCMTestContext(http.MethodPost, "/integration/scm/github/install?code=test-code")
-	setUserID(c, 42)
+	setUserID(c, "42")
 
 	if err := handler.Installation(c); err != nil {
 		t.Fatalf("expected nil error, got %v", err)
@@ -130,8 +130,8 @@ func TestGetInstallation_MissingUserID(t *testing.T) {
 
 func TestGetInstallation_Success(t *testing.T) {
 	expected := &domain.GithubInstallation{
-		ID:             1,
-		UserID:         99,
+		ID:             "1",
+		UserID:         "99",
 		InstallationID: 12345,
 		AccountType:    "User",
 		AccountLogin:   "octocat",
@@ -139,9 +139,9 @@ func TestGetInstallation_Success(t *testing.T) {
 
 	handler := &SCMHandler{
 		scmUsecase: &mockGithubUsecase{
-			getFn: func(_ context.Context, userID int64) (*domain.GithubInstallation, error) {
-				if userID != 99 {
-					t.Fatalf("expected userID 99, got %d", userID)
+			getFn: func(_ context.Context, userID string) (*domain.GithubInstallation, error) {
+				if userID != "99" {
+					t.Fatalf("expected userID 99, got %s", userID)
 				}
 				return expected, nil
 			},
@@ -149,7 +149,7 @@ func TestGetInstallation_Success(t *testing.T) {
 	}
 
 	rec, c := newSCMTestContext(http.MethodGet, "/integration/scm/github/")
-	setUserID(c, 99)
+	setUserID(c, "99")
 
 	if err := handler.GetInstallation(c); err != nil {
 		t.Fatalf("expected nil error, got %v", err)
@@ -178,10 +178,10 @@ func TestDeleteInstallation_Success(t *testing.T) {
 	called := false
 	handler := &SCMHandler{
 		scmUsecase: &mockGithubUsecase{
-			deleteFn: func(_ context.Context, userID int64) error {
+			deleteFn: func(_ context.Context, userID string) error {
 				called = true
-				if userID != 7 {
-					t.Fatalf("expected userID 7, got %d", userID)
+				if userID != "7" {
+					t.Fatalf("expected userID 7, got %s", userID)
 				}
 				return nil
 			},
@@ -189,7 +189,7 @@ func TestDeleteInstallation_Success(t *testing.T) {
 	}
 
 	rec, c := newSCMTestContext(http.MethodDelete, "/integration/scm/github/delete")
-	setUserID(c, 7)
+	setUserID(c, "7")
 
 	if err := handler.DeleteInstallation(c); err != nil {
 		t.Fatalf("expected nil error, got %v", err)

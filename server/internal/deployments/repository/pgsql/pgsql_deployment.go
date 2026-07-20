@@ -39,7 +39,7 @@ func (m *pgSQLDeploymentRepository) Store(ctx context.Context, d *domain.Deploym
 	return nil
 }
 
-func (m *pgSQLDeploymentRepository) GetByUserID(ctx context.Context, userID int64) ([]domain.Deployment, error) {
+func (m *pgSQLDeploymentRepository) GetByUserID(ctx context.Context, userID string) ([]domain.Deployment, error) {
 	query := `
 		SELECT id, user_id, repo_id, clone_url, status, created_at, updated_at
 		FROM deployments
@@ -77,7 +77,7 @@ func (m *pgSQLDeploymentRepository) GetByUserID(ctx context.Context, userID int6
 	return deployments, nil
 }
 
-func (m *pgSQLDeploymentRepository) GetByID(ctx context.Context, userID, id int64) (*domain.Deployment, error) {
+func (m *pgSQLDeploymentRepository) GetByID(ctx context.Context, userID, id string) (*domain.Deployment, error) {
 	query := `
 		SELECT id, user_id, repo_id, clone_url, status, created_at, updated_at
 		FROM deployments
@@ -99,16 +99,48 @@ func (m *pgSQLDeploymentRepository) GetByID(ctx context.Context, userID, id int6
 	return &d, nil
 }
 
-func (m *pgSQLDeploymentRepository) UpdateStatus(ctx context.Context, deploymentID int64, status domain.DeploymentStatus) error {
+func (m *pgSQLDeploymentRepository) UpdateStatus(ctx context.Context, deploymentID string, status domain.DeploymentStatus) error {
 	query := `
 		UPDATE deployments
-		SET status = $1
+		SET status = $1, updated_at = NOW()
 		WHERE id = $2
 	`
 	_, err := m.Conn.ExecContext(ctx, query, status, deploymentID)
 	if err != nil {
 		log := appmiddleware.LoggerFromContext(ctx)
 		log.Error("failed to update deployment status", zap.Error(err))
+		return err
+	}
+
+	return nil
+}
+
+func (m *pgSQLDeploymentRepository) UpdateOutputURL(ctx context.Context, deploymentID, outputURL string) error {
+	query := `
+		UPDATE deployments
+		SET output_url = $1, updated_at = NOW()
+		WHERE id = $2
+	`
+	_, err := m.Conn.ExecContext(ctx, query, outputURL, deploymentID)
+	if err != nil {
+		log := appmiddleware.LoggerFromContext(ctx)
+		log.Error("failed to update deployment output URL", zap.Error(err))
+		return err
+	}
+
+	return nil
+}
+
+func (m *pgSQLDeploymentRepository) UpdateErrorMessage(ctx context.Context, deploymentID, errMsg string) error {
+	query := `
+		UPDATE deployments
+		SET error_message = $1, updated_at = NOW()
+		WHERE id = $2
+	`
+	_, err := m.Conn.ExecContext(ctx, query, errMsg, deploymentID)
+	if err != nil {
+		log := appmiddleware.LoggerFromContext(ctx)
+		log.Error("failed to update deployment error message", zap.Error(err))
 		return err
 	}
 

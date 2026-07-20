@@ -15,8 +15,8 @@ import (
 
 type mockGithubRepository struct {
 	storeFn  func(ctx context.Context, inst *domain.GithubInstallation) error
-	getFn    func(ctx context.Context, userID int64) (*domain.GithubInstallation, error)
-	deleteFn func(ctx context.Context, userID int64) error
+	getFn    func(ctx context.Context, userID string) (*domain.GithubInstallation, error)
+	deleteFn func(ctx context.Context, userID string) error
 }
 
 func (m *mockGithubRepository) StoreInstallation(ctx context.Context, inst *domain.GithubInstallation) error {
@@ -26,21 +26,21 @@ func (m *mockGithubRepository) StoreInstallation(ctx context.Context, inst *doma
 	return nil
 }
 
-func (m *mockGithubRepository) GetInstallationByUserID(ctx context.Context, userID int64) (*domain.GithubInstallation, error) {
+func (m *mockGithubRepository) GetInstallationByUserID(ctx context.Context, userID string) (*domain.GithubInstallation, error) {
 	if m.getFn != nil {
 		return m.getFn(ctx, userID)
 	}
 	return nil, nil
 }
 
-func (m *mockGithubRepository) DeleteInstallationByUserID(ctx context.Context, userID int64) error {
+func (m *mockGithubRepository) DeleteInstallationByUserID(ctx context.Context, userID string) error {
 	if m.deleteFn != nil {
 		return m.deleteFn(ctx, userID)
 	}
 	return nil
 }
 
-func (m *mockGithubRepository) UpdateInstallationStatus(_ context.Context, _ int64, _ string) error {
+func (m *mockGithubRepository) UpdateInstallationStatus(_ context.Context, _, _ string) error {
 	return nil
 }
 
@@ -97,14 +97,14 @@ func TestInstallGithubApp_Success(t *testing.T) {
 	})
 
 	uc := NewGithubAppUsecase(repo)
-	if err := uc.InstallGithubApp(context.Background(), client, "code-abc", 77); err != nil {
+	if err := uc.InstallGithubApp(context.Background(), client, "code-abc", "77"); err != nil {
 		t.Fatalf("expected nil error, got %v", err)
 	}
 
 	if stored == nil {
 		t.Fatal("expected installation to be stored")
 	}
-	if stored.UserID != 77 || stored.InstallationID != 55 || stored.AccountLogin != "octocat" {
+	if stored.UserID != "77" || stored.InstallationID != 55 || stored.AccountLogin != "octocat" {
 		t.Fatalf("unexpected stored installation: %+v", stored)
 	}
 	if stored.Status != domain.GithubInstallationStatusActive {
@@ -128,7 +128,7 @@ func TestInstallGithubApp_InvalidCodeExchange(t *testing.T) {
 	})
 
 	uc := NewGithubAppUsecase(repo)
-	if err := uc.InstallGithubApp(context.Background(), client, "bad-code", 77); err != domain.ErrInvalidCode {
+	if err := uc.InstallGithubApp(context.Background(), client, "bad-code", "77"); err != domain.ErrInvalidCode {
 		t.Fatalf("expected ErrInvalidCode, got %v", err)
 	}
 }
@@ -150,24 +150,24 @@ func TestInstallGithubApp_FetchInstallationsError(t *testing.T) {
 	})
 
 	uc := NewGithubAppUsecase(repo)
-	if err := uc.InstallGithubApp(context.Background(), client, "code-abc", 77); err != domain.ErrGithubInstallationFetchFailed {
+	if err := uc.InstallGithubApp(context.Background(), client, "code-abc", "77"); err != domain.ErrGithubInstallationFetchFailed {
 		t.Fatalf("expected ErrGithubInstallationFetchFailed, got %v", err)
 	}
 }
 
 func TestGetGithubAppInstallation(t *testing.T) {
-	expected := &domain.GithubInstallation{UserID: 11, InstallationID: 22, Status: domain.GithubInstallationStatusActive}
+	expected := &domain.GithubInstallation{UserID: "11", InstallationID: 22, Status: domain.GithubInstallationStatusActive}
 	repo := &mockGithubRepository{
-		getFn: func(_ context.Context, userID int64) (*domain.GithubInstallation, error) {
-			if userID != 11 {
-				t.Fatalf("expected userID 11, got %d", userID)
+		getFn: func(_ context.Context, userID string) (*domain.GithubInstallation, error) {
+			if userID != "11" {
+				t.Fatalf("expected userID 11, got %s", userID)
 			}
 			return expected, nil
 		},
 	}
 
 	uc := NewGithubAppUsecase(repo)
-	got, err := uc.GetGithubAppInstallation(context.Background(), 11)
+	got, err := uc.GetGithubAppInstallation(context.Background(), "11")
 	if err != nil {
 		t.Fatalf("expected nil error, got %v", err)
 	}
@@ -179,17 +179,17 @@ func TestGetGithubAppInstallation(t *testing.T) {
 func TestDeleteGithubApp(t *testing.T) {
 	called := false
 	repo := &mockGithubRepository{
-		deleteFn: func(_ context.Context, userID int64) error {
+		deleteFn: func(_ context.Context, userID string) error {
 			called = true
-			if userID != 99 {
-				t.Fatalf("expected userID 99, got %d", userID)
+			if userID != "99" {
+				t.Fatalf("expected userID 99, got %s", userID)
 			}
 			return nil
 		},
 	}
 
 	uc := NewGithubAppUsecase(repo)
-	if err := uc.DeleteGithubApp(context.Background(), 99); err != nil {
+	if err := uc.DeleteGithubApp(context.Background(), "99"); err != nil {
 		t.Fatalf("expected nil error, got %v", err)
 	}
 	if !called {
@@ -214,7 +214,7 @@ func TestInstallGithubApp_DecodesTokenAndInstallationResponse(t *testing.T) {
 	})
 
 	uc := NewGithubAppUsecase(repo)
-	if err := uc.InstallGithubApp(context.Background(), client, "code", 1); err != nil {
+	if err := uc.InstallGithubApp(context.Background(), client, "code", "1"); err != nil {
 		t.Fatalf("expected nil error, got %v", err)
 	}
 }
@@ -241,7 +241,7 @@ func TestInstallGithubApp_DefaultsStatusToActive(t *testing.T) {
 	})
 
 	uc := NewGithubAppUsecase(repo)
-	if err := uc.InstallGithubApp(context.Background(), client, "code-abc", 77); err != nil {
+	if err := uc.InstallGithubApp(context.Background(), client, "code-abc", "77"); err != nil {
 		t.Fatalf("expected nil error, got %v", err)
 	}
 

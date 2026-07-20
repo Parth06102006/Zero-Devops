@@ -15,21 +15,21 @@ import (
 )
 
 type mockDeploymentUsecase struct {
-	createFn func(ctx context.Context, userID, repoID int64, reqID string) (*domain.Deployment, error)
+	createFn func(ctx context.Context, userID string, repoID int64, reqID string) (*domain.Deployment, error)
 }
 
-func (m *mockDeploymentUsecase) CreateDeployment(ctx context.Context, userID, repoID int64, reqID string) (*domain.Deployment, error) {
+func (m *mockDeploymentUsecase) CreateDeployment(ctx context.Context, userID string, repoID int64, reqID string) (*domain.Deployment, error) {
 	if m.createFn != nil {
 		return m.createFn(ctx, userID, repoID, reqID)
 	}
 	return nil, nil
 }
 
-func (m *mockDeploymentUsecase) GetDeployments(_ context.Context, _ int64) ([]domain.Deployment, error) {
+func (m *mockDeploymentUsecase) GetDeployments(_ context.Context, _ string) ([]domain.Deployment, error) {
 	return nil, nil
 }
 
-func (m *mockDeploymentUsecase) GetDeploymentByID(_ context.Context, _, _ int64) (*domain.Deployment, error) {
+func (m *mockDeploymentUsecase) GetDeploymentByID(_ context.Context, _, _ string) (*domain.Deployment, error) {
 	return nil, nil
 }
 
@@ -54,7 +54,7 @@ func TestCreateDeployment_InvalidBody(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.Set(middleware.UserIDContextKey, int64(11))
+	c.Set(middleware.UserIDContextKey, "11")
 
 	h := &DeploymentHandler{dUsecase: &mockDeploymentUsecase{}}
 	if err := h.CreateDeployment(c); err != nil {
@@ -71,14 +71,14 @@ func TestCreateDeployment_Success(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.Set(middleware.UserIDContextKey, int64(11))
+	c.Set(middleware.UserIDContextKey, "11")
 
-	want := &domain.Deployment{ID: 9, UserID: 11, RepoID: 42, Status: domain.DeploymentStatusPending}
+	want := &domain.Deployment{ID: "9", UserID: "11", RepoID: 42, Status: domain.DeploymentStatusPending}
 	h := &DeploymentHandler{
 		dUsecase: &mockDeploymentUsecase{
-			createFn: func(_ context.Context, userID, repoID int64, _ string) (*domain.Deployment, error) {
-				if userID != 11 || repoID != 42 {
-					t.Fatalf("unexpected args userID=%d repoID=%d", userID, repoID)
+			createFn: func(_ context.Context, userID string, repoID int64, _ string) (*domain.Deployment, error) {
+				if userID != "11" || repoID != 42 {
+					t.Fatalf("unexpected args userID=%s repoID=%d", userID, repoID)
 				}
 				return want, nil
 			},
@@ -99,11 +99,11 @@ func TestCreateDeployment_UsecaseError(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.Set(middleware.UserIDContextKey, int64(11))
+	c.Set(middleware.UserIDContextKey, "11")
 
 	h := &DeploymentHandler{
 		dUsecase: &mockDeploymentUsecase{
-			createFn: func(_ context.Context, _, _ int64, _ string) (*domain.Deployment, error) {
+			createFn: func(_ context.Context, _ string, _ int64, _ string) (*domain.Deployment, error) {
 				return nil, domain.ErrConflict
 			},
 		},

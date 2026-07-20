@@ -316,7 +316,7 @@ func TestGetUser_Success(t *testing.T) {
 	handler := &AuthHandler{
 		AUsecase: &mockAuthUsecase{
 			userResp: &domain.UserResponse{
-				ID:        1,
+				ID:        "1",
 				Provider:  "github",
 				Username:  "testuser",
 				Email:     "test@example.com",

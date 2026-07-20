@@ -30,14 +30,14 @@ func NewAuthMiddlewareHandler(repo domain.UserRepository) *AuthMiddlewareHandler
 }
 
 // Validator validates a JWT token and returns the user ID
-func (a *AuthMiddlewareHandler) Validator(c *echo.Context, token string) (int64, error) {
+func (a *AuthMiddlewareHandler) Validator(c *echo.Context, token string) (string, error) {
 	secretKey := viper.GetString("JWT_SECRET")
 	if secretKey == "" {
-		return 0, domain.ErrMissingSecret
+		return "", domain.ErrMissingSecret
 	}
 
 	if token == "" {
-		return 0, domain.ErrInvalidToken
+		return "", domain.ErrInvalidToken
 	}
 
 	parsedToken, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
@@ -48,24 +48,23 @@ func (a *AuthMiddlewareHandler) Validator(c *echo.Context, token string) (int64,
 	})
 
 	if err != nil || !parsedToken.Valid {
-		return 0, domain.ErrInvalidToken
+		return "", domain.ErrInvalidToken
 	}
 
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if !ok {
-		return 0, domain.ErrInvalidToken
+		return "", domain.ErrInvalidToken
 	}
 
-	userIDFloat, ok := claims["user_id"].(float64)
+	userID, ok := claims["user_id"].(string)
 	if !ok {
-		return 0, domain.ErrInvalidToken
+		return "", domain.ErrInvalidToken
 	}
-	userID := int64(userIDFloat)
 
 	if a.userRepo != nil {
 		_, err := a.userRepo.GetByID(c.Request().Context(), userID)
 		if err != nil {
-			return 0, domain.ErrUserLookupFailed
+			return "", domain.ErrUserLookupFailed
 		}
 	}
 
@@ -116,13 +115,13 @@ func (a *AuthMiddlewareHandler) ToMiddleware() echo.MiddlewareFunc {
 }
 
 // GetUserID retrieves the authenticated user ID from the echo context
-func GetUserID(c *echo.Context) (int64, bool) {
-	userID, ok := c.Get(UserIDContextKey).(int64)
+func GetUserID(c *echo.Context) (string, bool) {
+	userID, ok := c.Get(UserIDContextKey).(string)
 	return userID, ok
 }
 
 // GetUserIDFromContext retrieves the authenticated user ID from a standard context
-func GetUserIDFromContext(ctx context.Context) (int64, bool) {
-	userID, ok := ctx.Value(UserIDContextKey).(int64)
+func GetUserIDFromContext(ctx context.Context) (string, bool) {
+	userID, ok := ctx.Value(UserIDContextKey).(string)
 	return userID, ok
 }

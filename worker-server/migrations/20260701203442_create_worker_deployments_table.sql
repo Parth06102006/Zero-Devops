@@ -1,26 +1,27 @@
 -- +goose Up
 CREATE TYPE deployment_status AS ENUM (
-    'queued',
+    'pending',
     'building',
-    'done',
-    'failed'
+    'success',
+    'failed',
+    'canceled'
 );
 
 CREATE TABLE deployments (
-    id              BIGINT PRIMARY KEY,
+    id              UUID PRIMARY KEY,
     clone_url       TEXT NOT NULL,
-    status          deployment_status NOT NULL DEFAULT 'queued',
+    status          deployment_status NOT NULL DEFAULT 'pending',
 
     retry_count     INTEGER NOT NULL DEFAULT 0,
     error_message   TEXT,
 
-    image_tag       TEXT,               -- e.g. "deploy-<id>:latest"
-    output_url      TEXT,               -- CloudStorage reference once build completes
+    image_tag       TEXT,
+    output_url      TEXT,
 
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
-    started_at      TIMESTAMPTZ,        -- set when worker picks it up (status -> building)
-    finished_at     TIMESTAMPTZ         -- set on done/failed
+    started_at      TIMESTAMPTZ,
+    finished_at     TIMESTAMPTZ
 );
 
 CREATE INDEX idx_deployments_status ON deployments(status);

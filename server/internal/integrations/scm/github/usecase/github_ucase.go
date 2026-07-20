@@ -50,9 +50,9 @@ type GithubInstallationList struct {
 	Installations []Installation `json:"installations"`
 }
 
-func (g *githubAppUsecase) InstallGithubApp(ctx context.Context, client *http.Client, code string, userID int64) error {
+func (g *githubAppUsecase) InstallGithubApp(ctx context.Context, client *http.Client, code, userID string) error {
 	log := appmiddleware.LoggerFromContext(ctx)
-	log.Info("Starting GitHub App installation", zap.Int64("user_id", userID))
+	log.Info("Starting GitHub App installation", zap.String("user_id", userID))
 
 	githubAppClientID := viper.GetString("GITHUB_APP_CLIENT_ID")
 	githubAppClientSecret := viper.GetString("GITHUB_APP_CLIENT_SECRET")
@@ -143,7 +143,7 @@ func (g *githubAppUsecase) InstallGithubApp(ctx context.Context, client *http.Cl
 	return nil
 }
 
-func (g *githubAppUsecase) GetGithubAppInstallation(ctx context.Context, userID int64) (*domain.GithubInstallation, error) {
+func (g *githubAppUsecase) GetGithubAppInstallation(ctx context.Context, userID string) (*domain.GithubInstallation, error) {
 	githubRepo, err := g.githubRepo.GetInstallationByUserID(ctx, userID)
 
 	if err != nil {
@@ -153,6 +153,6 @@ func (g *githubAppUsecase) GetGithubAppInstallation(ctx context.Context, userID 
 	return githubRepo, nil
 }
 
-func (g *githubAppUsecase) DeleteGithubApp(ctx context.Context, userID int64) error {
+func (g *githubAppUsecase) DeleteGithubApp(ctx context.Context, userID string) error {
 	return g.githubRepo.DeleteInstallationByUserID(ctx, userID)
 }

@@ -7,7 +7,7 @@ import (
 
 // User represents the user domain model for OAuth callback handling
 type User struct {
-	ID           int64     `json:"id"`
+	ID           string    `json:"id"`
 	ProviderID   int64     `json:"providerId"`
 	Provider     string    `json:"provider"`
 	Username     string    `json:"username"`
@@ -19,9 +19,9 @@ type User struct {
 
 // UserRepository defines the interface for user data operations
 type UserRepository interface {
-	GetByID(ctx context.Context, id int64) (User, error)
+	GetByID(ctx context.Context, id string) (User, error)
 	GetByUsername(ctx context.Context, username string) (User, error)
 	GetProviderByID(ctx context.Context, providerID int64) (User, error)
 	Store(ctx context.Context, u *User) error
-	UpdateRefreshToken(ctx context.Context, id int64, refreshToken string) error
+	UpdateRefreshToken(ctx context.Context, id string, refreshToken string) error
 }

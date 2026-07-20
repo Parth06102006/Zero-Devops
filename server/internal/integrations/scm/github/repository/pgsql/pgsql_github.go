@@ -43,7 +43,7 @@ func (m *pgSQLGithubRepository) StoreInstallation(ctx context.Context, inst *dom
 	return nil
 }
 
-func (m *pgSQLGithubRepository) GetInstallationByUserID(ctx context.Context, userID int64) (*domain.GithubInstallation, error) {
+func (m *pgSQLGithubRepository) GetInstallationByUserID(ctx context.Context, userID string) (*domain.GithubInstallation, error) {
 	query := `
 		SELECT id, user_id, installation_id, account_type, account_login, status, created_at, updated_at
 		FROM github_installations
@@ -75,7 +75,7 @@ func (m *pgSQLGithubRepository) GetInstallationByUserID(ctx context.Context, use
 	return &inst, nil
 }
 
-func (m *pgSQLGithubRepository) DeleteInstallationByUserID(ctx context.Context, userID int64) error {
+func (m *pgSQLGithubRepository) DeleteInstallationByUserID(ctx context.Context, userID string) error {
 	query := `DELETE FROM github_installations WHERE user_id = $1`
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 
@@ -111,7 +111,7 @@ func (m *pgSQLGithubRepository) DeleteInstallationByUserID(ctx context.Context, 
 	return nil
 }
 
-func (m *pgSQLGithubRepository) UpdateInstallationStatus(ctx context.Context, userID int64, status string) error {
+func (m *pgSQLGithubRepository) UpdateInstallationStatus(ctx context.Context, userID, status string) error {
 	if status != domain.GithubInstallationStatusActive &&
 		status != domain.GithubInstallationStatusSuspended &&
 		status != domain.GithubInstallationStatusUninstalled {

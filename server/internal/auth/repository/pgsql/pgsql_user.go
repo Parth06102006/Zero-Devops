@@ -21,7 +21,7 @@ func NewPgSQLUserRepository(conn *sql.DB) domain.UserRepository {
 	return &pqSQLUserRepository{conn}
 }
 
-func (m *pqSQLUserRepository) GetByID(ctx context.Context, id int64) (domain.User, error) {
+func (m *pqSQLUserRepository) GetByID(ctx context.Context, id string) (domain.User, error) {
 	query := `
 		SELECT id, provider_id, provider, username, COALESCE(email, ''), COALESCE(avatar_url, ''), created_at, COALESCE(refresh_token, '')
 		FROM users
@@ -132,7 +132,7 @@ func (m *pqSQLUserRepository) Store(ctx context.Context, user *domain.User) erro
 	return nil
 }
 
-func (m *pqSQLUserRepository) UpdateRefreshToken(ctx context.Context, id int64, refreshToken string) error {
+func (m *pqSQLUserRepository) UpdateRefreshToken(ctx context.Context, id, refreshToken string) error {
 	query := `UPDATE users SET refresh_token = $1 WHERE id = $2`
 
 	stmt, err := m.Conn.PrepareContext(ctx, query)

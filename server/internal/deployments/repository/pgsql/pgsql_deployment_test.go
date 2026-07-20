@@ -21,7 +21,7 @@ var (
 
 type deploymentsDBState struct {
 	mu          sync.Mutex
-	lastUserID  int64
+	lastUserID  string
 	lastStore   *domain.Deployment
 	queryRowErr error
 	queryErr    error
@@ -60,7 +60,7 @@ func (c *deploymentsConn) QueryContext(_ context.Context, query string, args []d
 		return nil, deploymentsState.queryErr
 	}
 	if len(args) > 0 {
-		if v, ok := args[0].Value.(int64); ok {
+		if v, ok := args[0].Value.(string); ok {
 			deploymentsState.lastUserID = v
 		}
 	}
@@ -70,7 +70,7 @@ func (c *deploymentsConn) QueryContext(_ context.Context, query string, args []d
 	if contains(query, "RETURNING id") {
 		return &deploymentsRows{
 			cols: []string{"id"},
-			vals: [][]driver.Value{{int64(1)}},
+			vals: [][]driver.Value{{"1"}},
 		}, nil
 	}
 	if deploymentsState.queryRowErr == sql.ErrNoRows {
@@ -82,8 +82,8 @@ func (c *deploymentsConn) QueryContext(_ context.Context, query string, args []d
 	return &deploymentsRows{
 		cols: []string{"id", "user_id", "repo_id", "clone_url", "status", "created_at", "updated_at"},
 		vals: [][]driver.Value{{
-			int64(1), deploymentsState.lastUserID, int64(22),
-			"https://example.com/repo.git", domain.DeploymentStatusPending, time.Now(), time.Now(),
+			"1", deploymentsState.lastUserID, int64(22),
+			"https://example.com/repo.git", string(domain.DeploymentStatusPending), time.Now(), time.Now(),
 		}},
 	}, nil
 }
@@ -139,7 +139,7 @@ func newDeploymentsTestDB(t *testing.T) *sql.DB {
 func resetDeploymentsState() {
 	deploymentsState.mu.Lock()
 	defer deploymentsState.mu.Unlock()
-	deploymentsState.lastUserID = 0
+	deploymentsState.lastUserID = ""
 	deploymentsState.lastStore = nil
 	deploymentsState.queryRowErr = nil
 	deploymentsState.queryErr = nil
@@ -154,13 +154,13 @@ func TestStore(t *testing.T) {
 
 	repo := NewPgSQLDeploymentRepository(db)
 	d := &domain.Deployment{
-		UserID: 7, RepoID: 8, CloneURL: "https://example.com/x.git",
+		UserID: "7", RepoID: 8, CloneURL: "https://example.com/x.git",
 		Status: domain.DeploymentStatusPending, CreatedAt: time.Now(), UpdatedAt: time.Now(),
 	}
 	if err := repo.Store(context.Background(), d); err != nil {
 		t.Fatalf("expected nil error, got %v", err)
 	}
-	if d.ID == 0 {
+	if d.ID == "" {
 		t.Fatal("expected ID to be set")
 	}
 }
@@ -171,11 +171,11 @@ func TestGetByUserID(t *testing.T) {
 	defer func() { _ = db.Close() }()
 
 	repo := NewPgSQLDeploymentRepository(db)
-	got, err := repo.GetByUserID(context.Background(), 44)
+	got, err := repo.GetByUserID(context.Background(), "44")
 	if err != nil {
 		t.Fatalf("expected nil error, got %v", err)
 	}
-	if len(got) != 1 || got[0].UserID != 44 {
+	if len(got) != 1 || got[0].UserID != "44" {
 		t.Fatalf("unexpected deployments: %+v", got)
 	}
 }
@@ -188,7 +188,7 @@ func TestGetByID_NotFound(t *testing.T) {
 	defer func() { _ = db.Close() }()
 
 	repo := NewPgSQLDeploymentRepository(db)
-	_, err := repo.GetByID(context.Background(), 1, 2)
+	_, err := repo.GetByID(context.Background(), "1", "2")
 	if err != domain.ErrNotFound {
 		t.Fatalf("expected ErrNotFound, got %v", err)
 	}

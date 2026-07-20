@@ -18,7 +18,7 @@ type mockUserRepository struct {
 	err  error
 }
 
-func (m *mockUserRepository) GetByID(_ context.Context, _ int64) (domain.User, error) {
+func (m *mockUserRepository) GetByID(_ context.Context, _ string) (domain.User, error) {
 	if m.err != nil {
 		return domain.User{}, m.err
 	}
@@ -37,7 +37,7 @@ func (m *mockUserRepository) Store(_ context.Context, _ *domain.User) error {
 	return nil
 }
 
-func (m *mockUserRepository) UpdateRefreshToken(_ context.Context, _ int64, _ string) error {
+func (m *mockUserRepository) UpdateRefreshToken(_ context.Context, _, _ string) error {
 	return nil
 }
 
@@ -48,7 +48,7 @@ func setMiddlewareTestConfig() {
 func generateTestAccessToken(exp time.Time) string {
 	secretKey := []byte(viper.GetString("JWT_SECRET"))
 	claims := jwt.MapClaims{
-		"user_id": int64(1),
+		"user_id": "1",
 		"email":   "test@example.com",
 		"exp":     exp.Unix(),
 		"iat":     time.Now().Unix(),
@@ -141,8 +141,8 @@ func TestValidator_ValidToken_NoUserRepo(t *testing.T) {
 	if err != nil {
 		t.Errorf("expected no error, got %v", err)
 	}
-	if userID != 1 {
-		t.Errorf("expected userID 1, got %d", userID)
+	if userID != "1" {
+		t.Errorf("expected userID 1, got %s", userID)
 	}
 }
 
@@ -152,7 +152,7 @@ func TestValidator_ValidToken_WithUserRepo(t *testing.T) {
 	handler := &AuthMiddlewareHandler{
 		userRepo: &mockUserRepository{
 			user: domain.User{
-				ID:       1,
+				ID:       "1",
 				Username: "testuser",
 			},
 		},
@@ -166,8 +166,8 @@ func TestValidator_ValidToken_WithUserRepo(t *testing.T) {
 	if err != nil {
 		t.Errorf("expected no error, got %v", err)
 	}
-	if userID != 1 {
-		t.Errorf("expected userID 1, got %d", userID)
+	if userID != "1" {
+		t.Errorf("expected userID 1, got %s", userID)
 	}
 }
 
@@ -312,8 +312,8 @@ func TestAuthMiddleware_ValidToken(t *testing.T) {
 	}
 
 	userID, ok := GetUserID(c)
-	if !ok || userID != 1 {
-		t.Errorf("expected userID 1 in context, got %d", userID)
+	if !ok || userID != "1" {
+		t.Errorf("expected userID 1 in context, got %s", userID)
 	}
 }
 
@@ -330,14 +330,14 @@ func TestGetUserID_NotSet(t *testing.T) {
 func TestGetUserID_Set(t *testing.T) {
 	e := echo.New()
 	c := e.NewContext(httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody), httptest.NewRecorder())
-	c.Set("user_id", int64(123))
+	c.Set("user_id", "123")
 
 	userID, ok := GetUserID(c)
 	if !ok {
 		t.Error("expected true when user ID is set")
 	}
-	if userID != 123 {
-		t.Errorf("expected userID 123, got %d", userID)
+	if userID != "123" {
+		t.Errorf("expected userID 123, got %s", userID)
 	}
 }
 

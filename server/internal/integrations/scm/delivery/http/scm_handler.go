@@ -59,11 +59,11 @@ func (inst *SCMHandler) Installation(c *echo.Context) error {
 	err := inst.scmUsecase.InstallGithubApp(ctx, client, code, userID)
 
 	if err != nil {
-		log.Error("Failed to install GitHub app", zap.Error(err), zap.Int64("user_id", userID))
+		log.Error("Failed to install GitHub app", zap.Error(err), zap.String("user_id", userID))
 		return c.JSON(helper.GetStatusCode(err), helper.BuildErrorResponse(err.Error(), err, reqID))
 	}
 
-	log.Info("GitHub App installed successfully", zap.Int64("user_id", userID))
+	log.Info("GitHub App installed successfully", zap.String("user_id", userID))
 	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(nil, "", reqID, helper.WithMessage("Github App Installed Successfully")))
 }
 
@@ -84,7 +84,7 @@ func (inst *SCMHandler) GetInstallation(c *echo.Context) error {
 	installation, err := inst.scmUsecase.GetGithubAppInstallation(ctx, userID)
 
 	if err != nil {
-		log.Error("Failed to get GitHub app installation", zap.Error(err), zap.Int64("user_id", userID))
+		log.Error("Failed to get GitHub app installation", zap.Error(err), zap.String("user_id", userID))
 		return c.JSON(helper.GetStatusCode(err), helper.BuildErrorResponse(err.Error(), err, reqID))
 	}
 
@@ -108,11 +108,11 @@ func (inst *SCMHandler) DeleteInstallation(c *echo.Context) error {
 	err := inst.scmUsecase.DeleteGithubApp(ctx, userID)
 
 	if err != nil {
-		log.Error("Failed to delete GitHub app installation", zap.Error(err), zap.Int64("user_id", userID))
+		log.Error("Failed to delete GitHub app installation", zap.Error(err), zap.String("user_id", userID))
 		return c.JSON(helper.GetStatusCode(err), helper.BuildErrorResponse(err.Error(), err, reqID))
 	}
 
-	log.Info("GitHub App uninstalled successfully", zap.Int64("user_id", userID))
+	log.Info("GitHub App uninstalled successfully", zap.String("user_id", userID))
 	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(nil, "", reqID, helper.WithMessage("GitHub App uninstalled successfully")))
 }
 

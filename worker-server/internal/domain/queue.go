@@ -11,7 +11,7 @@ type RabbitMQ struct {
 
 // DeployJob represents a deployment job to be processed by the worker.
 type DeployJob struct {
-	DeploymentID int64  `json:"deployment_id"`
+	DeploymentID string `json:"deployment_id"`
 	CloneURL     string `json:"clone_url"`
 	RetryCount   int    `json:"retry_count"`
 	RequestID    string `json:"request_id"`
@@ -19,8 +19,10 @@ type DeployJob struct {
 
 // DeployStatusMessage represents a status update for a deployment.
 type DeployStatusMessage struct {
-	DeploymentID int64  `json:"deployment_id"`
+	DeploymentID string `json:"deployment_id"`
 	Status       string `json:"status"`
+	OutputURL    string `json:"output_url,omitempty"`
+	ErrorMessage string `json:"error_message,omitempty"`
 }
 
 // QueueUsecase defines the interface for queue operations.

@@ -23,7 +23,7 @@ import (
 const jwtExpiryMinutes = 10
 
 type deployJob struct {
-	DeploymentID  int64  `json:"deployment_id"`
+	DeploymentID  string `json:"deployment_id"`
 	CloneURL      string `json:"clone_url"`
 	CallbackQueue string `json:"callback_queue"`
 	RetryCount    int    `json:"retry_count"`
@@ -39,8 +39,10 @@ type deploymentUsecase struct {
 }
 
 type deploymentStatusUpdate struct {
-	DeploymentID int64  `json:"deployment_id"`
+	DeploymentID string `json:"deployment_id"`
 	Status       string `json:"status"`
+	OutputURL    string `json:"output_url"`
+	ErrorMessage string `json:"error_message"`
 }
 
 // NewDeploymentUsecase creates a new deployment use case
@@ -81,7 +83,7 @@ type githubRepoResponse struct {
 	CloneURL string `json:"clone_url"`
 }
 
-func (d *deploymentUsecase) publishJob(deploymentID int64, cloneURL, requestID string) error {
+func (d *deploymentUsecase) publishJob(deploymentID, cloneURL, requestID string) error {
 	job := deployJob{
 		DeploymentID:  deploymentID,
 		CloneURL:      cloneURL,
@@ -144,15 +146,25 @@ func (d *deploymentUsecase) consumeStatusUpdate() error {
 		if err := d.deploymentRepo.UpdateStatus(ctx, update.DeploymentID, domain.DeploymentStatus(update.Status)); err != nil {
 			zap.L().Error("failed to update deployment status", zap.Error(err))
 		}
+		if update.OutputURL != "" {
+			if err := d.deploymentRepo.UpdateOutputURL(ctx, update.DeploymentID, update.OutputURL); err != nil {
+				zap.L().Error("failed to update deployment output URL", zap.Error(err))
+			}
+		}
+		if update.ErrorMessage != "" {
+			if err := d.deploymentRepo.UpdateErrorMessage(ctx, update.DeploymentID, update.ErrorMessage); err != nil {
+				zap.L().Error("failed to update deployment error message", zap.Error(err))
+			}
+		}
 	}
 
 	return nil
 }
 
 //nolint:funlen
-func (d *deploymentUsecase) CreateDeployment(ctx context.Context, userID, repoID int64, requestID string) (*domain.Deployment, error) {
+func (d *deploymentUsecase) CreateDeployment(ctx context.Context, userID string, repoID int64, requestID string) (*domain.Deployment, error) {
 	log := appmiddleware.LoggerFromContext(ctx)
-	log.Info("Starting deployment creation", zap.Int64("user_id", userID), zap.Int64("repo_id", repoID))
+	log.Info("Starting deployment creation", zap.String("user_id", userID), zap.Int64("repo_id", repoID))
 
 	installation, err := d.githubRepo.GetInstallationByUserID(ctx, userID)
 	if err != nil {
@@ -276,14 +288,14 @@ func (d *deploymentUsecase) CreateDeployment(ctx context.Context, userID, repoID
 		return nil, err
 	}
 
-	log.Info("Deployment created successfully", zap.Int64("deployment_id", deployment.ID))
+	log.Info("Deployment created successfully", zap.String("deployment_id", deployment.ID))
 	return deployment, nil
 }
 
-func (d *deploymentUsecase) GetDeployments(ctx context.Context, userID int64) ([]domain.Deployment, error) {
+func (d *deploymentUsecase) GetDeployments(ctx context.Context, userID string) ([]domain.Deployment, error) {
 	return d.deploymentRepo.GetByUserID(ctx, userID)
 }
 
-func (d *deploymentUsecase) GetDeploymentByID(ctx context.Context, userID, deploymentID int64) (*domain.Deployment, error) {
+func (d *deploymentUsecase) GetDeploymentByID(ctx context.Context, userID, deploymentID string) (*domain.Deployment, error) {
 	return d.deploymentRepo.GetByID(ctx, userID, deploymentID)
 }

@@ -1,6 +1,6 @@
 -- +goose Up
 CREATE TABLE IF NOT EXISTS users (
-    id BIGSERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     provider_id BIGINT NOT NULL,
     provider TEXT NOT NULL,
     username TEXT NOT NULL,

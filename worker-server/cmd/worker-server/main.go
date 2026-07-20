@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"Zero_Devops/worker_server/internal/config"
+	deploymentRepo "Zero_Devops/worker_server/internal/deployments/repository/pgsql"
 	"Zero_Devops/worker_server/internal/logger"
 	"Zero_Devops/worker_server/internal/queue"
 	"Zero_Devops/worker_server/internal/upload"
@@ -102,8 +103,11 @@ func main() {
 		baseLogger.Fatal("failed to set up queues", zap.Error(err))
 	}
 
+	// Deployment Repository
+	depRepo := deploymentRepo.NewPgSQLDeploymentRepository(db)
+
 	// Worker Usecase
-	workerUsecase := worker.NewWorkerUsecase(queueClient, db, artifactUploader)
+	workerUsecase := worker.NewWorkerUsecase(queueClient, depRepo, artifactUploader)
 	if err := workerUsecase.StartWorker(baseLogger); err != nil {
 		baseLogger.Fatal("worker stopped", zap.Error(err))
 	}

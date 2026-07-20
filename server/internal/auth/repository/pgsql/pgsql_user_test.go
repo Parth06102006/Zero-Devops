@@ -133,11 +133,11 @@ func TestGetByID(t *testing.T) {
 	defer func() { _ = db.Close() }()
 
 	repo := NewPgSQLUserRepository(db)
-	got, err := repo.GetByID(context.Background(), 123)
+	got, err := repo.GetByID(context.Background(), "123")
 	if err != nil {
 		t.Fatalf("expected nil error, got %v", err)
 	}
-	if got.ID != 1 || got.Username != "octocat" {
+	if got.ID != "1" || got.Username != "octocat" {
 		t.Fatalf("unexpected user: %+v", got)
 	}
 }
@@ -150,7 +150,7 @@ func TestGetByID_NotFound(t *testing.T) {
 	defer func() { _ = db.Close() }()
 
 	repo := NewPgSQLUserRepository(db)
-	_, err := repo.GetByID(context.Background(), 123)
+	_, err := repo.GetByID(context.Background(), "123")
 	if err != domain.ErrNotFound {
 		t.Fatalf("expected ErrNotFound, got %v", err)
 	}
@@ -166,7 +166,7 @@ func TestStore(t *testing.T) {
 	if err := repo.Store(context.Background(), u); err != nil {
 		t.Fatalf("expected nil error, got %v", err)
 	}
-	if u.ID == 0 {
+	if u.ID == "" {
 		t.Fatal("expected user ID to be set")
 	}
 }
@@ -177,7 +177,7 @@ func TestUpdateRefreshToken(t *testing.T) {
 	defer func() { _ = db.Close() }()
 
 	repo := NewPgSQLUserRepository(db)
-	if err := repo.UpdateRefreshToken(context.Background(), 1, "new-token"); err != nil {
+	if err := repo.UpdateRefreshToken(context.Background(), "1", "new-token"); err != nil {
 		t.Fatalf("expected nil error, got %v", err)
 	}
 }

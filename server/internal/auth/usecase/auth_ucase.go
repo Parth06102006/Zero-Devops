@@ -89,7 +89,7 @@ func (a *authUsecase) HandleOAuthCallback(ctx context.Context, code, provider st
 		return nil, err
 	}
 
-	if existingUser.ID == 0 {
+	if existingUser.ID == "" {
 		userToSave := domain.User{
 			ProviderID: oauthUser.ProviderID,
 			Provider:   oauthUser.Provider,
@@ -150,7 +150,7 @@ func (a *authUsecase) RefreshToken(ctx context.Context, refreshToken string) (*d
 	if !ok {
 		return nil, domain.ErrInvalidToken
 	}
-	userID := int64(claims[claimUserID].(float64))
+	userID := claims[claimUserID].(string)
 
 	user, err := a.userRepo.GetByID(ctx, userID)
 	if err != nil {
@@ -202,11 +202,10 @@ func (a *authUsecase) Logout(ctx context.Context, accessToken string) error {
 		return domain.ErrInvalidToken
 	}
 
-	userIDFloat, ok := claims[claimUserID].(float64)
+	userID, ok := claims[claimUserID].(string)
 	if !ok {
 		return domain.ErrInvalidToken
 	}
-	userID := int64(userIDFloat)
 
 	err = a.userRepo.UpdateRefreshToken(ctx, userID, "")
 
@@ -240,11 +239,10 @@ func (a *authUsecase) GetCurrentUser(ctx context.Context, accessToken string) (d
 		return domain.UserResponse{}, domain.ErrInvalidToken
 	}
 
-	userIDFloat, ok := claims[claimUserID].(float64)
+	userID, ok := claims[claimUserID].(string)
 	if !ok {
 		return domain.UserResponse{}, domain.ErrInvalidToken
 	}
-	userID := int64(userIDFloat)
 
 	user, err := a.userRepo.GetByID(ctx, userID)
 

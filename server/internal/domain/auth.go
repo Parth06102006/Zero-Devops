@@ -22,7 +22,7 @@ type OAuthUser struct {
 
 // UserResponse represents the public user data returned to clients
 type UserResponse struct {
-	ID        int64  `json:"id"`
+	ID        string `json:"id"`
 	Provider  string `json:"provider"`
 	Username  string `json:"username"`
 	Email     string `json:"email"`

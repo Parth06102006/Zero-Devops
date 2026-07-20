@@ -3,8 +3,8 @@ package worker
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
+	"fmt"
 
 	"Zero_Devops/worker_server/internal/deployments"
 	"Zero_Devops/worker_server/internal/domain"
@@ -18,15 +18,15 @@ import (
 
 type workerUsecase struct {
 	queueClient      domain.QueueUsecase
-	db               *sql.DB
+	repo             domain.DeploymentRepository
 	artifactUploader domain.UploadUsecase
 }
 
 // NewWorkerUsecase creates a new WorkerUsecase with the given dependencies.
-func NewWorkerUsecase(queueClient domain.QueueUsecase, db *sql.DB, artifactUploader domain.UploadUsecase) domain.WorkerUsecase {
+func NewWorkerUsecase(queueClient domain.QueueUsecase, repo domain.DeploymentRepository, artifactUploader domain.UploadUsecase) domain.WorkerUsecase {
 	return &workerUsecase{
 		queueClient:      queueClient,
-		db:               db,
+		repo:             repo,
 		artifactUploader: artifactUploader,
 	}
 }
@@ -79,7 +79,7 @@ func (w *workerUsecase) StartWorker(baseLogger *zap.Logger) error {
 
 		logger.Info("received deploy job message", zap.Uint64("delivery_tag", msg.DeliveryTag))
 
-		err := deployments.ProcessDeployment(ctx, w.db, job, w.artifactUploader, w.queueClient, job.RetryCount, logger)
+		err := deployments.ProcessDeployment(ctx, w.repo, job, w.artifactUploader, w.queueClient, job.RetryCount, logger)
 
 		maxRetriesCount := viper.GetInt("MAX_RETRIES_COUNT")
 
@@ -88,9 +88,20 @@ func (w *workerUsecase) StartWorker(baseLogger *zap.Logger) error {
 		}
 
 		if err != nil {
-			logger.Error("deployment job failed", zap.Int64("deployment_id", job.DeploymentID), zap.Error(err))
+			logger.Error("deployment job failed", zap.String("deployment_id", job.DeploymentID), zap.Error(err))
 			job.RetryCount++
 			if job.RetryCount >= maxRetriesCount {
+				errMsg := fmt.Sprintf("max retries (%d) exceeded: %s", maxRetriesCount, err.Error())
+				if err := w.repo.MarkCanceled(ctx, job.DeploymentID, errMsg); err != nil {
+					logger.Error("failed to mark deployment as canceled", zap.Error(err))
+				}
+				if pubErr := w.queueClient.PublishStatusUpdate(domain.DeployStatusMessage{
+					DeploymentID: job.DeploymentID,
+					Status:       "canceled",
+					ErrorMessage: errMsg,
+				}); pubErr != nil {
+					logger.Error("failed to publish canceled status", zap.Error(pubErr))
+				}
 				if nackErr := msg.Nack(false, false); nackErr != nil {
 					logger.Error("failed to nack message", zap.Error(nackErr))
 				}
@@ -108,7 +119,7 @@ func (w *workerUsecase) StartWorker(baseLogger *zap.Logger) error {
 			continue
 		}
 
-		logger.Info("deployment job completed", zap.Int64("deployment_id", job.DeploymentID))
+		logger.Info("deployment job completed", zap.String("deployment_id", job.DeploymentID))
 		if ackErr := msg.Ack(false); ackErr != nil {
 			logger.Error("failed to ack message", zap.Error(ackErr))
 		}
