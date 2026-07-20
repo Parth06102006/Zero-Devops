@@ -32,6 +32,7 @@ func (m *mockUserRepository) GetByID(_ context.Context, id string) (domain.User,
 }
 
 func (m *mockUserRepository) GetByUsername(_ context.Context, username string) (domain.User, error) {
+	//nolint:gocritic
 	for _, user := range m.users {
 		if user.Username == username {
 			return user, nil
