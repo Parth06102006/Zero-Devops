@@ -6,12 +6,9 @@ root = "."
 tmp_dir = "tmp_app"
 
 [build]
-# Just plain old shell command. You could use `make` as well.
-cmd = "go build -o ./tmp_app/app/engine.exe ./cmd/server/."
-# Binary file yields from `cmd`.
-bin = "./tmp_app/app/engine.exe"
-# Customize binary.
-full_bin = "./tmp_app/app/engine.exe"
+# Just plain old shell command. You could use `make' as well.
+cmd = "go build -trimpath -o ./tmp_app/engine ./cmd/server/."
+entrypoint = ["./tmp_app/engine"]
 # This log file places in your tmp_dir.
 log = "air_errors.log"
 # Watch these filename extensions.
@@ -20,6 +17,10 @@ include_ext = ["go", "yaml", "toml"]
 exclude_dir = ["tmp_app", "tmp"]
 # It's not necessary to trigger build each time file changes if it's too frequent.
 delay = 1000 # ms
+
+[build.windows]
+cmd = "go build -trimpath -o tmp_app\\engine.exe .\\cmd\\server\\."
+entrypoint = ["tmp_app\\engine.exe"]
 
 [log]
 # Show log time

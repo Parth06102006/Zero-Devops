@@ -1,6 +1,7 @@
 services:
   pgsql:
     image: postgres:17-alpine
+    container_name: zero_devops_pgsql
     restart: always
     environment:
       - POSTGRES_DB=${DATABASE_NAME}

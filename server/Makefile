@@ -32,7 +32,7 @@ include ./misc/make/help.Makefile
 
 # ~~~ Development Environment ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-up: dev-env dev-air             ## Startup / Spinup Docker Compose and air
+up: dev-air                     ## Startup / Spinup Docker Compose and air
 down: docker-stop               ## Stop Docker
 destroy: docker-teardown clean  ## Teardown (removes volumes, tmp files, etc...)
 
@@ -43,6 +43,8 @@ deps:
 
 dev-env: ## Bootstrap Environment (with a Docker-Compose help).
 	@ docker-compose up -d --build pgsql
+	@ echo "Waiting for pgsql to be healthy..."
+	@ until docker inspect --format='{{.State.Health.Status}}' zero_devops_pgsql 2>/dev/null | grep -q "healthy"; do sleep 1; done
 	@ if [ -n "$$(docker ps -q -f name=zero_devops_rabbitmq)" ]; then \
 		echo "RabbitMQ is already running."; \
 	elif [ -n "$$(docker ps -a -q -f name=zero_devops_rabbitmq)" ]; then \
@@ -52,12 +54,17 @@ dev-env: ## Bootstrap Environment (with a Docker-Compose help).
 		echo "Creating and starting RabbitMQ container..."; \
 		docker-compose up -d --build rabbitmq; \
 	fi
+	@ echo "Waiting for rabbitmq to be healthy..."
+	@ until docker inspect --format='{{.State.Health.Status}}' zero_devops_rabbitmq 2>/dev/null | grep -q "healthy"; do sleep 1; done
 
 dev-env-test: dev-env ## Run application (within a Docker-Compose help)
 	@ $(MAKE) image-build
 	docker-compose up web
 
-dev-air: $(AIR) ## Starts AIR ( Continuous Development app).
+dev-air: dev-env build $(AIR) ## Starts AIR ( Continuous Development app).
+	@ if [ "$(OS)" = "Windows_NT" ]; then \
+		export PATH="$$PATH:/c/Windows/System32/WindowsPowerShell/v1.0"; \
+	fi
 	air
 
 docker-stop:
@@ -81,12 +88,12 @@ lint: $(GOLANGCI) ## Runs golangci-lint with predefined configuration
 # todo(butuzov): add additional flags to compiler to have an `version` flag.
 build: ## Builds binary
 	@ printf "Building aplication... "
-	@ go build -trimpath -o engine ./cmd/server/
+	@ go build -trimpath -o engine$(EXE) ./cmd/server/
 	@ echo "done"
 
 build-race: ## Builds binary (with -race flag)
 	@ printf "Building aplication with race flag... "
-	@ go build -trimpath -race -o engine ./cmd/server/
+	@ go build -trimpath -race -o engine$(EXE) ./cmd/server/
 	@ echo "done"
 
 
