@@ -1,0 +1,13 @@
+steps:
+  # Build with Google Cloud Buildpacks (auto-detects Go, no Dockerfile needed)
+  - name: 'gcr.io/k8s-skaffold/pack'
+    entrypoint: 'pack'
+    args:
+      - 'build'
+      - '$_ARTIFACT_REGISTRY/zero-devops-worker:$SHORT_SHA'
+      - '--builder=gcr.io/buildpacks/builder:latest'
+      - '--publish'
+    dir: 'worker-server'
+
+images:
+  - '$_ARTIFACT_REGISTRY/zero-devops-worker:$SHORT_SHA'

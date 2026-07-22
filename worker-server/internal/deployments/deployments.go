@@ -2,10 +2,8 @@
 package deployments
 
 import (
-	"bufio"
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -18,7 +16,6 @@ import (
 
 	"Zero_Devops/worker_server/internal/domain"
 
-	"github.com/moby/go-archive"
 	"github.com/moby/moby/client"
 	"go.uber.org/zap"
 )
@@ -143,46 +140,63 @@ func writeDockerfile(repoPath string, builder *Builder, pm string) error {
 	return os.WriteFile(filepath.Join(repoPath, templateDockerfile), []byte(content), 0o600) //nolint:mnd // file permission
 }
 
-func buildImage(ctx context.Context, cli *client.Client, repoPath, imageTag string) error {
-	buildCtx, err := archive.TarWithOptions(repoPath, &archive.TarOptions{})
-	if err != nil {
-		return err
-	}
-	defer func() { _ = buildCtx.Close() }()
+// packBuild uses Google Cloud Buildpacks via the `pack` CLI to build a container image.
+// It auto-detects the language/runtime (Go, Node.js, Python, etc.) from the repo contents.
+func packBuild(ctx context.Context, repoPath, imageTag string) error {
+	//nolint:gosec // repoPath is from cloneRepo which validates the URL
+	cmd := exec.CommandContext(ctx, "pack", "build", imageTag,
+		"--builder=gcr.io/buildpacks/builder:latest",
+		"--path="+repoPath,
+	)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
 
-	opts := client.ImageBuildOptions{
-		Dockerfile: templateDockerfile,
-		Tags:       []string{imageTag},
-		Remove:     true,
-	}
-
-	result, err := cli.ImageBuild(ctx, buildCtx, opts)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = result.Body.Close() }()
-
-	scanner := bufio.NewScanner(result.Body)
-	var lastLine string
-	for scanner.Scan() {
-		lastLine = scanner.Text()
-		fmt.Println(lastLine)
-	}
-	if err := scanner.Err(); err != nil {
-		return err
-	}
-
-	var errCheck struct {
-		Error string `json:"error"`
-	}
-	if lastLine != "" {
-		_ = json.Unmarshal([]byte(lastLine), &errCheck)
-	}
-	if errCheck.Error != "" {
-		return fmt.Errorf("build failed: %s", errCheck.Error)
-	}
-
-	return nil
+// dockerBuild builds the image using the local Docker daemon with a generated Dockerfile.
+//
+//	func buildImage(ctx context.Context, cli *client.Client, repoPath, imageTag string) error {
+//		buildCtx, err := archive.TarWithOptions(repoPath, &archive.TarOptions{})
+//		if err != nil {
+//			return err
+//		}
+//		defer func() { _ = buildCtx.Close() }()
+//
+//		opts := client.ImageBuildOptions{
+//			Dockerfile: templateDockerfile,
+//			Tags:       []string{imageTag},
+//			Remove:     true,
+//		}
+//
+//		result, err := cli.ImageBuild(ctx, buildCtx, opts)
+//		if err != nil {
+//			return err
+//		}
+//		defer func() { _ = result.Body.Close() }()
+//
+//		scanner := bufio.NewScanner(result.Body)
+//		var lastLine string
+//		for scanner.Scan() {
+//			lastLine = scanner.Text()
+//			fmt.Println(lastLine)
+//		}
+//		if err := scanner.Err(); err != nil {
+//			return err
+//		}
+//
+//		var errCheck struct {
+//			Error string `json:"error"`
+//		}
+//		if lastLine != "" {
+//			_ = json.Unmarshal([]byte(lastLine), &errCheck)
+//		}
+//		if errCheck.Error != "" {
+//			return fmt.Errorf("build failed: %s", errCheck.Error)
+//		}
+//		return nil
+//	}
+func buildImage(ctx context.Context, _ *client.Client, repoPath, imageTag string) error {
+	return packBuild(ctx, repoPath, imageTag)
 }
 
 func saveImageTar(ctx context.Context, cli *client.Client, imageTag, tarPath string) error {
@@ -231,7 +245,7 @@ func prepareAndMarkBuilding(
 	return publishStatusUpdate(queueUsecase, job.DeploymentID, "building", "", "")
 }
 
-func cloneAndPrepare(repoPath string, job domain.DeployJob, logger *zap.Logger) (string, error) {
+func cloneAndPrepare(repoPath string, job domain.DeployJob, logger *zap.Logger, useBuildpacks bool) (string, error) {
 	logger.Info("detecting framework", zap.String("deployment_id", job.DeploymentID))
 	builder, err := detectFramework(repoPath)
 	if err != nil {
@@ -239,6 +253,11 @@ func cloneAndPrepare(repoPath string, job domain.DeployJob, logger *zap.Logger) 
 	}
 	pm := detectPackageManager(repoPath)
 	logger.Info("framework detected", zap.String("deployment_id", job.DeploymentID), zap.String("framework", builder.Name), zap.String("package_manager", pm))
+
+	if useBuildpacks {
+		logger.Info("using Google Cloud Buildpacks for build", zap.String("deployment_id", job.DeploymentID))
+		return pm, nil
+	}
 
 	if builder.Name != builderDocker {
 		logger.Info("writing Dockerfile from template", zap.String("deployment_id", job.DeploymentID), zap.String("template", builder.Template))
@@ -305,7 +324,7 @@ func ProcessDeployment(
 
 	defer func() { _ = os.RemoveAll(repoPath) }()
 
-	if _, err := cloneAndPrepare(repoPath, job, logger); err != nil {
+	if _, err := cloneAndPrepare(repoPath, job, logger, true); err != nil {
 		return markFailed(ctx, repo, job, queueUsecase, "clone/prepare failed: "+err.Error())
 	}
 
