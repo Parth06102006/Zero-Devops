@@ -6,15 +6,14 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = []
-  bin = "./tmp/worker-engine.exe"
-  cmd = "go build -o ./tmp/worker-engine.exe ./app/"
+  entrypoint = ["./tmp/worker-engine"]
+  cmd = "go build -trimpath -o ./tmp/worker-engine ./cmd/worker-server/"
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata"]
   exclude_file = []
   exclude_regex = ["_test.go"]
   exclude_unchanged = false
   follow_symlink = false
-  full_bin = ""
   include_dir = []
   include_ext = ["go", "tpl", "tmpl", "html"]
   include_file = []
@@ -26,6 +25,10 @@ tmp_dir = "tmp"
   rerun_delay = 500
   send_interrupt = false
   stop_on_error = false
+
+[build.windows]
+  cmd = "go build -trimpath -o tmp\\worker-engine.exe .\\cmd\\worker-server\\."
+  entrypoint = ["tmp\\worker-engine.exe"]
 
 [color]
   app = ""

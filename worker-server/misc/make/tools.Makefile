@@ -59,17 +59,17 @@ bin/migrate$(EXE): bin
 	fi
 	@ echo "done."
 
-# ~~ [ air ] ~~~ https://github.com/cosmtrek/air ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~ [ air ] ~~~ https://github.com/air-verse/air ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 AIR := bin/air$(EXE)
 air: bin/air$(EXE) ## Installs air (go file watcher)
 
-bin/air$(EXE): VERSION := 1.15.1
-bin/air$(EXE): GITHUB  := cosmtrek/air
+bin/air$(EXE): VERSION := 1.67.1
+bin/air$(EXE): GITHUB  := air-verse/air
 bin/air$(EXE): bin
 	@ printf "Install air... "
 	@ if [ "$(IS_WINDOWS)" = "1" ]; then \
-		GOBIN="$(CURDIR)/bin" go install github.com/cosmtrek/air@v$(VERSION); \
+		GOBIN="$(CURDIR)/bin" go install github.com/air-verse/air@v$(VERSION); \
 	else \
 		curl -Ls https://github.com/$(GITHUB)/releases/download/v$(VERSION)/air_$(VERSION)_$(OSTYPE)_amd64.tar.gz | tar -zOxf - air > $@ && chmod +x $@; \
 	fi

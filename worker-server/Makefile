@@ -32,7 +32,7 @@ include ./misc/make/help.Makefile
 
 # ~~~ Development Environment ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-up: dev-env dev-air            ## Startup / Spinup Docker Compose and run worker with hot reload
+up: dev-air                    ## Startup / Spinup Docker Compose and run worker with hot reload
 down: docker-stop              ## Stop Docker
 destroy: docker-teardown clean ## Teardown (removes volumes, tmp files, etc...)
 
@@ -43,6 +43,8 @@ deps:
 
 dev-env: ## Bootstrap Environment (with Docker-Compose help).
 	@ docker-compose up -d --build postgres
+	@ echo "Waiting for postgres to be healthy..."
+	@ until docker inspect --format='{{.State.Health.Status}}' zero_devops_worker-server-postgres 2>/dev/null | grep -q "healthy"; do sleep 1; done
 	@ if [ -n "$$(docker ps -q -f name=zero_devops_rabbitmq)" ]; then \
 		echo "RabbitMQ is already running."; \
 	elif [ -n "$$(docker ps -a -q -f name=zero_devops_rabbitmq)" ]; then \
@@ -52,11 +54,16 @@ dev-env: ## Bootstrap Environment (with Docker-Compose help).
 		echo "Creating and starting RabbitMQ container..."; \
 		docker-compose up -d --build rabbitmq; \
 	fi
+	@ echo "Waiting for rabbitmq to be healthy..."
+	@ until docker inspect --format='{{.State.Health.Status}}' zero_devops_rabbitmq 2>/dev/null | grep -q "healthy"; do sleep 1; done
 
 dev-run: build ## Build and run the worker binary directly.
-	@ ./tmp/worker-engine
+	@ ./tmp/worker-engine$(EXE)
 
-dev-air: $(AIR) ## Starts AIR (Continuous Development app).
+dev-air: dev-env build $(AIR) ## Starts AIR (Continuous Development app).
+	@ if [ "$(OS)" = "Windows_NT" ]; then \
+		export PATH="$$PATH:/c/Windows/System32/WindowsPowerShell/v1.0"; \
+	fi
 	air
 
 docker-stop:
@@ -78,12 +85,12 @@ lint: $(GOLANGCI) ## Runs golangci-lint with predefined configuration
 #             https://golang.org/doc/articles/race_detector.html
 build: ## Builds worker-engine binary
 	@ printf "Building worker-engine... "
-	@ go build -trimpath -o ./tmp/worker-engine ./cmd/worker-server/
+	@ go build -trimpath -o ./tmp/worker-engine$(EXE) ./cmd/worker-server/
 	@ echo "done"
 
 build-race: ## Builds worker-engine binary (with -race flag)
 	@ printf "Building worker-engine with race flag... "
-	@ go build -trimpath -race -o ./tmp/worker-engine ./cmd/worker-server/
+	@ go build -trimpath -race -o ./tmp/worker-engine$(EXE) ./cmd/worker-server/
 	@ echo "done"
 
 go-generate: $(MOCKERY) ## Runs go generate ./...
@@ -151,7 +158,7 @@ clean: clean-artifacts clean-docker
 clean-artifacts: ## Removes Artifacts (*.out)
 	@printf "Cleaning artifacts... "
 	@rm -f *.out
-	@rm -f worker-engine
+	@rm -f worker-engine worker-engine.exe
 	@rm -f ./tmp/worker-engine ./tmp/worker-engine.exe
 	@echo "done."
 
