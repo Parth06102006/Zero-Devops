@@ -15,6 +15,7 @@ type DeployJob struct {
 	CloneURL     string `json:"clone_url"`
 	RetryCount   int    `json:"retry_count"`
 	RequestID    string `json:"request_id"`
+	BuildType    string `json:"build_type"`
 }
 
 // DeployStatusMessage represents a status update for a deployment.
