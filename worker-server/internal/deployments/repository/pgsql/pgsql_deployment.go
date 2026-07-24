@@ -19,18 +19,23 @@ func NewPgSQLDeploymentRepository(conn *sql.DB) domain.DeploymentRepository {
 
 func (m *pgSQLDeploymentRepository) Insert(ctx context.Context, job domain.DeployJob) error {
 	imageTag := fmt.Sprintf("deploy-%s:latest", job.DeploymentID)
+	buildType := job.BuildType
+	if buildType == "" {
+		buildType = "buildpacks"
+	}
 	query := `
-		INSERT INTO deployments (id, clone_url, status, retry_count, image_tag)
-		VALUES ($1, $2, 'pending', $3, $4)
+		INSERT INTO deployments (id, clone_url, status, retry_count, image_tag, build_type)
+		VALUES ($1, $2, 'pending', $3, $4, $5)
 		ON CONFLICT (id) DO UPDATE SET
 			clone_url = EXCLUDED.clone_url,
 			status = 'pending',
 			retry_count = EXCLUDED.retry_count,
 			image_tag = EXCLUDED.image_tag,
+			build_type = EXCLUDED.build_type,
 			updated_at = now()
 	`
 	_, err := m.Conn.ExecContext(ctx, query,
-		job.DeploymentID, job.CloneURL, job.RetryCount, imageTag,
+		job.DeploymentID, job.CloneURL, job.RetryCount, imageTag, buildType,
 	)
 	return err
 }

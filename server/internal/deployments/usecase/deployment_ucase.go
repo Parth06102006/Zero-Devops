@@ -28,6 +28,7 @@ type deployJob struct {
 	CallbackQueue string `json:"callback_queue"`
 	RetryCount    int    `json:"retry_count"`
 	RequestID     string `json:"request_id"`
+	BuildType     string `json:"build_type"`
 }
 
 type deploymentUsecase struct {
@@ -90,6 +91,7 @@ func (d *deploymentUsecase) publishJob(deploymentID, cloneURL, requestID string)
 		CallbackQueue: "deploy.status",
 		RetryCount:    0,
 		RequestID:     requestID,
+		BuildType:     "buildpacks",
 	}
 	body, err := json.Marshal(job)
 	if err != nil {
