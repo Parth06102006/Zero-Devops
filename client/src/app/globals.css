@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Design tokens — Zero DevOps
+  Graphite base with an electric-violet brand accent and a mint "healthy
+  deploy" signal color (deliberately distinct from the generic AI dark+clay
+  default). See design notes in project README.
+*/
+@layer base {
+  :root {
+    --background: 228 15% 6%;
+    --foreground: 220 20% 95%;
+
+    --surface: 228 12% 9%;
+    --surface-elevated: 228 10% 13%;
+
+    --border: 228 10% 18%;
+    --input: 228 10% 18%;
+    --ring: 249 83% 68%;
+
+    --card: 228 12% 9%;
+    --card-foreground: 220 20% 95%;
+
+    --popover: 228 10% 12%;
+    --popover-foreground: 220 20% 95%;
+
+    --primary: 249 83% 68%;
+    --primary-foreground: 220 30% 98%;
+
+    --secondary: 228 10% 13%;
+    --secondary-foreground: 220 20% 95%;
+
+    --muted: 228 10% 13%;
+    --muted-foreground: 220 9% 60%;
+
+    --accent: 249 83% 68%;
+    --accent-foreground: 220 30% 98%;
+
+    --success: 152 58% 52%;
+    --success-foreground: 228 15% 6%;
+
+    --warning: 38 92% 58%;
+    --warning-foreground: 228 15% 6%;
+
+    --destructive: 6 78% 62%;
+    --destructive-foreground: 220 30% 98%;
+
+    --radius: 0.625rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    @apply bg-primary/30 text-foreground;
+  }
+
+  /* Visible, consistent keyboard focus everywhere — accessibility floor. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .bg-grid {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.4) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.4) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .mask-fade-b {
+    mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
