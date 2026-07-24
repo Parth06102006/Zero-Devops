@@ -311,6 +311,9 @@ func ProcessDeployment(
 	if job.BuildType == "" {
 		job.BuildType = "buildpacks"
 	}
+	if job.BuildType != "docker" && job.BuildType != "buildpacks" {
+		return markFailed(ctx, repo, job, queueUsecase, "unsupported build type: "+job.BuildType)
+	}
 	if err := prepareAndMarkBuilding(ctx, repo, job, queueUsecase, retryCount, logger); err != nil {
 		return err
 	}
