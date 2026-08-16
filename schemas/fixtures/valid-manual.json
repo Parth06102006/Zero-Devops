@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "event_id": "manual-20260816-0001",
+  "deployment_id": "dep-01J5XYZDEF456",
+  "project_id": "proj-01J5XYZABC123",
+  "installation_id": 12345678,
+  "repository_id": 987654321,
+  "clone_url": "https://github.com/acme/web.git",
+  "commit_sha": "abcdef0123456789abcdef0123456789abcdef01",
+  "requested_ref": "main",
+  "trigger": "manual",
+  "generation": 8,
+  "retry_count": 0,
+  "correlation_id": "req-manual-20260816-0001",
+  "configuration": {
+    "executable": "bun",
+    "args": ["run", "build"],
+    "working_dir": ".",
+    "scanner_policy_version": "v1"
+  }
+}

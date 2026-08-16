@@ -4,6 +4,7 @@ package queue
 import (
 	"encoding/json"
 
+	"Zero_Devops/worker_server/internal/deployments/contract"
 	"Zero_Devops/worker_server/internal/domain"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -141,6 +142,15 @@ func (r *queueUsecase) PublishJob(job domain.DeployJob) error {
 			Body:         body,
 		},
 	)
+}
+
+// PublishBuildRequest publishes a complete deploy.jobs V1 request.
+func (r *queueUsecase) PublishBuildRequest(request contract.BuildRequestV1) error {
+	publishing, err := contract.Publishing(request)
+	if err != nil {
+		return err
+	}
+	return r.queueClient.Channel.Publish("", "deploy.jobs", false, false, publishing)
 }
 
 // PublishStatusUpdate publishes a deployment status message to the queue.

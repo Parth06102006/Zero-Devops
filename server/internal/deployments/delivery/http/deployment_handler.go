@@ -10,7 +10,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v5"
-	"go.uber.org/zap"
 )
 
 // DeploymentHandler handles deployment HTTP requests
@@ -35,7 +34,7 @@ func (h *DeploymentHandler) CreateDeployment(c *echo.Context) error {
 	reqID := middleware.GetRequestID(c)
 	log := middleware.LoggerFromContext(c.Request().Context())
 
-	userID, ok := authmiddleware.GetUserID(c)
+	_, ok := authmiddleware.GetUserID(c)
 	if !ok {
 		log.Warn("User ID not found in context")
 		return c.JSON(http.StatusUnauthorized, helper.BuildErrorResponse("user id not found", fmt.Errorf("user id not found in context"), reqID))
@@ -43,7 +42,7 @@ func (h *DeploymentHandler) CreateDeployment(c *echo.Context) error {
 
 	var req createDeploymentRequest
 	if err := c.Bind(&req); err != nil {
-		log.Warn("Invalid request body for deployment", zap.Error(err))
+		log.Warn("Invalid request body for deployment")
 		return c.JSON(http.StatusBadRequest, helper.BuildErrorResponse("invalid request body", err, reqID))
 	}
 
@@ -52,13 +51,12 @@ func (h *DeploymentHandler) CreateDeployment(c *echo.Context) error {
 		return c.JSON(http.StatusBadRequest, helper.BuildErrorResponse("repo_id is required", fmt.Errorf("repo_id is required"), reqID))
 	}
 
-	ctx := c.Request().Context()
-	deployment, err := h.dUsecase.CreateDeployment(ctx, userID, req.RepoID, reqID)
-	if err != nil {
-		log.Error("Failed to create deployment", zap.Error(err), zap.String("user_id", userID), zap.Int64("repo_id", req.RepoID))
-		return c.JSON(helper.GetStatusCode(err), helper.BuildErrorResponse(err.Error(), err, reqID))
-	}
+	// This legacy endpoint supplies only a repository ID. It cannot produce the
+	// complete, immutable deploy.jobs V1 contract, so publishing here would be
+	// unsafe. A project/manual-build API must supply all V1 fields first.
+	return c.JSON(http.StatusConflict, helper.BuildErrorResponse(
+		"legacy deploy requests are disabled: submit a complete V1 build request through the project build API",
+		fmt.Errorf("deploy.jobs V1 requires project, commit, configuration, scanner, and event metadata"), reqID,
+	))
 
-	log.Info("Deployment created successfully", zap.String("deployment_id", deployment.ID))
-	return c.JSON(http.StatusCreated, helper.BuildSuccessResponse(deployment, "Deployment created successfully", reqID))
 }

@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -72,9 +73,20 @@ func validateCloneURL(rawURL string) error {
 	return nil
 }
 
-func cloneRepo(cloneURL, deploymentID string) (string, error) {
+// commitSHAPattern matches a full immutable commit SHA. The contract already
+// validates this server-side; this is defense in depth before any git command
+// receives the value.
+var commitSHAPattern = regexp.MustCompile(`^[0-9a-f]{40}$`)
+
+// cloneRepo materializes the exact commitSHA in destPath. It never clones the
+// moving default-branch tip: the worktree is created from the immutable commit
+// the job was accepted for. GitHub supports fetching an arbitrary reachable SHA.
+func cloneRepo(cloneURL, deploymentID, commitSHA string) (string, error) {
 	if err := validateCloneURL(cloneURL); err != nil {
 		return "", fmt.Errorf("clone rejected: %w", err)
+	}
+	if !commitSHAPattern.MatchString(commitSHA) {
+		return "", fmt.Errorf("clone rejected: invalid commit SHA %q", commitSHA)
 	}
 
 	destPath := filepath.Join(buildRoot, deploymentID)
@@ -90,22 +102,40 @@ func cloneRepo(cloneURL, deploymentID string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), gitCloneTimeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "git", "clone", "--depth", "1", cloneURL, destPath) //nolint:gosec // cloneURL validated by validateCloneURL above
+	//nolint:gosec // cloneURL validated by validateCloneURL and commitSHA by commitSHAPattern above
+	commands := [][]string{
+		{"init", destPath},
+		{"-C", destPath, "remote", "add", "origin", cloneURL},
+		{"-C", destPath, "fetch", "--depth", "1", "origin", commitSHA},
+		{"-C", destPath, "checkout", "FETCH_HEAD"},
+	}
+	for _, args := range commands {
+		if err := runGit(ctx, args); err != nil {
+			return "", fmt.Errorf("git %s failed: %w", args[0], err)
+		}
+	}
+
+	return destPath, nil
+}
+
+// runGit executes a git command with the shared clone timeout and captures
+// stderr for diagnostics.
+func runGit(ctx context.Context, args []string) error {
+	cmd := exec.CommandContext(ctx, "git", args...) //nolint:gosec // arguments are constructed internally above
 
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
 		if ctx.Err() == context.DeadlineExceeded {
-			return "", err
+			return ctx.Err()
 		}
 		if stderr.Len() > 0 {
-			return "", fmt.Errorf("git clone failed: %s", stderr.String())
+			return errors.New(stderr.String())
 		}
-		return "", errors.New("git clone failed")
+		return err
 	}
-
-	return destPath, nil
+	return nil
 }
 
 func publishStatusUpdate(queueUsecase domain.QueueUsecase, deploymentID, status, outputURL, errorMessage string) error {
@@ -275,9 +305,9 @@ func ProcessDeployment(
 		return markFailed(ctx, repo, job, queueUsecase, "failed to read image tag: "+err.Error())
 	}
 
-	repoPath, err := cloneRepo(job.CloneURL, job.DeploymentID)
+	repoPath, err := cloneRepo(job.CloneURL, job.DeploymentID, job.CommitSHA)
 	if err != nil {
-		return markFailed(ctx, repo, job, queueUsecase, "git clone failed: "+err.Error())
+		return markFailed(ctx, repo, job, queueUsecase, "git checkout failed: "+err.Error())
 	}
 
 	defer func() { _ = os.RemoveAll(repoPath) }()

@@ -65,7 +65,7 @@ func TestCreateDeployment_InvalidBody(t *testing.T) {
 	}
 }
 
-func TestCreateDeployment_Success(t *testing.T) {
+func TestCreateDeployment_LegacyRequestFailsClosed(t *testing.T) {
 	e := echo.New()
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/deployments", bytes.NewBufferString(`{"repo_id":42}`))
 	req.Header.Set("Content-Type", "application/json")
@@ -73,23 +73,21 @@ func TestCreateDeployment_Success(t *testing.T) {
 	c := e.NewContext(req, rec)
 	c.Set(middleware.UserIDContextKey, "11")
 
-	want := &domain.Deployment{ID: "9", UserID: "11", RepoID: 42, Status: domain.DeploymentStatusPending}
-	h := &DeploymentHandler{
-		dUsecase: &mockDeploymentUsecase{
-			createFn: func(_ context.Context, userID string, repoID int64, _ string) (*domain.Deployment, error) {
-				if userID != "11" || repoID != 42 {
-					t.Fatalf("unexpected args userID=%s repoID=%d", userID, repoID)
-				}
-				return want, nil
-			},
+	h := &DeploymentHandler{dUsecase: &mockDeploymentUsecase{
+		createFn: func(_ context.Context, _ string, _ int64, _ string) (*domain.Deployment, error) {
+			t.Fatal("legacy handler must not call the use case")
+			return nil, nil
 		},
-	}
+	}}
 
 	if err := h.CreateDeployment(c); err != nil {
 		t.Fatalf("expected nil echo error, got %v", err)
 	}
-	if rec.Code != http.StatusCreated {
-		t.Fatalf("expected status %d, got %d", http.StatusCreated, rec.Code)
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("expected status %d, got %d", http.StatusConflict, rec.Code)
+	}
+	if !bytes.Contains(rec.Body.Bytes(), []byte("complete V1 build request")) {
+		t.Fatalf("missing actionable error: %s", rec.Body.String())
 	}
 }
 

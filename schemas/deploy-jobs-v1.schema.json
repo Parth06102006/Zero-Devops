@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zerodevops.dev/schemas/deploy-jobs-v1.schema.json",
+  "title": "DeployJobsV1",
+  "description": "Immutable RabbitMQ message contract for the deploy.jobs queue, shared between the server (producer) and worker-server (consumer). This file is the single source of truth. It is immutable once V1 ships: any breaking change is a new version (deploy-jobs-v2.schema.json) shipped alongside V1 for a bounded migration window; this file must never be edited in place.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "event_id",
+    "deployment_id",
+    "project_id",
+    "installation_id",
+    "repository_id",
+    "clone_url",
+    "commit_sha",
+    "trigger",
+    "generation",
+    "retry_count",
+    "correlation_id",
+    "configuration"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Message contract version. The body value is authoritative; the x-contract-version AMQP header is an advisory routing aid."
+    },
+    "event_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique event identifier. For webhook builds it is the GitHub delivery UUID; for manual builds it is the client idempotency key. Used as the AMQP message_id and for deduplication."
+    },
+    "deployment_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identifies exactly one build run (one deployments row)."
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identifies the durable selected/configured project that groups this build's history."
+    },
+    "installation_id": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "GitHub App installation ID. Authorization and token scoping derive from it."
+    },
+    "repository_id": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Numeric GitHub repository ID."
+    },
+    "clone_url": {
+      "type": "string",
+      "pattern": "^https://github\\.com/.+",
+      "description": "Immutable HTTPS clone source. The worker validates this URL defensively before running git."
+    },
+    "commit_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$",
+      "description": "Full immutable commit SHA. Mandatory and authoritative: the worker checks out this exact commit, never the moving branch head."
+    },
+    "requested_ref": {
+      "type": ["string", "null"],
+      "description": "The ref the build was requested from (branch ref for webhook pushes, user-supplied ref for manual builds). Mutable context only; never identifies a build."
+    },
+    "trigger": {
+      "type": "string",
+      "enum": ["manual", "webhook_push"],
+      "description": "How the build was triggered. Manual and webhook builds are never coalesced."
+    },
+    "generation": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Monotonic project desired-revision generation. Older generations must never become the project's current/latest result after a newer accepted revision."
+    },
+    "retry_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Delivery attempt count carried in the message so retries preserve the immutable V1 body."
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Correlation/request ID. Used as the AMQP correlation_id for tracing."
+    },
+    "configuration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["executable", "args", "working_dir", "scanner_policy_version"],
+      "properties": {
+        "executable": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Structured build command executable. Never an arbitrary sh -c string."
+        },
+        "args": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Argument array for the executable."
+        },
+        "working_dir": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Declared working directory for the build command."
+        },
+        "scanner_policy_version": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Version of the command scanner/policy that approved this configuration snapshot."
+        }
+      }
+    }
+  }
+}

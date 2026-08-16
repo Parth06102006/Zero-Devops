@@ -2,6 +2,7 @@
 package usecase
 
 import (
+	"Zero_Devops/server/internal/deployments/contract"
 	"Zero_Devops/server/internal/domain"
 	"context"
 	"encoding/json"
@@ -21,14 +22,6 @@ import (
 )
 
 const jwtExpiryMinutes = 10
-
-type deployJob struct {
-	DeploymentID  string `json:"deployment_id"`
-	CloneURL      string `json:"clone_url"`
-	CallbackQueue string `json:"callback_queue"`
-	RetryCount    int    `json:"retry_count"`
-	RequestID     string `json:"request_id"`
-}
 
 type deploymentUsecase struct {
 	deploymentRepo domain.DeploymentRepository
@@ -83,33 +76,21 @@ type githubRepoResponse struct {
 	CloneURL string `json:"clone_url"`
 }
 
-func (d *deploymentUsecase) publishJob(deploymentID, cloneURL, requestID string) error {
-	job := deployJob{
-		DeploymentID:  deploymentID,
-		CloneURL:      cloneURL,
-		CallbackQueue: "deploy.status",
-		RetryCount:    0,
-		RequestID:     requestID,
-	}
-	body, err := json.Marshal(job)
+// publishBuildRequestV1 is the only deploy.jobs producer. Callers must provide
+// every immutable input; legacy repo-only deployment requests are intentionally
+// rejected by the HTTP handler rather than being converted to this contract.
+func (d *deploymentUsecase) publishBuildRequestV1(job contract.BuildRequestV1) error {
+	publishing, err := contract.Publishing(job)
 	if err != nil {
-		return fmt.Errorf("failed to marshal deploy job: %w", err)
+		return fmt.Errorf("invalid deploy.jobs V1 request: %w", err)
+	}
+	if d.publishCh == nil {
+		return fmt.Errorf("deploy.jobs publisher is unavailable")
 	}
 
 	d.pubMutex.Lock()
 	defer d.pubMutex.Unlock()
-
-	return d.publishCh.Publish(
-		"",
-		"deploy.jobs",
-		false,
-		false,
-		amqp.Publishing{
-			ContentType:  "application/json",
-			Body:         body,
-			DeliveryMode: amqp.Persistent,
-		},
-	)
+	return d.publishCh.Publish("", "deploy.jobs", false, false, publishing)
 }
 
 func (d *deploymentUsecase) consumeStatusUpdate() error {
@@ -283,10 +264,8 @@ func (d *deploymentUsecase) CreateDeployment(ctx context.Context, userID string,
 		return nil, err
 	}
 
-	if err := d.publishJob(deployment.ID, repoData.CloneURL, requestID); err != nil {
-		log.Error("Failed to publish deployment job", zap.Error(err))
-		return nil, err
-	}
+	// This path is currently unreachable: POST /deploy fails closed because it
+	// lacks the required V1 immutable build inputs. Keep no legacy publisher.
 
 	log.Info("Deployment created successfully", zap.String("deployment_id", deployment.ID))
 	return deployment, nil

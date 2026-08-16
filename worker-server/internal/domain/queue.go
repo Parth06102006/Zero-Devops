@@ -1,7 +1,11 @@
 // Package domain defines core domain types and interfaces for the worker server.
 package domain
 
-import amqp "github.com/rabbitmq/amqp091-go"
+import (
+	"Zero_Devops/worker_server/internal/deployments/contract"
+
+	amqp "github.com/rabbitmq/amqp091-go"
+)
 
 // RabbitMQ holds the connection and channel for RabbitMQ messaging.
 type RabbitMQ struct {
@@ -13,6 +17,7 @@ type RabbitMQ struct {
 type DeployJob struct {
 	DeploymentID string `json:"deployment_id"`
 	CloneURL     string `json:"clone_url"`
+	CommitSHA    string `json:"commit_sha"`
 	RetryCount   int    `json:"retry_count"`
 	RequestID    string `json:"request_id"`
 }
@@ -31,5 +36,6 @@ type QueueUsecase interface {
 	Channel() *amqp.Channel
 	SetUpQueues() error
 	PublishJob(job DeployJob) error
+	PublishBuildRequest(request contract.BuildRequestV1) error
 	PublishStatusUpdate(status DeployStatusMessage) error
 }

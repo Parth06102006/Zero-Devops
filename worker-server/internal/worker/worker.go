@@ -3,15 +3,14 @@ package worker
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"Zero_Devops/worker_server/internal/deployments"
+	"Zero_Devops/worker_server/internal/deployments/contract"
 	"Zero_Devops/worker_server/internal/domain"
 
 	appMiddleware "Zero_Devops/worker_server/internal/middleware"
 
-	"github.com/google/uuid"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -59,27 +58,33 @@ func (w *workerUsecase) StartWorker(baseLogger *zap.Logger) error {
 	baseLogger.Info("Worker consumer registered. Listening for 'deploy.jobs' messages on RabbitMQ...")
 
 	for msg := range msgs {
-		var job domain.DeployJob
-
-		if err := json.Unmarshal(msg.Body, &job); err != nil {
-			baseLogger.Error("failed to decode deploy job", zap.Error(err))
+		request, err := contract.DecodeV1(msg.Body)
+		if err == nil {
+			err = contract.ValidateMetadata(request, msg.ContentType, msg.MessageId, msg.CorrelationId, msg.Headers)
+		}
+		if err != nil {
+			// requeue=false invokes the established deploy.jobs DLQ policy. Never
+			// interpret malformed/legacy requests as the former job shape.
+			baseLogger.Error("rejecting invalid deploy.jobs V1 message", zap.Error(err))
 			if nackErr := msg.Nack(false, false); nackErr != nil {
 				baseLogger.Error("failed to nack message", zap.Error(nackErr))
 			}
 			continue
 		}
-
-		reqID := job.RequestID
-		if reqID == "" {
-			reqID = uuid.NewString() // fallback if somehow missing/came from an untraced source
+		job := domain.DeployJob{
+			DeploymentID: request.DeploymentID,
+			CloneURL:     request.CloneURL,
+			CommitSHA:    request.CommitSHA,
+			RetryCount:   request.RetryCount,
+			RequestID:    request.CorrelationID,
 		}
 
-		logger := baseLogger.With(zap.String("request_id", reqID))
+		logger := baseLogger.With(zap.String("request_id", job.RequestID))
 		ctx := appMiddleware.WithLogger(context.Background(), logger)
 
 		logger.Info("received deploy job message", zap.Uint64("delivery_tag", msg.DeliveryTag))
 
-		err := deployments.ProcessDeployment(ctx, w.repo, job, w.artifactUploader, w.queueClient, job.RetryCount, logger)
+		err = deployments.ProcessDeployment(ctx, w.repo, job, w.artifactUploader, w.queueClient, job.RetryCount, logger)
 
 		maxRetriesCount := viper.GetInt("MAX_RETRIES_COUNT")
 
@@ -89,8 +94,9 @@ func (w *workerUsecase) StartWorker(baseLogger *zap.Logger) error {
 
 		if err != nil {
 			logger.Error("deployment job failed", zap.String("deployment_id", job.DeploymentID), zap.Error(err))
-			job.RetryCount++
-			if job.RetryCount >= maxRetriesCount {
+			request.RetryCount++
+			job.RetryCount = request.RetryCount
+			if request.RetryCount >= maxRetriesCount {
 				errMsg := fmt.Sprintf("max retries (%d) exceeded: %s", maxRetriesCount, err.Error())
 				if err := w.repo.MarkCanceled(ctx, job.DeploymentID, errMsg); err != nil {
 					logger.Error("failed to mark deployment as canceled", zap.Error(err))
@@ -106,7 +112,9 @@ func (w *workerUsecase) StartWorker(baseLogger *zap.Logger) error {
 					logger.Error("failed to nack message", zap.Error(nackErr))
 				}
 			} else {
-				if err := w.queueClient.PublishJob(job); err != nil {
+				// Preserve the accepted V1 body and envelope identity on retries. A
+				// legacy DeployJob cannot pass the fail-closed consumer validation.
+				if err := w.queueClient.PublishBuildRequest(request); err != nil {
 					if nackErr := msg.Nack(false, true); nackErr != nil {
 						logger.Error("failed to nack message", zap.Error(nackErr))
 					}

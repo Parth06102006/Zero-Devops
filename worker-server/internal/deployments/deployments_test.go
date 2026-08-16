@@ -93,6 +93,12 @@ func TestValidateCloneURL_RejectsNonGithubHost(t *testing.T) {
 	}
 }
 
+func TestCloneRepo_RejectsInvalidCommitSHA(t *testing.T) {
+	if _, err := cloneRepo("https://github.com/user/repo.git", "deployment-id", "not-a-sha"); err == nil {
+		t.Fatal("cloneRepo() = nil, want error for invalid commit SHA")
+	}
+}
+
 func TestValidateCloneURL_RejectsMalformedURL(t *testing.T) {
 	urls := []string{
 		":invalid",

@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"Zero_Devops/worker_server/internal/deployments/contract"
 	"Zero_Devops/worker_server/internal/domain"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -25,6 +26,10 @@ func (f *fakeQueueUsecase) SetUpQueues() error {
 }
 
 func (f *fakeQueueUsecase) PublishJob(_ domain.DeployJob) error {
+	return nil
+}
+
+func (f *fakeQueueUsecase) PublishBuildRequest(_ contract.BuildRequestV1) error {
 	return nil
 }
 
