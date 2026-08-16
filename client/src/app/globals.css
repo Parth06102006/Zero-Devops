@@ -1,0 +1,159 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 244 49% 14%;
+
+    --surface: 270 100% 99%;
+    --surface-elevated: 268 100% 96%;
+
+    --border: 266 62% 88%;
+    --input: 266 62% 88%;
+    --ring: 270 100% 65%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 244 49% 14%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 244 49% 14%;
+
+    --primary: 266 100% 59%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 268 100% 96%;
+    --secondary-foreground: 244 49% 14%;
+
+    --muted: 268 100% 96%;
+    --muted-foreground: 258 38% 36%;
+
+    --accent: 270 100% 65%;
+    --accent-foreground: 0 0% 100%;
+
+    --success: 152 58% 52%;
+    --success-foreground: 244 49% 14%;
+
+    --warning: 38 92% 58%;
+    --warning-foreground: 244 49% 14%;
+
+    --destructive: 6 78% 62%;
+    --destructive-foreground: 0 0% 100%;
+
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --background: 258 24% 14%;
+    --foreground: 230 20% 96%;
+
+    --surface: 258 22% 18%;
+    --surface-elevated: 258 20% 24%;
+
+    --border: 258 18% 30%;
+    --input: 258 18% 30%;
+    --ring: 270 100% 65%;
+
+    --card: 258 22% 18%;
+    --card-foreground: 230 20% 96%;
+
+    --popover: 258 22% 18%;
+    --popover-foreground: 230 20% 96%;
+
+    --primary: 270 100% 65%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 258 20% 24%;
+    --secondary-foreground: 230 20% 96%;
+
+    --muted: 258 18% 22%;
+    --muted-foreground: 258 14% 68%;
+
+    --accent: 266 100% 62%;
+    --accent-foreground: 0 0% 100%;
+
+    --success: 152 58% 52%;
+    --success-foreground: 258 24% 14%;
+
+    --warning: 38 92% 58%;
+    --warning-foreground: 258 24% 14%;
+
+    --destructive: 6 78% 62%;
+    --destructive-foreground: 230 20% 96%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  html:not(.dark) {
+    color-scheme: light;
+  }
+
+  body {
+    @apply text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+    text-rendering: optimizeLegibility;
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(ellipse 80% 60% at 50% -10%, hsl(var(--ring) / 0.16) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 82% 34%, hsl(var(--primary) / 0.1) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 50% at 18% 68%, hsl(var(--accent) / 0.1) 0%, transparent 50%);
+    background-size: 200% 200%;
+    background-attachment: fixed;
+    animation: gradient-shift 20s ease-in-out infinite alternate;
+  }
+
+  ::selection {
+    background-color: hsl(var(--primary) / 0.28);
+    color: hsl(var(--foreground));
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .bg-grid {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.4) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.4) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .mask-fade-b {
+    mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  }
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

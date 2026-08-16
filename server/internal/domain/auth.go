@@ -33,6 +33,7 @@ type UserResponse struct {
 type OAuthProvider interface {
 	ExchangeCode(ctx context.Context, code string) (string, error)
 	GetUser(ctx context.Context, accessToken string) (*OAuthUser, error)
+	OauthURL(state string) string
 }
 
 // AuthUsecase defines the interface for authentication use cases
@@ -41,4 +42,5 @@ type AuthUsecase interface {
 	RefreshToken(ctx context.Context, refreshToken string) (*TokenResponse, error)
 	GetCurrentUser(ctx context.Context, accessToken string) (UserResponse, error)
 	Logout(ctx context.Context, accessToken string) error
+	GithubOauthURL(ctx context.Context, state string) (string, error)
 }

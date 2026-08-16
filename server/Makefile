@@ -65,7 +65,7 @@ dev-air: dev-env build $(AIR) ## Starts AIR ( Continuous Development app).
 	@ if [ "$(OS)" = "Windows_NT" ]; then \
 		export PATH="$$PATH:/c/Windows/System32/WindowsPowerShell/v1.0"; \
 	fi
-	air
+	./$(AIR)
 
 docker-stop:
 	@ docker-compose down

@@ -216,6 +216,7 @@ func (a *authUsecase) Logout(ctx context.Context, accessToken string) error {
 	return nil
 }
 
+// Current Logged In User Details
 func (a *authUsecase) GetCurrentUser(ctx context.Context, accessToken string) (domain.UserResponse, error) {
 	log := appmiddleware.LoggerFromContext(ctx)
 
@@ -257,4 +258,18 @@ func (a *authUsecase) GetCurrentUser(ctx context.Context, accessToken string) (d
 		Email:     user.Email,
 		AvatarURL: user.AvatarURL,
 	}, nil
+}
+
+// Github AuthCodeURL
+func (a *authUsecase) GithubOauthURL(ctx context.Context, state string) (string, error) {
+	log := appmiddleware.LoggerFromContext(ctx)
+	p, ok := a.providers["github"]
+	if !ok {
+		log.Error("Provider not supported", zap.String("provider", "github"))
+		return "", domain.ErrProviderNotSupported
+	}
+
+	authCodeURL := p.OauthURL(state)
+
+	return authCodeURL, nil
 }

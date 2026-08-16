@@ -68,6 +68,7 @@ func TestSkipper(t *testing.T) {
 		expected bool
 	}{
 		{"/auth/github/login", true},
+		{"/auth/github/login/callback", true},
 		{"/auth/refresh", true},
 		{"/auth/user/me", false},
 		{"/other/path", false},
@@ -204,9 +205,9 @@ func TestAuthMiddleware_SkipsAuthPaths(t *testing.T) {
 	middlewareFunc := handler.AuthMiddleware(next)
 
 	e := echo.New()
-	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/auth/github/login", http.NoBody)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/auth/github/login/callback", http.NoBody)
 	c := e.NewContext(req, httptest.NewRecorder())
-	c.SetPath("/auth/github/login")
+	c.SetPath("/auth/github/login/callback")
 
 	err := middlewareFunc(c)
 	if err != nil {

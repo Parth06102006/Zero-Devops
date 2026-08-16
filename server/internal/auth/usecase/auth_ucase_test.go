@@ -85,6 +85,10 @@ func (m *mockOAuthProvider) GetUser(_ context.Context, _ string) (*domain.OAuthU
 	return m.user, nil
 }
 
+func (m *mockOAuthProvider) OauthURL(state string) string {
+	return "https://github.com/login/oauth/authorize?state=" + state
+}
+
 func setJWTSecret() {
 	viper.Set("JWT_SECRET", "test-secret-key-for-testing")
 }

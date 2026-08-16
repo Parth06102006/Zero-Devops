@@ -74,6 +74,7 @@ func (a *AuthMiddlewareHandler) Validator(c *echo.Context, token string) (string
 func isPublicPath(c *echo.Context) bool {
 	switch c.Path() {
 	case "/auth/github/login",
+		"/auth/github/login/callback",
 		"/auth/refresh":
 		return true
 	}

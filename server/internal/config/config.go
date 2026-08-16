@@ -9,7 +9,7 @@ import (
 )
 
 // LoadConfig configures application settings from an optional .env file and environment variables.
-// It panics if an existing .env file cannot be read.
+// It panics if an existing .envpw file cannot be read.
 func LoadConfig() {
 	viper.SetConfigFile(".env")
 	viper.SetConfigType("env")

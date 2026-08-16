@@ -47,13 +47,7 @@ func run() error {
 		}
 	}()
 
-	dbHost := viper.GetString("DATABASE_HOST")
-	dbPort := viper.GetString("DATABASE_PORT")
-	dbUser := viper.GetString("DATABASE_USER")
-	dbPass := viper.GetString("DATABASE_PASS")
-	dbName := viper.GetString("DATABASE_NAME")
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		dbHost, dbPort, dbUser, dbPass, dbName)
+	dsn := buildPostgresDSN()
 	dbConn, err := sql.Open("postgres", dsn)
 
 	if err != nil {
@@ -72,6 +66,7 @@ func run() error {
 
 	e := echo.New()
 
+	e.Use(middleware.NewCORS())
 	e.Use(middleware.RequestIDMiddleware)
 	e.Use(middleware.RequestLoggerMiddleware(baseLogger))
 
@@ -127,6 +122,16 @@ func run() error {
 	_deploymentHttp.NewDeploymentHandler(e, deploymentUsecase)
 
 	return e.Start(viper.GetString("SERVER_ADDRESS"))
+}
+
+func buildPostgresDSN() string {
+	dbHost := viper.GetString("DATABASE_HOST")
+	dbPort := viper.GetString("DATABASE_PORT")
+	dbUser := viper.GetString("DATABASE_USER")
+	dbPass := viper.GetString("DATABASE_PASS")
+	dbName := viper.GetString("DATABASE_NAME")
+	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		dbHost, dbPort, dbUser, dbPass, dbName)
 }
 
 func main() {

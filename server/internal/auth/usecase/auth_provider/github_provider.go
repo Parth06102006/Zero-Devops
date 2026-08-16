@@ -48,6 +48,10 @@ func (g *githubProvider) ExchangeCode(ctx context.Context, code string) (string,
 	return token.AccessToken, nil
 }
 
+func (g *githubProvider) OauthURL(state string) string {
+	return g.config.AuthCodeURL(state)
+}
+
 func (g *githubProvider) GetUser(ctx context.Context, accessToken string) (*domain.OAuthUser, error) {
 	client := g.config.Client(ctx, &oauth2.Token{AccessToken: accessToken})
 

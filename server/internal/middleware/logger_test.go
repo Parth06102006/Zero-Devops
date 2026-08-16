@@ -9,6 +9,8 @@ import (
 	"github.com/labstack/echo/v5"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap/zaptest/observer"
 )
 
 func TestRequestLoggerMiddleware_InjectsLogger(t *testing.T) {
@@ -69,5 +71,64 @@ func TestRequestLoggerMiddleware_ChainCallsNext(t *testing.T) {
 	}
 	if !called {
 		t.Error("expected next handler to be called")
+	}
+}
+
+func TestRequestLoggerMiddleware_LogsCompletedRequest(t *testing.T) {
+	core, recorded := observer.New(zapcore.InfoLevel)
+	base := zap.New(core)
+	e := echo.New()
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/health", http.NoBody)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	handler := RequestLoggerMiddleware(base)(func(c *echo.Context) error {
+		return c.String(http.StatusAccepted, "ok")
+	})
+
+	if err := handler(c); err != nil {
+		t.Fatal(err)
+	}
+
+	entries := recorded.FilterMessage("http request completed").All()
+	if len(entries) != 1 {
+		t.Fatalf("expected one completed request log, got %d", len(entries))
+	}
+	fields := entries[0].ContextMap()
+	if fields["method"] != http.MethodGet {
+		t.Errorf("expected method %q, got %v", http.MethodGet, fields["method"])
+	}
+	if fields["path"] != "/health" {
+		t.Errorf("expected path %q, got %v", "/health", fields["path"])
+	}
+	if fields["status"] != int64(http.StatusAccepted) {
+		t.Errorf("expected status %d, got %v", http.StatusAccepted, fields["status"])
+	}
+}
+
+func TestRequestLoggerMiddleware_LogsHTTPErrorStatus(t *testing.T) {
+	core, recorded := observer.New(zapcore.InfoLevel)
+	base := zap.New(core)
+	e := echo.New()
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	handler := RequestLoggerMiddleware(base)(func(_ *echo.Context) error {
+		return echo.NewHTTPError(http.StatusNotFound, "Not Found")
+	})
+
+	err := handler(c)
+	if err == nil {
+		t.Fatal("expected error")
+	}
+
+	entries := recorded.FilterMessage("http request failed").All()
+	if len(entries) != 1 {
+		t.Fatalf("expected one failed request log, got %d", len(entries))
+	}
+	fields := entries[0].ContextMap()
+	if fields["status"] != int64(http.StatusNotFound) {
+		t.Errorf("expected status %d, got %v", http.StatusNotFound, fields["status"])
 	}
 }

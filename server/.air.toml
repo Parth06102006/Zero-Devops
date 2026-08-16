@@ -25,6 +25,8 @@ entrypoint = ["tmp_app\\engine.exe"]
 [log]
 # Show log time
 time = true
+main_only = false
+silent = false
 
 [color]
 # Customize each part's color. If no color found, use the raw app log.
@@ -36,3 +38,7 @@ runner = "green"
 [misc]
 # Delete tmp directory on exit
 clean_on_exit = true
+
+[screen]
+clear_on_rebuild = false
+keep_scroll = true
