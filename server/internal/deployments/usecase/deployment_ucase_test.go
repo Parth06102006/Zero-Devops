@@ -61,6 +61,17 @@ type githubRepoMock struct {
 	getInstFn func(ctx context.Context, userID string) (*domain.GithubInstallation, error)
 }
 
+type installationTokenProviderMock struct {
+	createFn func(ctx context.Context, installationID int64) (string, error)
+}
+
+func (m *installationTokenProviderMock) CreateInstallationToken(ctx context.Context, installationID int64) (string, error) {
+	if m.createFn != nil {
+		return m.createFn(ctx, installationID)
+	}
+	return "test-token", nil
+}
+
 func (m *githubRepoMock) StoreInstallation(_ context.Context, _ *domain.GithubInstallation) error {
 	return nil
 }
@@ -86,7 +97,7 @@ func TestGetDeployments_PassesThrough(t *testing.T) {
 			}
 			return want, nil
 		},
-	}, &githubRepoMock{}, nil)
+	}, &githubRepoMock{}, &installationTokenProviderMock{}, nil)
 
 	got, err := uc.GetDeployments(context.Background(), "2")
 	if err != nil {
@@ -106,7 +117,7 @@ func TestGetDeploymentByID_PassesThrough(t *testing.T) {
 			}
 			return want, nil
 		},
-	}, &githubRepoMock{}, nil)
+	}, &githubRepoMock{}, &installationTokenProviderMock{}, nil)
 
 	got, err := uc.GetDeploymentByID(context.Background(), "2", "9")
 	if err != nil {

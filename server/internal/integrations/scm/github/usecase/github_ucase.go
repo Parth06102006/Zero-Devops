@@ -4,11 +4,16 @@ package usecase
 import (
 	"Zero_Devops/server/internal/domain"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 
 	appmiddleware "Zero_Devops/server/internal/middleware"
 
@@ -16,15 +21,29 @@ import (
 	"go.uber.org/zap"
 )
 
+const jwtExpiryMinutes = 10
+
 type githubAppUsecase struct {
-	githubRepo domain.GithubRepository
+	githubRepo       domain.GithubRepository
+	tokenProvider    domain.InstallationTokenProvider
+	repositoryClient domain.GithubRepositoryClient
+	redisClient      *redis.Client
 }
 
 // NewGithubAppUsecase creates a new GithubUsecase
-func NewGithubAppUsecase(githubRepo domain.GithubRepository) domain.GithubUsecase {
-	return &githubAppUsecase{
-		githubRepo: githubRepo,
+func NewGithubAppUsecase(githubRepo domain.GithubRepository, dependencies ...interface{}) domain.GithubUsecase {
+	usecase := &githubAppUsecase{githubRepo: githubRepo}
+	for _, dependency := range dependencies {
+		switch value := dependency.(type) {
+		case domain.InstallationTokenProvider:
+			usecase.tokenProvider = value
+		case domain.GithubRepositoryClient:
+			usecase.repositoryClient = value
+		case *redis.Client:
+			usecase.redisClient = value
+		}
 	}
+	return usecase
 }
 
 // GithubTokenResponse represents an OAuth token response from GitHub
@@ -155,4 +174,50 @@ func (g *githubAppUsecase) GetGithubAppInstallation(ctx context.Context, userID 
 
 func (g *githubAppUsecase) DeleteGithubApp(ctx context.Context, userID string) error {
 	return g.githubRepo.DeleteInstallationByUserID(ctx, userID)
+}
+
+func (g *githubAppUsecase) ListRepositories(ctx context.Context, userID, cursor, query string, perPage int) (*domain.RepositoryList, error) {
+	installation, err := g.githubRepo.GetInstallationByUserID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if installation.Status != domain.GithubInstallationStatusActive {
+		return nil, domain.ErrInvalidStatus
+	}
+
+	normalizedQuery := strings.Join(strings.Fields(strings.ToLower(query)), " ")
+	cacheKey := repositoryCacheKey(installation.InstallationID, cursor, normalizedQuery, perPage)
+	if g.redisClient != nil {
+		if cached, cacheErr := g.redisClient.Get(ctx, cacheKey).Bytes(); cacheErr == nil {
+			var result domain.RepositoryList
+			if json.Unmarshal(cached, &result) == nil {
+				return &result, nil
+			}
+		}
+	}
+
+	token, err := g.tokenProvider.CreateInstallationToken(ctx, installation.InstallationID)
+	if err != nil {
+		return nil, err
+	}
+	result, err := g.repositoryClient.ListRepositories(ctx, token, cursor, normalizedQuery, perPage)
+	if err != nil {
+		return nil, err
+	}
+	if g.redisClient != nil {
+		if payload, marshalErr := json.Marshal(result); marshalErr == nil {
+			ttl := time.Duration(viper.GetInt("REDIS_REPOSITORY_CACHE_TTL_SECONDS")) * time.Second
+			if ttl <= 0 {
+				ttl = 10 * time.Minute
+			}
+			_ = g.redisClient.Set(ctx, cacheKey, payload, ttl).Err()
+		}
+	}
+	return result, nil
+}
+
+func repositoryCacheKey(installationID int64, cursor, query string, perPage int) string {
+	input := strconv.FormatInt(installationID, 10) + "|" + cursor + "|" + query + "|" + strconv.Itoa(perPage)
+	sum := sha256.Sum256([]byte(input))
+	return "github:repositories:" + hex.EncodeToString(sum[:])
 }

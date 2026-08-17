@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -31,6 +32,7 @@ func NewSCMHandler(e *echo.Echo, gh domain.GithubUsecase) {
 	e.POST("/integration/scm/github/install", handler.Installation)
 	e.GET("/integration/scm/github/", handler.GetInstallation)
 	e.DELETE("/integration/scm/github/delete", handler.DeleteInstallation)
+	e.GET("/integrations/github/repositories", handler.ListRepositories)
 }
 
 // Installation handles GitHub App installation callback
@@ -91,7 +93,34 @@ func (inst *SCMHandler) GetInstallation(c *echo.Context) error {
 	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(installation, "", reqID))
 }
 
-// DeleteInstallation removes the current user's GitHub App installation
+// ListRepositories returns repositories available to the current user's installation
+func (inst *SCMHandler) ListRepositories(c *echo.Context) error {
+	reqID := middleware.GetRequestID(c)
+	userID, ok := authmiddleware.GetUserID(c)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, helper.BuildErrorResponse("user id not found", fmt.Errorf("user id not found in context"), reqID))
+	}
+
+	perPage := 30
+	if raw := strings.TrimSpace(c.QueryParam("per_page")); raw != "" {
+		parsed, err := strconv.Atoi(raw)
+		if err != nil || parsed < 1 {
+			return c.JSON(http.StatusBadRequest, helper.BuildErrorResponse("invalid per_page", domain.ErrBadParamInput, reqID))
+		}
+		perPage = parsed
+	}
+	if perPage > 100 {
+		perPage = 100
+	}
+
+	result, err := inst.scmUsecase.ListRepositories(c.Request().Context(), userID, strings.TrimSpace(c.QueryParam("cursor")), c.QueryParam("query"), perPage)
+	if err != nil {
+		return c.JSON(helper.GetStatusCode(err), helper.BuildErrorResponse(err.Error(), err, reqID))
+	}
+	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(result, "", reqID))
+}
+
+// DeleteInstallation handles removal of the current user's GitHub App installation
 func (inst *SCMHandler) DeleteInstallation(c *echo.Context) error {
 	reqID := middleware.GetRequestID(c)
 	log := middleware.LoggerFromContext(c.Request().Context())

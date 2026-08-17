@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	_authHttp "Zero_Devops/server/internal/auth/delivery/http"
@@ -19,8 +20,11 @@ import (
 	_deploymentUsecase "Zero_Devops/server/internal/deployments/usecase"
 	domain "Zero_Devops/server/internal/domain"
 	_appHttp "Zero_Devops/server/internal/integrations/scm/delivery/http"
+	_githubClient "Zero_Devops/server/internal/integrations/scm/github/client"
 	_githubRepo "Zero_Devops/server/internal/integrations/scm/github/repository/pgsql"
+	_tokenProvider "Zero_Devops/server/internal/integrations/scm/github/token"
 	_githubUsecase "Zero_Devops/server/internal/integrations/scm/github/usecase"
+
 	"Zero_Devops/server/internal/logger"
 	middleware "Zero_Devops/server/internal/middleware"
 	_queue "Zero_Devops/server/internal/queue"
@@ -28,6 +32,7 @@ import (
 	"github.com/labstack/echo/v5"
 	_ "github.com/lib/pq"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -64,6 +69,27 @@ func run() error {
 		return fmt.Errorf("failed to ping database: %w", err)
 	}
 
+	redisAddr := viper.GetString("REDIS_ADDR")
+	if redisAddr == "" {
+		redisAddr = "localhost:6379"
+	}
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     redisAddr,
+		Password: viper.GetString("REDIS_PASSWORD"),
+		DB:       viper.GetInt("REDIS_DB"),
+		Protocol: 2,
+	})
+
+	defer func() {
+		if err := rdb.Close(); err != nil {
+			log.Println("redis-db close failed", err)
+		}
+	}()
+
+	if _, err = rdb.Ping(ctx).Result(); err != nil {
+		log.Println("Redis unavailable; repository listing will bypass cache:", err)
+	}
+
 	e := echo.New()
 
 	e.Use(middleware.NewCORS())
@@ -82,6 +108,8 @@ func run() error {
 		viper.GetString("OAUTH_GITHUB_REDIRECT_URL"),
 	)
 
+	tokenProvider := _tokenProvider.NewInstallationTokenProvider(viper.GetString("GITHUB_APP_ID"), viper.GetString("GITHUB_APP_PRIVATE_KEY_PATH"))
+
 	providers := map[string]domain.OAuthProvider{
 		"github": githubProvider,
 	}
@@ -90,7 +118,8 @@ func run() error {
 	authUsecase := _authUcase.NewAuthUsecase(userRepo, providers, timeoutContext)
 	_authHttp.NewAuthHandler(e, authUsecase)
 
-	githubUsecase := _githubUsecase.NewGithubAppUsecase(githubRepo)
+	repositoryClient := _githubClient.NewRepositoryClient(http.DefaultClient)
+	githubUsecase := _githubUsecase.NewGithubAppUsecase(githubRepo, tokenProvider, repositoryClient, rdb)
 	_appHttp.NewSCMHandler(e, githubUsecase)
 
 	rmqConn, err := amqp.Dial(viper.GetString("RABBITMQ_CONNECTION_STRING"))
@@ -118,7 +147,7 @@ func run() error {
 	}
 
 	deploymentRepo := _deploymentRepo.NewPgSQLDeploymentRepository(dbConn)
-	deploymentUsecase := _deploymentUsecase.NewDeploymentUsecase(deploymentRepo, githubRepo, rmqConn)
+	deploymentUsecase := _deploymentUsecase.NewDeploymentUsecase(deploymentRepo, githubRepo, tokenProvider, rmqConn)
 	_deploymentHttp.NewDeploymentHandler(e, deploymentUsecase)
 
 	return e.Start(viper.GetString("SERVER_ADDRESS"))

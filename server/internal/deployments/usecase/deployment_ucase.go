@@ -9,15 +9,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"sync"
 	"time"
 
 	appmiddleware "Zero_Devops/server/internal/middleware"
-
-	"github.com/golang-jwt/jwt/v5"
+	
 	amqp "github.com/rabbitmq/amqp091-go"
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
@@ -26,6 +23,7 @@ const jwtExpiryMinutes = 10
 type deploymentUsecase struct {
 	deploymentRepo domain.DeploymentRepository
 	githubRepo     domain.GithubRepository
+	tokenProvider  domain.InstallationTokenProvider
 	rmqConn        *amqp.Connection
 	publishCh      *amqp.Channel
 	pubMutex       sync.Mutex
@@ -39,7 +37,7 @@ type deploymentStatusUpdate struct {
 }
 
 // NewDeploymentUsecase creates a new deployment use case
-func NewDeploymentUsecase(deploymentRepo domain.DeploymentRepository, githubRepo domain.GithubRepository, rmqConn *amqp.Connection) domain.DeploymentUsecase {
+func NewDeploymentUsecase(deploymentRepo domain.DeploymentRepository, githubRepo domain.GithubRepository, tokenProvider domain.InstallationTokenProvider ,rmqConn *amqp.Connection) domain.DeploymentUsecase {
 	var publishCh *amqp.Channel
 	var err error
 	if rmqConn != nil {
@@ -65,11 +63,6 @@ func NewDeploymentUsecase(deploymentRepo domain.DeploymentRepository, githubRepo
 	}
 
 	return uc
-}
-
-type installationTokenResponse struct {
-	Token     string `json:"token"`
-	ExpiresAt string `json:"expires_at"`
 }
 
 type githubRepoResponse struct {
@@ -153,65 +146,12 @@ func (d *deploymentUsecase) CreateDeployment(ctx context.Context, userID string,
 		return nil, err
 	}
 
-	appID := viper.GetInt64("GITHUB_APP_ID")
-	privateKeyPath := viper.GetString("GITHUB_APP_PRIVATE_KEY_PATH")
-
 	//nolint:gosec // path comes from trusted server config, not user input
-	privateKeyPEM, err := os.ReadFile(privateKeyPath)
-	if err != nil {
-		log.Error("Failed to read GitHub App private key", zap.Error(err))
-		return nil, err
-	}
 
-	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(privateKeyPEM)
-	if err != nil {
-		log.Error("Failed to parse GitHub App private key", zap.Error(err))
-		return nil, err
-	}
+	// I have added the token provider instllation token
 
-	now := time.Now()
-	jwtToken := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
-		"iat": now.Unix(),
-		"exp": now.Add(jwtExpiryMinutes * time.Minute).Unix(),
-		"iss": appID,
-	})
-
-	signedJWT, err := jwtToken.SignedString(privateKey)
-	if err != nil {
-		log.Error("Failed to sign JWT", zap.Error(err))
-		return nil, err
-	}
-
-	tokenURL := fmt.Sprintf("https://api.github.com/app/installations/%d/access_tokens", installation.InstallationID)
-	tokenReq, err := http.NewRequestWithContext(ctx, http.MethodPost, tokenURL, http.NoBody)
-	if err != nil {
-		log.Error("Failed to create token request", zap.Error(err))
-		return nil, err
-	}
-	tokenReq.Header.Set("Authorization", "Bearer "+signedJWT)
-	tokenReq.Header.Set("Accept", "application/vnd.github+json")
-
-	tokenResp, err := http.DefaultClient.Do(tokenReq)
-	if err != nil {
-		log.Error("Failed to get installation token", zap.Error(err))
-		return nil, err
-	}
-	defer func() {
-		if err := tokenResp.Body.Close(); err != nil {
-			log.Error("failed to close token response body", zap.Error(err))
-		}
-	}()
-
-	if tokenResp.StatusCode != http.StatusCreated {
-		log.Error("Unexpected status from GitHub token API", zap.Int("status", tokenResp.StatusCode))
-		return nil, fmt.Errorf("github token API returned status %d", tokenResp.StatusCode)
-	}
-
-	var tokenData installationTokenResponse
-	if err := json.NewDecoder(tokenResp.Body).Decode(&tokenData); err != nil {
-		log.Error("Failed to decode token response", zap.Error(err))
-		return nil, err
-	}
+	token , err := d.tokenProvider.CreateInstallationToken(ctx,installation.InstallationID)
+	
 
 	repoURL := fmt.Sprintf("https://api.github.com/repositories/%d", repoID)
 	repoReq, err := http.NewRequestWithContext(ctx, http.MethodGet, repoURL, http.NoBody)
@@ -219,7 +159,7 @@ func (d *deploymentUsecase) CreateDeployment(ctx context.Context, userID string,
 		log.Error("Failed to create repo request", zap.Error(err))
 		return nil, err
 	}
-	repoReq.Header.Set("Authorization", "Bearer "+tokenData.Token)
+	repoReq.Header.Set("Authorization", "Bearer "+token)
 	repoReq.Header.Set("Accept", "application/vnd.github+json")
 
 	repoResp, err := http.DefaultClient.Do(repoReq)

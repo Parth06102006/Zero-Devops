@@ -32,6 +32,7 @@ type GithubUsecase interface {
 	InstallGithubApp(ctx context.Context, client *http.Client, code string, userID string) error
 	DeleteGithubApp(ctx context.Context, userID string) error
 	GetGithubAppInstallation(ctx context.Context, userID string) (*GithubInstallation, error)
+	ListRepositories(ctx context.Context, userID, cursor, query string, perPage int) (*RepositoryList, error)
 }
 
 // GithubRepository defines the interface for GitHub installation data operations
@@ -40,4 +41,27 @@ type GithubRepository interface {
 	GetInstallationByUserID(ctx context.Context, userID string) (*GithubInstallation, error)
 	DeleteInstallationByUserID(ctx context.Context, userID string) error
 	UpdateInstallationStatus(ctx context.Context, userID string, status string) error
+}
+
+type InstallationTokenProvider interface {
+	CreateInstallationToken(ctx context.Context, installationID int64) (string, error)
+}
+
+type RepositoryPicker struct {
+	ID            int64  `json:"id"`
+	Owner         string `json:"owner"`
+	Name          string `json:"name"`
+	FullName      string `json:"full_name"`
+	DefaultBranch string `json:"default_branch"`
+	CloneURL      string `json:"clone_url"`
+	Private       bool   `json:"private"`
+}
+
+type RepositoryList struct {
+	Repositories []RepositoryPicker `json:"repositories"`
+	NextCursor   string             `json:"next_cursor,omitempty"`
+}
+
+type GithubRepositoryClient interface {
+	ListRepositories(ctx context.Context, installationToken, cursor, query string, perPage int) (*RepositoryList, error)
 }

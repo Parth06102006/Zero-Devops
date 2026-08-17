@@ -9,15 +9,17 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/labstack/echo/v5"
 )
 
 type mockGithubUsecase struct {
-	installFn func(ctx context.Context, client *http.Client, code string, userID string) error
-	getFn     func(ctx context.Context, userID string) (*domain.GithubInstallation, error)
-	deleteFn  func(ctx context.Context, userID string) error
+	installFn          func(ctx context.Context, client *http.Client, code string, userID string) error
+	getFn              func(ctx context.Context, userID string) (*domain.GithubInstallation, error)
+	deleteFn           func(ctx context.Context, userID string) error
+	listRepositoriesFn func(ctx context.Context, userID, cursor, query string, perPage int) (*domain.RepositoryList, error)
 }
 
 func (m *mockGithubUsecase) InstallGithubApp(ctx context.Context, client *http.Client, code, userID string) error {
@@ -39,6 +41,13 @@ func (m *mockGithubUsecase) DeleteGithubApp(ctx context.Context, userID string) 
 		return m.deleteFn(ctx, userID)
 	}
 	return nil
+}
+
+func (m *mockGithubUsecase) ListRepositories(ctx context.Context, userID, cursor, query string, perPage int) (*domain.RepositoryList, error) {
+	if m.listRepositoriesFn != nil {
+		return m.listRepositoriesFn(ctx, userID, cursor, query, perPage)
+	}
+	return nil, nil
 }
 
 func newSCMTestContext(method, target string) (*httptest.ResponseRecorder, *echo.Context) {
@@ -200,6 +209,44 @@ func TestDeleteInstallation_Success(t *testing.T) {
 	}
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected status %d, got %d", http.StatusOK, rec.Code)
+	}
+}
+
+func TestListRepositories_MissingUserID(t *testing.T) {
+	handler := &SCMHandler{scmUsecase: &mockGithubUsecase{}}
+	rec, c := newSCMTestContext(http.MethodGet, "/integrations/github/repositories")
+
+	if err := handler.ListRepositories(c); err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("expected status %d, got %d", http.StatusUnauthorized, rec.Code)
+	}
+}
+
+func TestListRepositories_PassesBoundedParameters(t *testing.T) {
+	var gotUserID, gotCursor, gotQuery string
+	var gotPerPage int
+	handler := &SCMHandler{scmUsecase: &mockGithubUsecase{
+		listRepositoriesFn: func(_ context.Context, userID, cursor, query string, perPage int) (*domain.RepositoryList, error) {
+			gotUserID, gotCursor, gotQuery, gotPerPage = userID, cursor, query, perPage
+			return &domain.RepositoryList{Repositories: []domain.RepositoryPicker{{ID: 123, Owner: "acme", Name: "web", FullName: "acme/web", DefaultBranch: "main", CloneURL: "https://github.com/acme/web.git", Private: true}}, NextCursor: "opaque-value"}, nil
+		},
+	}}
+	rec, c := newSCMTestContext(http.MethodGet, "/integrations/github/repositories?cursor=opaque-value&per_page=200&query=%20Acme%20%20Web%20")
+	setUserID(c, "42")
+
+	if err := handler.ListRepositories(c); err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if gotUserID != "42" || gotCursor != "opaque-value" || gotQuery != " Acme  Web " || gotPerPage != 100 {
+		t.Fatalf("unexpected arguments user=%q cursor=%q query=%q per_page=%d", gotUserID, gotCursor, gotQuery, gotPerPage)
+	}
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status %d, got %d", http.StatusOK, rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), `"next_cursor":"opaque-value"`) {
+		t.Fatalf("expected opaque next cursor in response: %s", rec.Body.String())
 	}
 }
 

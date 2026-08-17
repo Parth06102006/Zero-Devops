@@ -1,0 +1,122 @@
+package client
+
+import (
+	"Zero_Devops/server/internal/domain"
+	"context"
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
+)
+
+const (
+	maxPerPage      = 100
+	maxResponseSize = 2 << 20
+)
+
+type RepositoryClient struct {
+	httpClient *http.Client
+	baseURL    string
+}
+
+func NewRepositoryClient(httpClient *http.Client) *RepositoryClient {
+	if httpClient == nil {
+		httpClient = http.DefaultClient
+	}
+	return &RepositoryClient{httpClient: httpClient, baseURL: "https://api.github.com"}
+}
+
+func (c *RepositoryClient) ListRepositories(ctx context.Context, installationToken, cursor, query string, perPage int) (*domain.RepositoryList, error) {
+	if perPage < 1 {
+		perPage = 30
+	}
+	if perPage > maxPerPage {
+		perPage = maxPerPage
+	}
+
+	page, err := decodeCursor(cursor)
+	if err != nil {
+		return nil, domain.ErrBadParamInput
+	}
+
+	params := url.Values{}
+	params.Set("per_page", strconv.Itoa(perPage))
+	params.Set("page", strconv.Itoa(page))
+	if normalized := normalizeQuery(query); normalized != "" {
+		params.Set("query", normalized)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+"/installation/repositories?"+params.Encode(), http.NoBody)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", "Bearer "+installationToken)
+	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("github repositories API returned status %d", resp.StatusCode)
+	}
+
+	var payload struct {
+		Repositories []struct {
+			ID            int64  `json:"id"`
+			FullName      string `json:"full_name"`
+			Name          string `json:"name"`
+			DefaultBranch string `json:"default_branch"`
+			CloneURL      string `json:"clone_url"`
+			Private       bool   `json:"private"`
+			Owner         struct {
+				Login string `json:"login"`
+			} `json:"owner"`
+		} `json:"repositories"`
+	}
+	decoder := json.NewDecoder(io.LimitReader(resp.Body, maxResponseSize))
+	if err := decoder.Decode(&payload); err != nil {
+		return nil, err
+	}
+
+	result := &domain.RepositoryList{Repositories: make([]domain.RepositoryPicker, 0, len(payload.Repositories))}
+	for _, repo := range payload.Repositories {
+		result.Repositories = append(result.Repositories, domain.RepositoryPicker{
+			ID: repo.ID, Owner: repo.Owner.Login, Name: repo.Name, FullName: repo.FullName,
+			DefaultBranch: repo.DefaultBranch, CloneURL: repo.CloneURL, Private: repo.Private,
+		})
+	}
+	if len(payload.Repositories) == perPage {
+		result.NextCursor = encodeCursor(page + 1)
+	}
+	return result, nil
+}
+
+func normalizeQuery(query string) string {
+	return strings.Join(strings.Fields(strings.ToLower(query)), " ")
+}
+
+func encodeCursor(page int) string {
+	return base64.RawURLEncoding.EncodeToString([]byte(strconv.Itoa(page)))
+}
+
+func decodeCursor(cursor string) (int, error) {
+	if cursor == "" {
+		return 1, nil
+	}
+	decoded, err := base64.RawURLEncoding.DecodeString(cursor)
+	if err != nil {
+		return 0, err
+	}
+	page, err := strconv.Atoi(string(decoded))
+	if err != nil || page < 1 {
+		return 0, fmt.Errorf("invalid cursor")
+	}
+	return page, nil
+}
