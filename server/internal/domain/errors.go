@@ -43,4 +43,7 @@ var (
 	ErrParsingPayload = errors.New("error parsing payload")
 	// ErrHMACVerificationFailed is returned when HMAC verification fails
 	ErrHMACVerificationFailed = errors.New("HMAC verification failed")
+
+	// ErrCommandDenied is returned when a build command fails command scan / policy validation
+	ErrCommandDenied = errors.New("build command was denied by the security policy")
 )

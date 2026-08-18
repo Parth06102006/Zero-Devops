@@ -20,6 +20,7 @@ type mockGithubUsecase struct {
 	getFn              func(ctx context.Context, userID string) (*domain.GithubInstallation, error)
 	deleteFn           func(ctx context.Context, userID string) error
 	listRepositoriesFn func(ctx context.Context, userID, cursor, query string, perPage int) (*domain.RepositoryList, error)
+	getRepositoryDetailsFn func(ctx context.Context, userID string, repoID int64) (*domain.RepositoryPicker, error)
 }
 
 func (m *mockGithubUsecase) InstallGithubApp(ctx context.Context, client *http.Client, code, userID string) error {
@@ -48,6 +49,17 @@ func (m *mockGithubUsecase) ListRepositories(ctx context.Context, userID, cursor
 		return m.listRepositoriesFn(ctx, userID, cursor, query, perPage)
 	}
 	return nil, nil
+}
+
+func (m *mockGithubUsecase) GetRepositoryDetails(ctx context.Context, userID string, repoID int64) (*domain.RepositoryPicker, error) {
+	if m.getRepositoryDetailsFn != nil {
+		return m.getRepositoryDetailsFn(ctx, userID, repoID)
+	}
+	return nil, nil
+}
+
+func (m *mockGithubUsecase) InvalidateRepositoryCache(_ context.Context, _ int64) error {
+	return nil
 }
 
 func newSCMTestContext(method, target string) (*httptest.ResponseRecorder, *echo.Context) {

@@ -24,6 +24,10 @@ import (
 	_githubRepo "Zero_Devops/server/internal/integrations/scm/github/repository/pgsql"
 	_tokenProvider "Zero_Devops/server/internal/integrations/scm/github/token"
 	_githubUsecase "Zero_Devops/server/internal/integrations/scm/github/usecase"
+	_projectHttp "Zero_Devops/server/internal/project/delivery/http"
+	_projectRepo "Zero_Devops/server/internal/project/repository/pgsql"
+	_projectScanner "Zero_Devops/server/internal/project/scanner"
+	_projectUsecase "Zero_Devops/server/internal/project/usecase"
 
 	"Zero_Devops/server/internal/logger"
 	middleware "Zero_Devops/server/internal/middleware"
@@ -122,6 +126,10 @@ func run() error {
 	githubUsecase := _githubUsecase.NewGithubAppUsecase(githubRepo, tokenProvider, repositoryClient, rdb)
 	_appHttp.NewSCMHandler(e, githubUsecase)
 
+	projectRepo := _projectRepo.NewPgSQLProjectRepository(dbConn)
+	projectUsecase := _projectUsecase.NewProjectUsecase(projectRepo, githubUsecase, _projectScanner.DefaultScanner)
+	_projectHttp.NewProjectHandler(e, projectUsecase)
+
 	rmqConn, err := amqp.Dial(viper.GetString("RABBITMQ_CONNECTION_STRING"))
 	if err != nil {
 		return fmt.Errorf("failed to connect to RabbitMQ: %w", err)
@@ -147,7 +155,7 @@ func run() error {
 	}
 
 	deploymentRepo := _deploymentRepo.NewPgSQLDeploymentRepository(dbConn)
-	deploymentUsecase := _deploymentUsecase.NewDeploymentUsecase(deploymentRepo, githubRepo, tokenProvider, rmqConn)
+	deploymentUsecase := _deploymentUsecase.NewDeploymentUsecase(deploymentRepo, githubRepo, tokenProvider, rmqConn, projectRepo, repositoryClient)
 	_deploymentHttp.NewDeploymentHandler(e, deploymentUsecase)
 
 	return e.Start(viper.GetString("SERVER_ADDRESS"))

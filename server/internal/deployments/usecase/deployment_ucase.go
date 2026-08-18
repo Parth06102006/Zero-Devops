@@ -9,11 +9,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
 	appmiddleware "Zero_Devops/server/internal/middleware"
-	
+
+	"github.com/google/uuid"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
 )
@@ -21,12 +23,14 @@ import (
 const jwtExpiryMinutes = 10
 
 type deploymentUsecase struct {
-	deploymentRepo domain.DeploymentRepository
-	githubRepo     domain.GithubRepository
-	tokenProvider  domain.InstallationTokenProvider
-	rmqConn        *amqp.Connection
-	publishCh      *amqp.Channel
-	pubMutex       sync.Mutex
+	deploymentRepo   domain.DeploymentRepository
+	githubRepo       domain.GithubRepository
+	tokenProvider    domain.InstallationTokenProvider
+	projectRepo      domain.ProjectRepository
+	repositoryClient domain.GithubRepositoryClient
+	rmqConn          *amqp.Connection
+	publishCh        *amqp.Channel
+	pubMutex         sync.Mutex
 }
 
 type deploymentStatusUpdate struct {
@@ -36,8 +40,8 @@ type deploymentStatusUpdate struct {
 	ErrorMessage string `json:"error_message"`
 }
 
-// NewDeploymentUsecase creates a new deployment use case
-func NewDeploymentUsecase(deploymentRepo domain.DeploymentRepository, githubRepo domain.GithubRepository, tokenProvider domain.InstallationTokenProvider ,rmqConn *amqp.Connection) domain.DeploymentUsecase {
+// NewDeploymentUsecase creates a new deployment use case.
+func NewDeploymentUsecase(deploymentRepo domain.DeploymentRepository, githubRepo domain.GithubRepository, tokenProvider domain.InstallationTokenProvider, rmqConn *amqp.Connection, dependencies ...interface{}) domain.DeploymentUsecase {
 	var publishCh *amqp.Channel
 	var err error
 	if rmqConn != nil {
@@ -50,8 +54,17 @@ func NewDeploymentUsecase(deploymentRepo domain.DeploymentRepository, githubRepo
 	uc := &deploymentUsecase{
 		deploymentRepo: deploymentRepo,
 		githubRepo:     githubRepo,
+		tokenProvider:  tokenProvider,
 		rmqConn:        rmqConn,
 		publishCh:      publishCh,
+	}
+	for _, dependency := range dependencies {
+		switch value := dependency.(type) {
+		case domain.ProjectRepository:
+			uc.projectRepo = value
+		case domain.GithubRepositoryClient:
+			uc.repositoryClient = value
+		}
 	}
 
 	if rmqConn != nil {
@@ -150,8 +163,11 @@ func (d *deploymentUsecase) CreateDeployment(ctx context.Context, userID string,
 
 	// I have added the token provider instllation token
 
-	token , err := d.tokenProvider.CreateInstallationToken(ctx,installation.InstallationID)
-	
+	token, err := d.tokenProvider.CreateInstallationToken(ctx, installation.InstallationID)
+	if err != nil {
+		log.Error("Failed to create installation token", zap.Error(err), zap.Int64("installation_id", installation.InstallationID))
+		return nil, err
+	}
 
 	repoURL := fmt.Sprintf("https://api.github.com/repositories/%d", repoID)
 	repoReq, err := http.NewRequestWithContext(ctx, http.MethodGet, repoURL, http.NoBody)
@@ -208,6 +224,123 @@ func (d *deploymentUsecase) CreateDeployment(ctx context.Context, userID string,
 	// lacks the required V1 immutable build inputs. Keep no legacy publisher.
 
 	log.Info("Deployment created successfully", zap.String("deployment_id", deployment.ID))
+	return deployment, nil
+}
+
+func (d *deploymentUsecase) CreateProjectBuild(ctx context.Context, userID string, params domain.CreateProjectBuildParams) (*domain.Deployment, error) {
+	log := appmiddleware.LoggerFromContext(ctx)
+	projectID := strings.TrimSpace(params.ProjectID)
+	shaOrRef := strings.TrimSpace(params.ShaOrRef)
+	if projectID == "" || shaOrRef == "" || strings.TrimSpace(params.IdempotencyKey) == "" {
+		return nil, domain.ErrBadParamInput
+	}
+
+	idempotencyKey, err := uuid.Parse(strings.TrimSpace(params.IdempotencyKey))
+	if err != nil {
+		return nil, domain.ErrBadParamInput
+	}
+	if d.projectRepo == nil || d.repositoryClient == nil || d.tokenProvider == nil {
+		return nil, fmt.Errorf("project build dependencies are unavailable")
+	}
+
+	project, err := d.projectRepo.GetByID(ctx, userID, projectID)
+	if err != nil {
+		log.Error("failed to get project for manual build", zap.Error(err), zap.String("project_id", projectID), zap.String("user_id", userID))
+		return nil, err
+	}
+
+	installation, err := d.githubRepo.GetInstallationByUserID(ctx, userID)
+	if err != nil {
+		log.Error("failed to get github installation for manual build", zap.Error(err), zap.String("user_id", userID))
+		return nil, err
+	}
+	if installation.Status != domain.GithubInstallationStatusActive {
+		return nil, domain.ErrInvalidStatus
+	}
+	if project.InstallationID != installation.ID {
+		return nil, domain.ErrNotFound
+	}
+
+	token, err := d.tokenProvider.CreateInstallationToken(ctx, installation.InstallationID)
+	if err != nil {
+		log.Error("failed to create installation token for manual build", zap.Error(err), zap.Int64("installation_id", installation.InstallationID))
+		return nil, err
+	}
+
+	repoDetails, err := d.repositoryClient.GetRepositoryDetails(ctx, token, project.GitHubRepositoryID)
+	if err != nil {
+		log.Error("failed to refresh repository details for manual build", zap.Error(err), zap.Int64("repository_id", project.GitHubRepositoryID))
+		return nil, err
+	}
+	commitSHA, err := d.repositoryClient.ResolveCommit(ctx, token, project.RepositoryOwner, project.RepositoryName, shaOrRef)
+	if err != nil {
+		log.Error("failed to resolve manual build ref", zap.Error(err), zap.String("sha_or_ref", shaOrRef), zap.String("project_id", projectID))
+		return nil, err
+	}
+
+	config := project.BuildConfiguration
+	if config.ScannerPolicyVersion == "" {
+		config.ScannerPolicyVersion = project.CommandPolicyVersion
+	}
+	if config.ScannerPolicyVersion == "" {
+		return nil, domain.ErrBadParamInput
+	}
+
+	now := time.Now()
+	deployment := &domain.Deployment{
+		UserID:                    userID,
+		RepoID:                    project.GitHubRepositoryID,
+		CloneURL:                  repoDetails.CloneURL,
+		Status:                    domain.DeploymentStatusPending,
+		ProjectID:                 project.ID,
+		GithubInstallationID:      installation.ID,
+		CommitSHA:                 commitSHA,
+		RequestedRef:              shaOrRef,
+		Trigger:                   contract.TriggerManual,
+		DesiredRevisionGeneration: project.DesiredRevisionGeneration,
+		ConfigurationSnapshot:     config,
+		ConfigurationVersion:      project.ConfigurationVersion,
+		CommandPolicyVersion:      project.CommandPolicyVersion,
+		CommandScanResult:         project.CommandScanResult,
+		ManualIdempotencyKey:      idempotencyKey.String(),
+		CreatedAt:                 now,
+		UpdatedAt:                 now,
+	}
+	if err := d.deploymentRepo.StoreProjectBuild(ctx, deployment); err != nil {
+		log.Error("failed to store manual project build", zap.Error(err), zap.String("project_id", projectID))
+		return nil, err
+	}
+
+	correlationID := strings.TrimSpace(params.CorrelationID)
+	if correlationID == "" {
+		correlationID = uuid.NewString()
+	}
+	job := contract.BuildRequestV1{
+		Version:        contract.VersionV1,
+		EventID:        uuid.NewString(),
+		DeploymentID:   deployment.ID,
+		ProjectID:      project.ID,
+		InstallationID: installation.InstallationID,
+		RepositoryID:   project.GitHubRepositoryID,
+		CloneURL:       repoDetails.CloneURL,
+		CommitSHA:      commitSHA,
+		RequestedRef:   shaOrRef,
+		Trigger:        contract.TriggerManual,
+		Generation:     project.DesiredRevisionGeneration,
+		RetryCount:     0,
+		CorrelationID:  correlationID,
+		Configuration: contract.Configuration{
+			Executable:           config.Executable,
+			Args:                 config.Args,
+			WorkingDir:           config.WorkingDir,
+			ScannerPolicyVersion: config.ScannerPolicyVersion,
+		},
+	}
+	if err := d.publishBuildRequestV1(job); err != nil {
+		log.Error("failed to publish manual project build", zap.Error(err), zap.String("deployment_id", deployment.ID))
+		return nil, err
+	}
+
 	return deployment, nil
 }
 

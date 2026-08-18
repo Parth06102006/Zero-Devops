@@ -22,6 +22,9 @@ func TestDockerBuild_WithDockerfile(t *testing.T) {
 	if _, err := exec.LookPath("docker"); err != nil {
 		t.Skip("docker not available, skipping")
 	}
+	if out, err := exec.CommandContext(context.Background(), "docker", "info").CombinedOutput(); err != nil {
+		t.Skipf("docker daemon unreachable, skipping: %v (%s)", err, out)
+	}
 
 	tmpDir := t.TempDir()
 

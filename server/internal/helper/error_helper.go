@@ -62,6 +62,8 @@ func GetStatusCode(err error) int {
 		return http.StatusNotFound
 	case domain.ErrConflict:
 		return http.StatusConflict
+	case domain.ErrCommandDenied:
+		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
 	}

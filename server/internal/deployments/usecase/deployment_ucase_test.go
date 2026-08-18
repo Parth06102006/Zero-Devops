@@ -8,6 +8,7 @@ import (
 
 type deploymentRepoMock struct {
 	storeFn              func(ctx context.Context, d *domain.Deployment) error
+	storeProjectBuildFn  func(ctx context.Context, d *domain.Deployment) error
 	getUserFn            func(ctx context.Context, userID string) ([]domain.Deployment, error)
 	getIDFn              func(ctx context.Context, userID, id string) (*domain.Deployment, error)
 	updateStatusFn       func(ctx context.Context, deploymentID string, status domain.DeploymentStatus) error
@@ -18,6 +19,13 @@ type deploymentRepoMock struct {
 func (m *deploymentRepoMock) Store(ctx context.Context, d *domain.Deployment) error {
 	if m.storeFn != nil {
 		return m.storeFn(ctx, d)
+	}
+	return nil
+}
+
+func (m *deploymentRepoMock) StoreProjectBuild(ctx context.Context, d *domain.Deployment) error {
+	if m.storeProjectBuildFn != nil {
+		return m.storeProjectBuildFn(ctx, d)
 	}
 	return nil
 }

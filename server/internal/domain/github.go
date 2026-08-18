@@ -33,6 +33,8 @@ type GithubUsecase interface {
 	DeleteGithubApp(ctx context.Context, userID string) error
 	GetGithubAppInstallation(ctx context.Context, userID string) (*GithubInstallation, error)
 	ListRepositories(ctx context.Context, userID, cursor, query string, perPage int) (*RepositoryList, error)
+	GetRepositoryDetails(ctx context.Context, userID string, repoID int64) (*RepositoryPicker, error)
+	InvalidateRepositoryCache(ctx context.Context, installationID int64) error
 }
 
 // GithubRepository defines the interface for GitHub installation data operations
@@ -63,5 +65,7 @@ type RepositoryList struct {
 }
 
 type GithubRepositoryClient interface {
-	ListRepositories(ctx context.Context, installationToken, cursor, query string, perPage int) (*RepositoryList, error)
+	ListRepositories(ctx context.Context, installationToken string, cursor string, query string, perPage int) (*RepositoryList, error)
+	GetRepositoryDetails(ctx context.Context, installationToken string, repoID int64) (*RepositoryPicker, error)
+	ResolveCommit(ctx context.Context, installationToken, owner, repo, shaOrRef string) (string, error)
 }

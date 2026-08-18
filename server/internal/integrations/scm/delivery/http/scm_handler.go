@@ -115,7 +115,16 @@ func (inst *SCMHandler) ListRepositories(c *echo.Context) error {
 
 	result, err := inst.scmUsecase.ListRepositories(c.Request().Context(), userID, strings.TrimSpace(c.QueryParam("cursor")), c.QueryParam("query"), perPage)
 	if err != nil {
-		return c.JSON(helper.GetStatusCode(err), helper.BuildErrorResponse(err.Error(), err, reqID))
+		status := helper.GetStatusCode(err)
+		if errors.Is(err, domain.ErrBadParamInput) {
+			status = http.StatusBadRequest
+		}
+		if errors.Is(err, domain.ErrInvalidStatus) {
+			status = http.StatusConflict
+		}
+		resp := helper.BuildErrorResponse(err.Error(), err, reqID)
+		resp.Error.Code = status
+		return c.JSON(status, resp)
 	}
 	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(result, "", reqID))
 }
