@@ -224,6 +224,90 @@ func TestDeleteInstallation_Success(t *testing.T) {
 	}
 }
 
+func TestGetInstallationStatus_MissingUserID(t *testing.T) {
+	handler := &SCMHandler{scmUsecase: &mockGithubUsecase{}}
+	rec, c := newSCMTestContext(http.MethodGet, "/integrations/github/installation")
+
+	if err := handler.GetInstallationStatus(c); err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("expected status %d, got %d", http.StatusUnauthorized, rec.Code)
+	}
+}
+
+func TestGetInstallationStatus_Success(t *testing.T) {
+	expected := &domain.GithubInstallation{
+		ID:             "1",
+		UserID:         "99",
+		InstallationID: 12345,
+		AccountType:    "User",
+		AccountLogin:   "octocat",
+		Status:         domain.GithubInstallationStatusActive,
+	}
+
+	handler := &SCMHandler{
+		scmUsecase: &mockGithubUsecase{
+			getFn: func(_ context.Context, userID string) (*domain.GithubInstallation, error) {
+				if userID != "99" {
+					t.Fatalf("expected userID 99, got %s", userID)
+				}
+				return expected, nil
+			},
+		},
+	}
+
+	rec, c := newSCMTestContext(http.MethodGet, "/integrations/github/installation")
+	setUserID(c, "99")
+
+	if err := handler.GetInstallationStatus(c); err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status %d, got %d", http.StatusOK, rec.Code)
+	}
+
+	var resp struct {
+		Success bool                      `json:"success"`
+		Data    domain.GithubInstallation `json:"data"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("failed to unmarshal response: %v", err)
+	}
+	if !resp.Success {
+		t.Fatal("expected success to be true")
+	}
+	if resp.Data.InstallationID != expected.InstallationID {
+		t.Fatalf("expected installation_id %d, got %d", expected.InstallationID, resp.Data.InstallationID)
+	}
+}
+
+func TestGetInstallationStatus_NotFound(t *testing.T) {
+	handler := &SCMHandler{
+		scmUsecase: &mockGithubUsecase{
+			getFn: func(_ context.Context, _ string) (*domain.GithubInstallation, error) {
+				return nil, domain.ErrNotFound
+			},
+		},
+	}
+
+	rec, c := newSCMTestContext(http.MethodGet, "/integrations/github/installation")
+	setUserID(c, "99")
+
+	if err := handler.GetInstallationStatus(c); err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("expected status %d, got %d", http.StatusNotFound, rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), "github installation not found") {
+		t.Fatalf("expected not found message, got %s", rec.Body.String())
+	}
+}
+
 func TestListRepositories_MissingUserID(t *testing.T) {
 	handler := &SCMHandler{scmUsecase: &mockGithubUsecase{}}
 	rec, c := newSCMTestContext(http.MethodGet, "/integrations/github/repositories")

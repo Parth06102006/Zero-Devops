@@ -11,6 +11,7 @@ type deploymentRepoMock struct {
 	storeProjectBuildFn  func(ctx context.Context, d *domain.Deployment) error
 	getUserFn            func(ctx context.Context, userID string) ([]domain.Deployment, error)
 	getIDFn              func(ctx context.Context, userID, id string) (*domain.Deployment, error)
+	getProjectFn         func(ctx context.Context, userID, projectID string) ([]domain.Deployment, error)
 	updateStatusFn       func(ctx context.Context, deploymentID string, status domain.DeploymentStatus) error
 	UpdateOutputURLFn    func(ctx context.Context, deploymentID string, outputURL string) error
 	UpdateErrorMessageFn func(ctx context.Context, deploymentID string, errMsg string) error
@@ -40,6 +41,13 @@ func (m *deploymentRepoMock) GetByUserID(ctx context.Context, userID string) ([]
 func (m *deploymentRepoMock) GetByID(ctx context.Context, userID, id string) (*domain.Deployment, error) {
 	if m.getIDFn != nil {
 		return m.getIDFn(ctx, userID, id)
+	}
+	return nil, nil
+}
+
+func (m *deploymentRepoMock) GetByProjectID(ctx context.Context, userID, projectID string) ([]domain.Deployment, error) {
+	if m.getProjectFn != nil {
+		return m.getProjectFn(ctx, userID, projectID)
 	}
 	return nil, nil
 }
@@ -128,6 +136,62 @@ func TestGetDeploymentByID_PassesThrough(t *testing.T) {
 	}, &githubRepoMock{}, &installationTokenProviderMock{}, nil)
 
 	got, err := uc.GetDeploymentByID(context.Background(), "2", "9")
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if got.ID != "9" {
+		t.Fatalf("unexpected deployment: %+v", got)
+	}
+}
+
+func TestListProjectBuilds_EmptyProjectID(t *testing.T) {
+	uc := NewDeploymentUsecase(&deploymentRepoMock{}, &githubRepoMock{}, &installationTokenProviderMock{}, nil)
+	_, err := uc.ListProjectBuilds(context.Background(), "2", "  ")
+	if err != domain.ErrBadParamInput {
+		t.Fatalf("expected ErrBadParamInput, got %v", err)
+	}
+}
+
+func TestListProjectBuilds_PassesThrough(t *testing.T) {
+	want := []domain.Deployment{{ID: "1", UserID: "2", ProjectID: "p1"}}
+	uc := NewDeploymentUsecase(&deploymentRepoMock{
+		getProjectFn: func(_ context.Context, userID, projectID string) ([]domain.Deployment, error) {
+			if userID != "2" || projectID != "p1" {
+				t.Fatalf("unexpected args userID=%s projectID=%s", userID, projectID)
+			}
+			return want, nil
+		},
+	}, &githubRepoMock{}, &installationTokenProviderMock{}, nil)
+
+	got, err := uc.ListProjectBuilds(context.Background(), "2", "p1")
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if len(got) != 1 || got[0].ID != "1" {
+		t.Fatalf("unexpected deployments: %+v", got)
+	}
+}
+
+func TestGetBuild_EmptyBuildID(t *testing.T) {
+	uc := NewDeploymentUsecase(&deploymentRepoMock{}, &githubRepoMock{}, &installationTokenProviderMock{}, nil)
+	_, err := uc.GetBuild(context.Background(), "2", " ")
+	if err != domain.ErrBadParamInput {
+		t.Fatalf("expected ErrBadParamInput, got %v", err)
+	}
+}
+
+func TestGetBuild_PassesThrough(t *testing.T) {
+	want := &domain.Deployment{ID: "9", UserID: "2"}
+	uc := NewDeploymentUsecase(&deploymentRepoMock{
+		getIDFn: func(_ context.Context, userID, id string) (*domain.Deployment, error) {
+			if userID != "2" || id != "9" {
+				t.Fatalf("unexpected args userID=%s id=%s", userID, id)
+			}
+			return want, nil
+		},
+	}, &githubRepoMock{}, &installationTokenProviderMock{}, nil)
+
+	got, err := uc.GetBuild(context.Background(), "2", "9")
 	if err != nil {
 		t.Fatalf("expected nil error, got %v", err)
 	}

@@ -23,6 +23,61 @@ func NewPgSQLDeploymentRepository(conn *sql.DB) domain.DeploymentRepository {
 	return &pgSQLDeploymentRepository{conn}
 }
 
+const deploymentColumns = `
+	id, user_id, repo_id, clone_url, status,
+	project_id, github_installation_id, commit_sha, requested_ref, trigger,
+	desired_revision_generation, configuration_snapshot, configuration_version,
+	command_policy_version, command_scan_result, manual_idempotency_key,
+	output_url, error_message, created_at, updated_at
+`
+
+type deploymentRowScanner interface {
+	Scan(dest ...any) error
+}
+
+func scanDeployment(row deploymentRowScanner) (domain.Deployment, error) {
+	var d domain.Deployment
+	var projectID, githubInstallationID, commitSHA, requestedRef, commandPolicyVersion sql.NullString
+	var desiredRevisionGeneration sql.NullInt64
+	var configurationVersion sql.NullInt32
+	var manualIdempotencyKey, outputURL, errorMessage sql.NullString
+	var configSnapshot, scanResult []byte
+
+	if err := row.Scan(
+		&d.ID, &d.UserID, &d.RepoID, &d.CloneURL, &d.Status,
+		&projectID, &githubInstallationID, &commitSHA, &requestedRef, &d.Trigger,
+		&desiredRevisionGeneration, &configSnapshot, &configurationVersion,
+		&commandPolicyVersion, &scanResult, &manualIdempotencyKey,
+		&outputURL, &errorMessage, &d.CreatedAt, &d.UpdatedAt,
+	); err != nil {
+		return domain.Deployment{}, err
+	}
+
+	d.ProjectID = projectID.String
+	d.GithubInstallationID = githubInstallationID.String
+	d.CommitSHA = commitSHA.String
+	d.RequestedRef = requestedRef.String
+	d.DesiredRevisionGeneration = desiredRevisionGeneration.Int64
+	d.ConfigurationVersion = int(configurationVersion.Int32)
+	d.CommandPolicyVersion = commandPolicyVersion.String
+	d.ManualIdempotencyKey = manualIdempotencyKey.String
+	d.OutputURL = outputURL.String
+	d.ErrorMessage = errorMessage.String
+
+	if len(configSnapshot) > 0 {
+		if err := json.Unmarshal(configSnapshot, &d.ConfigurationSnapshot); err != nil {
+			return domain.Deployment{}, fmt.Errorf("unmarshal configuration snapshot: %w", err)
+		}
+	}
+	if len(scanResult) > 0 {
+		if err := json.Unmarshal(scanResult, &d.CommandScanResult); err != nil {
+			return domain.Deployment{}, fmt.Errorf("unmarshal command scan result: %w", err)
+		}
+	}
+
+	return d, nil
+}
+
 func (m *pgSQLDeploymentRepository) Store(ctx context.Context, d *domain.Deployment) error {
 	query := `
 		INSERT INTO deployments (user_id, repo_id, clone_url, status, created_at, updated_at)
@@ -86,52 +141,31 @@ func (m *pgSQLDeploymentRepository) StoreProjectBuild(ctx context.Context, d *do
 
 func (m *pgSQLDeploymentRepository) GetByUserID(ctx context.Context, userID string) ([]domain.Deployment, error) {
 	query := `
-		SELECT id, user_id, repo_id, clone_url, status, created_at, updated_at
+		SELECT ` + deploymentColumns + `
 		FROM deployments
 		WHERE user_id = $1
 		ORDER BY created_at DESC
 	`
-	rows, err := m.Conn.QueryContext(ctx, query, userID)
-	if err != nil {
-		log := appmiddleware.LoggerFromContext(ctx)
-		log.Error("failed to query deployments by user ID", zap.Error(err))
-		return nil, err
-	}
-	defer func() {
-		if err := rows.Close(); err != nil {
-			appmiddleware.LoggerFromContext(ctx).Error("failed to close rows", zap.Error(err))
-		}
-	}()
+	return m.queryDeployments(ctx, query, userID)
+}
 
-	var deployments []domain.Deployment
-	for rows.Next() {
-		var d domain.Deployment
-		err := rows.Scan(&d.ID, &d.UserID, &d.RepoID, &d.CloneURL, &d.Status, &d.CreatedAt, &d.UpdatedAt)
-		if err != nil {
-			log := appmiddleware.LoggerFromContext(ctx)
-			log.Error("failed to scan deployment", zap.Error(err))
-			return nil, err
-		}
-		deployments = append(deployments, d)
-	}
-
-	if deployments == nil {
-		deployments = []domain.Deployment{}
-	}
-
-	return deployments, nil
+func (m *pgSQLDeploymentRepository) GetByProjectID(ctx context.Context, userID, projectID string) ([]domain.Deployment, error) {
+	query := `
+		SELECT ` + deploymentColumns + `
+		FROM deployments
+		WHERE project_id = $1 AND user_id = $2
+		ORDER BY created_at DESC
+	`
+	return m.queryDeployments(ctx, query, projectID, userID)
 }
 
 func (m *pgSQLDeploymentRepository) GetByID(ctx context.Context, userID, id string) (*domain.Deployment, error) {
 	query := `
-		SELECT id, user_id, repo_id, clone_url, status, created_at, updated_at
+		SELECT ` + deploymentColumns + `
 		FROM deployments
 		WHERE id = $1 AND user_id = $2
 	`
-	res := m.Conn.QueryRowContext(ctx, query, id, userID)
-
-	var d domain.Deployment
-	err := res.Scan(&d.ID, &d.UserID, &d.RepoID, &d.CloneURL, &d.Status, &d.CreatedAt, &d.UpdatedAt)
+	d, err := scanDeployment(m.Conn.QueryRowContext(ctx, query, id, userID))
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, domain.ErrNotFound
@@ -142,6 +176,38 @@ func (m *pgSQLDeploymentRepository) GetByID(ctx context.Context, userID, id stri
 	}
 
 	return &d, nil
+}
+
+func (m *pgSQLDeploymentRepository) queryDeployments(ctx context.Context, query string, args ...any) ([]domain.Deployment, error) {
+	rows, err := m.Conn.QueryContext(ctx, query, args...)
+	if err != nil {
+		log := appmiddleware.LoggerFromContext(ctx)
+		log.Error("failed to query deployments", zap.Error(err))
+		return nil, err
+	}
+	defer func() {
+		if err := rows.Close(); err != nil {
+			appmiddleware.LoggerFromContext(ctx).Error("failed to close rows", zap.Error(err))
+		}
+	}()
+
+	deployments := []domain.Deployment{}
+	for rows.Next() {
+		d, err := scanDeployment(rows)
+		if err != nil {
+			log := appmiddleware.LoggerFromContext(ctx)
+			log.Error("failed to scan deployment", zap.Error(err))
+			return nil, err
+		}
+		deployments = append(deployments, d)
+	}
+	if err := rows.Err(); err != nil {
+		log := appmiddleware.LoggerFromContext(ctx)
+		log.Error("failed to iterate deployments", zap.Error(err))
+		return nil, err
+	}
+
+	return deployments, nil
 }
 
 func (m *pgSQLDeploymentRepository) UpdateStatus(ctx context.Context, deploymentID string, status domain.DeploymentStatus) error {

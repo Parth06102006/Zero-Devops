@@ -32,7 +32,10 @@ func NewSCMHandler(e *echo.Echo, gh domain.GithubUsecase) {
 	e.POST("/integration/scm/github/install", handler.Installation)
 	e.GET("/integration/scm/github/", handler.GetInstallation)
 	e.DELETE("/integration/scm/github/delete", handler.DeleteInstallation)
+
+	// I have to change the api end points here
 	e.GET("/integrations/github/repositories", handler.ListRepositories)
+	e.GET("/integrations/github/installation", handler.GetInstallationStatus)
 }
 
 // Installation handles GitHub App installation callback
@@ -88,6 +91,33 @@ func (inst *SCMHandler) GetInstallation(c *echo.Context) error {
 	if err != nil {
 		log.Error("Failed to get GitHub app installation", zap.Error(err), zap.String("user_id", userID))
 		return c.JSON(helper.GetStatusCode(err), helper.BuildErrorResponse(err.Error(), err, reqID))
+	}
+
+	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(installation, "", reqID))
+}
+
+// GetInstallationStatus returns the current user's GitHub App installation status.
+func (inst *SCMHandler) GetInstallationStatus(c *echo.Context) error {
+	reqID := middleware.GetRequestID(c)
+	log := middleware.LoggerFromContext(c.Request().Context())
+
+	userID, ok := authmiddleware.GetUserID(c)
+	if !ok {
+		log.Warn("User ID not found in context")
+		return c.JSON(http.StatusUnauthorized, helper.BuildErrorResponse("user id not found", fmt.Errorf("user id not found in context"), reqID))
+	}
+
+	installation, err := inst.scmUsecase.GetGithubAppInstallation(c.Request().Context(), userID)
+	if err != nil {
+		log.Error("Failed to get GitHub app installation status", zap.Error(err), zap.String("user_id", userID))
+		if errors.Is(err, domain.ErrNotFound) {
+			resp := helper.BuildErrorResponse("github installation not found", err, reqID)
+			resp.Error.Code = http.StatusNotFound
+			return c.JSON(http.StatusNotFound, resp)
+		}
+		resp := helper.BuildErrorResponse(err.Error(), err, reqID)
+		resp.Error.Code = http.StatusInternalServerError
+		return c.JSON(http.StatusInternalServerError, resp)
 	}
 
 	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(installation, "", reqID))

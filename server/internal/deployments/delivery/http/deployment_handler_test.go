@@ -17,6 +17,8 @@ import (
 type mockDeploymentUsecase struct {
 	createFn             func(ctx context.Context, userID string, repoID int64, reqID string) (*domain.Deployment, error)
 	createProjectBuildFn func(ctx context.Context, userID string, params domain.CreateProjectBuildParams) (*domain.Deployment, error)
+	listProjectBuildsFn  func(ctx context.Context, userID, projectID string) ([]domain.Deployment, error)
+	getBuildFn           func(ctx context.Context, userID, buildID string) (*domain.Deployment, error)
 }
 
 func (m *mockDeploymentUsecase) CreateDeployment(ctx context.Context, userID string, repoID int64, reqID string) (*domain.Deployment, error) {
@@ -38,6 +40,20 @@ func (m *mockDeploymentUsecase) GetDeployments(_ context.Context, _ string) ([]d
 }
 
 func (m *mockDeploymentUsecase) GetDeploymentByID(_ context.Context, _, _ string) (*domain.Deployment, error) {
+	return nil, nil
+}
+
+func (m *mockDeploymentUsecase) ListProjectBuilds(ctx context.Context, userID, projectID string) ([]domain.Deployment, error) {
+	if m.listProjectBuildsFn != nil {
+		return m.listProjectBuildsFn(ctx, userID, projectID)
+	}
+	return nil, nil
+}
+
+func (m *mockDeploymentUsecase) GetBuild(ctx context.Context, userID, buildID string) (*domain.Deployment, error) {
+	if m.getBuildFn != nil {
+		return m.getBuildFn(ctx, userID, buildID)
+	}
 	return nil, nil
 }
 
@@ -96,6 +112,166 @@ func TestCreateProjectBuild_PassesParams(t *testing.T) {
 
 	if rec.Code != http.StatusCreated {
 		t.Fatalf("expected status %d, got %d", http.StatusCreated, rec.Code)
+	}
+}
+
+func TestListProjectBuilds_Unauthorized(t *testing.T) {
+	e := echo.New()
+	h := &DeploymentHandler{dUsecase: &mockDeploymentUsecase{}}
+	e.GET("/projects/:id/builds", h.ListProjectBuilds)
+
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/projects/p1/builds", http.NoBody)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("expected status %d, got %d", http.StatusUnauthorized, rec.Code)
+	}
+}
+
+func TestListProjectBuilds_MissingProjectID(t *testing.T) {
+	e := echo.New()
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/projects//builds", http.NoBody)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.Set(middleware.UserIDContextKey, "11")
+	c.SetPathValues(echo.PathValues{{Name: "id", Value: ""}})
+
+	h := &DeploymentHandler{dUsecase: &mockDeploymentUsecase{}}
+	if err := h.ListProjectBuilds(c); err != nil {
+		t.Fatalf("expected nil echo error, got %v", err)
+	}
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("expected status %d, got %d", http.StatusBadRequest, rec.Code)
+	}
+}
+
+func TestListProjectBuilds_PassesParams(t *testing.T) {
+	e := echo.New()
+	h := &DeploymentHandler{dUsecase: &mockDeploymentUsecase{
+		listProjectBuildsFn: func(_ context.Context, userID, projectID string) ([]domain.Deployment, error) {
+			if userID != "11" || projectID != "p1" {
+				t.Fatalf("unexpected args userID=%s projectID=%s", userID, projectID)
+			}
+			return []domain.Deployment{{ID: "b1"}}, nil
+		},
+	}}
+	e.GET("/projects/:id/builds", func(c *echo.Context) error {
+		c.Set(middleware.UserIDContextKey, "11")
+		return h.ListProjectBuilds(c)
+	})
+
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/projects/p1/builds", http.NoBody)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status %d, got %d", http.StatusOK, rec.Code)
+	}
+}
+
+func TestListProjectBuilds_NotFound(t *testing.T) {
+	e := echo.New()
+	h := &DeploymentHandler{dUsecase: &mockDeploymentUsecase{
+		listProjectBuildsFn: func(_ context.Context, _, _ string) ([]domain.Deployment, error) {
+			return nil, domain.ErrNotFound
+		},
+	}}
+	e.GET("/projects/:id/builds", func(c *echo.Context) error {
+		c.Set(middleware.UserIDContextKey, "11")
+		return h.ListProjectBuilds(c)
+	})
+
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/projects/p1/builds", http.NoBody)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("expected status %d, got %d", http.StatusNotFound, rec.Code)
+	}
+	if !bytes.Contains(rec.Body.Bytes(), []byte("project not found or has no builds")) {
+		t.Fatalf("missing expected error message: %s", rec.Body.String())
+	}
+}
+
+func TestGetBuild_Unauthorized(t *testing.T) {
+	e := echo.New()
+	h := &DeploymentHandler{dUsecase: &mockDeploymentUsecase{}}
+	e.GET("/builds/:id", h.GetBuild)
+
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/builds/b1", http.NoBody)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("expected status %d, got %d", http.StatusUnauthorized, rec.Code)
+	}
+}
+
+func TestGetBuild_MissingBuildID(t *testing.T) {
+	e := echo.New()
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/builds/", http.NoBody)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.Set(middleware.UserIDContextKey, "11")
+	c.SetPathValues(echo.PathValues{{Name: "id", Value: ""}})
+
+	h := &DeploymentHandler{dUsecase: &mockDeploymentUsecase{}}
+	if err := h.GetBuild(c); err != nil {
+		t.Fatalf("expected nil echo error, got %v", err)
+	}
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("expected status %d, got %d", http.StatusBadRequest, rec.Code)
+	}
+}
+
+func TestGetBuild_PassesParams(t *testing.T) {
+	e := echo.New()
+	h := &DeploymentHandler{dUsecase: &mockDeploymentUsecase{
+		getBuildFn: func(_ context.Context, userID, buildID string) (*domain.Deployment, error) {
+			if userID != "11" || buildID != "b1" {
+				t.Fatalf("unexpected args userID=%s buildID=%s", userID, buildID)
+			}
+			return &domain.Deployment{ID: "b1"}, nil
+		},
+	}}
+	e.GET("/builds/:id", func(c *echo.Context) error {
+		c.Set(middleware.UserIDContextKey, "11")
+		return h.GetBuild(c)
+	})
+
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/builds/b1", http.NoBody)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status %d, got %d", http.StatusOK, rec.Code)
+	}
+}
+
+func TestGetBuild_NotFound(t *testing.T) {
+	e := echo.New()
+	h := &DeploymentHandler{dUsecase: &mockDeploymentUsecase{
+		getBuildFn: func(_ context.Context, _, _ string) (*domain.Deployment, error) {
+			return nil, domain.ErrNotFound
+		},
+	}}
+	e.GET("/builds/:id", func(c *echo.Context) error {
+		c.Set(middleware.UserIDContextKey, "11")
+		return h.GetBuild(c)
+	})
+
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/builds/b1", http.NoBody)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("expected status %d, got %d", http.StatusNotFound, rec.Code)
+	}
+	if !bytes.Contains(rec.Body.Bytes(), []byte("build not found")) {
+		t.Fatalf("missing expected error message: %s", rec.Body.String())
 	}
 }
 

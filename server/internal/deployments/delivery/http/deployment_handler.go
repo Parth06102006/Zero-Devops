@@ -6,8 +6,10 @@ import (
 	"Zero_Devops/server/internal/domain"
 	"Zero_Devops/server/internal/helper"
 	"Zero_Devops/server/internal/middleware"
+	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v5"
 	"go.uber.org/zap"
@@ -25,6 +27,8 @@ func NewDeploymentHandler(e *echo.Echo, du domain.DeploymentUsecase) {
 	}
 	e.POST("/deploy", handler.CreateDeployment)
 	e.POST("/projects/:id/builds", handler.CreateProjectBuild)
+	e.GET("/projects/:id/builds", handler.ListProjectBuilds)
+	e.GET("/builds/:id", handler.GetBuild)
 }
 
 type createDeploymentRequest struct {
@@ -82,6 +86,73 @@ func (h *DeploymentHandler) CreateProjectBuild(c *echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, helper.BuildSuccessResponse(deployment, "", reqID, helper.WithMessage("build created successfully")))
+}
+
+// ListProjectBuilds returns builds for one project, scoped to the authenticated user.
+func (h *DeploymentHandler) ListProjectBuilds(c *echo.Context) error {
+	reqID := middleware.GetRequestID(c)
+	log := middleware.LoggerFromContext(c.Request().Context())
+
+	userID, ok := authmiddleware.GetUserID(c)
+	if !ok {
+		log.Warn("User ID not found in context")
+		return deploymentError(c, http.StatusUnauthorized, "user id not found", fmt.Errorf("user id not found in context"), reqID)
+	}
+
+	projectID := strings.TrimSpace(c.Param("id"))
+	if projectID == "" {
+		return deploymentError(c, http.StatusBadRequest, "project id is required", domain.ErrBadParamInput, reqID)
+	}
+
+	builds, err := h.dUsecase.ListProjectBuilds(c.Request().Context(), userID, projectID)
+	if err != nil {
+		log.Error("Failed to list project builds", zap.Error(err), zap.String("project_id", projectID), zap.String("user_id", userID))
+		return handleDeploymentUsecaseError(c, err, reqID, "project not found or has no builds")
+	}
+
+	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(builds, "", reqID))
+}
+
+// GetBuild returns a single build scoped to the authenticated user.
+func (h *DeploymentHandler) GetBuild(c *echo.Context) error {
+	reqID := middleware.GetRequestID(c)
+	log := middleware.LoggerFromContext(c.Request().Context())
+
+	userID, ok := authmiddleware.GetUserID(c)
+	if !ok {
+		log.Warn("User ID not found in context")
+		return deploymentError(c, http.StatusUnauthorized, "user id not found", fmt.Errorf("user id not found in context"), reqID)
+	}
+
+	buildID := strings.TrimSpace(c.Param("id"))
+	if buildID == "" {
+		return deploymentError(c, http.StatusBadRequest, "build id is required", domain.ErrBadParamInput, reqID)
+	}
+
+	build, err := h.dUsecase.GetBuild(c.Request().Context(), userID, buildID)
+	if err != nil {
+		log.Error("Failed to get build", zap.Error(err), zap.String("build_id", buildID), zap.String("user_id", userID))
+		return handleDeploymentUsecaseError(c, err, reqID, "build not found")
+	}
+
+	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(build, "", reqID))
+}
+
+func handleDeploymentUsecaseError(c *echo.Context, err error, reqID, notFoundMessage string) error {
+	switch {
+	case errors.Is(err, domain.ErrBadParamInput):
+		return deploymentError(c, http.StatusBadRequest, err.Error(), err, reqID)
+	case errors.Is(err, domain.ErrNotFound):
+		return deploymentError(c, http.StatusNotFound, notFoundMessage, err, reqID)
+	default:
+		return deploymentError(c, http.StatusInternalServerError, err.Error(), err, reqID)
+	}
+}
+
+func deploymentError(c *echo.Context, status int, message string, err error, reqID string) error {
+	resp := helper.BuildErrorResponse(message, err, reqID)
+	resp.Error.Code = status
+	return c.JSON(status, resp)
 }
 
 func (h *DeploymentHandler) CreateDeployment(c *echo.Context) error {

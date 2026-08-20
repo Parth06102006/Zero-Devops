@@ -351,3 +351,19 @@ func (d *deploymentUsecase) GetDeployments(ctx context.Context, userID string) (
 func (d *deploymentUsecase) GetDeploymentByID(ctx context.Context, userID, deploymentID string) (*domain.Deployment, error) {
 	return d.deploymentRepo.GetByID(ctx, userID, deploymentID)
 }
+
+func (d *deploymentUsecase) ListProjectBuilds(ctx context.Context, userID, projectID string) ([]domain.Deployment, error) {
+	projectID = strings.TrimSpace(projectID)
+	if projectID == "" {
+		return nil, domain.ErrBadParamInput
+	}
+	return d.deploymentRepo.GetByProjectID(ctx, userID, projectID)
+}
+
+func (d *deploymentUsecase) GetBuild(ctx context.Context, userID, buildID string) (*domain.Deployment, error) {
+	buildID = strings.TrimSpace(buildID)
+	if buildID == "" {
+		return nil, domain.ErrBadParamInput
+	}
+	return d.deploymentRepo.GetByID(ctx, userID, buildID)
+}
