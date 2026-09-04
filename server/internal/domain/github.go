@@ -41,8 +41,12 @@ type GithubUsecase interface {
 type GithubRepository interface {
 	StoreInstallation(ctx context.Context, inst *GithubInstallation) error
 	GetInstallationByUserID(ctx context.Context, userID string) (*GithubInstallation, error)
+	GetInstallationIdByGithubInstallationID(ctx context.Context, installationID int64) (string, error)
+	GetInstallationStatusByID(ctx context.Context, installationDBID string) (string, error)
 	DeleteInstallationByUserID(ctx context.Context, userID string) error
 	UpdateInstallationStatus(ctx context.Context, userID string, status string) error
+	UpdateInstallationStatusByGithubInstallationID(ctx context.Context, installationID int64, status string) error
+	UpdateInstallationExternalIDByID(ctx context.Context, installationID string, github_installation_db_id string) error
 }
 
 type InstallationTokenProvider interface {

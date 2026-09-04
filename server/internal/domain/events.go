@@ -17,8 +17,8 @@ const (
 	// CheckRunEvent                            Event = "check_run"
 	// CheckSuiteEvent                          Event = "check_suite"
 	// CommitCommentEvent                       Event = "commit_comment"
-	// CreateEvent                              Event = "create"
-	// DeleteEvent                              Event = "delete"
+	CreateEvent                               Event = "create"
+	DeleteEvent                               Event = "delete"
 	// DependabotAlertEvent                     Event = "dependabot_alert"
 	// DeployKeyEvent                           Event = "deploy_key"
 	// DeploymentEvent                          Event = "deployment"
@@ -45,8 +45,8 @@ const (
 	// PullRequestEvent                         Event = "pull_request"
 	// PullRequestReviewEvent                   Event = "pull_request_review"
 	// PullRequestReviewCommentEvent            Event = "pull_request_review_comment"
-	// ReleaseEvent                             Event = "release"
-	// RepositoryEvent                          Event = "repository"
+	ReleaseEvent                              Event = "release"
+	RepositoryEvent                           Event = "repository"
 	// RepositoryVulnerabilityAlertEvent        Event = "repository_vulnerability_alert"
 	// SecurityAdvisoryEvent                    Event = "security_advisory"
 	// StatusEvent                              Event = "status"
@@ -611,7 +611,7 @@ type CommitCommentPayload struct {
 	} `json:"installation"`
 }
 
-// CreatePayload contains the information for GitHub's create hook event
+*/// CreatePayload contains the information for GitHub's create hook event
 type CreatePayload struct {
 	Ref          string `json:"ref"`
 	RefType      string `json:"ref_type"`
@@ -845,6 +845,7 @@ type DeletePayload struct {
 	} `json:"sender"`
 }
 
+/*
 // DependabotAlertPayload contains the information for GitHub's dependabot_alert hook event
 type DependabotAlertPayload struct {
 	Action string `json:"action"` // "created", "dissmissed", "fixed", "reintroduced", "reopened"
@@ -5573,7 +5574,6 @@ type PushPayload struct {
 	} `json:"installation"`
 }
 
-/*
 // ReleasePayload contains the information for GitHub's release hook event
 type ReleasePayload struct {
 	Action  string `json:"action"`
@@ -5875,7 +5875,6 @@ type RepositoryPayload struct {
 		SiteAdmin         bool   `json:"site_admin"`
 	} `json:"sender"`
 }
-*/
 
 // RepositoryVulnerabilityAlertPayload contains the information for GitHub's repository_vulnerability_alert hook event.
 type RepositoryVulnerabilityAlertPayload struct {

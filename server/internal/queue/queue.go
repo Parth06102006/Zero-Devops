@@ -133,6 +133,44 @@ func SetUpQueues(conn *amqp.Connection, queueChannel *amqp.Channel) error {
 			return err
 		}
 	}
+/* 
+	exists, err = exchangeExists(conn, "webhooks.dlx", "direct")
+	if err != nil {
+		return err
+	}
+	if !exists {
+		if err := declareExchange(queueChannel, "webhooks.dlx", "direct"); err != nil {
+			return err
+		}
+	}
+
+	exists, err = queueExists(conn, "webhooks.jobs.dlq", nil)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		if err := declareQueue(queueChannel, "webhooks.jobs.dlq", nil); err != nil {
+			return err
+		}
+		if err := bindQueue(queueChannel, "webhooks.jobs.dlq", "webhooks.jobs.dlq", "webhooks.dlx"); err != nil {
+			return err
+		}
+	}
+
+	argsJobs = amqp.Table{
+		"x-dead-letter-exchange":    "webhooks.dlx",
+		"x-dead-letter-routing-key": "webhooks.jobs.dlq",
+	}
+
+	exists, err = queueExists(conn, "webhooks.jobs", argsJobs)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		if err := declareQueue(queueChannel, "webhooks.jobs", argsJobs); err != nil {
+			return err
+		}
+	} */
 
 	return nil
 }

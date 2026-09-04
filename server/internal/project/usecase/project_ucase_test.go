@@ -9,11 +9,11 @@ import (
 )
 
 type projectRepoMock struct {
-	storeFn   func(ctx context.Context, p *domain.Project) error
-	listFn    func(ctx context.Context, userID string) ([]domain.Project, error)
-	getFn     func(ctx context.Context, userID, id string) (*domain.Project, error)
-	updateFn  func(ctx context.Context, p *domain.Project) error
-	deleteFn  func(ctx context.Context, userID, id string) error
+	storeFn  func(ctx context.Context, p *domain.Project) error
+	listFn   func(ctx context.Context, userID string) ([]domain.Project, error)
+	getFn    func(ctx context.Context, userID, id string) (*domain.Project, error)
+	updateFn func(ctx context.Context, p *domain.Project) error
+	deleteFn func(ctx context.Context, userID, id string) error
 }
 
 func (m *projectRepoMock) Store(ctx context.Context, p *domain.Project) error {
@@ -46,13 +46,25 @@ func (m *projectRepoMock) Delete(ctx context.Context, userID, id string) error {
 	}
 	return nil
 }
+func (m *projectRepoMock) GetProjectRepoAvailability(_ context.Context, _ string) (map[int64]bool, error) {
+	return nil, nil
+}
+func (m *projectRepoMock) UpdateProjectRepoAvailability(_ context.Context, _ string, _ map[int64] bool) error {
+	return nil
+}
+func (m *projectRepoMock) GetByInstallationAndRepositoryID(_ context.Context, _ string, _ int64) (*domain.Project, error) {
+	return nil, nil
+}
+func (m *projectRepoMock) IncrementDesiredRevisionGeneration(_ context.Context, _ string, _ int64) (int64, error) {
+	return 0, nil
+}
 
 type githubUsecaseMock struct {
 	detailsFn func(ctx context.Context, userID string, repoID int64) (*domain.RepositoryPicker, error)
 	instFn    func(ctx context.Context, userID string) (*domain.GithubInstallation, error)
 }
 
-func (m *githubUsecaseMock) InstallGithubApp(_ context.Context, _ *http.Client, _ , _ string) error {
+func (m *githubUsecaseMock) InstallGithubApp(_ context.Context, _ *http.Client, _, _ string) error {
 	return nil
 }
 func (m *githubUsecaseMock) DeleteGithubApp(_ context.Context, _ string) error { return nil }
@@ -62,7 +74,7 @@ func (m *githubUsecaseMock) GetGithubAppInstallation(ctx context.Context, userID
 	}
 	return nil, nil
 }
-func (m *githubUsecaseMock) ListRepositories(_ context.Context, _ , _ , _ string, _ int) (*domain.RepositoryList, error) {
+func (m *githubUsecaseMock) ListRepositories(_ context.Context, _, _, _ string, _ int) (*domain.RepositoryList, error) {
 	return nil, nil
 }
 func (m *githubUsecaseMock) GetRepositoryDetails(ctx context.Context, userID string, repoID int64) (*domain.RepositoryPicker, error) {

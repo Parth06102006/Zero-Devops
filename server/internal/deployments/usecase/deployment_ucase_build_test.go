@@ -13,7 +13,7 @@ type projectRepoMock struct {
 	getFn func(ctx context.Context, userID, id string) (*domain.Project, error)
 }
 
-func (m *projectRepoMock) Store(_ context.Context, _ *domain.Project) error    { return nil }
+func (m *projectRepoMock) Store(_ context.Context, _ *domain.Project) error { return nil }
 func (m *projectRepoMock) ListByUserID(_ context.Context, _ string) ([]domain.Project, error) {
 	return nil, nil
 }
@@ -24,17 +24,29 @@ func (m *projectRepoMock) GetByID(ctx context.Context, userID, id string) (*doma
 	return nil, nil
 }
 func (m *projectRepoMock) Update(_ context.Context, _ *domain.Project) error { return nil }
-func (m *projectRepoMock) Delete(_ context.Context, _ , _ string) error         { return nil }
+func (m *projectRepoMock) Delete(_ context.Context, _, _ string) error       { return nil }
+func (m *projectRepoMock) GetProjectRepoAvailability(_ context.Context, _ string) (map[int64]bool, error) {
+	return nil, nil
+}
+func (m *projectRepoMock) UpdateProjectRepoAvailability(_ context.Context, _ string, _ map[int64]bool) error {
+	return nil
+}
+func (m *projectRepoMock) GetByInstallationAndRepositoryID(_ context.Context, _ string, _ int64) (*domain.Project, error) {
+	return nil, nil
+}
+func (m *projectRepoMock) IncrementDesiredRevisionGeneration(_ context.Context, _ string, _ int64) (int64, error) {
+	return 0, nil
+}
 
 type repositoryClientMock struct{}
 
-func (m *repositoryClientMock) ListRepositories(_ context.Context, _ , _ , _ string, _ int) (*domain.RepositoryList, error) {
+func (m *repositoryClientMock) ListRepositories(_ context.Context, _, _, _ string, _ int) (*domain.RepositoryList, error) {
 	return nil, nil
 }
 func (m *repositoryClientMock) GetRepositoryDetails(_ context.Context, _ string, _ int64) (*domain.RepositoryPicker, error) {
 	return &domain.RepositoryPicker{}, nil
 }
-func (m *repositoryClientMock) ResolveCommit(_ context.Context, _ , _ , _ , _ string) (string, error) {
+func (m *repositoryClientMock) ResolveCommit(_ context.Context, _, _, _, _ string) (string, error) {
 	return "0", nil
 }
 
@@ -55,7 +67,7 @@ func TestCreateProjectBuild_MissingIdempotencyKey(t *testing.T) {
 
 func TestCreateProjectBuild_ProjectNotFound(t *testing.T) {
 	pr := &projectRepoMock{
-		getFn: func(_ context.Context, _ , _ string) (*domain.Project, error) {
+		getFn: func(_ context.Context, _, _ string) (*domain.Project, error) {
 			return nil, domain.ErrNotFound
 		},
 	}
@@ -77,7 +89,7 @@ func TestCreateProjectBuild_ProjectNotFound(t *testing.T) {
 
 func TestCreateProjectBuild_InactiveInstallation(t *testing.T) {
 	pr := &projectRepoMock{
-		getFn: func(_ context.Context, _ , _ string) (*domain.Project, error) {
+		getFn: func(_ context.Context, _, _ string) (*domain.Project, error) {
 			return &domain.Project{ID: "p1", UserID: "u", InstallationID: "inst-1", GitHubRepositoryID: 99}, nil
 		},
 	}
@@ -99,7 +111,7 @@ func TestCreateProjectBuild_InactiveInstallation(t *testing.T) {
 
 func TestCreateProjectBuild_InstallationMismatch(t *testing.T) {
 	pr := &projectRepoMock{
-		getFn: func(_ context.Context, _ , _ string) (*domain.Project, error) {
+		getFn: func(_ context.Context, _, _ string) (*domain.Project, error) {
 			return &domain.Project{ID: "p1", UserID: "u", InstallationID: "inst-1", GitHubRepositoryID: 99}, nil
 		},
 	}

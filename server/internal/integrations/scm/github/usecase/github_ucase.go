@@ -13,9 +13,7 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/redis/go-redis/v9"
-
+	
 	"Zero_Devops/server/internal/integrations/scm/github/cache"
 	appmiddleware "Zero_Devops/server/internal/middleware"
 
@@ -49,9 +47,8 @@ func NewGithubAppUsecase(githubRepo domain.GithubRepository, dependencies ...int
 			usecase.tokenProvider = value
 		case domain.GithubRepositoryClient:
 			usecase.repositoryClient = value
-		case *redis.Client:
-			ttl := time.Duration(viper.GetInt("REDIS_REPOSITORY_CACHE_TTL_SECONDS")) * time.Second
-			usecase.cache = cache.NewRedisRepositoryListCache(value, ttl)
+		case *cache.RedisRepositoryListCache:
+			usecase.cache = value
 		case cache.RepositoryListCache:
 			usecase.cache = value
 		}

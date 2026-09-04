@@ -2,11 +2,13 @@
 package pgsql
 
 import (
+	"Zero_Devops/server/internal/deployments/contract"
 	"Zero_Devops/server/internal/domain"
 	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	appmiddleware "Zero_Devops/server/internal/middleware"
 
@@ -137,6 +139,127 @@ func (m *pgSQLDeploymentRepository) StoreProjectBuild(ctx context.Context, d *do
 		return err
 	}
 	return nil
+}
+
+// StoreWebhookBuildWithOutbox durably records a webhook-triggered build and its
+// deploy.jobs V1 outbox event in one transaction. The deployments row snapshots
+// the project's approved configuration and the exact pushed commit; the outbox
+// row carries the complete V1 BuildRequestV1 payload (with the generated
+// deployment ID) so a later dispatcher can publish it to RabbitMQ without
+// losing an accepted build. A redelivered webhook delivery violates the unique
+// deployments.webhook_delivery_id index and is returned as domain.ErrConflict.
+func (m *pgSQLDeploymentRepository) StoreWebhookBuildWithOutbox(ctx context.Context, params domain.StoreWebhookBuildParams) (*domain.Deployment, error) {
+	configSnapshot, err := json.Marshal(params.ConfigurationSnapshot)
+	if err != nil {
+		return nil, fmt.Errorf("marshal configuration snapshot: %w", err)
+	}
+	scanResult, err := json.Marshal(params.CommandScanResult)
+	if err != nil {
+		return nil, fmt.Errorf("marshal command scan result: %w", err)
+	}
+
+	now := time.Now()
+	tx, err := m.Conn.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
+	deployment := &domain.Deployment{
+		UserID:                    params.UserID,
+		RepoID:                    params.RepoID,
+		CloneURL:                  params.CloneURL,
+		Status:                    domain.DeploymentStatusPending,
+		ProjectID:                 params.ProjectID,
+		GithubInstallationID:      params.GithubInstallationID,
+		CommitSHA:                 params.CommitSHA,
+		RequestedRef:              params.RequestedRef,
+		Trigger:                   contract.TriggerWebhookPush,
+		DesiredRevisionGeneration: params.DesiredRevisionGeneration,
+		ConfigurationSnapshot:     params.ConfigurationSnapshot,
+		ConfigurationVersion:      params.ConfigurationVersion,
+		CommandPolicyVersion:      params.CommandPolicyVersion,
+		CommandScanResult:         params.CommandScanResult,
+		CreatedAt:                 now,
+		UpdatedAt:                 now,
+	}
+
+	query := `
+		INSERT INTO deployments (
+			user_id, repo_id, clone_url, status,
+			project_id, github_installation_id, commit_sha, requested_ref, trigger,
+			desired_revision_generation, configuration_snapshot, configuration_version,
+			command_policy_version, command_scan_result, webhook_delivery_id,
+			created_at, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+		RETURNING id
+	`
+	if err := tx.QueryRowContext(ctx, query,
+		deployment.UserID, deployment.RepoID, deployment.CloneURL, deployment.Status,
+		deployment.ProjectID, deployment.GithubInstallationID, deployment.CommitSHA, deployment.RequestedRef, deployment.Trigger,
+		deployment.DesiredRevisionGeneration, configSnapshot, deployment.ConfigurationVersion,
+		deployment.CommandPolicyVersion, scanResult, params.WebhookDeliveryID,
+		deployment.CreatedAt, deployment.UpdatedAt,
+	).Scan(&deployment.ID); err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+			return nil, domain.ErrConflict
+		}
+		log := appmiddleware.LoggerFromContext(ctx)
+		log.Error("failed to store webhook build deployment", zap.Error(err))
+		return nil, err
+	}
+
+	job := contract.BuildRequestV1{
+		Version:        contract.VersionV1,
+		EventID:        params.EventID,
+		DeploymentID:   deployment.ID,
+		ProjectID:      params.ProjectID,
+		InstallationID: params.InstallationID,
+		RepositoryID:   params.RepoID,
+		CloneURL:       params.CloneURL,
+		CommitSHA:      params.CommitSHA,
+		RequestedRef:   params.RequestedRef,
+		Trigger:        contract.TriggerWebhookPush,
+		Generation:     params.DesiredRevisionGeneration,
+		RetryCount:     0,
+		CorrelationID:  params.CorrelationID,
+		Configuration: contract.Configuration{
+			Executable:           params.ConfigurationSnapshot.Executable,
+			Args:                 params.ConfigurationSnapshot.Args,
+			WorkingDir:           params.ConfigurationSnapshot.WorkingDir,
+			ScannerPolicyVersion: params.ConfigurationSnapshot.ScannerPolicyVersion,
+		},
+	}
+	if err := job.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid deploy.jobs V1 outbox payload: %w", err)
+	}
+	payload, err := json.Marshal(job)
+	if err != nil {
+		return nil, fmt.Errorf("marshal deploy.jobs V1 payload: %w", err)
+	}
+
+	outboxQuery := `
+		INSERT INTO deployment_outbox (
+			deployment_id, event_type, message_version, payload, state
+		) VALUES ($1, $2, $3, $4, $5)
+	`
+	if _, err := tx.ExecContext(ctx, outboxQuery,
+		deployment.ID, domain.WebhookBuildEventType, contract.VersionV1, payload, domain.OutboxStatePending,
+	); err != nil {
+		log := appmiddleware.LoggerFromContext(ctx)
+		log.Error("failed to store webhook build outbox event", zap.Error(err))
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		log := appmiddleware.LoggerFromContext(ctx)
+		log.Error("failed to commit webhook build outbox transaction", zap.Error(err))
+		return nil, err
+	}
+
+	return deployment, nil
 }
 
 func (m *pgSQLDeploymentRepository) GetByUserID(ctx context.Context, userID string) ([]domain.Deployment, error) {

@@ -64,6 +64,17 @@ func GetStatusCode(err error) int {
 		return http.StatusConflict
 	case domain.ErrCommandDenied:
 		return http.StatusBadRequest
+	case domain.ErrMissingGithubEventHeader,
+		domain.ErrMissingGithubDeliveryHeader,
+		domain.ErrParsingPayload:
+		return http.StatusBadRequest
+	case domain.ErrEventNotFound:
+		return http.StatusAccepted
+	case domain.ErrMissingHubSignatureHeader,
+		domain.ErrHMACVerificationFailed:
+		return http.StatusUnauthorized
+	case domain.ErrPayloadTooLarge:
+		return http.StatusRequestEntityTooLarge
 	default:
 		return http.StatusInternalServerError
 	}

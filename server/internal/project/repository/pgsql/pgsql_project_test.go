@@ -79,6 +79,7 @@ func TestPgSQLProjectRepository_StoreGetAndDuplicateConflict(t *testing.T) {
 		RepositoryFullName:        "o/n",
 		ConfiguredBranch:          "refs/heads/main",
 		ProjectWebhookEnabled:     true,
+		RepositoryAvailable:       true,
 		DesiredRevisionGeneration: 0,
 		BuildConfiguration:        domain.BuildConfiguration{Executable: "go", Args: []string{"build"}, WorkingDir: "/app"},
 		ConfigurationVersion:      1,
@@ -98,7 +99,7 @@ func TestPgSQLProjectRepository_StoreGetAndDuplicateConflict(t *testing.T) {
 	if err != nil {
 		t.Fatalf("get by id: %v", err)
 	}
-	if got.GitHubRepositoryID != 12345 || got.ConfiguredBranch != "refs/heads/main" {
+	if got.GitHubRepositoryID != 12345 || got.ConfiguredBranch != "refs/heads/main" || !got.RepositoryAvailable {
 		t.Fatalf("unexpected persisted project: %+v", got)
 	}
 

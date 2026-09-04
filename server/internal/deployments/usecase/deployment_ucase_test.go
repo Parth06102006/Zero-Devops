@@ -31,6 +31,10 @@ func (m *deploymentRepoMock) StoreProjectBuild(ctx context.Context, d *domain.De
 	return nil
 }
 
+func (m *deploymentRepoMock) StoreWebhookBuildWithOutbox(_ context.Context, _ domain.StoreWebhookBuildParams) (*domain.Deployment, error) {
+	return nil, nil
+}
+
 func (m *deploymentRepoMock) GetByUserID(ctx context.Context, userID string) ([]domain.Deployment, error) {
 	if m.getUserFn != nil {
 		return m.getUserFn(ctx, userID)
@@ -102,6 +106,19 @@ func (m *githubRepoMock) DeleteInstallationByUserID(_ context.Context, _ string)
 }
 func (m *githubRepoMock) UpdateInstallationStatus(_ context.Context, _, _ string) error {
 	return nil
+}
+func (m *githubRepoMock) UpdateInstallationStatusByGithubInstallationID(_ context.Context, _ int64, _ string) error {
+	return nil
+}
+func (m *githubRepoMock) GetInstallationIdByGithubInstallationID(_ context.Context, _ int64) (string, error) {
+	return "", nil
+}
+func (m *githubRepoMock) UpdateInstallationExternalIDByID(_ context.Context, _, _ string) error {
+	return nil
+}
+
+func (m *githubRepoMock) GetInstallationStatusByID(_ context.Context, _ string) (string, error) {
+	return domain.GithubInstallationStatusActive, nil
 }
 
 func TestGetDeployments_PassesThrough(t *testing.T) {

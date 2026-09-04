@@ -24,10 +24,15 @@ import (
 	_githubRepo "Zero_Devops/server/internal/integrations/scm/github/repository/pgsql"
 	_tokenProvider "Zero_Devops/server/internal/integrations/scm/github/token"
 	_githubUsecase "Zero_Devops/server/internal/integrations/scm/github/usecase"
+	_webhookHttp "Zero_Devops/server/internal/integrations/scm/webhook/delivery/http"
+	_webhookUsecase "Zero_Devops/server/internal/integrations/scm/webhook/github"
+	_webhookRepo "Zero_Devops/server/internal/integrations/scm/webhook/repository/pgsql"
 	_projectHttp "Zero_Devops/server/internal/project/delivery/http"
 	_projectRepo "Zero_Devops/server/internal/project/repository/pgsql"
 	_projectScanner "Zero_Devops/server/internal/project/scanner"
 	_projectUsecase "Zero_Devops/server/internal/project/usecase"
+	"Zero_Devops/server/internal/integrations/scm/github/cache"
+
 
 	"Zero_Devops/server/internal/logger"
 	middleware "Zero_Devops/server/internal/middleware"
@@ -122,8 +127,11 @@ func run() error {
 	authUsecase := _authUcase.NewAuthUsecase(userRepo, providers, timeoutContext)
 	_authHttp.NewAuthHandler(e, authUsecase)
 
+	ttl := time.Duration(viper.GetInt("REDIS_REPOSITORY_CACHE_TTL_SECONDS")) * time.Second
+	cache_usecase := cache.NewRedisRepositoryListCache(rdb, ttl)
+
 	repositoryClient := _githubClient.NewRepositoryClient(http.DefaultClient)
-	githubUsecase := _githubUsecase.NewGithubAppUsecase(githubRepo, tokenProvider, repositoryClient, rdb)
+	githubUsecase := _githubUsecase.NewGithubAppUsecase(githubRepo, tokenProvider, repositoryClient, cache_usecase)
 	_appHttp.NewSCMHandler(e, githubUsecase)
 
 	projectRepo := _projectRepo.NewPgSQLProjectRepository(dbConn)
@@ -157,6 +165,22 @@ func run() error {
 	deploymentRepo := _deploymentRepo.NewPgSQLDeploymentRepository(dbConn)
 	deploymentUsecase := _deploymentUsecase.NewDeploymentUsecase(deploymentRepo, githubRepo, tokenProvider, rmqConn, projectRepo, repositoryClient)
 	_deploymentHttp.NewDeploymentHandler(e, deploymentUsecase)
+
+	webhookRepo := _webhookRepo.NewPGSQLWebhookRepository(dbConn)
+	webhookUsecase, err := _webhookUsecase.NewWebhookUsecase(webhookRepo,
+		githubRepo,
+		projectRepo,
+		deploymentRepo,
+		cache_usecase,
+		_webhookUsecase.Options.Secret(viper.GetString("GITHUB_APP_WEBHOOK_SECRET")),
+		_webhookUsecase.Options.MaxPayloadSize(10_485_760),
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to create webhook usecase:%w", err)
+	}
+
+	_webhookHttp.NewWebhookHandler(e, webhookUsecase)
 
 	return e.Start(viper.GetString("SERVER_ADDRESS"))
 }

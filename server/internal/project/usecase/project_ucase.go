@@ -11,8 +11,8 @@ import (
 )
 
 type projectUsecase struct {
-	projectRepo   domain.ProjectRepository
-	githubUsecase domain.GithubUsecase
+	projectRepo    domain.ProjectRepository
+	githubUsecase  domain.GithubUsecase
 	commandScanner domain.CommandScanner
 }
 
@@ -52,6 +52,7 @@ func (p *projectUsecase) CreateProject(ctx context.Context, userID string, param
 		RepositoryFullName:        picker.FullName,
 		ConfiguredBranch:          toFullRef(params.ConfiguredBranch, picker.DefaultBranch),
 		ProjectWebhookEnabled:     params.ProjectWebhookEnabled,
+		RepositoryAvailable:       true,
 		DesiredRevisionGeneration: 0,
 		BuildConfiguration:        params.BuildConfiguration,
 		ConfigurationVersion:      1,

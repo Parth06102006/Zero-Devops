@@ -65,10 +65,48 @@ type DeploymentUsecase interface {
 	GetBuild(ctx context.Context, userID, buildID string) (*Deployment, error)
 }
 
+// WebhookBuildEventType is the deployment_outbox event type for build requests
+// created by webhook pushes. The outbox payload is a deploy.jobs V1
+// BuildRequestV1 JSON document.
+const WebhookBuildEventType = "deploy.jobs"
+
+// OutboxState enumerates the deployment_outbox.state lifecycle.
+const (
+	OutboxStatePending    = "pending"
+	OutboxStatePublishing = "publishing"
+	OutboxStateSent       = "sent"
+	OutboxStateFailed     = "failed"
+)
+
+// StoreWebhookBuildParams carries the immutable inputs for a webhook-triggered
+// build. The caller has already advanced the project's desired-revision
+// generation and resolved the webhook delivery row before calling; the
+// repository persists the deployments row and the deploy.jobs V1 outbox event
+// in one transaction.
+type StoreWebhookBuildParams struct {
+	ProjectID                 string
+	UserID                    string
+	RepoID                    int64
+	CloneURL                  string
+	GithubInstallationID      string // FK -> github_installations.id (DB UUID)
+	WebhookDeliveryID         string // FK -> webhook_deliveries.id (DB UUID)
+	CommitSHA                 string // push payload.After (authoritative)
+	RequestedRef              string // push payload.Ref
+	DesiredRevisionGeneration int64  // value returned by IncrementDesiredRevisionGeneration
+	ConfigurationSnapshot     BuildConfiguration
+	ConfigurationVersion      int
+	CommandPolicyVersion      string
+	CommandScanResult         CommandScanResult
+	EventID                   string // deploy.jobs event ID (V1 payload event_id)
+	InstallationID            int64  // external GitHub installation ID (V1 payload installation_id)
+	CorrelationID             string
+}
+
 // DeploymentRepository defines the interface for deployment data operations
 type DeploymentRepository interface {
 	Store(ctx context.Context, d *Deployment) error
 	StoreProjectBuild(ctx context.Context, d *Deployment) error
+	StoreWebhookBuildWithOutbox(ctx context.Context, params StoreWebhookBuildParams) (*Deployment, error)
 	GetByUserID(ctx context.Context, userID string) ([]Deployment, error)
 	GetByID(ctx context.Context, userID, id string) (*Deployment, error)
 	GetByProjectID(ctx context.Context, userID, projectID string) ([]Deployment, error)

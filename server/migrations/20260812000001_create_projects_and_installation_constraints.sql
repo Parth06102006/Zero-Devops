@@ -40,6 +40,7 @@ CREATE TABLE projects (
     repository_full_name TEXT NOT NULL,
     configured_branch TEXT NOT NULL,
     project_webhook_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    repository_available BOOLEAN NOT NULL DEFAULT TRUE,
     desired_revision_generation BIGINT NOT NULL DEFAULT 0 CHECK (desired_revision_generation >= 0),
     build_configuration JSONB NOT NULL DEFAULT '{}'::JSONB,
     configuration_version INTEGER NOT NULL DEFAULT 1 CHECK (configuration_version > 0),

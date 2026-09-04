@@ -4,7 +4,8 @@ CREATE TABLE webhook_deliveries (
     delivery_id UUID NOT NULL,
     event_name TEXT NOT NULL,
     event_action TEXT,
-    github_installation_id BIGINT,
+    github_installation_external_id BIGINT,
+    github_installation_db_id UUID REFERENCES github_installations(id) ON DELETE SET NULL,
     github_repository_id BIGINT,
     processing_status TEXT NOT NULL DEFAULT 'received'
         CHECK (processing_status IN ('received', 'accepted', 'processed', 'failed')),

@@ -24,9 +24,9 @@ type BuildConfiguration struct {
 // into its own column on the projects table for quick filtering, while the
 // full result lives in the `command_scan_result` JSONB column.
 type CommandScanResult struct {
-	Status            string `json:"status"`              // approved | denied | pending
-	PolicyVersion     string `json:"policy_version"`      // e.g. "v1"
-	Source            string `json:"source"`              // autoscan | manual
+	Status            string `json:"status"`         // approved | denied | pending
+	PolicyVersion     string `json:"policy_version"` // e.g. "v1"
+	Source            string `json:"source"`         // autoscan | manual
 	DetectedFramework string `json:"detected_framework,omitempty"`
 	Message           string `json:"message,omitempty"`
 	DeniedReason      string `json:"denied_reason,omitempty"`
@@ -41,7 +41,7 @@ const (
 
 // CommandScanSource enumerates how a scan was initiated.
 const (
-	CommandScanSourceManual  = "manual"
+	CommandScanSourceManual   = "manual"
 	CommandScanSourceAutoscan = "autoscan"
 )
 
@@ -73,7 +73,8 @@ type Project struct {
 	RepositoryName            string             `json:"repository_name"`
 	RepositoryFullName        string             `json:"repository_full_name"`
 	ConfiguredBranch          string             `json:"configured_branch"` // stored as full ref, e.g. refs/heads/main
-	ProjectWebhookEnabled            bool               `json:"project_webhook_enabled"`
+	ProjectWebhookEnabled     bool               `json:"project_webhook_enabled"`
+	RepositoryAvailable       bool               `json:"repository_available"`
 	DesiredRevisionGeneration int64              `json:"desired_revision_generation"`
 	BuildConfiguration        BuildConfiguration `json:"build_configuration"`
 	ConfigurationVersion      int                `json:"configuration_version"`
@@ -90,10 +91,10 @@ type Project struct {
 // the scanner/policy on the build command, and persisting the resulting
 // snapshot. Do not persist the entire GitHub repository inventory here.
 type CreateProjectParams struct {
-	RepositoryID       int64              `json:"repository_id"`
-	ConfiguredBranch   string             `json:"configured_branch"`
-	ProjectWebhookEnabled     bool               `json:"project_webhook_enabled"`
-	BuildConfiguration BuildConfiguration `json:"build_configuration"`
+	RepositoryID          int64              `json:"repository_id"`
+	ConfiguredBranch      string             `json:"configured_branch"`
+	ProjectWebhookEnabled bool               `json:"project_webhook_enabled"`
+	BuildConfiguration    BuildConfiguration `json:"build_configuration"`
 }
 
 // UpdateProjectParams carries optional PATCH fields. Pointer fields distinguish
@@ -101,9 +102,9 @@ type CreateProjectParams struct {
 // The configured branch may be changed only through this authenticated API;
 // webhook handling reads the persisted value and never a client-supplied ref.
 type UpdateProjectParams struct {
-	ConfiguredBranch   *string             `json:"configured_branch,omitempty"`
-	ProjectWebhookEnabled     *bool               `json:"project_webhook_enabled,omitempty"`
-	BuildConfiguration *BuildConfiguration `json:"build_configuration,omitempty"`
+	ConfiguredBranch      *string             `json:"configured_branch,omitempty"`
+	ProjectWebhookEnabled *bool               `json:"project_webhook_enabled,omitempty"`
+	BuildConfiguration    *BuildConfiguration `json:"build_configuration,omitempty"`
 }
 
 // ProjectUsecase defines the project configuration business logic. Every
@@ -127,4 +128,12 @@ type ProjectRepository interface {
 	GetByID(ctx context.Context, userID, id string) (*Project, error)
 	Update(ctx context.Context, p *Project) error
 	Delete(ctx context.Context, userID, id string) error
+	GetProjectRepoAvailability(ctx context.Context, githubInstallationID string) (map[int64]bool, error)
+	UpdateProjectRepoAvailability(ctx context.Context, githubInstallationID string, listOfRepos map[int64]bool) error
+	GetByInstallationAndRepositoryID(ctx context.Context, githubInstallationID string, githubRepositoryID int64) (*Project, error)
+	// IncrementDesiredRevisionGeneration atomically advances the project's
+	// desired-revision counter and returns the new generation. It is keyed by
+	// the webhook identity (installation + GitHub repository ID); a missing row
+	// yields ErrNotFound.
+	IncrementDesiredRevisionGeneration(ctx context.Context, githubInstallationID string, githubRepositoryID int64) (int64, error)
 }
