@@ -7,19 +7,24 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
+	_config "Zero_Devops/server/config"
 	_authHttp "Zero_Devops/server/internal/auth/delivery/http"
 	_authMiddleware "Zero_Devops/server/internal/auth/delivery/http/middleware"
 	_userRepo "Zero_Devops/server/internal/auth/repository/pgsql"
 	_authUcase "Zero_Devops/server/internal/auth/usecase"
 	_authProvider "Zero_Devops/server/internal/auth/usecase/auth_provider"
-	_config "Zero_Devops/server/internal/config"
 	_deploymentHttp "Zero_Devops/server/internal/deployments/delivery/http"
+	_outboxDispatcher "Zero_Devops/server/internal/deployments/dispatcher"
 	_deploymentRepo "Zero_Devops/server/internal/deployments/repository/pgsql"
 	_deploymentUsecase "Zero_Devops/server/internal/deployments/usecase"
 	domain "Zero_Devops/server/internal/domain"
 	_appHttp "Zero_Devops/server/internal/integrations/scm/delivery/http"
+	"Zero_Devops/server/internal/integrations/scm/github/cache"
 	_githubClient "Zero_Devops/server/internal/integrations/scm/github/client"
 	_githubRepo "Zero_Devops/server/internal/integrations/scm/github/repository/pgsql"
 	_tokenProvider "Zero_Devops/server/internal/integrations/scm/github/token"
@@ -31,8 +36,6 @@ import (
 	_projectRepo "Zero_Devops/server/internal/project/repository/pgsql"
 	_projectScanner "Zero_Devops/server/internal/project/scanner"
 	_projectUsecase "Zero_Devops/server/internal/project/usecase"
-	"Zero_Devops/server/internal/integrations/scm/github/cache"
-
 
 	"Zero_Devops/server/internal/logger"
 	middleware "Zero_Devops/server/internal/middleware"
@@ -62,6 +65,9 @@ func run() error {
 	}()
 
 	dsn := buildPostgresDSN()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
 	dbConn, err := sql.Open("postgres", dsn)
 
 	if err != nil {
@@ -73,7 +79,6 @@ func run() error {
 		}
 	}()
 
-	ctx := context.Background()
 	if err := dbConn.PingContext(ctx); err != nil {
 		return fmt.Errorf("failed to ping database: %w", err)
 	}
@@ -163,8 +168,35 @@ func run() error {
 	}
 
 	deploymentRepo := _deploymentRepo.NewPgSQLDeploymentRepository(dbConn)
-	deploymentUsecase := _deploymentUsecase.NewDeploymentUsecase(deploymentRepo, githubRepo, tokenProvider, rmqConn, projectRepo, repositoryClient)
+	// Durable deploy.status consumer (Task 5): applies worker status updates
+	// atomically via ApplyStatusUpdate and acks only after the commit. Same
+	// signal context as the outbox dispatcher and HTTP server.
+	deploymentUsecase := _deploymentUsecase.NewDeploymentUsecase(ctx, deploymentRepo, githubRepo, tokenProvider, rmqConn, projectRepo, repositoryClient)
 	_deploymentHttp.NewDeploymentHandler(e, deploymentUsecase)
+
+	// Outbox dispatcher (Task 5, plan-server-12-08.md): the only deploy.jobs
+	// producer. Manual and webhook builds both write their deployment row and
+	// outbox event in one transaction; this loop claims pending events and
+	// publishes them with broker confirmation. It runs alongside the HTTP
+	// server and stops on the same signal context. If it exits with an error
+	// (for example the RabbitMQ channel cannot be opened), the server keeps
+	// accepting builds — the outbox rows accumulate durably and are dispatched
+	// after a restart or once the broker recovers; nothing is lost.
+	outbox := _outboxDispatcher.NewOutbox(
+		deploymentRepo,
+		rmqConn,
+		baseLogger,
+		_outboxDispatcher.Config{
+			PollInterval: time.Duration(viper.GetInt("OUTBOX_POLL_INTERVAL_MS")) * time.Millisecond,
+			BatchSize:    viper.GetInt("OUTBOX_BATCH_SIZE"),
+		},
+	)
+	go func() {
+		if err := outbox.Run(ctx); err != nil {
+			baseLogger.Error("outbox dispatcher stopped with error; builds will accumulate in the outbox until restart",
+				zap.Error(err))
+		}
+	}()
 
 	webhookRepo := _webhookRepo.NewPGSQLWebhookRepository(dbConn)
 	webhookUsecase, err := _webhookUsecase.NewWebhookUsecase(webhookRepo,
@@ -182,7 +214,13 @@ func run() error {
 
 	_webhookHttp.NewWebhookHandler(e, webhookUsecase)
 
-	return e.Start(viper.GetString("SERVER_ADDRESS"))
+	// Start the HTTP server bound to the same signal context as the outbox
+	// dispatcher: on SIGINT/SIGTERM echo drains in-flight requests gracefully
+	// and the dispatcher stops claiming new batches, all through one ctx.
+	return echo.StartConfig{
+		Address:         viper.GetString("SERVER_ADDRESS"),
+		GracefulTimeout: 10 * time.Second,
+	}.Start(ctx, e)
 }
 
 func buildPostgresDSN() string {

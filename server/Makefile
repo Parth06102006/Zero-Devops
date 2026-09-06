@@ -132,28 +132,28 @@ export GOOSE_DBSTRING ?= $(POSTGRES_DSN)
 migrate-up: $(GOOSE) ## Apply all (or N up) migrations.
 	@ read -p "How many migration you wants to perform (default value: [all]): " N; \
 	if [ -z "$${N}" ]; then \
-		goose -dir migrations up; \
+		goose -dir database/migrations up; \
 	else \
-		goose -dir migrations up $${N}; \
+		goose -dir database/migrations up $${N}; \
 	fi
 
 .PHONY: migrate-down
 migrate-down: $(GOOSE) ## Apply all (or N down) migrations.
 	@ read -p "How many migration you wants to perform (default value: [all]): " N; \
 	if [ -z "$${N}" ]; then \
-		goose -dir migrations down; \
+		goose -dir database/migrations down; \
 	else \
-		goose -dir migrations down $${N}; \
+		goose -dir database/migrations down $${N}; \
 	fi
 
 .PHONY: migrate-drop
 migrate-drop: $(GOOSE) ## Drop everything inside the database.
-	goose -dir migrations reset
+	goose -dir database/migrations reset
 
 .PHONY: migrate-create
 migrate-create: $(GOOSE) ## Create a set of up/down migrations with a specified name.
 	@ read -p "Please provide name for the migration: " Name; \
-	goose create $${Name} -dir migrations --sql-header "-- +goose Up\n-- +goose Down"
+	goose create $${Name} -dir database/migrations --sql-header "-- +goose Up\n-- +goose Down"
 
 # ~~~ Cleans ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

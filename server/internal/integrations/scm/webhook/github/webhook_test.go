@@ -13,6 +13,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/redis/go-redis/v9"
@@ -127,7 +128,6 @@ type fakeProjectRepository struct {
 	project      *domain.Project
 	projectErr   error
 	lookups      []lookupArgs
-	generations  int64
 }
 
 type lookupArgs struct {
@@ -162,10 +162,6 @@ func (f *fakeProjectRepository) GetByInstallationAndRepositoryID(_ context.Conte
 	}
 	return f.project, nil
 }
-func (f *fakeProjectRepository) IncrementDesiredRevisionGeneration(_ context.Context, _ string, _ int64) (int64, error) {
-	f.generations++
-	return f.generations, nil
-}
 
 type fakeDeploymentRepository struct {
 	stored     []domain.StoreWebhookBuildParams
@@ -173,10 +169,6 @@ type fakeDeploymentRepository struct {
 	storedRepo *domain.Deployment
 }
 
-func (f *fakeDeploymentRepository) Store(_ context.Context, _ *domain.Deployment) error { return nil }
-func (f *fakeDeploymentRepository) StoreProjectBuild(_ context.Context, _ *domain.Deployment) error {
-	return nil
-}
 func (f *fakeDeploymentRepository) StoreWebhookBuildWithOutbox(_ context.Context, params domain.StoreWebhookBuildParams) (*domain.Deployment, error) {
 	if f.storeErr != nil {
 		return nil, f.storeErr
@@ -196,12 +188,24 @@ func (f *fakeDeploymentRepository) GetByID(_ context.Context, _, _ string) (*dom
 func (f *fakeDeploymentRepository) GetByProjectID(_ context.Context, _, _ string) ([]domain.Deployment, error) {
 	return nil, nil
 }
-func (f *fakeDeploymentRepository) UpdateStatus(_ context.Context, _ string, _ domain.DeploymentStatus) error {
+func (f *fakeDeploymentRepository) StoreProjectBuildWithOutbox(_ context.Context, _ domain.StoreProjectBuildWithOutboxParams) (*domain.Deployment, error) {
+	return nil, nil
+}
+func (f *fakeDeploymentRepository) ClaimOutboxBatch(_ context.Context, _ int) ([]domain.OutboxEvent, error) {
+	return nil, nil
+}
+func (f *fakeDeploymentRepository) MarkOutboxSent(_ context.Context, _ string) error { return nil }
+func (f *fakeDeploymentRepository) MarkOutboxPublishFailed(_ context.Context, _ string, _ string, _ time.Time) error {
 	return nil
 }
-func (f *fakeDeploymentRepository) UpdateOutputURL(_ context.Context, _, _ string) error { return nil }
-func (f *fakeDeploymentRepository) UpdateErrorMessage(_ context.Context, _, _ string) error {
-	return nil
+func (f *fakeDeploymentRepository) ResetStuckPublishing(_ context.Context, _ time.Duration) (int64, error) {
+	return 0, nil
+}
+func (f *fakeDeploymentRepository) ApplyStatusUpdate(_ context.Context, _ domain.ApplyStatusParams) (*domain.ApplyStatusResult, error) {
+	return nil, nil
+}
+func (f *fakeDeploymentRepository) DeleteSentOutboxOlderThan(_ context.Context, _ time.Duration) (int64, error) {
+	return 0, nil
 }
 
 func newTestRepositoryListCache(t *testing.T) *cache.RedisRepositoryListCache {
@@ -545,9 +549,6 @@ func TestHandleGithubWebhook_PushEligibleCreatesBuild(t *testing.T) {
 	}
 	if stored.CommitSHA != "abc123def456" || stored.RequestedRef != "refs/heads/main" {
 		t.Fatalf("unexpected source fields: %+v", stored)
-	}
-	if stored.DesiredRevisionGeneration != 1 {
-		t.Fatalf("expected generation 1, got %d", stored.DesiredRevisionGeneration)
 	}
 	if stored.CloneURL != "https://github.com/u/r.git" {
 		t.Fatalf("unexpected clone URL: %q", stored.CloneURL)

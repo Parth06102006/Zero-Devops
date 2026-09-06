@@ -93,7 +93,7 @@ sequenceDiagram
 | `internal/deployments` | Deployment records, manual project builds, V1 `deploy.jobs` contract, RabbitMQ queue setup. |
 | `internal/queue` | RabbitMQ exchange/queue/DLQ declaration. |
 | `internal/domain` | Shared entities, interfaces, error sentinels. |
-| `internal/config`, `logger`, `middleware`, `helper` | Config (Viper), structured logging (Zap), CORS/request-ID/request-logger, response envelope helpers. |
+| `config`, `internal/logger`, `internal/middleware`, `internal/helper` | Config (Viper), structured logging (Zap), CORS/request-ID/request-logger, response envelope helpers. |
 
 Current server HTTP surface:
 

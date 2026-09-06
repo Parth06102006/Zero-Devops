@@ -21,13 +21,6 @@ type mockDeploymentUsecase struct {
 	getBuildFn           func(ctx context.Context, userID, buildID string) (*domain.Deployment, error)
 }
 
-func (m *mockDeploymentUsecase) CreateDeployment(ctx context.Context, userID string, repoID int64, reqID string) (*domain.Deployment, error) {
-	if m.createFn != nil {
-		return m.createFn(ctx, userID, repoID, reqID)
-	}
-	return nil, nil
-}
-
 func (m *mockDeploymentUsecase) CreateProjectBuild(ctx context.Context, userID string, params domain.CreateProjectBuildParams) (*domain.Deployment, error) {
 	if m.createProjectBuildFn != nil {
 		return m.createProjectBuildFn(ctx, userID, params)
@@ -272,88 +265,6 @@ func TestGetBuild_NotFound(t *testing.T) {
 	}
 	if !bytes.Contains(rec.Body.Bytes(), []byte("build not found")) {
 		t.Fatalf("missing expected error message: %s", rec.Body.String())
-	}
-}
-
-func TestCreateDeployment_Unauthorized(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/deployments", http.NoBody)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	h := &DeploymentHandler{dUsecase: &mockDeploymentUsecase{}}
-	if err := h.CreateDeployment(c); err != nil {
-		t.Fatalf("expected nil echo error, got %v", err)
-	}
-	if rec.Code != http.StatusUnauthorized {
-		t.Fatalf("expected status %d, got %d", http.StatusUnauthorized, rec.Code)
-	}
-}
-
-func TestCreateDeployment_InvalidBody(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/deployments", bytes.NewBufferString("{"))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.Set(middleware.UserIDContextKey, "11")
-
-	h := &DeploymentHandler{dUsecase: &mockDeploymentUsecase{}}
-	if err := h.CreateDeployment(c); err != nil {
-		t.Fatalf("expected nil echo error, got %v", err)
-	}
-	if rec.Code != http.StatusBadRequest {
-		t.Fatalf("expected status %d, got %d", http.StatusBadRequest, rec.Code)
-	}
-}
-
-func TestCreateDeployment_LegacyRequestFailsClosed(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/deployments", bytes.NewBufferString(`{"repo_id":42}`))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.Set(middleware.UserIDContextKey, "11")
-
-	h := &DeploymentHandler{dUsecase: &mockDeploymentUsecase{
-		createFn: func(_ context.Context, _ string, _ int64, _ string) (*domain.Deployment, error) {
-			t.Fatal("legacy handler must not call the use case")
-			return nil, nil
-		},
-	}}
-
-	if err := h.CreateDeployment(c); err != nil {
-		t.Fatalf("expected nil echo error, got %v", err)
-	}
-	if rec.Code != http.StatusConflict {
-		t.Fatalf("expected status %d, got %d", http.StatusConflict, rec.Code)
-	}
-	if !bytes.Contains(rec.Body.Bytes(), []byte("complete V1 build request")) {
-		t.Fatalf("missing actionable error: %s", rec.Body.String())
-	}
-}
-
-func TestCreateDeployment_UsecaseError(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/deployments", bytes.NewBufferString(`{"repo_id":42}`))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.Set(middleware.UserIDContextKey, "11")
-
-	h := &DeploymentHandler{
-		dUsecase: &mockDeploymentUsecase{
-			createFn: func(_ context.Context, _ string, _ int64, _ string) (*domain.Deployment, error) {
-				return nil, domain.ErrConflict
-			},
-		},
-	}
-
-	if err := h.CreateDeployment(c); err != nil {
-		t.Fatalf("expected nil echo error, got %v", err)
-	}
-	if rec.Code != http.StatusConflict {
-		t.Fatalf("expected status %d, got %d", http.StatusConflict, rec.Code)
 	}
 }
 

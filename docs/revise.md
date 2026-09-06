@@ -723,7 +723,7 @@ Progress completed today:
 - Updated the GitHub usecase constructor pattern so `NewGithubAppUsecase` accepts `domain.GithubRepository` and `domain.UserRepository`, then returns `domain.GithubUsecase`.
 - Clarified that callers should pass repository interfaces into the usecase instead of trying to pass pointers to interfaces.
 - Confirmed that returning `&githubAppUsecase{...}` as `domain.GithubUsecase` is the correct Go pattern; `*domain.GithubUsecase` should not be used.
-- Reviewed the Goose migration command setup and confirmed that `goose -dir migrations status` is valid when `GOOSE_DRIVER` and `GOOSE_DBSTRING` are exported and the command is run from `server`.
+- Reviewed the Goose migration command setup and confirmed that `goose -dir database/migrations status` is valid when `GOOSE_DRIVER` and `GOOSE_DBSTRING` are exported and the command is run from `server`.
 - Confirmed that adding the new `NOT NULL` GitHub installation columns directly is acceptable for the current local database because there are no existing `github_installations` records.
 
 Current GitHub installation schema direction:

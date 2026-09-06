@@ -49,14 +49,11 @@ func (m *projectRepoMock) Delete(ctx context.Context, userID, id string) error {
 func (m *projectRepoMock) GetProjectRepoAvailability(_ context.Context, _ string) (map[int64]bool, error) {
 	return nil, nil
 }
-func (m *projectRepoMock) UpdateProjectRepoAvailability(_ context.Context, _ string, _ map[int64] bool) error {
+func (m *projectRepoMock) UpdateProjectRepoAvailability(_ context.Context, _ string, _ map[int64]bool) error {
 	return nil
 }
 func (m *projectRepoMock) GetByInstallationAndRepositoryID(_ context.Context, _ string, _ int64) (*domain.Project, error) {
 	return nil, nil
-}
-func (m *projectRepoMock) IncrementDesiredRevisionGeneration(_ context.Context, _ string, _ int64) (int64, error) {
-	return 0, nil
 }
 
 type githubUsecaseMock struct {

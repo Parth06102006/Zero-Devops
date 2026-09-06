@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Zero_Devops/server/internal/config"
+	"Zero_Devops/server/config"
 	"os"
 	"path/filepath"
 	"strings"

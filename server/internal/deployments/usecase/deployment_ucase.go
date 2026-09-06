@@ -1,4 +1,20 @@
-// Package usecase contains deployment business logic
+// Package usecase contains deployment business logic.
+//
+// ─────────────────────────────────────────────────────────────────────────────
+// DEAD / LEGACY CODE — REMOVED 2026-09-06
+// ─────────────────────────────────────────────────────────────────────────────
+// The legacy chain (jwtExpiryMinutes, githubRepoResponse, CreateDeployment,
+// the POST /deploy route, and the repo methods Store/StoreProjectBuild) was
+// deleted on 2026-09-06 after the durable status consumer landed.
+//
+// The live paths are:
+//
+//	build:  CreateProjectBuild → StoreProjectBuildWithOutbox → the outbox
+//	        dispatcher in internal/deployments/dispatcher publishes deploy.jobs.
+//	status: durable consumer (consumeStatusUpdate) listens on deploy.status,
+//	        applies ApplyStatusUpdate atomically, acks only after commit.
+//
+// ─────────────────────────────────────────────────────────────────────────────
 package usecase
 
 import (
@@ -6,9 +22,8 @@ import (
 	"Zero_Devops/server/internal/domain"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"io"
-	"net/http"
 	"strings"
 	"sync"
 	"time"
@@ -20,7 +35,8 @@ import (
 	"go.uber.org/zap"
 )
 
-const jwtExpiryMinutes = 10
+// jwtExpiryMinutes was deleted 2026-09-06 (dead code); token TTLs are owned
+// by the token provider, which has its own copy of the constant.
 
 type deploymentUsecase struct {
 	deploymentRepo   domain.DeploymentRepository
@@ -28,11 +44,16 @@ type deploymentUsecase struct {
 	tokenProvider    domain.InstallationTokenProvider
 	projectRepo      domain.ProjectRepository
 	repositoryClient domain.GithubRepositoryClient
-	rmqConn          *amqp.Connection
-	publishCh        *amqp.Channel
-	pubMutex         sync.Mutex
+
+	// rmqConn feeds the durable deploy.status consumer (see
+	// consumeStatusUpdate). It is no longer used for publishing; deploy.jobs
+	// is published exclusively by the outbox dispatcher.
+	rmqConn *amqp.Connection
 }
 
+// deploymentStatusUpdate is the wire format of the worker's deploy.status
+// message. Decoded by the durable status consumer and applied via
+// ApplyStatusUpdate.
 type deploymentStatusUpdate struct {
 	DeploymentID string `json:"deployment_id"`
 	Status       string `json:"status"`
@@ -40,23 +61,17 @@ type deploymentStatusUpdate struct {
 	ErrorMessage string `json:"error_message"`
 }
 
-// NewDeploymentUsecase creates a new deployment use case.
-func NewDeploymentUsecase(deploymentRepo domain.DeploymentRepository, githubRepo domain.GithubRepository, tokenProvider domain.InstallationTokenProvider, rmqConn *amqp.Connection, dependencies ...interface{}) domain.DeploymentUsecase {
-	var publishCh *amqp.Channel
-	var err error
-	if rmqConn != nil {
-		publishCh, err = rmqConn.Channel()
-		if err != nil {
-			zap.L().Fatal("failed to open publish channel", zap.Error(err))
-		}
-	}
-
+// NewDeploymentUsecase creates a new deployment use case. ctx governs the
+// background deploy.status consumer's lifetime: it stops accepting messages
+// and cancels in-flight database work when ctx is cancelled (the server's
+// signal context). Pass context.Background() when no lifecycle control is
+// needed (tests).
+func NewDeploymentUsecase(ctx context.Context, deploymentRepo domain.DeploymentRepository, githubRepo domain.GithubRepository, tokenProvider domain.InstallationTokenProvider, rmqConn *amqp.Connection, dependencies ...interface{}) domain.DeploymentUsecase {
 	uc := &deploymentUsecase{
 		deploymentRepo: deploymentRepo,
 		githubRepo:     githubRepo,
 		tokenProvider:  tokenProvider,
 		rmqConn:        rmqConn,
-		publishCh:      publishCh,
 	}
 	for _, dependency := range dependencies {
 		switch value := dependency.(type) {
@@ -68,163 +83,273 @@ func NewDeploymentUsecase(deploymentRepo domain.DeploymentRepository, githubRepo
 	}
 
 	if rmqConn != nil {
-		go func() {
-			if err := uc.consumeStatusUpdate(); err != nil {
-				zap.L().Error("deployment status consumer stopped", zap.Error(err))
-			}
-		}()
+		// Durable deploy.status consumer (Task 5, plan-server-12-08.md):
+		// applies worker status updates atomically via ApplyStatusUpdate and
+		// acknowledges only after the database commit. The restart wrapper
+		// keeps the consumer alive across channel/connection failures and
+		// stops cleanly on ctx cancellation.
+		go uc.runStatusConsumerLoop(ctx)
 	}
 
 	return uc
 }
 
-type githubRepoResponse struct {
-	CloneURL string `json:"clone_url"`
+// githubRepoResponse was deleted 2026-09-06 (dead code, used only by the
+// removed CreateDeployment); superseded by domain.GithubRepositoryClient.
+
+// statusAcknowledger is the broker-acknowledgement seam of an amqp.Delivery
+// (Ack/Nack). Extracted as an interface so the consumer's message handling is
+// unit-testable without a live broker; amqp.Delivery satisfies it.
+type statusAcknowledger interface {
+	Ack(multiple bool) error
+	Nack(multiple, requeue bool) error
 }
 
-// publishBuildRequestV1 is the only deploy.jobs producer. Callers must provide
-// every immutable input; legacy repo-only deployment requests are intentionally
-// rejected by the HTTP handler rather than being converted to this contract.
-func (d *deploymentUsecase) publishBuildRequestV1(job contract.BuildRequestV1) error {
-	publishing, err := contract.Publishing(job)
-	if err != nil {
-		return fmt.Errorf("invalid deploy.jobs V1 request: %w", err)
-	}
-	if d.publishCh == nil {
-		return fmt.Errorf("deploy.jobs publisher is unavailable")
-	}
+const (
+	// statusConsumePrefetch bounds unacknowledged in-flight status messages.
+	// With autoAck=false and no Qos the broker would push unlimited
+	// unacknowledged deliveries into this process.
+	statusConsumePrefetch = 32
 
-	d.pubMutex.Lock()
-	defer d.pubMutex.Unlock()
-	return d.publishCh.Publish("", "deploy.jobs", false, false, publishing)
+	// statusMaxApplyAttempts bounds in-process retries for transient
+	// ApplyStatusUpdate failures (database blips). Exhausted attempts
+	// dead-letter the message instead of requeueing: RabbitMQ redelivers
+	// requeued messages immediately, which would hot-loop against a
+	// struggling database.
+	statusMaxApplyAttempts = 3
+
+	// statusRestartBackoff bounds the consumer restart loop after an
+	// unexpected channel/connection loss.
+	statusRestartBackoffStart = time.Second
+	statusRestartBackoffMax   = 30 * time.Second
+	statusSessionResetAfter   = time.Minute
+)
+
+// statusApplyBackoff sleeps between transient-failure retry attempts. A
+// package var so tests can shorten it.
+var statusApplyBackoff = []time.Duration{200 * time.Millisecond, 400 * time.Millisecond}
+
+// runStatusConsumerLoop keeps a durable deploy.status consumer alive for the
+// lifetime of ctx. Each iteration runs one consume session; on unexpected
+// session end (channel or connection loss, broker restart) it reconnects
+// with capped exponential backoff. A session that ran for a while resets the
+// backoff so one old failure does not leave the consumer permanently slow.
+func (d *deploymentUsecase) runStatusConsumerLoop(ctx context.Context) {
+	backoff := statusRestartBackoffStart
+	for {
+		if ctx.Err() != nil {
+			return
+		}
+
+		started := time.Now()
+		err := d.consumeStatusUpdate(ctx)
+		if ctx.Err() != nil {
+			return // planned shutdown
+		}
+
+		if time.Since(started) >= statusSessionResetAfter {
+			backoff = statusRestartBackoffStart
+		}
+
+		zap.L().Error("deploy.status consumer session ended; restarting",
+			zap.Error(err), zap.Duration("restart_in", backoff))
+
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(backoff):
+		}
+
+		backoff *= 2
+		if backoff > statusRestartBackoffMax {
+			backoff = statusRestartBackoffMax
+		}
+	}
 }
 
-func (d *deploymentUsecase) consumeStatusUpdate() error {
+// consumeStatusUpdate runs one durable consume session on deploy.status.
+// It returns nil on planned shutdown (ctx cancelled) and an error when the
+// session ended unexpectedly, so runStatusConsumerLoop can restart it.
+func (d *deploymentUsecase) consumeStatusUpdate(ctx context.Context) error {
+	if d.rmqConn == nil {
+		return errors.New("status consumer requires a RabbitMQ connection")
+	}
+
 	consumerCh, err := d.rmqConn.Channel()
 	if err != nil {
 		return fmt.Errorf("failed to open consumer channel: %w", err)
 	}
-	defer func() {
-		if err := consumerCh.Close(); err != nil {
-			zap.L().Error("failed to close consumer channel", zap.Error(err))
+
+	// Close the channel exactly once, either from the ctx watcher (shutdown)
+	// or after the delivery loop drains. Closing the channel is what ends the
+	// `for range msgs` loop, so the watcher guarantees prompt shutdown even
+	// while no messages are arriving.
+	var closeOnce sync.Once
+	closeChannel := func() {
+		closeOnce.Do(func() { _ = consumerCh.Close() })
+	}
+	watcherDone := make(chan struct{})
+	go func() {
+		select {
+		case <-ctx.Done():
+			closeChannel()
+		case <-watcherDone:
 		}
 	}()
+	defer close(watcherDone)
+	defer closeChannel()
+
+	// Ack must happen after the durable commit, so autoAck is false; prefetch
+	// bounds the unacknowledged in-flight window.
+	if err := consumerCh.Qos(statusConsumePrefetch, 0, false); err != nil {
+		return fmt.Errorf("failed to set status consumer prefetch: %w", err)
+	}
 
 	msgs, err := consumerCh.Consume(
 		"deploy.status",
-		"",
-		true,
+		"deploy-status-consumer",
+		false, // autoAck: acknowledge only after ApplyStatusUpdate commits
 		false,
 		false,
 		false,
 		nil,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to register consumer: %w", err)
+		return fmt.Errorf("failed to register status consumer: %w", err)
 	}
 
 	for msg := range msgs {
-		var update deploymentStatusUpdate
-		if err := json.Unmarshal(msg.Body, &update); err != nil {
-			zap.L().Error("failed to unmarshal status update", zap.Error(err))
-			continue
-		}
-		ctx := context.Background()
-		if err := d.deploymentRepo.UpdateStatus(ctx, update.DeploymentID, domain.DeploymentStatus(update.Status)); err != nil {
-			zap.L().Error("failed to update deployment status", zap.Error(err))
-		}
-		if update.OutputURL != "" {
-			if err := d.deploymentRepo.UpdateOutputURL(ctx, update.DeploymentID, update.OutputURL); err != nil {
-				zap.L().Error("failed to update deployment output URL", zap.Error(err))
-			}
-		}
-		if update.ErrorMessage != "" {
-			if err := d.deploymentRepo.UpdateErrorMessage(ctx, update.DeploymentID, update.ErrorMessage); err != nil {
-				zap.L().Error("failed to update deployment error message", zap.Error(err))
-			}
-		}
+		d.handleStatusMessage(ctx, msg, msg.Body)
 	}
 
-	return nil
+	if ctx.Err() != nil {
+		return nil // planned shutdown; the channel was closed by the watcher
+	}
+	return errors.New("deploy.status delivery channel closed unexpectedly")
 }
 
-//nolint:funlen
-func (d *deploymentUsecase) CreateDeployment(ctx context.Context, userID string, repoID int64, requestID string) (*domain.Deployment, error) {
-	log := appmiddleware.LoggerFromContext(ctx)
-	log.Info("Starting deployment creation", zap.String("user_id", userID), zap.Int64("repo_id", repoID))
+// handleStatusMessage applies one deploy.status message durably and only then
+// acknowledges it. Failure handling follows the classification documented in
+// plan-server-12-08.md (Task 5):
+//
+//   - malformed message (bad JSON, empty ID, unknown status): poison — retry
+//     can never fix it; Nack(requeue=false) dead-letters to deploy.status.dlq.
+//   - ErrNotFound / ErrInvalidStatus(Transition) / ErrBadParamInput from
+//     ApplyStatusUpdate: permanent — the same rejection every time;
+//     dead-letter immediately.
+//   - any other error (database down, deadlock, timeout): transient — retry
+//     up to statusMaxApplyAttempts in-process. Still failing after that is
+//     also dead-lettered (never requeued: requeue redelivers immediately and
+//     hot-loops). The deployment row stays in its current non-terminal state;
+//     stuck-deployment reconciliation and/or DLQ replay recover it.
+//
+// A crash between the durable commit and the Ack redelivers the message;
+// ApplyStatusUpdate is idempotent (terminal states are immutable, same-status
+// duplicates are no-ops), so redelivery converges instead of corrupting state.
+func (d *deploymentUsecase) handleStatusMessage(ctx context.Context, ack statusAcknowledger, body []byte) {
+	log := zap.L()
 
-	installation, err := d.githubRepo.GetInstallationByUserID(ctx, userID)
-	if err != nil {
-		log.Error("Failed to get github installation", zap.Error(err))
-		return nil, err
+	var update deploymentStatusUpdate
+	err := json.Unmarshal(body, &update)
+	if err == nil && (update.DeploymentID == "" || !isValidWorkerStatus(domain.DeploymentStatus(update.Status))) {
+		err = fmt.Errorf("invalid deployment_id %q or status %q", update.DeploymentID, update.Status)
 	}
-
-	//nolint:gosec // path comes from trusted server config, not user input
-
-	// I have added the token provider instllation token
-
-	token, err := d.tokenProvider.CreateInstallationToken(ctx, installation.InstallationID)
 	if err != nil {
-		log.Error("Failed to create installation token", zap.Error(err), zap.Int64("installation_id", installation.InstallationID))
-		return nil, err
-	}
-
-	repoURL := fmt.Sprintf("https://api.github.com/repositories/%d", repoID)
-	repoReq, err := http.NewRequestWithContext(ctx, http.MethodGet, repoURL, http.NoBody)
-	if err != nil {
-		log.Error("Failed to create repo request", zap.Error(err))
-		return nil, err
-	}
-	repoReq.Header.Set("Authorization", "Bearer "+token)
-	repoReq.Header.Set("Accept", "application/vnd.github+json")
-
-	repoResp, err := http.DefaultClient.Do(repoReq)
-	if err != nil {
-		log.Error("Failed to get repo info", zap.Error(err))
-		return nil, err
-	}
-	defer func() {
-		if err := repoResp.Body.Close(); err != nil {
-			log.Error("failed to close repo response body", zap.Error(err))
+		log.Warn("dead-lettering malformed deploy.status message (poison)", zap.Error(err))
+		if nackErr := ack.Nack(false, false); nackErr != nil {
+			log.Error("failed to nack malformed deploy.status message", zap.Error(nackErr))
 		}
-	}()
-
-	if repoResp.StatusCode != http.StatusOK {
-		log.Error("Unexpected status from GitHub repo API", zap.Int("status", repoResp.StatusCode))
-		return nil, fmt.Errorf("github repo API returned status %d", repoResp.StatusCode)
+		return
 	}
 
-	body, err := io.ReadAll(repoResp.Body)
-	if err != nil {
-		log.Error("Failed to read repo response", zap.Error(err))
-		return nil, err
+	params := domain.ApplyStatusParams{
+		DeploymentID: update.DeploymentID,
+		Status:       domain.DeploymentStatus(update.Status),
+		OutputURL:    update.OutputURL,
+		ErrorMessage: update.ErrorMessage,
 	}
 
-	var repoData githubRepoResponse
-	if err := json.Unmarshal(body, &repoData); err != nil {
-		log.Error("Failed to decode repo response", zap.Error(err))
-		return nil, err
+	var result *domain.ApplyStatusResult
+	var applyErr error
+	for attempt := 1; attempt <= statusMaxApplyAttempts; attempt++ {
+		result, applyErr = d.deploymentRepo.ApplyStatusUpdate(ctx, params)
+		if applyErr == nil || isPermanentStatusError(applyErr) {
+			break
+		}
+		if attempt == statusMaxApplyAttempts {
+			break
+		}
+		wait := statusApplyBackoff[attempt-1]
+		select {
+		case <-ctx.Done():
+			// Shutdown mid-retry: neither ack nor nack — the broker
+			// redelivers the unacknowledged message and the idempotent
+			// apply converges after restart.
+			return
+		case <-time.After(wait):
+		}
 	}
 
-	deployment := &domain.Deployment{
-		UserID:    userID,
-		RepoID:    repoID,
-		CloneURL:  repoData.CloneURL,
-		Status:    domain.DeploymentStatusPending,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+	switch {
+	case applyErr == nil:
+		if result != nil && !result.IsCurrentGeneration {
+			// Applied durably, but a newer accepted push superseded this
+			// generation. Not an error: the deployment row keeps its true
+			// outcome and currency is derived at read time; log for
+			// observability of out-of-order pushes.
+			log.Warn("status applied for superseded generation",
+				zap.String("deployment_id", update.DeploymentID),
+				zap.String("status", update.Status))
+		}
+		if ackErr := ack.Ack(false); ackErr != nil {
+			// The commit happened but the ack failed (e.g. the channel
+			// dropped): the broker redelivers and the idempotent apply runs
+			// again. Log and continue.
+			log.Error("deploy.status ack failed after durable commit",
+				zap.String("deployment_id", update.DeploymentID),
+				zap.Error(ackErr))
+		}
+	case isPermanentStatusError(applyErr):
+		log.Warn("dead-lettering unapplicable deploy.status update",
+			zap.String("deployment_id", update.DeploymentID),
+			zap.String("status", update.Status),
+			zap.Error(applyErr))
+		if nackErr := ack.Nack(false, false); nackErr != nil {
+			log.Error("failed to nack unapplicable deploy.status message", zap.Error(nackErr))
+		}
+	default:
+		log.Error("dead-lettering deploy.status update after exhausted retries",
+			zap.String("deployment_id", update.DeploymentID),
+			zap.String("status", update.Status),
+			zap.Error(applyErr))
+		if nackErr := ack.Nack(false, false); nackErr != nil {
+			log.Error("failed to nack exhausted deploy.status message", zap.Error(nackErr))
+		}
 	}
+}
 
-	if err := d.deploymentRepo.Store(ctx, deployment); err != nil {
-		log.Error("Failed to store deployment", zap.Error(err))
-		return nil, err
+// isValidWorkerStatus reports whether the status string is one the worker may
+// report on deploy.status.
+func isValidWorkerStatus(status domain.DeploymentStatus) bool {
+	switch status {
+	case domain.DeploymentStatusPending,
+		domain.DeploymentStatusBuilding,
+		domain.DeploymentStatusSuccess,
+		domain.DeploymentStatusFailed,
+		domain.DeploymentStatusCanceled:
+		return true
+	default:
+		return false
 	}
+}
 
-	// This path is currently unreachable: POST /deploy fails closed because it
-	// lacks the required V1 immutable build inputs. Keep no legacy publisher.
-
-	log.Info("Deployment created successfully", zap.String("deployment_id", deployment.ID))
-	return deployment, nil
+// isPermanentStatusError reports whether an ApplyStatusUpdate failure can
+// never succeed on retry (unknown deployment, illegal transition, bad input).
+func isPermanentStatusError(err error) bool {
+	return errors.Is(err, domain.ErrNotFound) ||
+		errors.Is(err, domain.ErrInvalidStatus) ||
+		errors.Is(err, domain.ErrInvalidStatusTransition) ||
+		errors.Is(err, domain.ErrBadParamInput)
 }
 
 func (d *deploymentUsecase) CreateProjectBuild(ctx context.Context, userID string, params domain.CreateProjectBuildParams) (*domain.Deployment, error) {
@@ -306,40 +431,41 @@ func (d *deploymentUsecase) CreateProjectBuild(ctx context.Context, userID strin
 		CreatedAt:                 now,
 		UpdatedAt:                 now,
 	}
-	if err := d.deploymentRepo.StoreProjectBuild(ctx, deployment); err != nil {
-		log.Error("failed to store manual project build", zap.Error(err), zap.String("project_id", projectID))
-		return nil, err
-	}
-
 	correlationID := strings.TrimSpace(params.CorrelationID)
 	if correlationID == "" {
 		correlationID = uuid.NewString()
 	}
-	job := contract.BuildRequestV1{
-		Version:        contract.VersionV1,
-		EventID:        uuid.NewString(),
-		DeploymentID:   deployment.ID,
-		ProjectID:      project.ID,
-		InstallationID: installation.InstallationID,
-		RepositoryID:   project.GitHubRepositoryID,
-		CloneURL:       repoDetails.CloneURL,
-		CommitSHA:      commitSHA,
-		RequestedRef:   shaOrRef,
-		Trigger:        contract.TriggerManual,
-		Generation:     project.DesiredRevisionGeneration,
-		RetryCount:     0,
-		CorrelationID:  correlationID,
-		Configuration: contract.Configuration{
-			Executable:           config.Executable,
-			Args:                 config.Args,
-			WorkingDir:           config.WorkingDir,
-			ScannerPolicyVersion: config.ScannerPolicyVersion,
-		},
-	}
-	if err := d.publishBuildRequestV1(job); err != nil {
-		log.Error("failed to publish manual project build", zap.Error(err), zap.String("deployment_id", deployment.ID))
+
+	// Transactional outbox (Task 5, plan-server-12-08.md): the deployments row
+	// and its deploy.jobs V1 outbox event are committed in one transaction by
+	// StoreProjectBuildWithOutbox. The outbox dispatcher is the only deploy.jobs
+	// producer; there is no synchronous publish here, so a crash after the DB
+	// commit can no longer lose an accepted build.
+	deployment, err = d.deploymentRepo.StoreProjectBuildWithOutbox(ctx, domain.StoreProjectBuildWithOutboxParams{
+		Deployment:                deployment,
+		EventID:                   uuid.NewString(),
+		InstallationID:            installation.InstallationID,
+		CorrelationID:             correlationID,
+		DesiredRevisionGeneration: project.DesiredRevisionGeneration,
+	})
+	if err != nil {
+		if errors.Is(err, domain.ErrConflict) {
+			// Duplicate (project, manual idempotency key): the build already
+			// exists and its outbox event is already recorded or sent.
+			log.Info("manual project build already exists for idempotency key",
+				zap.String("project_id", projectID),
+				zap.String("idempotency_key", idempotencyKey.String()))
+			return nil, domain.ErrConflict
+		}
+		log.Error("failed to store manual project build with outbox event", zap.Error(err), zap.String("project_id", projectID))
 		return nil, err
 	}
+
+	log.Info("manual project build created with outbox event",
+		zap.String("project_id", projectID),
+		zap.String("deployment_id", deployment.ID),
+		zap.String("commit_sha", commitSHA),
+		zap.String("trigger", contract.TriggerManual))
 
 	return deployment, nil
 }

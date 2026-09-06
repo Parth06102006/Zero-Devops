@@ -131,9 +131,8 @@ type ProjectRepository interface {
 	GetProjectRepoAvailability(ctx context.Context, githubInstallationID string) (map[int64]bool, error)
 	UpdateProjectRepoAvailability(ctx context.Context, githubInstallationID string, listOfRepos map[int64]bool) error
 	GetByInstallationAndRepositoryID(ctx context.Context, githubInstallationID string, githubRepositoryID int64) (*Project, error)
-	// IncrementDesiredRevisionGeneration atomically advances the project's
-	// desired-revision counter and returns the new generation. It is keyed by
-	// the webhook identity (installation + GitHub repository ID); a missing row
-	// yields ErrNotFound.
-	IncrementDesiredRevisionGeneration(ctx context.Context, githubInstallationID string, githubRepositoryID int64) (int64, error)
+	// (IncrementDesiredRevisionGeneration was removed 2026-09-06: its only
+	// caller incremented before the store transaction, so webhook redelivery
+	// bumped the counter without creating a build. The bump now happens inside
+	// StoreWebhookBuildWithOutbox keyed by projects.id.)
 }

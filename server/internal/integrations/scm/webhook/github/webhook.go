@@ -283,30 +283,27 @@ func (webH *webhookUsecase) handlePushEvent(ctx context.Context, githubInstallat
 		return nil
 	}
 
-	// Advance the desired-revision generation so an older queued/running result
-	// cannot become the project's current result after this revision is accepted.
-	generation, err := webH.projectRepo.IncrementDesiredRevisionGeneration(ctx, githubInstallationDBID, payload.Repository.ID)
-	if err != nil {
-		return err
-	}
-
+	// The desired-revision generation is advanced by
+	// StoreWebhookBuildWithOutbox inside the same transaction as the build
+	// insert, so an older queued/running result cannot become the project's
+	// current result after this revision is accepted — and a redelivered
+	// delivery cannot bump the counter without creating a build.
 	deployment, err := webH.deploymentRepo.StoreWebhookBuildWithOutbox(ctx, domain.StoreWebhookBuildParams{
-		ProjectID:                 project.ID,
-		UserID:                    project.UserID,
-		RepoID:                    payload.Repository.ID,
-		CloneURL:                  payload.Repository.CloneURL,
-		GithubInstallationID:      githubInstallationDBID,
-		WebhookDeliveryID:         webhookDeliveryDBID,
-		CommitSHA:                 payload.After,
-		RequestedRef:              payload.Ref,
-		DesiredRevisionGeneration: generation,
-		ConfigurationSnapshot:     project.BuildConfiguration,
-		ConfigurationVersion:      project.ConfigurationVersion,
-		CommandPolicyVersion:      project.CommandPolicyVersion,
-		CommandScanResult:         project.CommandScanResult,
-		EventID:                   uuid.NewString(),
-		InstallationID:            int64(payload.Installation.ID),
-		CorrelationID:             uuid.NewString(),
+		ProjectID:             project.ID,
+		UserID:                project.UserID,
+		RepoID:                payload.Repository.ID,
+		CloneURL:              payload.Repository.CloneURL,
+		GithubInstallationID:  githubInstallationDBID,
+		WebhookDeliveryID:     webhookDeliveryDBID,
+		CommitSHA:             payload.After,
+		RequestedRef:          payload.Ref,
+		ConfigurationSnapshot: project.BuildConfiguration,
+		ConfigurationVersion:  project.ConfigurationVersion,
+		CommandPolicyVersion:  project.CommandPolicyVersion,
+		CommandScanResult:     project.CommandScanResult,
+		EventID:               uuid.NewString(),
+		InstallationID:        int64(payload.Installation.ID),
+		CorrelationID:         uuid.NewString(),
 	})
 	if err == domain.ErrConflict {
 		// The unique (webhook_delivery_id) index already recorded a build for
@@ -328,7 +325,8 @@ func (webH *webhookUsecase) handlePushEvent(ctx context.Context, githubInstallat
 		zap.String("deployment_id", deployment.ID),
 		zap.Int64("github_repository_id", payload.Repository.ID),
 		zap.String("commit_sha", payload.After),
-		zap.Int64("desired_revision_generation", generation),
+		zap.Int64("desired_revision_generation", deployment.DesiredRevisionGeneration),
+		zap.Int64("build_number", deployment.BuildNumber),
 	)
 	return nil
 }

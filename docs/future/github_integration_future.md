@@ -40,6 +40,6 @@ Recommended behavior:
 - `server/integrations/scm/github/usecase/github_ucase.go`
 - `server/integrations/scm/delivery/http/scm_handler.go`
 - `server/integrations/scm/webhook/github/webhook.go`
-- `server/migrations/*.sql`
+- `server/database/migrations/*.sql`
 
 

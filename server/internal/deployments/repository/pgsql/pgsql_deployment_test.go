@@ -29,6 +29,8 @@ type deploymentsDBState struct {
 	queryErr      error
 	rowsErr       error
 	getByIDErr    error
+	lastExecQuery string
+	execRows      int64
 }
 
 type deploymentsDriver struct{}
@@ -46,7 +48,7 @@ var fullDeploymentColumns = []string{
 	"project_id", "github_installation_id", "commit_sha", "requested_ref", "trigger",
 	"desired_revision_generation", "configuration_snapshot", "configuration_version",
 	"command_policy_version", "command_scan_result", "manual_idempotency_key",
-	"output_url", "error_message", "created_at", "updated_at",
+	"output_url", "error_message", "created_at", "updated_at", "build_number",
 }
 
 func fullDeploymentRow(userID, projectID string) []driver.Value {
@@ -56,7 +58,7 @@ func fullDeploymentRow(userID, projectID string) []driver.Value {
 		projectID, "inst-1", "aabbccddeeff00112233445566778899aabbccdd", "refs/heads/main", "manual",
 		int64(0), []byte(`{"executable":"npm","args":["run","build"],"working_dir":".","scanner_policy_version":"v1"}`), int32(1),
 		"v1", []byte(`{"status":"approved","policy_version":"v1","source":"manual"}`), "idem-1",
-		"", "", time.Now(), time.Now(),
+		"", "", time.Now(), time.Now(), int64(1),
 	}
 }
 
@@ -118,8 +120,11 @@ func (c *deploymentsConn) QueryContext(_ context.Context, query string, args []d
 func (c *deploymentsConn) Query(_ string, _ []driver.Value) (driver.Rows, error) {
 	return &deploymentsRows{}, nil
 }
-func (c *deploymentsConn) ExecContext(_ context.Context, _ string, _ []driver.NamedValue) (driver.Result, error) {
-	return deploymentsResult{rowsAffected: 1}, nil
+func (c *deploymentsConn) ExecContext(_ context.Context, query string, _ []driver.NamedValue) (driver.Result, error) {
+	deploymentsState.mu.Lock()
+	defer deploymentsState.mu.Unlock()
+	deploymentsState.lastExecQuery = query
+	return deploymentsResult{rowsAffected: deploymentsState.execRows}, nil
 }
 
 func (s *deploymentsStmt) Close() error  { return nil }
@@ -174,24 +179,8 @@ func resetDeploymentsState() {
 	deploymentsState.queryErr = nil
 	deploymentsState.rowsErr = nil
 	deploymentsState.getByIDErr = nil
-}
-
-func TestStore(t *testing.T) {
-	resetDeploymentsState()
-	db := newDeploymentsTestDB(t)
-	defer func() { _ = db.Close() }()
-
-	repo := NewPgSQLDeploymentRepository(db)
-	d := &domain.Deployment{
-		UserID: "7", RepoID: 8, CloneURL: "https://example.com/x.git",
-		Status: domain.DeploymentStatusPending, CreatedAt: time.Now(), UpdatedAt: time.Now(),
-	}
-	if err := repo.Store(context.Background(), d); err != nil {
-		t.Fatalf("expected nil error, got %v", err)
-	}
-	if d.ID == "" {
-		t.Fatal("expected ID to be set")
-	}
+	deploymentsState.lastExecQuery = ""
+	deploymentsState.execRows = 1
 }
 
 func TestGetByUserID(t *testing.T) {
@@ -313,3 +302,94 @@ func TestGetByID_NotFound(t *testing.T) {
 		t.Fatalf("expected ErrNotFound, got %v", err)
 	}
 }
+
+func lastExecQuery() string {
+	deploymentsState.mu.Lock()
+	defer deploymentsState.mu.Unlock()
+	return deploymentsState.lastExecQuery
+}
+
+func TestMarkOutboxSent_ExecutesValidUpdate(t *testing.T) {
+	resetDeploymentsState()
+	db := newDeploymentsTestDB(t)
+	defer func() { _ = db.Close() }()
+
+	repo := NewPgSQLDeploymentRepository(db)
+	if err := repo.MarkOutboxSent(context.Background(), "1"); err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+
+	query := lastExecQuery()
+	if !contains(query, "UPDATE deployment_outbox") {
+		t.Fatalf("expected UPDATE deployment_outbox, got %q", query)
+	}
+	if contains(query, "candidate AS (") {
+		t.Fatalf("expected no stray CTE fragment in query, got %q", query)
+	}
+	if !contains(query, "state = $1") || !contains(query, "WHERE id = $2") {
+		t.Fatalf("expected state/id guard parameters in query, got %q", query)
+	}
+}
+
+func TestMarkOutboxSent_NotFoundWhenNoRowMatched(t *testing.T) {
+	resetDeploymentsState()
+	deploymentsState.mu.Lock()
+	deploymentsState.execRows = 0 // rowsAffected 0
+	deploymentsState.mu.Unlock()
+
+	db := newDeploymentsTestDB(t)
+	defer func() { _ = db.Close() }()
+
+	repo := NewPgSQLDeploymentRepository(db)
+	err := repo.MarkOutboxSent(context.Background(), "1")
+	if err != domain.ErrNotFound {
+		t.Fatalf("expected ErrNotFound, got %v", err)
+	}
+}
+
+func TestResetStuckPublishing_RejectsNonPositiveOlderThan(t *testing.T) {
+	resetDeploymentsState()
+	db := newDeploymentsTestDB(t)
+	defer func() { _ = db.Close() }()
+
+	repo := NewPgSQLDeploymentRepository(db)
+	if _, err := repo.ResetStuckPublishing(context.Background(), 0); err != domain.ErrBadParamInput {
+		t.Fatalf("expected ErrBadParamInput, got %v", err)
+	}
+	if _, err := repo.ResetStuckPublishing(context.Background(), -time.Minute); err != domain.ErrBadParamInput {
+		t.Fatalf("expected ErrBadParamInput for negative duration, got %v", err)
+	}
+}
+
+func TestResetStuckPublishing_ExecutesValidReset(t *testing.T) {
+	resetDeploymentsState()
+	db := newDeploymentsTestDB(t)
+	defer func() { _ = db.Close() }()
+
+	repo := NewPgSQLDeploymentRepository(db)
+	reset, err := repo.ResetStuckPublishing(context.Background(), 5*time.Minute)
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if reset != 1 {
+		t.Fatalf("expected 1 reset row, got %d", reset)
+	}
+
+	query := lastExecQuery()
+	if !contains(query, "UPDATE deployment_outbox") {
+		t.Fatalf("expected UPDATE deployment_outbox, got %q", query)
+	}
+	if !contains(query, "SET state = $1") {
+		t.Fatalf("expected state column update, got %q", query)
+	}
+	if !contains(query, "WHERE state = $2") || !contains(query, "AND updated_at < $3") {
+		t.Fatalf("expected publishing/cutoff guards, got %q", query)
+	}
+	if contains(query, "status") {
+		t.Fatalf("expected no nonexistent status column in query, got %q", query)
+	}
+}
+
+// (Tests for the deleted legacy UpdateStatus/UpdateOutputURL/UpdateErrorMessage
+// methods were removed with them 2026-09-06; ApplyStatusUpdate's atomic path
+// is covered by its own tests.)

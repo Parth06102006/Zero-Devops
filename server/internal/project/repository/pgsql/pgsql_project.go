@@ -223,8 +223,7 @@ func (m *pgSQLProjectRepository) Delete(ctx context.Context, userID, id string) 
 	return nil
 }
 
-
-////// ****** THIS FUNCTION WAS NOT MADE BY ME IT WAS MADE BY GLM 5.3 THE CASE LOOKS FINE AND IT HAS ADDED OTHER LOGGER AS WELL WHICH I HAVE TO ADD 
+// //// ****** THIS FUNCTION WAS NOT MADE BY ME IT WAS MADE BY GLM 5.3 THE CASE LOOKS FINE AND IT HAS ADDED OTHER LOGGER AS WELL WHICH I HAVE TO ADD
 // GetByInstallationAndRepositoryID returns the project selected for the given
 // repository under the given installation, or ErrNotFound. This is the webhook
 // push lookup: it is deliberately NOT user-scoped because webhooks carry no
@@ -263,30 +262,6 @@ func (m *pgSQLProjectRepository) GetByInstallationAndRepositoryID(ctx context.Co
 		return nil, fmt.Errorf("unmarshal command scan result: %w", err)
 	}
 	return &p, nil
-}
-
-// IncrementDesiredRevisionGeneration atomically advances the project's
-// desired_revision_generation and returns the new value via RETURNING. It is
-// keyed by the webhook identity (installation DB ID + GitHub repository ID); a
-// missing project yields ErrNotFound so the caller can distinguish "not a
-// selected project" from a storage failure.
-func (m *pgSQLProjectRepository) IncrementDesiredRevisionGeneration(ctx context.Context, githubInstallationID string, githubRepositoryID int64) (int64, error) {
-	query := `
-		UPDATE projects
-		SET desired_revision_generation = desired_revision_generation + 1
-		WHERE github_installation_id = $1 AND github_repository_id = $2
-		RETURNING desired_revision_generation
-	`
-	var generation int64
-	if err := m.Conn.QueryRowContext(ctx, query, githubInstallationID, githubRepositoryID).Scan(&generation); err != nil {
-		if err == sql.ErrNoRows {
-			return 0, domain.ErrNotFound
-		}
-		log := appmiddleware.LoggerFromContext(ctx)
-		log.Error("failed to increment desired revision generation", zap.Error(err))
-		return 0, err
-	}
-	return generation, nil
 }
 
 func (m *pgSQLProjectRepository) GetProjectRepoAvailability(ctx context.Context, githubInstallationID string) (map[int64]bool, error) {
@@ -332,40 +307,28 @@ func (m *pgSQLProjectRepository) UpdateProjectRepoAvailability(ctx context.Conte
 		return nil
 	}
 
-	tx, err := m.Conn.BeginTx(ctx, nil)
+	availabilityJSON, err := json.Marshal(listOfRepos)
 	if err != nil {
 		log := appmiddleware.LoggerFromContext(ctx)
-		log.Error("failed to begin update repo availability transaction", zap.Error(err))
+		log.Error("failed to marshal repo availability", zap.Error(err))
 		return err
 	}
-	defer tx.Rollback()
 
-	stmt, err := tx.PrepareContext(ctx, `
-		UPDATE projects
-		SET repository_available = $1, updated_at = NOW()
-		WHERE github_installation_id = $2 AND github_repository_id = $3
-	`)
-	if err != nil {
+	query := `
+		UPDATE projects AS p
+		SET repository_available = availability.is_available::boolean,
+			updated_at = NOW()
+		FROM jsonb_each_text($1::jsonb)
+			AS availability(repository_id, is_available)
+		WHERE p.github_installation_id = $2
+			AND p.github_repository_id = availability.repository_id::bigint
+	`
+
+	if _, err := m.Conn.ExecContext(ctx, query, availabilityJSON, githubInstallationID); err != nil {
 		log := appmiddleware.LoggerFromContext(ctx)
-		log.Error("failed to prepare update repo availability statement", zap.Error(err))
+		log.Error("failed to update repo availability", zap.Error(err))
 		return err
 	}
-	defer stmt.Close()
 
-	for key, value := range listOfRepos {
-		if _, err := stmt.ExecContext(ctx, value, githubInstallationID, key); err != nil {
-			log := appmiddleware.LoggerFromContext(ctx)
-			log.Error("failed to update repo availability",
-				zap.Int64("github_repository_id", key),
-				zap.Error(err))
-			return err
-		}
-	}
-
-	if err := tx.Commit(); err != nil {
-		log := appmiddleware.LoggerFromContext(ctx)
-		log.Error("failed to commit update repo availability transaction", zap.Error(err))
-		return err
-	}
 	return nil
 }
