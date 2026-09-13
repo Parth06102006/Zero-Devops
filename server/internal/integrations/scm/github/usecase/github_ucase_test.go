@@ -44,6 +44,22 @@ func (m *mockGithubRepository) UpdateInstallationStatus(_ context.Context, _, _ 
 	return nil
 }
 
+func (m *mockGithubRepository) UpdateInstallationStatusByGithubInstallationID(_ context.Context, _ int64, _ string) error {
+	return nil
+}
+
+func (m *mockGithubRepository) GetInstallationIDByGithubInstallationID(_ context.Context, _ int64) (string, error) {
+	return "", nil
+}
+
+func (m *mockGithubRepository) UpdateInstallationExternalIDByID(_ context.Context, _, _ string) error {
+	return nil
+}
+
+func (m *mockGithubRepository) GetInstallationStatusByID(_ context.Context, _ string) (string, error) {
+	return domain.GithubInstallationStatusActive, nil
+}
+
 type roundTripFunc func(*http.Request) (*http.Response, error)
 
 func (f roundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {

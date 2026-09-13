@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "event_id": "9c5b94b3-1f1c-4f3f-9c8e-0a1b2c3d4e5f",
+  "deployment_id": "dep-01J5XYZABC123",
+  "project_id": "proj-01J5XYZABC123",
+  "installation_id": 12345678,
+  "repository_id": 987654321,
+  "clone_url": "https://github.com/acme/web.git",
+  "commit_sha": "0123456789abcdef0123456789abcdef01234567",
+  "requested_ref": "refs/heads/main",
+  "trigger": "webhook_push",
+  "generation": 7,
+  "retry_count": 0,
+  "correlation_id": "req-9c5b94b3-1f1c",
+  "configuration": {
+    "executable": "npm",
+    "args": ["run", "build"],
+    "working_dir": ".",
+    "scanner_policy_version": "v1"
+  }
+}

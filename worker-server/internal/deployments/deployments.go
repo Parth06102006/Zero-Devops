@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -21,8 +22,6 @@ import (
 )
 
 const (
-	buildRoot = "C:\\tmp\\build"
-
 	pkgManagerNPM  = "npm"
 	pkgManagerPNPM = "pnpm"
 	pkgManagerYarn = "yarn"
@@ -31,13 +30,31 @@ const (
 	templateDockerfile = "Dockerfile"
 	builderDocker      = "docker"
 
-	frameworkVite   = "vite"
-	frameworkNextJS = "nextjs"
-	frameworkAstro  = "astro"
-	frameworkReact  = "react"
-	langNode        = "node"
-	langGo          = "go"
-	langPython      = "python"
+	frameworkVite      = "vite"
+	frameworkNextJS    = "nextjs"
+	frameworkAstro     = "astro"
+	frameworkReact     = "react"
+	frameworkAngular   = "angular"
+	frameworkNuxt      = "nuxt"
+	frameworkSvelteKit = "sveltekit"
+	frameworkSvelte    = "svelte"
+	frameworkRemix     = "remix"
+	frameworkGatsby    = "gatsby"
+	frameworkVue       = "vue"
+	frameworkSolid     = "solid"
+
+	langNode       = "node"
+	langGo         = "go"
+	langPython     = "python"
+	langRuby       = "ruby"
+	langRust       = "rust"
+	langJavaMaven  = "java-maven"
+	langJavaGradle = "java-gradle"
+	langPHP        = "php"
+	langElixir     = "elixir"
+	langDotNet     = "dotnet"
+
+	gitChangeDirFlag = "-C"
 )
 
 var pmInstallCommands = map[string]string{
@@ -46,6 +63,13 @@ var pmInstallCommands = map[string]string{
 	pkgManagerYarn: "yarn install --frozen-lockfile --ignore-scripts",
 	pkgManagerBun:  "bun install --frozen-lockfile --ignore-scripts",
 }
+
+var buildRoot = func() string {
+	if root := os.Getenv("BUILD_ROOT"); root != "" {
+		return root
+	}
+	return filepath.Join(os.TempDir(), "zerodevops-build")
+}()
 
 const gitCloneTimeout = 60 * time.Second
 
@@ -67,9 +91,20 @@ func validateCloneURL(rawURL string) error {
 	return nil
 }
 
-func cloneRepo(cloneURL, deploymentID string) (string, error) {
+// commitSHAPattern matches a full immutable commit SHA. The contract already
+// validates this server-side; this is defense in depth before any git command
+// receives the value.
+var commitSHAPattern = regexp.MustCompile(`^[0-9a-f]{40}$`)
+
+// cloneRepo materializes the exact commitSHA in destPath. It never clones the
+// moving default-branch tip: the worktree is created from the immutable commit
+// the job was accepted for. GitHub supports fetching an arbitrary reachable SHA.
+func cloneRepo(cloneURL, deploymentID, commitSHA string) (string, error) {
 	if err := validateCloneURL(cloneURL); err != nil {
 		return "", fmt.Errorf("clone rejected: %w", err)
+	}
+	if !commitSHAPattern.MatchString(commitSHA) {
+		return "", fmt.Errorf("clone rejected: invalid commit SHA %q", commitSHA)
 	}
 
 	destPath := filepath.Join(buildRoot, deploymentID)
@@ -85,22 +120,40 @@ func cloneRepo(cloneURL, deploymentID string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), gitCloneTimeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "git", "clone", "--depth", "1", cloneURL, destPath) //nolint:gosec // cloneURL validated by validateCloneURL above
+	//nolint:gosec // cloneURL validated by validateCloneURL and commitSHA by commitSHAPattern above
+	commands := [][]string{
+		{"init", destPath},
+		{gitChangeDirFlag, destPath, "remote", "add", "origin", cloneURL},
+		{gitChangeDirFlag, destPath, "fetch", "--depth", "1", "origin", commitSHA},
+		{gitChangeDirFlag, destPath, "checkout", "FETCH_HEAD"},
+	}
+	for _, args := range commands {
+		if err := runGit(ctx, args); err != nil {
+			return "", fmt.Errorf("git %s failed: %w", args[0], err)
+		}
+	}
+
+	return destPath, nil
+}
+
+// runGit executes a git command with the shared clone timeout and captures
+// stderr for diagnostics.
+func runGit(ctx context.Context, args []string) error {
+	cmd := exec.CommandContext(ctx, "git", args...) //nolint:gosec // arguments are constructed internally above
 
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
 		if ctx.Err() == context.DeadlineExceeded {
-			return "", err
+			return ctx.Err()
 		}
 		if stderr.Len() > 0 {
-			return "", fmt.Errorf("git clone failed: %s", stderr.String())
+			return errors.New(stderr.String())
 		}
-		return "", errors.New("git clone failed")
+		return err
 	}
-
-	return destPath, nil
+	return nil
 }
 
 func publishStatusUpdate(queueUsecase domain.QueueUsecase, deploymentID, status, outputURL, errorMessage string) error {
@@ -140,63 +193,16 @@ func writeDockerfile(repoPath string, builder *Builder, pm string) error {
 	return os.WriteFile(filepath.Join(repoPath, templateDockerfile), []byte(content), 0o600) //nolint:mnd // file permission
 }
 
-// packBuild uses Google Cloud Buildpacks via the `pack` CLI to build a container image.
-// It auto-detects the language/runtime (Go, Node.js, Python, etc.) from the repo contents.
-func packBuild(ctx context.Context, repoPath, imageTag string) error {
+func buildImage(ctx context.Context, repoPath, imageTag string) error {
 	//nolint:gosec // repoPath is from cloneRepo which validates the URL
-	cmd := exec.CommandContext(ctx, "pack", "build", imageTag,
-		"--builder=gcr.io/buildpacks/builder:latest",
-		"--path="+repoPath,
+	cmd := exec.CommandContext(ctx, "docker", "build",
+		"-t", imageTag,
+		"-f", filepath.Join(repoPath, templateDockerfile),
+		repoPath,
 	)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
-}
-
-// dockerBuild builds the image using the local Docker daemon with a generated Dockerfile.
-//
-//	func buildImage(ctx context.Context, cli *client.Client, repoPath, imageTag string) error {
-//		buildCtx, err := archive.TarWithOptions(repoPath, &archive.TarOptions{})
-//		if err != nil {
-//			return err
-//		}
-//		defer func() { _ = buildCtx.Close() }()
-//
-//		opts := client.ImageBuildOptions{
-//			Dockerfile: templateDockerfile,
-//			Tags:       []string{imageTag},
-//			Remove:     true,
-//		}
-//
-//		result, err := cli.ImageBuild(ctx, buildCtx, opts)
-//		if err != nil {
-//			return err
-//		}
-//		defer func() { _ = result.Body.Close() }()
-//
-//		scanner := bufio.NewScanner(result.Body)
-//		var lastLine string
-//		for scanner.Scan() {
-//			lastLine = scanner.Text()
-//			fmt.Println(lastLine)
-//		}
-//		if err := scanner.Err(); err != nil {
-//			return err
-//		}
-//
-//		var errCheck struct {
-//			Error string `json:"error"`
-//		}
-//		if lastLine != "" {
-//			_ = json.Unmarshal([]byte(lastLine), &errCheck)
-//		}
-//		if errCheck.Error != "" {
-//			return fmt.Errorf("build failed: %s", errCheck.Error)
-//		}
-//		return nil
-//	}
-func buildImage(ctx context.Context, _ *client.Client, repoPath, imageTag string) error {
-	return packBuild(ctx, repoPath, imageTag)
 }
 
 func saveImageTar(ctx context.Context, cli *client.Client, imageTag, tarPath string) error {
@@ -270,7 +276,7 @@ func cloneAndPrepare(repoPath string, job domain.DeployJob, logger *zap.Logger, 
 
 func buildAndSaveImage(ctx context.Context, job domain.DeployJob, cli *client.Client, repoPath, imageTag string, logger *zap.Logger) (string, error) {
 	logger.Info("building Docker image", zap.String("deployment_id", job.DeploymentID), zap.String("image_tag", imageTag))
-	if err := buildImage(ctx, cli, repoPath, imageTag); err != nil {
+	if err := buildImage(ctx, repoPath, imageTag); err != nil {
 		return "", err
 	}
 
@@ -317,14 +323,14 @@ func ProcessDeployment(
 		return markFailed(ctx, repo, job, queueUsecase, "failed to read image tag: "+err.Error())
 	}
 
-	repoPath, err := cloneRepo(job.CloneURL, job.DeploymentID)
+	repoPath, err := cloneRepo(job.CloneURL, job.DeploymentID, job.CommitSHA)
 	if err != nil {
-		return markFailed(ctx, repo, job, queueUsecase, "git clone failed: "+err.Error())
+		return markFailed(ctx, repo, job, queueUsecase, "git checkout failed: "+err.Error())
 	}
 
 	defer func() { _ = os.RemoveAll(repoPath) }()
 
-	if _, err := cloneAndPrepare(repoPath, job, logger, true); err != nil {
+	if _, err := cloneAndPrepare(repoPath, job, logger, false); err != nil {
 		return markFailed(ctx, repo, job, queueUsecase, "clone/prepare failed: "+err.Error())
 	}
 

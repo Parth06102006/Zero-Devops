@@ -126,6 +126,8 @@ func (m *pqSQLUserRepository) Store(ctx context.Context, user *domain.User) erro
 	err := m.Conn.QueryRowContext(ctx, query, user.ProviderID, user.Provider, user.Username, user.Email, user.AvatarURL, user.CreatedAt).Scan(&user.ID)
 
 	if err != nil {
+		log := appmiddleware.LoggerFromContext(ctx)
+		log.Error("failed to store user", zap.Error(err))
 		return err
 	}
 

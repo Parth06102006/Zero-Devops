@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -31,6 +32,10 @@ func NewSCMHandler(e *echo.Echo, gh domain.GithubUsecase) {
 	e.POST("/integration/scm/github/install", handler.Installation)
 	e.GET("/integration/scm/github/", handler.GetInstallation)
 	e.DELETE("/integration/scm/github/delete", handler.DeleteInstallation)
+
+	// I have to change the api end points here
+	e.GET("/integrations/github/repositories", handler.ListRepositories)
+	e.GET("/integrations/github/installation", handler.GetInstallationStatus)
 }
 
 // Installation handles GitHub App installation callback
@@ -91,7 +96,72 @@ func (inst *SCMHandler) GetInstallation(c *echo.Context) error {
 	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(installation, "", reqID))
 }
 
-// DeleteInstallation removes the current user's GitHub App installation
+// GetInstallationStatus returns the current user's GitHub App installation status.
+func (inst *SCMHandler) GetInstallationStatus(c *echo.Context) error {
+	reqID := middleware.GetRequestID(c)
+	log := middleware.LoggerFromContext(c.Request().Context())
+
+	userID, ok := authmiddleware.GetUserID(c)
+	if !ok {
+		log.Warn("User ID not found in context")
+		return c.JSON(http.StatusUnauthorized, helper.BuildErrorResponse("user id not found", fmt.Errorf("user id not found in context"), reqID))
+	}
+
+	installation, err := inst.scmUsecase.GetGithubAppInstallation(c.Request().Context(), userID)
+	if err != nil {
+		log.Error("Failed to get GitHub app installation status", zap.Error(err), zap.String("user_id", userID))
+		if errors.Is(err, domain.ErrNotFound) {
+			resp := helper.BuildErrorResponse("github installation not found", err, reqID)
+			resp.Error.Code = http.StatusNotFound
+			return c.JSON(http.StatusNotFound, resp)
+		}
+		resp := helper.BuildErrorResponse(err.Error(), err, reqID)
+		resp.Error.Code = http.StatusInternalServerError
+		return c.JSON(http.StatusInternalServerError, resp)
+	}
+
+	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(installation, "", reqID))
+}
+
+// ListRepositories returns repositories available to the current user's installation
+func (inst *SCMHandler) ListRepositories(c *echo.Context) error {
+	reqID := middleware.GetRequestID(c)
+	userID, ok := authmiddleware.GetUserID(c)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, helper.BuildErrorResponse("user id not found", fmt.Errorf("user id not found in context"), reqID))
+	}
+
+	const maxRepositoriesPerPage = 100
+
+	perPage := 30
+	if raw := strings.TrimSpace(c.QueryParam("per_page")); raw != "" {
+		parsed, err := strconv.Atoi(raw)
+		if err != nil || parsed < 1 {
+			return c.JSON(http.StatusBadRequest, helper.BuildErrorResponse("invalid per_page", domain.ErrBadParamInput, reqID))
+		}
+		perPage = parsed
+	}
+	if perPage > maxRepositoriesPerPage {
+		perPage = maxRepositoriesPerPage
+	}
+
+	result, err := inst.scmUsecase.ListRepositories(c.Request().Context(), userID, strings.TrimSpace(c.QueryParam("cursor")), c.QueryParam("query"), perPage)
+	if err != nil {
+		status := helper.GetStatusCode(err)
+		if errors.Is(err, domain.ErrBadParamInput) {
+			status = http.StatusBadRequest
+		}
+		if errors.Is(err, domain.ErrInvalidStatus) {
+			status = http.StatusConflict
+		}
+		resp := helper.BuildErrorResponse(err.Error(), err, reqID)
+		resp.Error.Code = status
+		return c.JSON(status, resp)
+	}
+	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(result, "", reqID))
+}
+
+// DeleteInstallation handles removal of the current user's GitHub App installation
 func (inst *SCMHandler) DeleteInstallation(c *echo.Context) error {
 	reqID := middleware.GetRequestID(c)
 	log := middleware.LoggerFromContext(c.Request().Context())

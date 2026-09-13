@@ -39,6 +39,30 @@ func TestGetStatusCode_GenericError(t *testing.T) {
 	}
 }
 
+func TestGetStatusCode_WebhookErrors(t *testing.T) {
+	tests := []struct {
+		name string
+		err  error
+		want int
+	}{
+		{"missing event header", domain.ErrMissingGithubEventHeader, http.StatusBadRequest},
+		{"missing delivery header", domain.ErrMissingGithubDeliveryHeader, http.StatusBadRequest},
+		{"unsupported event", domain.ErrEventNotFound, http.StatusAccepted},
+		{"missing signature", domain.ErrMissingHubSignatureHeader, http.StatusUnauthorized},
+		{"bad signature", domain.ErrHMACVerificationFailed, http.StatusUnauthorized},
+		{"payload too large", domain.ErrPayloadTooLarge, http.StatusRequestEntityTooLarge},
+		{"malformed json", domain.ErrParsingPayload, http.StatusBadRequest},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if code := GetStatusCode(tt.err); code != tt.want {
+				t.Errorf("expected %d, got %d", tt.want, code)
+			}
+		})
+	}
+}
+
 func TestBuildErrorResponse_Production(t *testing.T) {
 	viper.Set("APP_ENV", "production")
 

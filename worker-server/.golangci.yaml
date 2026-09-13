@@ -53,6 +53,7 @@ linters:
               - "github.com/aws/aws-sdk-go-v2/service/s3"
               - "github.com/moby/go-archive"
               - "github.com/moby/moby/client"
+              - "github.com/santhosh-tekuri/jsonschema/v5"
     dupl:
       threshold: 300
     funlen:

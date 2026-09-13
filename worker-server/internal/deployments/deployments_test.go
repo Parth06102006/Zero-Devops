@@ -8,38 +8,34 @@ import (
 	"testing"
 )
 
-func TestPackBuild_InvalidPath(t *testing.T) {
-	ctx := context.Background()
-	err := packBuild(ctx, "/nonexistent/path", "test-image:latest")
+func TestDockerBuild_InvalidPath(t *testing.T) {
+	err := buildImage(context.Background(), "/nonexistent/path", "test-image:latest")
 	if err == nil {
 		t.Fatal("expected error for invalid path")
 	}
 }
 
-func TestPackBuild_WithGoApp(t *testing.T) {
+func TestDockerBuild_WithDockerfile(t *testing.T) {
 	if testing.Short() {
-		t.Skip("skipping pack build integration test in short mode")
-	}
-	if _, err := exec.LookPath("pack"); err != nil {
-		t.Skip("pack CLI not installed, skipping")
+		t.Skip("skipping docker build integration test in short mode")
 	}
 	if _, err := exec.LookPath("docker"); err != nil {
 		t.Skip("docker not available, skipping")
 	}
+	if out, err := exec.CommandContext(context.Background(), "docker", "info").CombinedOutput(); err != nil {
+		t.Skipf("docker daemon unreachable, skipping: %v (%s)", err, out)
+	}
 
 	tmpDir := t.TempDir()
 
-	if err := os.WriteFile(filepath.Join(tmpDir, "go.mod"), []byte("module test\n\ngo 1.25\n"), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(tmpDir, "main.go"), []byte("package main\nimport \"fmt\"\nfunc main() { fmt.Println(\"hello\") }\n"), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(tmpDir, "Dockerfile"), []byte("FROM alpine:latest\nCMD [\"echo\", \"hello\"]\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
-	imageTag := "pack-test-go-app:latest"
-	err := packBuild(context.Background(), tmpDir, imageTag)
+	imageTag := "docker-test-alpine:latest"
+	err := buildImage(context.Background(), tmpDir, imageTag)
 	if err != nil {
-		t.Fatalf("pack build failed on Go project: %v", err)
+		t.Fatalf("docker build failed: %v", err)
 	}
 
 	t.Cleanup(func() {
@@ -97,6 +93,12 @@ func TestValidateCloneURL_RejectsNonGithubHost(t *testing.T) {
 		if err := validateCloneURL(u); err == nil {
 			t.Errorf("validateCloneURL(%q) = nil, want error for non-github host", u)
 		}
+	}
+}
+
+func TestCloneRepo_RejectsInvalidCommitSHA(t *testing.T) {
+	if _, err := cloneRepo("https://github.com/user/repo.git", "deployment-id", "not-a-sha"); err == nil {
+		t.Fatal("cloneRepo() = nil, want error for invalid commit SHA")
 	}
 }
 

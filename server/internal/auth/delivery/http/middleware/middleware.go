@@ -75,7 +75,8 @@ func isPublicPath(c *echo.Context) bool {
 	switch c.Path() {
 	case "/auth/github/login",
 		"/auth/github/login/callback",
-		"/auth/refresh":
+		"/auth/refresh",
+		"/webhooks/github":
 		return true
 	}
 	return false

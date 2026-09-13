@@ -3,6 +3,8 @@ package domain
 import (
 	"testing"
 
+	"Zero_Devops/worker_server/internal/deployments/contract"
+
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
 )
@@ -13,11 +15,12 @@ func TestQueueUsecaseInterface(_ *testing.T) {
 
 type queueUsecaseMock struct{}
 
-func (m *queueUsecaseMock) Close()                                          {}
-func (m *queueUsecaseMock) Channel() *amqp.Channel                          { return nil }
-func (m *queueUsecaseMock) SetUpQueues() error                              { return nil }
-func (m *queueUsecaseMock) PublishJob(_ DeployJob) error                    { return nil }
-func (m *queueUsecaseMock) PublishStatusUpdate(_ DeployStatusMessage) error { return nil }
+func (m *queueUsecaseMock) Close()                                              {}
+func (m *queueUsecaseMock) Channel() *amqp.Channel                              { return nil }
+func (m *queueUsecaseMock) SetUpQueues() error                                  { return nil }
+func (m *queueUsecaseMock) PublishJob(_ DeployJob) error                        { return nil }
+func (m *queueUsecaseMock) PublishBuildRequest(_ contract.BuildRequestV1) error { return nil }
+func (m *queueUsecaseMock) PublishStatusUpdate(_ DeployStatusMessage) error     { return nil }
 
 func TestUploadUsecaseInterface(_ *testing.T) {
 	var _ UploadUsecase = (*uploadUsecaseMock)(nil)

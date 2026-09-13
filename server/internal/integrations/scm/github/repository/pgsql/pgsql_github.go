@@ -75,6 +75,49 @@ func (m *pgSQLGithubRepository) GetInstallationByUserID(ctx context.Context, use
 	return &inst, nil
 }
 
+func (m *pgSQLGithubRepository) GetInstallationIDByGithubInstallationID(ctx context.Context, installationID int64) (string, error) {
+	query := `
+		SELECT id
+		FROM github_installations
+		WHERE installation_id = $1
+	`
+
+	var githubInstallationDBID string
+	err := m.Conn.QueryRowContext(ctx, query, installationID).Scan(&githubInstallationDBID)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", domain.ErrNotFound
+		}
+		log := appmiddleware.LoggerFromContext(ctx)
+		log.Error("failed to get github installation", zap.Error(err))
+		return "", err
+	}
+
+	return githubInstallationDBID, nil
+}
+
+func (m *pgSQLGithubRepository) GetInstallationStatusByID(ctx context.Context, installationDBID string) (string, error) {
+	query := `
+		SELECT status
+		FROM github_installations
+		WHERE id = $1
+	`
+
+	var status string
+	err := m.Conn.QueryRowContext(ctx, query, installationDBID).Scan(&status)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", domain.ErrNotFound
+		}
+		log := appmiddleware.LoggerFromContext(ctx)
+		log.Error("failed to get github installation status", zap.Error(err))
+		return "", err
+	}
+
+	return status, nil
+}
+
 func (m *pgSQLGithubRepository) DeleteInstallationByUserID(ctx context.Context, userID string) error {
 	query := `DELETE FROM github_installations WHERE user_id = $1`
 	stmt, err := m.Conn.PrepareContext(ctx, query)
@@ -135,6 +178,88 @@ func (m *pgSQLGithubRepository) UpdateInstallationStatus(ctx context.Context, us
 	}()
 
 	res, err := stmt.ExecContext(ctx, status, userID)
+	if err != nil {
+		log := appmiddleware.LoggerFromContext(ctx)
+		log.Error("failed to update status", zap.Error(err))
+		return err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		log := appmiddleware.LoggerFromContext(ctx)
+		log.Error("failed to get rows affected", zap.Error(err))
+		return err
+	}
+
+	if rowsAffected != 1 {
+		return fmt.Errorf("weird Behavior. Total Affected: %d", rowsAffected)
+	}
+
+	return nil
+}
+
+func (m *pgSQLGithubRepository) UpdateInstallationStatusByGithubInstallationID(ctx context.Context, installationID int64, status string) error {
+	if status != domain.GithubInstallationStatusActive &&
+		status != domain.GithubInstallationStatusSuspended &&
+		status != domain.GithubInstallationStatusUninstalled {
+		return domain.ErrInvalidStatus
+	}
+
+	query := `UPDATE github_installations SET status = $1 WHERE installation_id = $2`
+
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+
+	if err != nil {
+		log := appmiddleware.LoggerFromContext(ctx)
+		log.Error("failed to prepare status update query", zap.Error(err))
+		return err
+	}
+
+	defer func() {
+		if err := stmt.Close(); err != nil {
+			appmiddleware.LoggerFromContext(ctx).Error("failed to close statement", zap.Error(err))
+		}
+	}()
+
+	res, err := stmt.ExecContext(ctx, status, installationID)
+	if err != nil {
+		log := appmiddleware.LoggerFromContext(ctx)
+		log.Error("failed to update status", zap.Error(err))
+		return err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		log := appmiddleware.LoggerFromContext(ctx)
+		log.Error("failed to get rows affected", zap.Error(err))
+		return err
+	}
+
+	if rowsAffected != 1 {
+		return fmt.Errorf("weird Behavior. Total Affected: %d", rowsAffected)
+	}
+
+	return nil
+}
+
+func (m *pgSQLGithubRepository) UpdateInstallationExternalIDByID(ctx context.Context, installationID, githubInstallationDBID string) error {
+	query := `UPDATE github_installations SET installation_id = $1 WHERE id = $2`
+
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+
+	if err != nil {
+		log := appmiddleware.LoggerFromContext(ctx)
+		log.Error("failed to prepare status update query", zap.Error(err))
+		return err
+	}
+
+	defer func() {
+		if err := stmt.Close(); err != nil {
+			appmiddleware.LoggerFromContext(ctx).Error("failed to close statement", zap.Error(err))
+		}
+	}()
+
+	res, err := stmt.ExecContext(ctx, installationID, githubInstallationDBID)
 	if err != nil {
 		log := appmiddleware.LoggerFromContext(ctx)
 		log.Error("failed to update status", zap.Error(err))
