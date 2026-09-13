@@ -1,207 +1,173 @@
 # Zero DevOps Server
 
-Backend service for GitHub OAuth authentication, GitHub App installation tracking, and the upcoming repository deployment flow.
+Go (Echo) API for GitHub OAuth, GitHub App integration, project configuration, and durable build orchestration.
 
-The server is written in Go, uses Echo for HTTP delivery, PostgreSQL for persistence, Viper for configuration, and follows a clean architecture style:
+The client talks only to this service (HTTPS + session cookies). The server owns PostgreSQL, Redis (repository-list cache), RabbitMQ (`deploy.jobs` / `deploy.status`), and GitHub. Build execution lives in `worker-server/`.
 
-- `domain`: core entities and interfaces
-- `authorization/auth`: login, refresh, logout, current-user logic
-- `authorization/user`: PostgreSQL user repository
-- `integrations/scm`: GitHub App installation APIs
-- `app`: dependency wiring and server startup
+For the full system picture, see [`docs/architecture.md`](../docs/architecture.md). Shared job contract: [`schemas/deploy-jobs-v1.schema.json`](../schemas/deploy-jobs-v1.schema.json). Historical notes live under [`_reference/`](_reference/).
 
-## Current Implementation
+## Architecture
 
-The backend currently supports:
+Clean-architecture style layout:
 
-- GitHub OAuth login through a callback-style `GET /auth/github/login`
-- App-owned access and refresh JWT cookies
-- Refresh-token rotation
-- Logout and cookie clearing
-- Current-user lookup
-- Auth middleware that reads `access_token`, validates it, and stores `user_id` in Echo context
-- GitHub App installation storage for the authenticated user
-- GitHub App installation lookup and local disconnect/delete
-
-Status tracking and GitHub webhooks are documented as future work and are not part of the current implementation.
-
-## Runtime Flow
+| Package | Responsibility |
+| --- | --- |
+| `internal/auth` | GitHub OAuth login/callback/refresh/logout/me, JWT cookies, auth middleware |
+| `internal/integrations/scm` | GitHub App install lifecycle, installation tokens, repository listing, webhooks |
+| `internal/project` | Project CRUD, branch/command config, command scanner/policy |
+| `internal/deployments` | Builds, outbox dispatcher, `deploy.status` consumer, V1 contract |
+| `internal/queue` | RabbitMQ exchange/queue/DLQ declaration |
+| `internal/domain` | Shared entities, interfaces, error sentinels |
+| `config`, `internal/logger`, `internal/middleware`, `internal/helper` | Viper config, Zap logging, CORS/request-ID, response envelopes |
 
 ```mermaid
-flowchart TD
-    Start([Server start]) --> Config[Load config from .env]
-    Config --> DB[Open PostgreSQL connection]
-    DB --> Echo[Create Echo server]
-
-    Echo --> UserRepo[UserRepository]
-    UserRepo --> AuthMiddleware[Auth middleware]
-    AuthMiddleware --> GlobalMiddleware[e.Use auth middleware]
-
-    DB --> GithubRepo[GithubRepository]
-    GithubRepo --> GithubUsecase[GithubUsecase]
-    GithubUsecase --> SCMHandler[SCM HTTP handler]
-
-    Echo --> GithubProvider[GitHub OAuth provider]
-    GithubProvider --> Providers[providers map]
-    Providers --> AuthUsecase[AuthUsecase]
-    UserRepo --> AuthUsecase
-    AuthUsecase --> AuthHandler[Auth HTTP handler]
-
-    AuthHandler --> Login[GET /auth/github/login]
-    AuthHandler --> Refresh[POST /auth/refresh]
-    AuthHandler --> Logout[POST /auth/logout]
-    AuthHandler --> Me[GET /auth/user/me]
-
-    SCMHandler --> Install[POST /integration/scm/github/install]
-    SCMHandler --> GetInstall[GET /integration/scm/github/]
-    SCMHandler --> DeleteInstall[DELETE /integration/scm/github/delete]
-
-    GlobalMiddleware --> Skip{Public route?}
-    Skip -->|login or refresh| ContinuePublic[Continue request]
-    Skip -->|protected| ReadCookie[Read access_token cookie]
-    ReadCookie --> ValidateJWT[Validate JWT]
-    ValidateJWT --> SetUserID[Set user_id in Echo context]
-    SetUserID --> ContinueProtected[Continue protected request]
+flowchart LR
+    Client[Client] -->|HTTPS + cookies| API[Server]
+    API --> PG[(PostgreSQL)]
+    API --> Redis[(Redis)]
+    API --> GitHub[GitHub]
+    API -->|outbox → deploy.jobs| MQ[(RabbitMQ)]
+    MQ -->|deploy.status| API
+    MQ --> Worker[worker-server]
 ```
 
-## Auth APIs
+**Build path:** manual `POST /projects/:id/builds` or webhook push → deployment + outbox row in one transaction → outbox dispatcher publishes `deploy.jobs` with publisher confirms → worker builds → `deploy.status` → server applies durable state transitions.
 
-Base URL locally depends on `SERVER_ADDRESS`. Example: `http://127.0.0.1:8750`.
+## Current capabilities
+
+- **Auth** — GitHub OAuth, `access_token` / `refresh_token` cookies, rotation, logout, current user. Public paths: `/auth/github/login`, `/auth/github/login/callback`, `/auth/refresh`, `/webhooks/github`.
+- **GitHub App** — install / get / delete, status (`active` / `suspended` / `uninstalled`), installation gate, paginated repository picker (Redis-cached, fail-open).
+- **Projects** — full CRUD, branch + webhook flag, command scanning/policy, `configuration_version` bump on update.
+- **Manual builds** — resolve ref → immutable SHA, config snapshot, `StoreProjectBuildWithOutbox`, idempotency-key dedup, per-project `build_number`.
+- **Webhook builds** — `POST /webhooks/github` (HMAC + delivery dedup), installation/project gates, exact configured-branch match, `StoreWebhookBuildWithOutbox`.
+- **Outbox dispatcher** — sole `deploy.jobs` producer; poll/claim, publisher confirms, stuck-row reconciliation, dead-letter state. Tunable via `OUTBOX_POLL_INTERVAL_MS` / `OUTBOX_BATCH_SIZE`.
+- **Status consumer** — durable `deploy.status` with manual ack, legal-transition validation, generation-aware currentness.
+
+Legacy `POST /deploy` has been removed. All builds go through project builds or the webhook.
+
+## HTTP API
+
+Base URL is `SERVER_ADDRESS` (example: `http://127.0.0.1:8750`). Authenticated routes require the `access_token` cookie unless noted.
+
+### Auth
 
 | Method | Path | Auth | Purpose |
 | --- | --- | --- | --- |
-| `GET` | `/auth/github/login?code=...` | Public | GitHub OAuth callback. Creates app cookies. |
-| `POST` | `/auth/refresh` | `refresh_token` cookie | Rotates access and refresh tokens. |
-| `POST` | `/auth/logout` | `access_token` cookie | Clears stored refresh token and auth cookies. |
-| `GET` | `/auth/user/me` | `access_token` cookie | Returns the current user. |
+| `GET` | `/auth/github/login` | Public | Start OAuth (state cookie + redirect) |
+| `GET` | `/auth/github/login/callback` | Public | Exchange code; set session cookies |
+| `POST` | `/auth/refresh` | `refresh_token` cookie | Rotate session tokens |
+| `POST` | `/auth/logout` | `access_token` cookie | Clear session + cookies |
+| `GET` | `/auth/user/me` | Cookie | Current user |
 
-GitHub OAuth redirects with a `GET` request, so `/auth/github/login` is intentionally registered as `GET`.
-
-## GitHub App APIs
+### GitHub integration
 
 | Method | Path | Auth | Purpose |
 | --- | --- | --- | --- |
-| `POST` | `/integration/scm/github/install?code=...` | `access_token` cookie | Installs/stores GitHub App installation for current user. |
-| `GET` | `/integration/scm/github/` | `access_token` cookie | Returns stored installation for current user. |
-| `DELETE` | `/integration/scm/github/delete` | `access_token` cookie | Removes stored installation from local DB. |
+| `POST` | `/integration/scm/github/install` | Cookie | Install/store App (legacy path) |
+| `GET` | `/integration/scm/github/` | Cookie | Stored installation (legacy path) |
+| `DELETE` | `/integration/scm/github/delete` | Cookie | Local disconnect (legacy path) |
+| `GET` | `/integrations/github/installation` | Cookie | Installation + status gate |
+| `GET` | `/integrations/github/repositories` | Cookie | Paginated repository picker |
 
-The delete route currently means local disconnect. It removes the installation record from this app's database. GitHub-side uninstall/suspend synchronization is planned later through webhooks.
+### Projects & builds
 
-## Key Functions
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| `GET` / `POST` | `/projects` | Cookie | List / create projects |
+| `GET` / `PATCH` / `DELETE` | `/projects/:id` | Cookie | Read / update / delete |
+| `POST` | `/projects/:id/builds` | Cookie | Manual build (immutable SHA + idempotency key) |
+| `GET` | `/projects/:id/builds` | Cookie | Build history |
+| `GET` | `/builds/:id` | Cookie | Build detail (`build_number` included) |
 
-Auth:
+### Webhooks
 
-- `NewAuthHandler`: registers auth routes.
-- `Login`: exchanges GitHub OAuth code through the auth usecase, then writes `access_token` and `refresh_token` cookies.
-- `Refresh`: reads `refresh_token`, rotates tokens, and rewrites cookies.
-- `Logout`: validates `access_token`, clears the stored refresh token, and deletes cookies.
-- `GetUser`: returns the current authenticated user.
-- `NewAuthUsecase`: wires user repository and OAuth providers.
-- `HandleOAuthCallback`: exchanges provider code, creates or loads local user, generates app tokens.
-- `RefreshToken`: validates refresh JWT and rotates persisted refresh token.
-- `AuthMiddleware`: validates access token and stores `user_id` in request context.
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| `POST` | `/webhooks/github` | HMAC signature | GitHub App ingress (`push`, installation lifecycle, etc.) |
 
-GitHub SCM:
+Resources are scoped to the authenticated user; cross-user access returns `404` (not `403`).
 
-- `NewSCMHandler`: registers GitHub App installation routes.
-- `Installation`: reads GitHub App install code and stores installation data for the current user.
-- `GetInstallation`: returns the current user's stored GitHub installation.
-- `DeleteInstallation`: deletes the current user's local GitHub installation record.
-- `NewGithubAppUsecase`: wires GitHub repository into the SCM usecase.
-- `InstallGithubApp`: exchanges GitHub code, fetches user installations, stores matching app installation.
-- `GetGithubAppInstallation`: loads installation by local user ID.
-- `DeleteGithubApp`: deletes installation by local user ID.
+## Data model (PostgreSQL)
+
+| Table | Role |
+| --- | --- |
+| `users` | OAuth identity + refresh token |
+| `github_installations` | Installation ID, account, status; unique per user and installation |
+| `projects` | Selected repo, branch, webhook flag, build config, generation / build counters |
+| `deployments` | Build runs (V1 fields, `build_number`, trigger, config snapshot) |
+| `webhook_deliveries` | GitHub delivery ID dedup/audit |
+| `deployment_outbox` | Durable `deploy.jobs` outbox (`pending` / `sent` / `dead`) |
+
+Migrations: Goose under `database/migrations/` (apply with `make migrate-up`).
 
 ## Configuration
 
-The server expects a `.env` file in `server/`.
-
-Minimum local keys:
+Copy `.env.example` → `.env` in `server/`. Important keys:
 
 ```env
-DATABASE_HOST=127.0.0.1
+SERVER_ADDRESS=127.0.0.1:8750
+DATABASE_HOST=localhost
 DATABASE_PORT=5432
-DATABASE_USER=postgres
-DATABASE_PASS=password
-DATABASE_NAME=zero_devops
-SERVER_ADDRESS=:8750
-JWT_SECRET=local-secret
+DATABASE_USER=
+DATABASE_PASS=
+DATABASE_NAME=
+JWT_SECRET=
+OAUTH_GITHUB_CLIENT_ID=
+OAUTH_GITHUB_CLIENT_SECRET=
+OAUTH_GITHUB_REDIRECT_URL=
+GITHUB_APP_ID=
+GITHUB_APP_CLIENT_ID=
+GITHUB_APP_CLIENT_SECRET=
+GITHUB_APP_PRIVATE_KEY_PATH=./keys/your-private-key.pem
+GITHUB_APP_WEBHOOK_SECRET=
+RABBITMQ_CONNECTION_STRING=amqp://guest:guest@localhost:5672/
+REDIS_ADDR=localhost:6379
+REDIS_REPOSITORY_CACHE_TTL_SECONDS=600
+OUTBOX_POLL_INTERVAL_MS=250
+OUTBOX_BATCH_SIZE=50
+ALLOWED_ORIGINS=http://localhost:5173
+FRONTEND_URL=http://localhost:5173
+APP_ENV=development
 ```
 
-Common GitHub/OAuth keys:
+## Local development
 
-```env
-OAUTH_GITHUB_CLIENT_ID=...
-OAUTH_GITHUB_CLIENT_SECRET=...
-OAUTH_GITHUB_REDIRECT_URL=...
-GITHUB_APP_CLIENT_ID=...
-GITHUB_APP_CLIENT_SECRET=...
-GITHUB_APP_ID=...
-ACCESS_TOKEN_EXPIRY=1
-REFRESH_TOKEN_EXPIRY=720
-IS_PRODUCTION_ENV=false
-context.timeout=2
+Run commands from `server/`.
+
+```bash
+# Dependencies + Postgres / RabbitMQ / Redis
+make install-deps
+make dev-env
+
+# Apply migrations
+make migrate-up
+
+# Hot reload (Air) or one-shot run
+make up
+# or
+make build && ./engine
+
+# Tests / lint
+make tests
+make lint
 ```
 
-## Local Development
+Docker Compose services: `pgsql` (Postgres 17), `rabbitmq`, `redis` — see `docker-compose.yaml`.
 
-Run commands from the `server/` folder.
+Focused tests (examples):
 
-Start PostgreSQL:
-
-```powershell
-docker compose up -d
+```bash
+go test ./internal/auth/... -v
+go test ./internal/deployments/... -v
+go test ./internal/integrations/scm/... -v
+go test ./internal/project/... -v
 ```
 
-Run the server:
+## Known gaps
 
-```powershell
-go run ./app
-```
+See [`docs/architecture.md`](../docs/architecture.md) §3 for the full list. Highlights that affect this service:
 
-Run tests with a repo-local Go cache on Windows:
-
-```powershell
-$env:GOCACHE = Join-Path $PWD '.gocache'
-go test ./... -v
-```
-
-Run focused packages:
-
-```powershell
-go test ./authorization/auth/delivery/http -v
-go test ./authorization/auth/usecase -v
-go test ./integrations/scm/delivery/http -v
-go test ./integrations/scm/github/usecase -v
-go test ./integrations/scm/github/repository/pgsql -v
-```
-
-## Next Implementation
-
-The next implementation should move from "GitHub App is installed" to "the app can inspect deployable repositories."
-
-Recommended first API:
-
-```text
-GET /integration/scm/github/repos
-```
-
-Expected flow:
-
-1. Require `access_token` cookie.
-2. Read `user_id` from auth middleware context.
-3. Load the stored GitHub installation for that user.
-4. Create a GitHub App installation access token from the stored `installation_id`.
-5. Call GitHub to list repositories available to that installation.
-6. Return repository metadata to the frontend.
-7. Let the user select a repository for the deployment flow.
-
-After repository listing works, the next natural steps are:
-
-- store the selected repository for a deployment/project
-- fetch repository branches and default branch
-- prepare clone/build/deploy orchestration
-- add GitHub webhooks later for push, uninstall, suspend, and repository events
-
-See `server/docs/future/issues.md` for prioritized future work.
-
+- Worker does not yet publish terminal `success` on `deploy.status` (successful builds can remain `building` server-side).
+- Legacy `/integration/scm/github/...` routes still coexist with `/integrations/...`.
+- Refresh tokens are stored raw (hash before production).
+- Live broker/DB failure-recovery tests and migration `20260906000001` runtime validation against real Postgres are still pending.
