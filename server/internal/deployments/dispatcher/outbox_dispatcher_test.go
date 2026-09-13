@@ -405,7 +405,7 @@ func TestDispatchBatch_StopsOnCanceledContext(t *testing.T) {
 	cancel()
 	o.dispatchBatch(ctx, pub)
 	if repo.claimCalls != 0 {
-		t.Fatalf("cancelled context must not claim, got %d claims", repo.claimCalls)
+		t.Fatalf("canceled context must not claim, got %d claims", repo.claimCalls)
 	}
 }
 
@@ -454,7 +454,7 @@ func TestReconcile_ResetsStuckAndDeletesOld(t *testing.T) {
 	}
 }
 
-func TestReconcile_ErrorsAreSurvivable(t *testing.T) {
+func TestReconcile_ErrorsAreSurvivable(_ *testing.T) {
 	repo := &fakeRepo{resetErr: errors.New("reset failed"), deleteErr: errors.New("delete failed")}
 	o := newTestOutbox(repo, Config{})
 

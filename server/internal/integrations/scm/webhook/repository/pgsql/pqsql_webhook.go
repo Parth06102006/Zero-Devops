@@ -1,3 +1,4 @@
+// Package pgsql stores GitHub webhook delivery records in PostgreSQL.
 package pgsql
 
 import (
@@ -13,6 +14,7 @@ type webhookRepository struct {
 	Conn *sql.DB
 }
 
+// NewPGSQLWebhookRepository creates a PostgreSQL webhook repository.
 func NewPGSQLWebhookRepository(conn *sql.DB) domain.WebhookRepository {
 	return &webhookRepository{conn}
 }
@@ -115,7 +117,7 @@ func (r *webhookRepository) UpdateDeliveryMetadata(ctx context.Context, delivery
 	return nil
 }
 
-func (r *webhookRepository) GetDeliveryId(ctx context.Context, deliveryID string) (*domain.WebhookDelivery, error) {
+func (r *webhookRepository) GetDeliveryID(ctx context.Context, deliveryID string) (*domain.WebhookDelivery, error) {
 	query := `
 		SELECT id, delivery_id, event_name, event_action, github_installation_external_id, github_installation_db_id, github_repository_id, processing_status,
   		received_at, processed_at, processing_error, payload_reference FROM webhook_deliveries WHERE delivery_id = $1
@@ -181,7 +183,7 @@ func (r *webhookRepository) GetDeliveryId(ctx context.Context, deliveryID string
 	return &webD, nil
 }
 
-func (r *webhookRepository) TryInsertDelivery(ctx context.Context, delivery domain.WebhookDelivery) (bool, string, error) {
+func (r *webhookRepository) TryInsertDelivery(ctx context.Context, delivery domain.WebhookDelivery) (inserted bool, deliveryDBID string, err error) {
 	query := `
 			INSERT INTO webhook_deliveries 
 			(delivery_id, event_name, event_action, github_installation_external_id, github_installation_db_id, github_repository_id, processing_status,
@@ -190,8 +192,7 @@ func (r *webhookRepository) TryInsertDelivery(ctx context.Context, delivery doma
 			RETURNING id
     `
 
-	var deliveryDBID string
-	err := r.Conn.QueryRowContext(ctx, query,
+	err = r.Conn.QueryRowContext(ctx, query,
 		delivery.DeliveryID,
 		delivery.EventName,
 		nullString(delivery.EventAction),

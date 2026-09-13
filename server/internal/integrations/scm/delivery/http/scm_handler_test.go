@@ -16,10 +16,10 @@ import (
 )
 
 type mockGithubUsecase struct {
-	installFn          func(ctx context.Context, client *http.Client, code string, userID string) error
-	getFn              func(ctx context.Context, userID string) (*domain.GithubInstallation, error)
-	deleteFn           func(ctx context.Context, userID string) error
-	listRepositoriesFn func(ctx context.Context, userID, cursor, query string, perPage int) (*domain.RepositoryList, error)
+	installFn              func(ctx context.Context, client *http.Client, code string, userID string) error
+	getFn                  func(ctx context.Context, userID string) (*domain.GithubInstallation, error)
+	deleteFn               func(ctx context.Context, userID string) error
+	listRepositoriesFn     func(ctx context.Context, userID, cursor, query string, perPage int) (*domain.RepositoryList, error)
 	getRepositoryDetailsFn func(ctx context.Context, userID string, repoID int64) (*domain.RepositoryPicker, error)
 }
 

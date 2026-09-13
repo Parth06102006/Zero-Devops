@@ -25,7 +25,7 @@ func newTestProjectDB(t *testing.T) *sql.DB {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := db.Ping(); err != nil {
+	if err := db.PingContext(context.Background()); err != nil {
 		t.Fatalf("ping: %v", err)
 	}
 	return db
@@ -64,7 +64,9 @@ func seedProjectParents(t *testing.T, db *sql.DB) (userID, installationUUID uuid
 
 func TestPgSQLProjectRepository_StoreGetAndDuplicateConflict(t *testing.T) {
 	db := newTestProjectDB(t)
-	defer db.Close()
+	defer func() {
+		_ = db.Close()
+	}()
 
 	userID, installationUUID, _ := seedProjectParents(t, db)
 	repo := NewPgSQLProjectRepository(db)

@@ -27,7 +27,7 @@ func (f *fakeStatusAck) Ack(bool) error {
 	return nil
 }
 
-func (f *fakeStatusAck) Nack(_ bool, requeue bool) error {
+func (f *fakeStatusAck) Nack(_, requeue bool) error {
 	if f.nackErr != nil {
 		return f.nackErr
 	}
@@ -60,8 +60,8 @@ func shortStatusBackoff(t *testing.T) {
 	t.Cleanup(func() { statusApplyBackoff = original })
 }
 
-func statusBody(id, status, output, errMsg string) []byte {
-	return []byte(`{"deployment_id":"` + id + `","status":"` + status + `","output_url":"` + output + `","error_message":"` + errMsg + `"}`)
+func statusBody(id, status, output string) []byte {
+	return []byte(`{"deployment_id":"` + id + `","status":"` + status + `","output_url":"` + output + `","error_message":""}`)
 }
 
 func TestHandleStatusMessage_AcksAfterDurableApply(t *testing.T) {
@@ -71,7 +71,7 @@ func TestHandleStatusMessage_AcksAfterDurableApply(t *testing.T) {
 		return &domain.ApplyStatusResult{IsCurrentGeneration: true}, nil
 	})
 
-	h.uc.handleStatusMessage(context.Background(), h.ack, statusBody("dep-1", "success", "https://out", ""))
+	h.uc.handleStatusMessage(context.Background(), h.ack, statusBody("dep-1", "success", "https://out"))
 
 	if h.ack.acks != 1 || h.ack.nacks != 0 {
 		t.Fatalf("expected exactly one ack, got acks=%d nacks=%d", h.ack.acks, h.ack.nacks)
@@ -90,7 +90,7 @@ func TestHandleStatusMessage_SupersededGenerationStillAcks(t *testing.T) {
 		return &domain.ApplyStatusResult{IsCurrentGeneration: false}, nil
 	})
 
-	h.uc.handleStatusMessage(context.Background(), h.ack, statusBody("dep-1", "success", "", ""))
+	h.uc.handleStatusMessage(context.Background(), h.ack, statusBody("dep-1", "success", ""))
 
 	if h.ack.acks != 1 || h.ack.nacks != 0 {
 		t.Fatalf("superseded generation must still ack, got acks=%d nacks=%d", h.ack.acks, h.ack.nacks)
@@ -126,7 +126,7 @@ func TestHandleStatusMessage_InvalidStatusDeadLettersWithoutRepo(t *testing.T) {
 			return nil, nil
 		})
 
-		h.uc.handleStatusMessage(context.Background(), h.ack, statusBody("dep-1", status, "", ""))
+		h.uc.handleStatusMessage(context.Background(), h.ack, statusBody("dep-1", status, ""))
 
 		if h.ack.nacks != 1 || h.ack.requeued || h.ack.acks != 0 || calls != 0 {
 			t.Fatalf("status %q: expected dead-letter without repo call, got acks=%d nacks=%d requeued=%v calls=%d",
@@ -142,7 +142,7 @@ func TestHandleStatusMessage_EmptyDeploymentIDDeadLetters(t *testing.T) {
 		return nil, nil
 	})
 
-	h.uc.handleStatusMessage(context.Background(), h.ack, statusBody("", "building", "", ""))
+	h.uc.handleStatusMessage(context.Background(), h.ack, statusBody("", "building", ""))
 
 	if h.ack.nacks != 1 || h.ack.requeued || calls != 0 {
 		t.Fatalf("expected dead-letter without repo call, got nacks=%d requeued=%v calls=%d", h.ack.nacks, h.ack.requeued, calls)
@@ -163,7 +163,7 @@ func TestHandleStatusMessage_PermanentErrorsDeadLetterImmediately(t *testing.T) 
 			return nil, permanentErr
 		})
 
-		h.uc.handleStatusMessage(context.Background(), h.ack, statusBody("dep-1", "success", "", ""))
+		h.uc.handleStatusMessage(context.Background(), h.ack, statusBody("dep-1", "success", ""))
 
 		if calls != 1 {
 			t.Fatalf("%s: permanent errors must not be retried, got %d repo calls", name, calls)
@@ -186,7 +186,7 @@ func TestHandleStatusMessage_TransientErrorRetriesThenAcks(t *testing.T) {
 		return &domain.ApplyStatusResult{IsCurrentGeneration: true}, nil
 	})
 
-	h.uc.handleStatusMessage(context.Background(), h.ack, statusBody("dep-1", "building", "", ""))
+	h.uc.handleStatusMessage(context.Background(), h.ack, statusBody("dep-1", "building", ""))
 
 	if calls != 2 {
 		t.Fatalf("expected retry after transient failure, got %d repo calls", calls)
@@ -205,7 +205,7 @@ func TestHandleStatusMessage_TransientExhaustedDeadLetters(t *testing.T) {
 		return nil, errors.New("db down")
 	})
 
-	h.uc.handleStatusMessage(context.Background(), h.ack, statusBody("dep-1", "success", "", ""))
+	h.uc.handleStatusMessage(context.Background(), h.ack, statusBody("dep-1", "success", ""))
 
 	if calls != statusMaxApplyAttempts {
 		t.Fatalf("expected exactly %d attempts, got %d", statusMaxApplyAttempts, calls)
@@ -230,7 +230,7 @@ func TestHandleStatusMessage_CtxCancelledMidRetryNeitherAcksNorNacks(t *testing.
 		return nil, errors.New("db down")
 	})
 
-	h.uc.handleStatusMessage(ctx, h.ack, statusBody("dep-1", "building", "", ""))
+	h.uc.handleStatusMessage(ctx, h.ack, statusBody("dep-1", "building", ""))
 
 	if h.ack.acks != 0 || h.ack.nacks != 0 {
 		t.Fatalf("shutdown mid-retry must neither ack nor nack, got acks=%d nacks=%d", h.ack.acks, h.ack.nacks)
@@ -240,7 +240,7 @@ func TestHandleStatusMessage_CtxCancelledMidRetryNeitherAcksNorNacks(t *testing.
 	}
 }
 
-func TestHandleStatusMessage_AckFailureAfterCommitIsLoggedNotFatal(t *testing.T) {
+func TestHandleStatusMessage_AckFailureAfterCommitIsLoggedNotFatal(_ *testing.T) {
 	h := newStatusTestHarness(func(context.Context, domain.ApplyStatusParams) (*domain.ApplyStatusResult, error) {
 		return &domain.ApplyStatusResult{IsCurrentGeneration: true}, nil
 	})
@@ -248,16 +248,16 @@ func TestHandleStatusMessage_AckFailureAfterCommitIsLoggedNotFatal(t *testing.T)
 
 	// Must not panic and must not attempt a compensating nack: the broker
 	// redelivers and the idempotent apply converges.
-	h.uc.handleStatusMessage(context.Background(), h.ack, statusBody("dep-1", "success", "", ""))
+	h.uc.handleStatusMessage(context.Background(), h.ack, statusBody("dep-1", "success", ""))
 }
 
-func TestHandleStatusMessage_NackFailureIsLoggedNotFatal(t *testing.T) {
+func TestHandleStatusMessage_NackFailureIsLoggedNotFatal(_ *testing.T) {
 	h := newStatusTestHarness(func(context.Context, domain.ApplyStatusParams) (*domain.ApplyStatusResult, error) {
 		return nil, domain.ErrNotFound
 	})
 	h.ack.nackErr = errors.New("channel closed")
 
-	h.uc.handleStatusMessage(context.Background(), h.ack, statusBody("dep-1", "success", "", ""))
+	h.uc.handleStatusMessage(context.Background(), h.ack, statusBody("dep-1", "success", ""))
 }
 
 func TestIsValidWorkerStatus(t *testing.T) {

@@ -79,15 +79,15 @@ func (f *fakeRepositoryCache) Set(_ context.Context, key string, value *domain.R
 
 func (f *fakeRepositoryCache) InvalidateInstallation(_ context.Context, _ int64) error { return nil }
 
-func installationFor(userID string, installationID int64, status string) *mockGithubRepository {
+func installationFor(status string) *mockGithubRepository {
 	return &mockGithubRepository{
 		getFn: func(_ context.Context, uid string) (*domain.GithubInstallation, error) {
-			if uid != userID {
+			if uid != "u" {
 				return nil, errors.New("unexpected user")
 			}
 			return &domain.GithubInstallation{
 				UserID:         uid,
-				InstallationID: installationID,
+				InstallationID: 10,
 				Status:         status,
 			}, nil
 		},
@@ -95,7 +95,7 @@ func installationFor(userID string, installationID int64, status string) *mockGi
 }
 
 func TestListRepositories_InactiveInstallation(t *testing.T) {
-	uc := NewGithubAppUsecase(installationFor("u", 10, domain.GithubInstallationStatusSuspended))
+	uc := NewGithubAppUsecase(installationFor(domain.GithubInstallationStatusSuspended))
 	_, err := uc.ListRepositories(context.Background(), "u", "", "", 30)
 	if !errors.Is(err, domain.ErrInvalidStatus) {
 		t.Fatalf("expected ErrInvalidStatus, got %v", err)
@@ -105,7 +105,7 @@ func TestListRepositories_InactiveInstallation(t *testing.T) {
 func TestListRepositories_CacheMissFetchesAndCaches(t *testing.T) {
 	var calls int32
 	client := &mockGithubRepositoryClient{
-		listFn: func(_ context.Context, _ , _ , _ string, perPage int) (*domain.RepositoryList, error) {
+		listFn: func(_ context.Context, _, _, _ string, perPage int) (*domain.RepositoryList, error) {
 			atomic.AddInt32(&calls, 1)
 			if perPage != 30 {
 				t.Fatalf("expected perPage 30, got %d", perPage)
@@ -114,7 +114,7 @@ func TestListRepositories_CacheMissFetchesAndCaches(t *testing.T) {
 		},
 	}
 	cache := &fakeRepositoryCache{}
-	uc := NewGithubAppUsecase(installationFor("u", 10, domain.GithubInstallationStatusActive), &mockInstallationTokenProvider{}, client, cache)
+	uc := NewGithubAppUsecase(installationFor(domain.GithubInstallationStatusActive), &mockInstallationTokenProvider{}, client, cache)
 
 	got, err := uc.ListRepositories(context.Background(), "u", "", "", 30)
 	if err != nil {
@@ -134,13 +134,13 @@ func TestListRepositories_CacheMissFetchesAndCaches(t *testing.T) {
 func TestListRepositories_CacheHitSkipsClient(t *testing.T) {
 	var calls int32
 	client := &mockGithubRepositoryClient{
-		listFn: func(_ context.Context, _ , _ , _ string, _ int) (*domain.RepositoryList, error) {
+		listFn: func(_ context.Context, _, _, _ string, _ int) (*domain.RepositoryList, error) {
 			atomic.AddInt32(&calls, 1)
 			return &domain.RepositoryList{Repositories: []domain.RepositoryPicker{{ID: 1, Name: "a"}}}, nil
 		},
 	}
 	cache := &fakeRepositoryCache{}
-	uc := NewGithubAppUsecase(installationFor("u", 10, domain.GithubInstallationStatusActive), &mockInstallationTokenProvider{}, client, cache)
+	uc := NewGithubAppUsecase(installationFor(domain.GithubInstallationStatusActive), &mockInstallationTokenProvider{}, client, cache)
 
 	if _, err := uc.ListRepositories(context.Background(), "u", "", "", 30); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -156,13 +156,13 @@ func TestListRepositories_CacheHitSkipsClient(t *testing.T) {
 func TestListRepositories_CacheFailureFallsThrough(t *testing.T) {
 	var calls int32
 	client := &mockGithubRepositoryClient{
-		listFn: func(_ context.Context, _ , _ , _ string, _ int) (*domain.RepositoryList, error) {
+		listFn: func(_ context.Context, _, _, _ string, _ int) (*domain.RepositoryList, error) {
 			atomic.AddInt32(&calls, 1)
 			return &domain.RepositoryList{Repositories: []domain.RepositoryPicker{{ID: 1, Name: "a"}}}, nil
 		},
 	}
 	cache := &fakeRepositoryCache{getErr: errors.New("redis down")}
-	uc := NewGithubAppUsecase(installationFor("u", 10, domain.GithubInstallationStatusActive), &mockInstallationTokenProvider{}, client, cache)
+	uc := NewGithubAppUsecase(installationFor(domain.GithubInstallationStatusActive), &mockInstallationTokenProvider{}, client, cache)
 
 	if _, err := uc.ListRepositories(context.Background(), "u", "", "", 30); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -176,7 +176,7 @@ func TestListRepositories_KeyIsolationByInstallation(t *testing.T) {
 	var mu sync.Mutex
 	var totalCalls int
 	client := &mockGithubRepositoryClient{
-		listFn: func(_ context.Context, _ , _ , _ string, _ int) (*domain.RepositoryList, error) {
+		listFn: func(_ context.Context, _, _, _ string, _ int) (*domain.RepositoryList, error) {
 			mu.Lock()
 			totalCalls++
 			mu.Unlock()
@@ -210,7 +210,7 @@ func TestListRepositories_KeyIsolationByInstallation(t *testing.T) {
 		t.Fatalf("expected 2 cache keys, got %d", len(cache.data))
 	}
 	for k := range cache.data {
-		if !strings.Contains(k, "github:installation:") || !(strings.Contains(k, ":10:") || strings.Contains(k, ":20:")) {
+		if !strings.Contains(k, "github:installation:") || (!strings.Contains(k, ":10:") && !strings.Contains(k, ":20:")) {
 			t.Fatalf("unexpected cache key shape: %s", k)
 		}
 	}
@@ -219,13 +219,13 @@ func TestListRepositories_KeyIsolationByInstallation(t *testing.T) {
 func TestListRepositories_SingleFlight(t *testing.T) {
 	var calls int32
 	client := &mockGithubRepositoryClient{
-		listFn: func(_ context.Context, _ , _ , _ string, _ int) (*domain.RepositoryList, error) {
+		listFn: func(_ context.Context, _, _, _ string, _ int) (*domain.RepositoryList, error) {
 			atomic.AddInt32(&calls, 1)
 			time.Sleep(20 * time.Millisecond)
 			return &domain.RepositoryList{Repositories: []domain.RepositoryPicker{{ID: 1}}}, nil
 		},
 	}
-	uc := NewGithubAppUsecase(installationFor("u", 10, domain.GithubInstallationStatusActive), &mockInstallationTokenProvider{}, client, &fakeRepositoryCache{})
+	uc := NewGithubAppUsecase(installationFor(domain.GithubInstallationStatusActive), &mockInstallationTokenProvider{}, client, &fakeRepositoryCache{})
 
 	var wg sync.WaitGroup
 	for i := 0; i < 5; i++ {
@@ -245,7 +245,7 @@ func TestListRepositories_SingleFlight(t *testing.T) {
 }
 
 func TestListRepositories_NoDependenciesFailsClosed(t *testing.T) {
-	uc := NewGithubAppUsecase(installationFor("u", 10, domain.GithubInstallationStatusActive))
+	uc := NewGithubAppUsecase(installationFor(domain.GithubInstallationStatusActive))
 	_, err := uc.ListRepositories(context.Background(), "u", "", "", 30)
 	if !errors.Is(err, domain.ErrInternalServerError) {
 		t.Fatalf("expected ErrInternalServerError, got %v", err)
@@ -253,7 +253,7 @@ func TestListRepositories_NoDependenciesFailsClosed(t *testing.T) {
 }
 
 func TestGetRepositoryDetails_InactiveInstallation(t *testing.T) {
-	uc := NewGithubAppUsecase(installationFor("u", 10, domain.GithubInstallationStatusSuspended))
+	uc := NewGithubAppUsecase(installationFor(domain.GithubInstallationStatusSuspended))
 	_, err := uc.GetRepositoryDetails(context.Background(), "u", 5)
 	if !errors.Is(err, domain.ErrInvalidStatus) {
 		t.Fatalf("expected ErrInvalidStatus, got %v", err)
@@ -261,7 +261,7 @@ func TestGetRepositoryDetails_InactiveInstallation(t *testing.T) {
 }
 
 func TestInvalidateRepositoryCache_NoCacheIsNoop(t *testing.T) {
-	uc := NewGithubAppUsecase(installationFor("u", 10, domain.GithubInstallationStatusActive))
+	uc := NewGithubAppUsecase(installationFor(domain.GithubInstallationStatusActive))
 	if err := uc.InvalidateRepositoryCache(context.Background(), 10); err != nil {
 		t.Fatalf("expected nil error with no cache, got %v", err)
 	}
@@ -270,7 +270,7 @@ func TestInvalidateRepositoryCache_NoCacheIsNoop(t *testing.T) {
 func TestListRepositories_TokenErrorIsAuthorizationFailure(t *testing.T) {
 	var clientCalled int32
 	client := &mockGithubRepositoryClient{
-		listFn: func(_ context.Context, _ , _ , _ string, _ int) (*domain.RepositoryList, error) {
+		listFn: func(_ context.Context, _, _, _ string, _ int) (*domain.RepositoryList, error) {
 			atomic.AddInt32(&clientCalled, 1)
 			return &domain.RepositoryList{}, nil
 		},
@@ -280,7 +280,7 @@ func TestListRepositories_TokenErrorIsAuthorizationFailure(t *testing.T) {
 			return "", errors.New("github authorization failed")
 		},
 	}
-	uc := NewGithubAppUsecase(installationFor("u", 10, domain.GithubInstallationStatusActive), tp, client, &fakeRepositoryCache{})
+	uc := NewGithubAppUsecase(installationFor(domain.GithubInstallationStatusActive), tp, client, &fakeRepositoryCache{})
 
 	_, err := uc.ListRepositories(context.Background(), "u", "", "", 30)
 	if err == nil {
@@ -298,7 +298,7 @@ func TestListRepositories_PaginationForwardsParams(t *testing.T) {
 	var gotCursor string
 	var gotPerPage int
 	client := &mockGithubRepositoryClient{
-		listFn: func(_ context.Context, _ , cursor, _ string, perPage int) (*domain.RepositoryList, error) {
+		listFn: func(_ context.Context, _, cursor, _ string, perPage int) (*domain.RepositoryList, error) {
 			gotCursor = cursor
 			gotPerPage = perPage
 			return &domain.RepositoryList{
@@ -307,7 +307,7 @@ func TestListRepositories_PaginationForwardsParams(t *testing.T) {
 			}, nil
 		},
 	}
-	uc := NewGithubAppUsecase(installationFor("u", 10, domain.GithubInstallationStatusActive), &mockInstallationTokenProvider{}, client, &fakeRepositoryCache{})
+	uc := NewGithubAppUsecase(installationFor(domain.GithubInstallationStatusActive), &mockInstallationTokenProvider{}, client, &fakeRepositoryCache{})
 
 	res, err := uc.ListRepositories(context.Background(), "u", "abc", "", 50)
 	if err != nil {
@@ -345,13 +345,13 @@ func (f *fakeRepositoryCacheWithInvalidation) InvalidateInstallation(_ context.C
 func TestInvalidateRepositoryCache_RemovesCachedKeys(t *testing.T) {
 	var calls int32
 	client := &mockGithubRepositoryClient{
-		listFn: func(_ context.Context, _ , _ , _ string, _ int) (*domain.RepositoryList, error) {
+		listFn: func(_ context.Context, _, _, _ string, _ int) (*domain.RepositoryList, error) {
 			atomic.AddInt32(&calls, 1)
 			return &domain.RepositoryList{Repositories: []domain.RepositoryPicker{{ID: 1}}}, nil
 		},
 	}
 	cache := &fakeRepositoryCacheWithInvalidation{}
-	uc := NewGithubAppUsecase(installationFor("u", 10, domain.GithubInstallationStatusActive), &mockInstallationTokenProvider{}, client, cache)
+	uc := NewGithubAppUsecase(installationFor(domain.GithubInstallationStatusActive), &mockInstallationTokenProvider{}, client, cache)
 
 	if _, err := uc.ListRepositories(context.Background(), "u", "", "", 30); err != nil {
 		t.Fatalf("unexpected error: %v", err)

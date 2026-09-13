@@ -36,15 +36,17 @@ type WebhookDelivery struct {
 	PayloadReference             string           `json:"payload_reference,omitempty"`
 }
 
+// WebhookUsecase processes GitHub webhook requests.
 type WebhookUsecase interface {
 	HandleGithubWebhook(ctx context.Context, r *http.Request) (interface{}, error)
 }
 
+// WebhookRepository persists and updates webhook delivery records.
 type WebhookRepository interface {
 	InsertDelivery(ctx context.Context, delivery WebhookDelivery) error
 	UpdateDeliveryStatus(ctx context.Context, deliveryID string, status ProcessingStatus, errMsg *string) error
 	UpdateDeliveryMetadata(ctx context.Context, deliveryID string, delivery WebhookDelivery) error
-	GetDeliveryId(ctx context.Context, deliveryID string) (*WebhookDelivery, error)
+	GetDeliveryID(ctx context.Context, deliveryID string) (*WebhookDelivery, error)
 	// TryInsertDelivery inserts a delivery keyed by its unique GitHub delivery
 	// UUID. It reports whether the row was newly inserted and, when it was,
 	// returns the new database row UUID (webhook_deliveries.id) for foreign-key

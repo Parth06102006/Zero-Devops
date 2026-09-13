@@ -229,7 +229,11 @@ func (m *pgSQLProjectRepository) Delete(ctx context.Context, userID, id string) 
 // push lookup: it is deliberately NOT user-scoped because webhooks carry no
 // user context — installation identity plus GitHub repository ID is the durable
 // key (one installation belongs to one user in V1, so at most one row matches).
-func (m *pgSQLProjectRepository) GetByInstallationAndRepositoryID(ctx context.Context, githubInstallationID string, githubRepositoryID int64) (*domain.Project, error) {
+func (m *pgSQLProjectRepository) GetByInstallationAndRepositoryID(
+	ctx context.Context,
+	githubInstallationID string,
+	githubRepositoryID int64,
+) (*domain.Project, error) {
 	query := `
 		SELECT id, user_id, github_installation_id, github_repository_id,
 			repository_owner, repository_name, repository_full_name,

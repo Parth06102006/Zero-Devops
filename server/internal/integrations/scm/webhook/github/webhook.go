@@ -52,6 +52,7 @@ type WebhookOptions struct{}
 // Options is a namespace var for configuration options
 var Options = WebhookOptions{}
 
+// Secret configures the GitHub webhook shared secret.
 func (WebhookOptions) Secret(secret string) Option {
 	return func(webH *webhookUsecase) error {
 		if secret == "" {
@@ -63,6 +64,7 @@ func (WebhookOptions) Secret(secret string) Option {
 	}
 }
 
+// MaxPayloadSize configures the largest accepted webhook body.
 func (WebhookOptions) MaxPayloadSize(maxPayloadSize int64) Option {
 	return func(webH *webhookUsecase) error {
 		if maxPayloadSize <= 0 {
@@ -73,7 +75,15 @@ func (WebhookOptions) MaxPayloadSize(maxPayloadSize int64) Option {
 	}
 }
 
-func NewWebhookUsecase(webhookRepo domain.WebhookRepository, githubRepo domain.GithubRepository, projectRepo domain.ProjectRepository, deploymentRepo domain.DeploymentRepository, repositoryListCache *cache.RedisRepositoryListCache, options ...Option) (domain.WebhookUsecase, error) {
+// NewWebhookUsecase creates a GitHub webhook use case.
+func NewWebhookUsecase(
+	webhookRepo domain.WebhookRepository,
+	githubRepo domain.GithubRepository,
+	projectRepo domain.ProjectRepository,
+	deploymentRepo domain.DeploymentRepository,
+	repositoryListCache *cache.RedisRepositoryListCache,
+	options ...Option,
+) (domain.WebhookUsecase, error) {
 	hook := new(webhookUsecase)
 	for _, opt := range options {
 		if err := opt(hook); err != nil {
@@ -120,7 +130,7 @@ func (webH *webhookUsecase) handleInstallationEvent(ctx context.Context, payload
 	}
 
 	if payload.Action == "created" || payload.Action == "reinstalled" {
-		githubInstallationDBID, err := webH.githubRepo.GetInstallationIdByGithubInstallationID(ctx, installationID)
+		githubInstallationDBID, err := webH.githubRepo.GetInstallationIDByGithubInstallationID(ctx, installationID)
 		if err == nil && githubInstallationDBID != "" {
 			if err := webH.githubRepo.UpdateInstallationExternalIDByID(ctx, strconv.FormatInt(installationID, 10), githubInstallationDBID); err != nil {
 				return err
@@ -139,7 +149,11 @@ func (webH *webhookUsecase) handleInstallationEvent(ctx context.Context, payload
 
 // handleInstallationRepositoriesEvent synchronizes selected project availability
 // after a GitHub installation repository change.
-func (webH *webhookUsecase) handleInstallationRepositoriesEvent(ctx context.Context, githubInstallationDBID string, payload domain.InstallationRepositoriesPayload) error {
+func (webH *webhookUsecase) handleInstallationRepositoriesEvent(
+	ctx context.Context,
+	githubInstallationDBID string,
+	payload domain.InstallationRepositoriesPayload,
+) error {
 	if webH.projectRepo == nil || webH.cache == nil {
 		return domain.ErrInternalServerError
 	}
@@ -187,7 +201,11 @@ func isZeroSHA(sha string) bool {
 // revision generation and durably records the deployment plus its deploy.jobs
 // V1 outbox event in one repository transaction; a later dispatcher publishes
 // the outbox row to RabbitMQ.
-func (webH *webhookUsecase) handlePushEvent(ctx context.Context, githubInstallationDBID, githubDeliveryID, webhookDeliveryDBID string, payload domain.PushPayload) error {
+func (webH *webhookUsecase) handlePushEvent(
+	ctx context.Context,
+	githubInstallationDBID, githubDeliveryID, webhookDeliveryDBID string,
+	payload domain.PushPayload,
+) error {
 	log := appmiddleware.LoggerFromContext(ctx)
 
 	// A deleted branch (after is all zeros) never creates a build. A force push
@@ -384,7 +402,7 @@ func (webH *webhookUsecase) HandleGithubWebhook(ctx context.Context, r *http.Req
 	webH.populateDelivery(&webhookDelivery, parsed)
 
 	if webhookDelivery.GitHubInstallationExternalID > 0 && webH.githubRepo != nil {
-		githubInstallationDBID, err := webH.githubRepo.GetInstallationIdByGithubInstallationID(ctx, webhookDelivery.GitHubInstallationExternalID)
+		githubInstallationDBID, err := webH.githubRepo.GetInstallationIDByGithubInstallationID(ctx, webhookDelivery.GitHubInstallationExternalID)
 		if err == nil {
 			webhookDelivery.GitHubInstallationDBID = githubInstallationDBID
 		} else if err != domain.ErrNotFound {
@@ -400,9 +418,7 @@ func (webH *webhookUsecase) HandleGithubWebhook(ctx context.Context, r *http.Req
 		return nil, err
 	}
 
-	result, err := webH.eventHandler(ctx, gitHubEvent, webhookDelivery.GitHubInstallationDBID, deliveryID, deliveryDBID, parsed)
-
-	if err != nil {
+	if err := webH.eventHandler(ctx, gitHubEvent, webhookDelivery.GitHubInstallationDBID, deliveryID, deliveryDBID, parsed); err != nil {
 		webH.markDeliveryFailed(ctx, deliveryID, err)
 		return nil, err
 	}
@@ -413,7 +429,7 @@ func (webH *webhookUsecase) HandleGithubWebhook(ctx context.Context, r *http.Req
 		return nil, err
 	}
 
-	return result, nil
+	return nil, nil
 }
 
 func (webH *webhookUsecase) markDeliveryFailed(ctx context.Context, deliveryID string, processingErr error) {
@@ -432,15 +448,7 @@ func (webH *webhookUsecase) checkEvents(event string, events ...domain.Event) (d
 	}
 	gitHubEvent := domain.Event(event)
 
-	var found bool
-	/* 	for _, evt := range events {
-		if evt == gitHubEvent {
-			found = true
-			break
-		}
-	} */
-
-	found = slices.Contains(events, gitHubEvent)
+	found := slices.Contains(events, gitHubEvent)
 
 	if !found {
 		return "", domain.ErrEventNotFound
@@ -549,36 +557,43 @@ func (webH *webhookUsecase) populateDelivery(d *domain.WebhookDelivery, parsed i
 }
 
 // eventHandler routes parsed payloads to their event handlers.
-func (webH *webhookUsecase) eventHandler(ctx context.Context, gitHubEvent domain.Event, githubInstallationDBID, githubDeliveryID, webhookDeliveryDBID string, payload interface{}) (interface{}, error) {
+func (webH *webhookUsecase) eventHandler(
+	ctx context.Context,
+	gitHubEvent domain.Event,
+	githubInstallationDBID, githubDeliveryID, webhookDeliveryDBID string,
+	payload interface{},
+) error {
 	switch gitHubEvent {
 	case domain.InstallationEvent:
 		installationPayload, ok := payload.(domain.InstallationPayload)
 		if !ok {
-			return nil, domain.ErrParsingPayload
+			return domain.ErrParsingPayload
 		}
-		return nil, webH.handleInstallationEvent(ctx, installationPayload)
+		return webH.handleInstallationEvent(ctx, installationPayload)
 	case domain.InstallationRepositoriesEvent:
 		installationRepositoriesPayload, ok := payload.(domain.InstallationRepositoriesPayload)
 
 		if !ok {
-			return nil, domain.ErrParsingPayload
+			return domain.ErrParsingPayload
 		}
 
-		return nil, webH.handleInstallationRepositoriesEvent(ctx, githubInstallationDBID, installationRepositoriesPayload)
+		return webH.handleInstallationRepositoriesEvent(ctx, githubInstallationDBID, installationRepositoriesPayload)
 	case domain.PushEventP:
 		pushPayload, ok := payload.(domain.PushPayload)
 		if !ok {
-			return nil, domain.ErrParsingPayload
+			return domain.ErrParsingPayload
 		}
-		return nil, webH.handlePushEvent(ctx, githubInstallationDBID, githubDeliveryID, webhookDeliveryDBID, pushPayload)
+		return webH.handlePushEvent(ctx, githubInstallationDBID, githubDeliveryID, webhookDeliveryDBID, pushPayload)
 
 	default:
-		return nil, nil
+		return nil
 	}
 }
 
+// BasicType is a scalar type accepted by P.
 type BasicType interface {
 	~string | ~bool | ~int | ~int64
 }
 
+// P returns a pointer to a scalar value.
 func P[T BasicType](t T) *T { return &t }

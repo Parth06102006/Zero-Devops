@@ -8,7 +8,7 @@ import (
 
 func TestPolicyScannerApprove(t *testing.T) {
 	res := DefaultScanner.Scan(context.Background(), domain.BuildConfiguration{
-		Executable: "npm",
+		Executable: executableNPM,
 		Args:       []string{"run", "build"},
 		WorkingDir: "/app",
 	})
@@ -32,7 +32,7 @@ func TestPolicyScannerDeniedByShell(t *testing.T) {
 
 func TestPolicyScannerDeniedByInjection(t *testing.T) {
 	res := DefaultScanner.Scan(context.Background(), domain.BuildConfiguration{
-		Executable: "npm",
+		Executable: executableNPM,
 		Args:       []string{"run", "build; rm -rf /"},
 	})
 	if res.Status != domain.CommandScanStatusDenied {

@@ -48,7 +48,7 @@ func (m *mockGithubRepository) UpdateInstallationStatusByGithubInstallationID(_ 
 	return nil
 }
 
-func (m *mockGithubRepository) GetInstallationIdByGithubInstallationID(_ context.Context, _ int64) (string, error) {
+func (m *mockGithubRepository) GetInstallationIDByGithubInstallationID(_ context.Context, _ int64) (string, error) {
 	return "", nil
 }
 

@@ -47,6 +47,9 @@ linters:
               - "golang.org/x/oauth2/github"
               - "go.uber.org/zap"
               - "github.com/google/uuid"
+              - "github.com/santhosh-tekuri/jsonschema/v5"
+              - "github.com/alicebob/miniredis/v2"
+              - "github.com/redis/go-redis/v9"
     dupl:
       threshold: 300
     funlen:
@@ -102,6 +105,7 @@ linters:
           - mnd
           - dupl
           - goconst
+          - lll
       - path: app
         text: "don't use `init` function"
     paths: []

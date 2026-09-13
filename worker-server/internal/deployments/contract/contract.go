@@ -24,6 +24,9 @@ const VersionV1 = 1
 // an advisory routing aid; the body "version" field is authoritative.
 const HeaderVersion = "x-contract-version"
 
+// ContentTypeJSON is the AMQP Content-Type for deploy.jobs message bodies.
+const ContentTypeJSON = "application/json"
+
 // Trigger values for a build request.
 const (
 	TriggerManual      = "manual"
@@ -119,7 +122,7 @@ func DecodeV1(body []byte) (BuildRequestV1, error) {
 // ValidateMetadata checks the AMQP envelope against the body. The body is
 // authoritative; envelope mismatches are treated as contract violations.
 func ValidateMetadata(req BuildRequestV1, contentType, messageID, correlationID string, headers amqp.Table) error {
-	if contentType != "application/json" {
+	if contentType != ContentTypeJSON {
 		return fmt.Errorf("unexpected content type %q", contentType)
 	}
 	if messageID != "" && messageID != req.EventID {
@@ -152,7 +155,7 @@ func Publishing(req BuildRequestV1) (amqp.Publishing, error) {
 		return amqp.Publishing{}, fmt.Errorf("marshal deploy.jobs V1 request: %w", err)
 	}
 	return amqp.Publishing{
-		ContentType:     "application/json",
+		ContentType:     ContentTypeJSON,
 		ContentEncoding: "utf-8",
 		DeliveryMode:    amqp.Persistent,
 		MessageId:       req.EventID,

@@ -90,7 +90,7 @@ sequenceDiagram
 | `internal/auth` | GitHub OAuth login/refresh/logout/current-user, JWT session cookies, auth middleware. |
 | `internal/integrations/scm` | GitHub App installation lifecycle, installation-token provider, repository listing, webhook parser/delivery. |
 | `internal/project` | Selected-project CRUD, branch/command configuration, command scanner/policy. |
-| `internal/deployments` | Deployment records, manual project builds, V1 `deploy.jobs` contract, RabbitMQ queue setup. |
+| `internal/deployments` | Deployment records, manual/webhook project builds, V1 `deploy.jobs` contract, RabbitMQ queue setup. |
 | `internal/queue` | RabbitMQ exchange/queue/DLQ declaration. |
 | `internal/domain` | Shared entities, interfaces, error sentinels. |
 | `config`, `internal/logger`, `internal/middleware`, `internal/helper` | Config (Viper), structured logging (Zap), CORS/request-ID/request-logger, response envelope helpers. |
@@ -116,7 +116,12 @@ Current server HTTP surface:
   - `POST /projects/:id/builds` — manual build (immutable SHA + idempotency key).
   - `GET /projects/:id/builds` — build history for a project.
   - `GET /builds/:id` — build detail.
-  - `POST /deploy` — legacy endpoint, currently fails closed (HTTP 409).
+  - ~~`POST /deploy`~~ — Removed (2026-09-06): route, handler, DTO, usecase path,
+    and repository stores were deleted; all builds flow through
+    `POST /projects/:id/builds` or the webhook.
+- Webhooks
+  - `POST /webhooks/github` — public (HMAC-verified) GitHub App event ingress;
+    push events create builds transactionally via the outbox.
 
 ### 1.3 Worker layout (`worker-server/`)
 
@@ -129,9 +134,11 @@ Current server HTTP surface:
 | `internal/deployments/contract` | V1 `deploy.jobs` contract mirror (validated against shared schema). |
 | `templates/` | Dockerfile templates for detected frameworks. |
 
-Current worker flow: consume `deploy.jobs` → validate V1 → clone exact `commit_sha` →
+Current worker flow: consume `deploy.jobs` (manual ack, prefetch 1) → validate V1 →
+insert/reset its own `deployments` row → publish `building` → clone exact `commit_sha` →
 detect framework/package manager → write Dockerfile from template (or use existing) →
-`docker build` → `docker save` to tar → upload tar to R2 → publish status.
+`docker build` → `docker save` to tar → upload tar to R2 → update its own DB →
+publish status (`failed`/`canceled`; `success` is NOT yet published — see gaps).
 
 > Important: the worker still uses **Docker** for builds, not Buildah, and produces a
 > node-local image tar rather than pushing an OCI image to a registry.
@@ -143,7 +150,7 @@ detect framework/package manager → write Dockerfile from template (or use exis
 - `projects` — selected/configured repository, branch, webhook flag, build configuration, scanner result, generation counter.
 - `deployments` — build runs, linked to project/installation, full V1 fields (SHA, ref, trigger, config snapshot, idempotency key).
 - `webhook_deliveries` — GitHub delivery ID dedup/audit.
-- `deployment_outbox` — durable outbox for build jobs (schema present; dispatcher not yet implemented).
+- `deployment_outbox` — durable outbox for build jobs (claimed/published with RabbitMQ publisher confirms by the running dispatcher; status `pending`/`sent`/`dead`).
 
 ### 1.5 Shared contract
 
@@ -251,48 +258,58 @@ sequenceDiagram
 
 ### 2.3 Planned migrations / contracts
 
-- Forward-only Goose migrations (already applied):
+- Forward-only Goose migrations:
+  - `20260518150322` / `20260518150656` — `users`, `github_providers`.
+  - `20260703000001` — legacy `deployments` table.
   - `20260812000001` — unique installation constraints + `projects`.
   - `20260812000002` — deployment history/outbox + `webhook_deliveries`.
+  - `20260812000003` — dead-letter outbox state.
+  - `20260906000001` — per-project build numbers (`deployments.build_number`,
+    `projects.next_build_number`, backfill, partial unique index). Written; runtime
+    validation against live PostgreSQL still pending.
 - No new `deploy.jobs` breaking change; V2 would ship alongside V1 for a bounded window.
 
 ---
 
-## 3. Completion Status (brief)
+## 3. Completion Status (as of 2026-09-06)
 
-### Done
+### Done — server
 
-- **Auth**: GitHub OAuth login/callback/refresh/logout/current-user, JWT session cookies, auth middleware with public-path skipping.
-- **GitHub installation**: install/get/delete + `status` tracking (`active`/`suspended`/`uninstalled`).
-- **Repository picker**: paginated, Redis-cached, single-flight, installation-scoped.
-- **Projects**: full CRUD with branch config, webhook flag, command scanning/policy, unique `(user, repo)` selection.
-- **Manual builds**: `POST /projects/:id/builds` resolves ref → immutable SHA, snapshots config, publishes V1 job.
+- **Auth**: GitHub OAuth login/callback/refresh/logout/current-user, JWT session cookies, auth middleware with public-path skipping (`/auth/github/login`, `/auth/github/login/callback`, `/auth/refresh`, `/webhooks/github`).
+- **GitHub installation**: install/get/delete + status tracking (`active`/`suspended`/`uninstalled`) + `GET /integrations/github/installation` global gate.
+- **Repository picker**: paginated, Redis-cached (fail-open), single-flight, installation-scoped.
+- **Projects**: full CRUD with branch config, webhook flag, command scanning/policy, `configuration_version` bump on update.
+- **Manual builds**: `POST /projects/:id/builds` resolves ref → immutable SHA, snapshots config, writes deployment + outbox event in one transaction (`StoreProjectBuildWithOutbox`); idempotency-key dedup.
+- **Webhook builds**: `POST /webhooks/github` fully wired — HMAC verification, delivery dedup via `webhook_deliveries` unique index, installation/project eligibility gates, exact `ref == configured_branch` match, `after`-SHA builds including force pushes. `StoreWebhookBuildWithOutbox` advances `desired_revision_generation`, consumes a build number, inserts the deployment, and writes the outbox event in one transaction; redelivery rolls the whole transaction back (generation over-increment bug fixed 2026-09-06).
+- **Outbox dispatcher**: the only `deploy.jobs` producer. Poll/claim batches, RabbitMQ publisher confirms, periodic reconciliation of stuck rows, dead-letter outbox state, graceful shutdown on signal; server keeps accepting builds if the broker is down (rows accumulate durably). Tunable via `OUTBOX_POLL_INTERVAL_MS` / `OUTBOX_BATCH_SIZE`.
+- **Durable status consumer**: `deploy.status` consumer with manual ack, `ApplyStatusUpdate` atomic state transitions (legal-transition validation, `ErrNotFound`/illegal-transition → DLQ), generation-aware currentness (`IsCurrentGeneration`), duplicate delivery converges.
+- **Per-project build numbers** (2026-09-06): `deployments.build_number` + `projects.next_build_number`, assigned in-transaction (race-free, rolled back on failure), shared sequence for manual + webhook builds, partial unique index safety net; exposed in all build responses (`build_number`).
 - **V1 contract**: shared JSON schema + Go contract packages in both services, with conformance tests.
-- **Worker**: consumes V1 jobs, checks out exact SHA, framework/package-manager detection, Docker build, R2 upload, status publish.
-- **Migrations**: users, installations, deployments, projects, webhook deliveries, outbox schema.
-- **CI**: path-filtered `server`/`worker`/`client` jobs (lint, vet, schema conformance, test, build).
+- **Dead code removal** (2026-09-06): legacy `POST /deploy` path, `CreateDeployment`, `Store`/`StoreProjectBuild` (non-outbox variants), `githubRepoResponse` — the two outbox-backed store functions are the only write paths.
+- **CI**: path-filtered `server`/`worker`/`client` jobs (lint, vet, schema conformance, test, build). All 26 server test packages + 11 worker packages pass (`go build`/`go vet`/`go test` green).
 
-### In progress / partial
+### Done — worker
 
-- **Webhook ingress**: parser and a stub handler/route exist, and `/webhooks/github` is already public in middleware, but the handler is **not wired** in `main.go` and returns `nil`.
-- **Client UI**: landing page, app shell, auth guard/session, dashboard/deployments/settings shells exist; project picker, project form, and build views are not yet built.
+- Consumes `deploy.jobs` V1 with strict contract + envelope validation; invalid messages nacked to `deploy.jobs.dlq` (never reinterpreted as the legacy shape).
+- Clones and checks out the exact `commit_sha` (shallow fetch of the SHA, never the moving tip).
+- Framework/package-manager detection (5 Dockerfile templates), `docker build`, `docker save` tar, R2 (S3-compatible) upload.
+- Publishes `building`/`failed`/`canceled` to `deploy.status`; max-retry exhaustion marks canceled + DLQs the message.
 
-### Not done (planned)
+### In progress / known gaps
 
-- Webhook → lifecycle status wiring (`suspend`/`unsuspend`/`deleted`).
-- Webhook → push → build creation with exact `after` SHA and stale-generation coalescing.
-- Webhook-driven Redis cache invalidation (method exists, not called).
-- Outbox dispatcher (table exists; publisher confirms/idempotent delivery not implemented).
-- Reliable status consumption (current consumer is auto-ack based).
-- Buildah executor + resource isolation (worker still uses Docker).
-- Registry push by digest (currently local tar → R2 only).
-- Build-log retrieval endpoint / signed log URL.
-- Autoscan command suggestions surfaced + confirmed in the client.
-- End-to-end rollout, staging ingress, and load/observability validation.
+- **Worker never publishes `success`** — `uploadAndFinalize` writes the finished state only to the worker's own DB (`zero_devops_build_logs`); the queue parameter is explicitly ignored. The server's `deploy.status` consumer therefore never receives a terminal success and successful builds stay `building` server-side forever. **This is the top worker fix.**
+- **Worker `Insert` resets terminal deployments**: `ON CONFLICT (id) DO UPDATE SET status='pending'` — a redelivered job resurrects a finished build and rebuilds it.
+- **Worker retry policy**: failure path re-publishes a new job copy and acks the original — a crash between the two yields duplicate concurrent builds. Needs single requeue/DLQ semantics.
+- **Worker drops `Configuration`** from the V1 job (approved executable/args/working-dir/scanner policy version never reaches the build); no autoscan suggestion/confirmation flow yet.
+- **Buildah isolation not started** — plain Docker, no CPU/mem/network/secret limits, non-root, or workspace isolation. Blocks enabling untrusted public repos.
+- **No registry**: images are node-local tars on R2; no digest-addressed OCI publication; worker ID/image digest not reported on `deploy.status`.
+- **Migration runtime validation pending**: `20260906000001` (build numbers) and the in-transaction SQL paths are only fake-driver-tested; need live PostgreSQL 17 (Docker unavailable in the current WSL distro).
+- **Real broker/DB failure-recovery tests pending**: commit-then-publish-failure, duplicate job delivery, crash-before-ack, duplicate status delivery, poison → DLQ — all need live RabbitMQ + PostgreSQL.
+- **Client UI (Task 3)**: landing page, app shell, auth guard/session exist; repository picker, project form, manual-build form, and build views are not yet built. API surface above is complete and contract-stable enough to build against.
+- **Legacy remnants**: legacy `/integration/scm/github/...` routes coexist with `/integrations/...`; refresh tokens stored raw (hash before production); `StoreInstallation` is a plain insert (reinstall should upsert); webhook delivery-row insert is a separate statement from the build transaction (acceptable; unique index guarantees at-most-one build).
 
-### Key known gaps
+### Rollout checklist (Task 7, not started)
 
-- Legacy `POST /deploy` fails closed; legacy SCM routes still coexist with new `/integrations/...` routes.
-- Refresh tokens are stored raw (hash before production).
-- `StoreInstallation` is a plain insert; reinstall should be an upsert.
-- Worker ack/retry/DLQ policy is not yet the final reliable path.
+- Migration-before-code ordering for every release (new binary requires `20260906000001` applied first — all deployment queries now reference `build_number`/`next_build_number`).
+- Client origin/CORS/CSRF policy, DTO-compatible release order, GitHub App webhook configuration after staging tests.
+- Full user-flow exercise and production observation (queue depth, outbox lag, DLQ counts).

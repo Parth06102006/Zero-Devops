@@ -15,7 +15,6 @@ import (
 )
 
 type mockDeploymentUsecase struct {
-	createFn             func(ctx context.Context, userID string, repoID int64, reqID string) (*domain.Deployment, error)
 	createProjectBuildFn func(ctx context.Context, userID string, params domain.CreateProjectBuildParams) (*domain.Deployment, error)
 	listProjectBuildsFn  func(ctx context.Context, userID, projectID string) ([]domain.Deployment, error)
 	getBuildFn           func(ctx context.Context, userID, buildID string) (*domain.Deployment, error)

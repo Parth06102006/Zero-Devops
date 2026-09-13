@@ -132,7 +132,7 @@ func (p amqpConfirmedPublisher) PublishConfirmed(ctx context.Context, message am
 	return confirmation.WaitContext(ctx)
 }
 
-// Run starts the dispatcher and blocks until ctx is cancelled or the AMQP
+// Run starts the dispatcher and blocks until ctx is canceled or the AMQP
 // channel cannot be initialized. Individual database and publish failures are
 // logged and retried; they do not stop the loop.
 func (o *Outbox) Run(ctx context.Context) error {
@@ -227,11 +227,12 @@ func (o *Outbox) dispatchBatch(ctx context.Context, publisher confirmedPublisher
 			zap.String("worker_id", o.workerID),
 			zap.Int("count", len(events)))
 
-		for _, event := range events {
+		for i := range events {
+			event := &events[i]
 			if ctx.Err() != nil {
 				return
 			}
-			if err := o.dispatchEvent(ctx, publisher, event); err != nil {
+			if err := o.dispatchEvent(ctx, publisher, *event); err != nil {
 				o.log.Warn("outbox event was not sent",
 					zap.String("worker_id", o.workerID),
 					zap.String("outbox_id", event.ID),

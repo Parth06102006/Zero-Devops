@@ -1,3 +1,4 @@
+// Package client calls GitHub repository APIs.
 package client
 
 import (
@@ -14,23 +15,27 @@ import (
 )
 
 const (
-	maxPerPage      = 100
-	maxResponseSize = 2 << 20
+	maxPerPage       = 100
+	maxResponseSize  = 2 << 20
+	githubAPIBaseURL = "https://api.github.com"
 )
 
+// RepositoryClient calls GitHub repository APIs.
 type RepositoryClient struct {
 	httpClient *http.Client
 	baseURL    string
 }
 
+// NewRepositoryClient creates a GitHub repository API client.
 func NewRepositoryClient(httpClient *http.Client) *RepositoryClient {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
-	return &RepositoryClient{httpClient: httpClient, baseURL: "https://api.github.com"}
+	return &RepositoryClient{httpClient: httpClient, baseURL: githubAPIBaseURL}
 }
 
-func (c *RepositoryClient) ListRepositories(ctx context.Context, installationToken string, cursor string, query string, perPage int) (*domain.RepositoryList, error) {
+// ListRepositories returns repositories available to an installation token.
+func (c *RepositoryClient) ListRepositories(ctx context.Context, installationToken, cursor, query string, perPage int) (*domain.RepositoryList, error) {
 	if perPage < 1 {
 		perPage = 30
 	}
@@ -60,7 +65,9 @@ func (c *RepositoryClient) ListRepositories(ctx context.Context, installationTok
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("github repositories API returned status %d", resp.StatusCode)
 	}
@@ -100,6 +107,7 @@ func (c *RepositoryClient) ListRepositories(ctx context.Context, installationTok
 	return result, nil
 }
 
+// GetRepositoryDetails returns metadata for one GitHub repository.
 func (c *RepositoryClient) GetRepositoryDetails(ctx context.Context, installationToken string, repoID int64) (*domain.RepositoryPicker, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/repositories/%d", c.baseURL, repoID), http.NoBody)
 	if err != nil {
@@ -113,7 +121,9 @@ func (c *RepositoryClient) GetRepositoryDetails(ctx context.Context, installatio
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode == http.StatusNotFound {
 		return nil, domain.ErrNotFound
@@ -145,6 +155,7 @@ func (c *RepositoryClient) GetRepositoryDetails(ctx context.Context, installatio
 	}, nil
 }
 
+// ResolveCommit resolves a SHA or ref to a full GitHub commit SHA.
 func (c *RepositoryClient) ResolveCommit(ctx context.Context, installationToken, owner, repo, shaOrRef string) (string, error) {
 	shaOrRef = strings.TrimSpace(shaOrRef)
 	if shaOrRef == "" {
@@ -169,7 +180,9 @@ func (c *RepositoryClient) ResolveCommit(ctx context.Context, installationToken,
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode == http.StatusNotFound {
 		return "", domain.ErrNotFound

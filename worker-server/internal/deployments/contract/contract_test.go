@@ -135,8 +135,8 @@ func TestPublishing_Envelope(t *testing.T) {
 		t.Fatalf("Publishing() = %v, want nil", err)
 	}
 
-	if pub.ContentType != "application/json" {
-		t.Errorf("ContentType = %q, want application/json", pub.ContentType)
+	if pub.ContentType != ContentTypeJSON {
+		t.Errorf("ContentType = %q, want %s", pub.ContentType, ContentTypeJSON)
 	}
 	if pub.ContentEncoding != "utf-8" {
 		t.Errorf("ContentEncoding = %q, want utf-8", pub.ContentEncoding)
@@ -173,7 +173,7 @@ func TestPublishing_RejectsInvalid(t *testing.T) {
 
 func TestValidateMetadata_Valid(t *testing.T) {
 	req := validRequest()
-	err := ValidateMetadata(req, "application/json", req.EventID, req.CorrelationID, amqp.Table{
+	err := ValidateMetadata(req, ContentTypeJSON, req.EventID, req.CorrelationID, amqp.Table{
 		HeaderVersion: int32(VersionV1),
 	})
 	if err != nil {
@@ -191,10 +191,10 @@ func TestValidateMetadata_RejectsMismatch(t *testing.T) {
 		headers       amqp.Table
 	}{
 		{"wrong content type", "text/plain", req.EventID, req.CorrelationID, amqp.Table{HeaderVersion: int32(VersionV1)}},
-		{"message_id mismatch", "application/json", "other-event", req.CorrelationID, amqp.Table{HeaderVersion: int32(VersionV1)}},
-		{"correlation_id mismatch", "application/json", req.EventID, "other-correlation", amqp.Table{HeaderVersion: int32(VersionV1)}},
-		{"header version mismatch", "application/json", req.EventID, req.CorrelationID, amqp.Table{HeaderVersion: int32(2)}},
-		{"header version wrong type", "application/json", req.EventID, req.CorrelationID, amqp.Table{HeaderVersion: "one"}},
+		{"message_id mismatch", ContentTypeJSON, "other-event", req.CorrelationID, amqp.Table{HeaderVersion: int32(VersionV1)}},
+		{"correlation_id mismatch", ContentTypeJSON, req.EventID, "other-correlation", amqp.Table{HeaderVersion: int32(VersionV1)}},
+		{"header version mismatch", ContentTypeJSON, req.EventID, req.CorrelationID, amqp.Table{HeaderVersion: int32(2)}},
+		{"header version wrong type", ContentTypeJSON, req.EventID, req.CorrelationID, amqp.Table{HeaderVersion: "one"}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

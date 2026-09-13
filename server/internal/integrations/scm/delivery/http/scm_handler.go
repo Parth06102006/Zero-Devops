@@ -131,6 +131,8 @@ func (inst *SCMHandler) ListRepositories(c *echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, helper.BuildErrorResponse("user id not found", fmt.Errorf("user id not found in context"), reqID))
 	}
 
+	const maxRepositoriesPerPage = 100
+
 	perPage := 30
 	if raw := strings.TrimSpace(c.QueryParam("per_page")); raw != "" {
 		parsed, err := strconv.Atoi(raw)
@@ -139,8 +141,8 @@ func (inst *SCMHandler) ListRepositories(c *echo.Context) error {
 		}
 		perPage = parsed
 	}
-	if perPage > 100 {
-		perPage = 100
+	if perPage > maxRepositoriesPerPage {
+		perPage = maxRepositoriesPerPage
 	}
 
 	result, err := inst.scmUsecase.ListRepositories(c.Request().Context(), userID, strings.TrimSpace(c.QueryParam("cursor")), c.QueryParam("query"), perPage)

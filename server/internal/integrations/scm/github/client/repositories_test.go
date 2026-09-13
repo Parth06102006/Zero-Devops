@@ -45,7 +45,7 @@ func TestListRepositories_ParsesAndFiltersByQuery(t *testing.T) {
 }
 
 func TestListRepositories_InvalidCursor(t *testing.T) {
-	client := &RepositoryClient{httpClient: http.DefaultClient, baseURL: "https://api.github.com"}
+	client := &RepositoryClient{httpClient: http.DefaultClient, baseURL: githubAPIBaseURL}
 	_, err := client.ListRepositories(context.Background(), "tok", "!!!not-valid-base64!!!", "", 30)
 	if !errors.Is(err, domain.ErrBadParamInput) {
 		t.Fatalf("expected ErrBadParamInput for invalid cursor, got %v", err)
@@ -109,7 +109,7 @@ func TestResolveCommit_ResolvesSHA(t *testing.T) {
 }
 
 func TestResolveCommit_EmptyRef(t *testing.T) {
-	client := &RepositoryClient{httpClient: http.DefaultClient, baseURL: "https://api.github.com"}
+	client := &RepositoryClient{httpClient: http.DefaultClient, baseURL: githubAPIBaseURL}
 	_, err := client.ResolveCommit(context.Background(), "tok", "alice", "widgets", "  ")
 	if !errors.Is(err, domain.ErrBadParamInput) {
 		t.Fatalf("expected ErrBadParamInput for empty ref, got %v", err)

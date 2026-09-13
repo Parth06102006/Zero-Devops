@@ -53,12 +53,13 @@ var (
 	// ErrCommandDenied is returned when a build command fails command scan / policy validation
 	ErrCommandDenied = errors.New("build command was denied by the security policy")
 
-	//ErrInvalidPayloadSize is returned when the payload size is invalid
+	// ErrInvalidPayloadSize is returned when the payload size is invalid
 	ErrInvalidPayloadSize = errors.New("payload size is invalid")
 
 	// ErrPayloadTooLarge is returned when the payload size becomes large
 	ErrPayloadTooLarge = errors.New("payload size is too large then the given limit")
 
+	// ErrMissingGithubDeliveryHeader is returned when the GitHub delivery header is missing or invalid.
 	ErrMissingGithubDeliveryHeader = errors.New("github delivery id is invalid")
 )
 

@@ -75,15 +75,15 @@ func (m *pgSQLGithubRepository) GetInstallationByUserID(ctx context.Context, use
 	return &inst, nil
 }
 
-func (m *pgSQLGithubRepository) GetInstallationIdByGithubInstallationID(ctx context.Context, installationID int64) (string, error) {
+func (m *pgSQLGithubRepository) GetInstallationIDByGithubInstallationID(ctx context.Context, installationID int64) (string, error) {
 	query := `
 		SELECT id
 		FROM github_installations
 		WHERE installation_id = $1
 	`
 
-	var github_installation_db_id string
-	err := m.Conn.QueryRowContext(ctx, query, installationID).Scan(&github_installation_db_id)
+	var githubInstallationDBID string
+	err := m.Conn.QueryRowContext(ctx, query, installationID).Scan(&githubInstallationDBID)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -94,7 +94,7 @@ func (m *pgSQLGithubRepository) GetInstallationIdByGithubInstallationID(ctx cont
 		return "", err
 	}
 
-	return github_installation_db_id, nil
+	return githubInstallationDBID, nil
 }
 
 func (m *pgSQLGithubRepository) GetInstallationStatusByID(ctx context.Context, installationDBID string) (string, error) {
@@ -242,7 +242,7 @@ func (m *pgSQLGithubRepository) UpdateInstallationStatusByGithubInstallationID(c
 	return nil
 }
 
-func (m *pgSQLGithubRepository) UpdateInstallationExternalIDByID(ctx context.Context, installationID string, github_installation_db_id string) error {
+func (m *pgSQLGithubRepository) UpdateInstallationExternalIDByID(ctx context.Context, installationID, githubInstallationDBID string) error {
 	query := `UPDATE github_installations SET installation_id = $1 WHERE id = $2`
 
 	stmt, err := m.Conn.PrepareContext(ctx, query)
@@ -259,7 +259,7 @@ func (m *pgSQLGithubRepository) UpdateInstallationExternalIDByID(ctx context.Con
 		}
 	}()
 
-	res, err := stmt.ExecContext(ctx, installationID, github_installation_db_id)
+	res, err := stmt.ExecContext(ctx, installationID, githubInstallationDBID)
 	if err != nil {
 		log := appmiddleware.LoggerFromContext(ctx)
 		log.Error("failed to update status", zap.Error(err))

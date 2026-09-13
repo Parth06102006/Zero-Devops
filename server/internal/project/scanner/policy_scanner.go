@@ -10,14 +10,17 @@ import (
 )
 
 const (
+	// PolicyVersion is the active project command scanner policy version.
 	PolicyVersion = "v1"
+
+	executableNPM = "npm"
 )
 
 // allowedExecutables is the allowlist of build tool executables a command may
 // invoke. Anything else — especially a shell interpreter — is denied. Entries
 // are matched against the basename of the executable (after trimming "./").
 var allowedExecutables = map[string]bool{
-	"npm": true, "npx": true, "yarn": true, "pnpm": true, "bun": true, "node": true,
+	executableNPM: true, "npx": true, "yarn": true, "pnpm": true, "bun": true, "node": true,
 	"go": true, "cargo": true, "rustc": true,
 	"mvn": true, "mvnw": true, "gradle": true, "gradlew": true, "sbt": true,
 	"python": true, "python3": true, "py": true, "pip": true, "pip3": true,
@@ -55,7 +58,7 @@ func (s *policyScanner) Scan(ctx context.Context, cfg domain.BuildConfiguration)
 
 	executable := strings.TrimSpace(cfg.Executable)
 	if executable == "" {
-		return denied(PolicyVersion, "executable cannot be empty")
+		return denied("executable cannot be empty")
 	}
 
 	name := strings.TrimPrefix(executable, "./")
@@ -63,16 +66,16 @@ func (s *policyScanner) Scan(ctx context.Context, cfg domain.BuildConfiguration)
 	name = strings.ToLower(filepath.Base(name))
 
 	if shellExecutables[name] {
-		return denied(PolicyVersion, "shell interpreters are not allowed as build executables: "+name)
+		return denied("shell interpreters are not allowed as build executables: " + name)
 	}
 
 	if !allowedExecutables[name] {
-		return denied(PolicyVersion, "executable is not allowlisted: "+name)
+		return denied("executable is not allowlisted: " + name)
 	}
 
 	for _, arg := range cfg.Args {
 		if containsFragment(arg, deniedArgFragments) {
-			return denied(PolicyVersion, "argument contains command injection fragment")
+			return denied("argument contains command injection fragment")
 		}
 	}
 
@@ -84,16 +87,12 @@ func (s *policyScanner) Scan(ctx context.Context, cfg domain.BuildConfiguration)
 	}
 }
 
-func denied(reason string, denials ...string) domain.CommandScanResult {
-	r := reason
-	if len(denials) > 0 && denials[0] != "" {
-		r = denials[0]
-	}
+func denied(reason string) domain.CommandScanResult {
 	return domain.CommandScanResult{
-		Status:       domain.CommandScanStatusDenied,
+		Status:        domain.CommandScanStatusDenied,
 		PolicyVersion: PolicyVersion,
-		Source:       domain.CommandScanSourceManual,
-		DeniedReason: r,
+		Source:        domain.CommandScanSourceManual,
+		DeniedReason:  reason,
 	}
 }
 

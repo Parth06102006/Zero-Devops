@@ -49,6 +49,9 @@ import (
 	"go.uber.org/zap"
 )
 
+const maxWebhookPayloadSize = 10_485_760
+
+//nolint:funlen // main setup wires all HTTP handlers and background workers.
 func run() error {
 	_config.LoadConfig()
 
@@ -133,10 +136,10 @@ func run() error {
 	_authHttp.NewAuthHandler(e, authUsecase)
 
 	ttl := time.Duration(viper.GetInt("REDIS_REPOSITORY_CACHE_TTL_SECONDS")) * time.Second
-	cache_usecase := cache.NewRedisRepositoryListCache(rdb, ttl)
+	cacheUsecase := cache.NewRedisRepositoryListCache(rdb, ttl)
 
 	repositoryClient := _githubClient.NewRepositoryClient(http.DefaultClient)
-	githubUsecase := _githubUsecase.NewGithubAppUsecase(githubRepo, tokenProvider, repositoryClient, cache_usecase)
+	githubUsecase := _githubUsecase.NewGithubAppUsecase(githubRepo, tokenProvider, repositoryClient, cacheUsecase)
 	_appHttp.NewSCMHandler(e, githubUsecase)
 
 	projectRepo := _projectRepo.NewPgSQLProjectRepository(dbConn)
@@ -203,9 +206,9 @@ func run() error {
 		githubRepo,
 		projectRepo,
 		deploymentRepo,
-		cache_usecase,
+		cacheUsecase,
 		_webhookUsecase.Options.Secret(viper.GetString("GITHUB_APP_WEBHOOK_SECRET")),
-		_webhookUsecase.Options.MaxPayloadSize(10_485_760),
+		_webhookUsecase.Options.MaxPayloadSize(maxWebhookPayloadSize),
 	)
 
 	if err != nil {

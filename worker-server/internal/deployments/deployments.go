@@ -53,6 +53,8 @@ const (
 	langPHP        = "php"
 	langElixir     = "elixir"
 	langDotNet     = "dotnet"
+
+	gitChangeDirFlag = "-C"
 )
 
 var pmInstallCommands = map[string]string{
@@ -121,9 +123,9 @@ func cloneRepo(cloneURL, deploymentID, commitSHA string) (string, error) {
 	//nolint:gosec // cloneURL validated by validateCloneURL and commitSHA by commitSHAPattern above
 	commands := [][]string{
 		{"init", destPath},
-		{"-C", destPath, "remote", "add", "origin", cloneURL},
-		{"-C", destPath, "fetch", "--depth", "1", "origin", commitSHA},
-		{"-C", destPath, "checkout", "FETCH_HEAD"},
+		{gitChangeDirFlag, destPath, "remote", "add", "origin", cloneURL},
+		{gitChangeDirFlag, destPath, "fetch", "--depth", "1", "origin", commitSHA},
+		{gitChangeDirFlag, destPath, "checkout", "FETCH_HEAD"},
 	}
 	for _, args := range commands {
 		if err := runGit(ctx, args); err != nil {

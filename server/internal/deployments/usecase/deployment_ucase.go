@@ -63,10 +63,19 @@ type deploymentStatusUpdate struct {
 
 // NewDeploymentUsecase creates a new deployment use case. ctx governs the
 // background deploy.status consumer's lifetime: it stops accepting messages
-// and cancels in-flight database work when ctx is cancelled (the server's
+// and cancels in-flight database work when ctx is canceled (the server's
 // signal context). Pass context.Background() when no lifecycle control is
 // needed (tests).
-func NewDeploymentUsecase(ctx context.Context, deploymentRepo domain.DeploymentRepository, githubRepo domain.GithubRepository, tokenProvider domain.InstallationTokenProvider, rmqConn *amqp.Connection, dependencies ...interface{}) domain.DeploymentUsecase {
+//
+//nolint:funlen // constructor wires optional dependencies and the status consumer in one place.
+func NewDeploymentUsecase(
+	ctx context.Context,
+	deploymentRepo domain.DeploymentRepository,
+	githubRepo domain.GithubRepository,
+	tokenProvider domain.InstallationTokenProvider,
+	rmqConn *amqp.Connection,
+	dependencies ...interface{},
+) domain.DeploymentUsecase {
 	uc := &deploymentUsecase{
 		deploymentRepo: deploymentRepo,
 		githubRepo:     githubRepo,
@@ -168,7 +177,7 @@ func (d *deploymentUsecase) runStatusConsumerLoop(ctx context.Context) {
 }
 
 // consumeStatusUpdate runs one durable consume session on deploy.status.
-// It returns nil on planned shutdown (ctx cancelled) and an error when the
+// It returns nil on planned shutdown (ctx canceled) and an error when the
 // session ended unexpectedly, so runStatusConsumerLoop can restart it.
 func (d *deploymentUsecase) consumeStatusUpdate(ctx context.Context) error {
 	if d.rmqConn == nil {

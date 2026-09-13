@@ -33,7 +33,7 @@ func (f *fakeWebhookRepository) InsertDelivery(_ context.Context, d domain.Webho
 	return nil
 }
 
-func (f *fakeWebhookRepository) TryInsertDelivery(_ context.Context, d domain.WebhookDelivery) (bool, string, error) {
+func (f *fakeWebhookRepository) TryInsertDelivery(_ context.Context, d domain.WebhookDelivery) (inserted bool, deliveryDBID string, err error) {
 	f.insertedDeliveries = append(f.insertedDeliveries, d)
 	if f.tryInsertErr != nil {
 		return false, "", f.tryInsertErr
@@ -58,7 +58,7 @@ func (f *fakeWebhookRepository) UpdateDeliveryStatus(_ context.Context, _ string
 	return nil
 }
 
-func (f *fakeWebhookRepository) GetDeliveryId(_ context.Context, _ string) (*domain.WebhookDelivery, error) {
+func (f *fakeWebhookRepository) GetDeliveryID(_ context.Context, _ string) (*domain.WebhookDelivery, error) {
 	return nil, domain.ErrNotFound
 }
 
@@ -77,7 +77,7 @@ func (f *fakeGithubRepository) GetInstallationByUserID(_ context.Context, _ stri
 	return nil, domain.ErrNotFound
 }
 
-func (f *fakeGithubRepository) GetInstallationIdByGithubInstallationID(_ context.Context, installationID int64) (string, error) {
+func (f *fakeGithubRepository) GetInstallationIDByGithubInstallationID(_ context.Context, installationID int64) (string, error) {
 	if f.dbIDByExternal == nil {
 		return "", domain.ErrNotFound
 	}
@@ -195,7 +195,7 @@ func (f *fakeDeploymentRepository) ClaimOutboxBatch(_ context.Context, _ int) ([
 	return nil, nil
 }
 func (f *fakeDeploymentRepository) MarkOutboxSent(_ context.Context, _ string) error { return nil }
-func (f *fakeDeploymentRepository) MarkOutboxPublishFailed(_ context.Context, _ string, _ string, _ time.Time) error {
+func (f *fakeDeploymentRepository) MarkOutboxPublishFailed(_ context.Context, _, _ string, _ time.Time) error {
 	return nil
 }
 func (f *fakeDeploymentRepository) ResetStuckPublishing(_ context.Context, _ time.Duration) (int64, error) {

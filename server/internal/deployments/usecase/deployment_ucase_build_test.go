@@ -191,7 +191,7 @@ func TestCreateProjectBuild_WritesOutboxEventInSameTransaction(t *testing.T) {
 		t.Fatal("EventID must be generated")
 	}
 	if captured.InstallationID != 10 {
-		t.Fatalf("InstallationID = %d, want external GitHub installation 10", captured.InstallationID)
+		t.Fatalf("installationID = %d, want external GitHub installation 10", captured.InstallationID)
 	}
 	if captured.DesiredRevisionGeneration != 3 {
 		t.Fatalf("DesiredRevisionGeneration = %d, want 3", captured.DesiredRevisionGeneration)

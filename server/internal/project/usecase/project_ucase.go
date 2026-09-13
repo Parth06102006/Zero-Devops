@@ -1,3 +1,4 @@
+// Package usecase implements project business rules.
 package usecase
 
 import (
@@ -16,6 +17,7 @@ type projectUsecase struct {
 	commandScanner domain.CommandScanner
 }
 
+// NewProjectUsecase creates a project use case.
 func NewProjectUsecase(projectRepo domain.ProjectRepository, githubUsecase domain.GithubUsecase, commandScanner domain.CommandScanner) domain.ProjectUsecase {
 	return &projectUsecase{projectRepo: projectRepo, githubUsecase: githubUsecase, commandScanner: commandScanner}
 }

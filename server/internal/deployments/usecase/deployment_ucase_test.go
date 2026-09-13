@@ -55,7 +55,7 @@ func (m *deploymentRepoMock) MarkOutboxSent(_ context.Context, _ string) error {
 	return nil
 }
 
-func (m *deploymentRepoMock) MarkOutboxPublishFailed(_ context.Context, _ string, _ string, _ time.Time) error {
+func (m *deploymentRepoMock) MarkOutboxPublishFailed(_ context.Context, _, _ string, _ time.Time) error {
 	return nil
 }
 
@@ -107,7 +107,7 @@ func (m *githubRepoMock) UpdateInstallationStatus(_ context.Context, _, _ string
 func (m *githubRepoMock) UpdateInstallationStatusByGithubInstallationID(_ context.Context, _ int64, _ string) error {
 	return nil
 }
-func (m *githubRepoMock) GetInstallationIdByGithubInstallationID(_ context.Context, _ int64) (string, error) {
+func (m *githubRepoMock) GetInstallationIDByGithubInstallationID(_ context.Context, _ int64) (string, error) {
 	return "", nil
 }
 func (m *githubRepoMock) UpdateInstallationExternalIDByID(_ context.Context, _, _ string) error {

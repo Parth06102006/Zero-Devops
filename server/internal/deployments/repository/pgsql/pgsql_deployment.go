@@ -334,7 +334,12 @@ func (m *pgSQLDeploymentRepository) queryDeployments(ctx context.Context, query 
 // StoreProjectBuildWithOutbox durably records a manual project build and its
 // deploy.jobs V1 outbox event in one transaction. Duplicate manual idempotency
 // keys for the same project map to domain.ErrConflict.
-func (m *pgSQLDeploymentRepository) StoreProjectBuildWithOutbox(ctx context.Context, params domain.StoreProjectBuildWithOutboxParams) (*domain.Deployment, error) {
+//
+//nolint:funlen // transaction intentionally keeps deployment and outbox writes together.
+func (m *pgSQLDeploymentRepository) StoreProjectBuildWithOutbox(
+	ctx context.Context,
+	params domain.StoreProjectBuildWithOutboxParams,
+) (*domain.Deployment, error) {
 	if params.Deployment == nil {
 		return nil, fmt.Errorf("deployment is required")
 	}
@@ -627,7 +632,7 @@ func (m *pgSQLDeploymentRepository) MarkOutboxSent(ctx context.Context, id strin
 	return nil
 }
 
-func (m *pgSQLDeploymentRepository) MarkOutboxPublishFailed(ctx context.Context, id string, errMsg string, nextAvailableAt time.Time) error {
+func (m *pgSQLDeploymentRepository) MarkOutboxPublishFailed(ctx context.Context, id, errMsg string, nextAvailableAt time.Time) error {
 	query := `
 		UPDATE deployment_outbox
 		SET state = CASE

@@ -13,15 +13,13 @@ import (
 	"strings"
 	"sync"
 	"time"
-	
+
 	"Zero_Devops/server/internal/integrations/scm/github/cache"
 	appmiddleware "Zero_Devops/server/internal/middleware"
 
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
-
-const jwtExpiryMinutes = 10
 
 type githubAppUsecase struct {
 	githubRepo       domain.GithubRepository
