@@ -1,44 +1,8 @@
+import { Github, LockKeyhole, UserRound } from "lucide-react";
 import type { Metadata } from "next";
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 
 export const metadata: Metadata = { title: "Settings" };
 
 export default function SettingsPage() {
-  return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Account, team, and billing settings will live here.
-        </p>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Account</CardTitle>
-          <CardDescription>Manage the identity connected to ghost.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Your account is linked to GitHub. Additional account controls will appear here as
-            they&apos;re built.
-          </p>
-        </CardContent>
-      </Card>
-
-      <Separator />
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Danger zone</CardTitle>
-          <CardDescription>Irreversible actions.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">Account deletion will be available here.</p>
-        </CardContent>
-      </Card>
-    </div>
-  );
+  return <div className="flex flex-col gap-8"><div className="border-b border-border pb-6"><p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">Workspace controls</p><h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-foreground">Settings</h1><p className="mt-2 text-sm text-muted-foreground">Account, team, and billing settings will live here.</p></div><section className="grid gap-4 lg:grid-cols-2"><div className="rounded-md border border-border bg-card p-5"><div className="flex items-center gap-3"><span className="flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary"><UserRound className="size-4" /></span><div><h2 className="text-sm font-medium text-foreground">Account</h2><p className="text-xs text-muted-foreground">Your identity connected to ghost.</p></div></div><p className="mt-6 text-sm leading-6 text-muted-foreground">Your account is linked to GitHub. Additional account controls will appear here as they&apos;re built.</p></div><div className="rounded-md border border-border bg-card p-5"><div className="flex items-center gap-3"><span className="flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary"><Github className="size-4" /></span><div><h2 className="text-sm font-medium text-foreground">GitHub connection</h2><p className="text-xs text-muted-foreground">OAuth identity and repository access.</p></div></div><div className="mt-6 flex items-center gap-2 text-sm text-success"><span className="size-2 rounded-full bg-success" /> Connected and ready</div></div><div className="rounded-md border border-destructive/30 bg-card p-5 lg:col-span-2"><div className="flex items-center gap-3"><span className="flex size-9 items-center justify-center rounded-md bg-destructive/10 text-destructive"><LockKeyhole className="size-4" /></span><div><h2 className="text-sm font-medium text-foreground">Danger zone</h2><p className="text-xs text-muted-foreground">Irreversible actions.</p></div></div><p className="mt-6 text-sm text-muted-foreground">Account deletion will be available here.</p></div></section></div>;
 }

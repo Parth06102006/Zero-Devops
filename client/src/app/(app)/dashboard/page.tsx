@@ -1,27 +1,22 @@
-import { Rocket } from "lucide-react";
+import { Activity, ArrowRight, CheckCircle2, GitBranch, Rocket, Settings, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 import type { Metadata } from "next";
-
-import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/shared/empty-state";
 
 export const metadata: Metadata = { title: "Overview" };
 
-export default function DashboardPage() {
-  return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-foreground">Overview</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          A summary of your projects and recent deployments will live here.
-        </p>
-      </div>
+const stats = [
+  { label: "Deployments", value: "—", detail: "Connect a repo to start", icon: Rocket },
+  { label: "Projects", value: "—", detail: "No projects yet", icon: GitBranch },
+  { label: "GitHub status", value: "Ready", detail: "OAuth connection available", icon: ShieldCheck },
+  { label: "System status", value: "Online", detail: "API and workers available", icon: Activity },
+] as const;
 
-      <EmptyState
-        icon={Rocket}
-        title="No projects yet"
-        description="Connect a GitHub repository to see your first deployment appear here."
-        action={<Button>Connect a repository</Button>}
-      />
-    </div>
-  );
+const workflow = [
+  ["01", "Connect a repository", "Authorize GitHub and choose the repo that should become a live service."],
+  ["02", "Let ghost detect it", "Framework, package manager, build command, and runtime needs are identified."],
+  ["03", "Ship on every push", "Builds produce immutable releases with live URLs, TLS, and rollback points."],
+] as const;
+
+export default function DashboardPage() {
+  return <div className="flex flex-col gap-10"><section className="relative overflow-hidden rounded-lg border border-primary/25 bg-card p-6 surface-glow md:p-8"><div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-primary/10 blur-3xl" /><div className="relative max-w-3xl"><span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-primary"><CheckCircle2 className="size-3.5" /> Workspace ready</span><h1 className="mt-5 text-3xl font-semibold leading-tight tracking-[-0.04em] text-foreground sm:text-4xl">Your path from commit to production starts here.</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">Connect GitHub, let ghost detect your app, then ship monitored deployments with TLS, logs, autoscaling, and rollback points already wired.</p><div className="mt-6 flex flex-wrap gap-3"><Link href="/deployments" className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground">View deployments <ArrowRight className="size-4" /></Link><Link href="/settings" className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-surface"><Settings className="size-4" /> Settings</Link></div></div></section><section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{stats.map(({ label, value, detail, icon: Icon }) => <div key={label} className="rounded-md border border-border bg-card p-4"><div className="flex items-center justify-between"><p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{label}</p><Icon className="size-4 text-primary" /></div><p className="mt-5 text-2xl font-semibold text-foreground">{value}</p><p className="mt-1 text-xs text-muted-foreground">{detail}</p></div>)}</section><section><div className="flex items-end justify-between gap-4"><div><p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">Getting started</p><h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-foreground">A deployment workflow that stays visible</h2></div><span className="hidden font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground sm:block">connect / detect / ship</span></div><div className="mt-5 grid gap-3 lg:grid-cols-3">{workflow.map(([number, title, description]) => <article key={number} className="min-h-48 rounded-md border border-border bg-card p-5 transition-colors hover:border-primary/40"><span className="font-mono text-xs text-primary">{number}</span><h3 className="mt-10 text-sm font-medium text-foreground">{title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p></article>)}</div></section><section className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]"><div className="rounded-md border border-border bg-card p-5"><div className="flex items-start justify-between"><div><h2 className="font-medium text-foreground">Recent activity</h2><p className="mt-1 text-sm text-muted-foreground">Builds, releases, and health events will appear here.</p></div><Activity className="size-4 text-primary" /></div><div className="mt-6 rounded-md border border-dashed border-border p-7 text-center"><p className="text-sm font-medium text-foreground">No activity yet</p><p className="mt-1 text-sm text-muted-foreground">Connect a GitHub repository to see your first deployment.</p></div></div><div className="rounded-md border border-border bg-surface p-5"><h2 className="font-medium text-foreground">Quick actions</h2><div className="mt-4 grid gap-2"><Link href="/deployments" className="flex items-center justify-between rounded-md border border-border bg-card p-3 text-sm hover:border-primary/40"><span className="flex items-center gap-3"><Rocket className="size-4 text-primary" /> View deployments</span><ArrowRight className="size-4 text-muted-foreground" /></Link><Link href="/settings" className="flex items-center justify-between rounded-md border border-border bg-card p-3 text-sm hover:border-primary/40"><span className="flex items-center gap-3"><Settings className="size-4 text-primary" /> Manage account</span><ArrowRight className="size-4 text-muted-foreground" /></Link></div></div></section></div>;
 }
