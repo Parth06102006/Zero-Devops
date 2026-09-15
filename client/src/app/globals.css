@@ -4,83 +4,83 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 244 49% 14%;
+    --background: 220 22% 96%;
+    --foreground: 222 28% 11%;
 
-    --surface: 270 100% 99%;
-    --surface-elevated: 268 100% 96%;
+    --surface: 220 18% 92%;
+    --surface-elevated: 220 16% 87%;
 
-    --border: 266 62% 88%;
-    --input: 266 62% 88%;
-    --ring: 270 100% 65%;
+    --border: 220 15% 80%;
+    --input: 220 15% 80%;
+    --ring: 187 92% 37%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 244 49% 14%;
+    --card: 220 22% 99%;
+    --card-foreground: 222 28% 11%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 244 49% 14%;
+    --popover: 220 22% 99%;
+    --popover-foreground: 222 28% 11%;
 
-    --primary: 266 100% 59%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 187 92% 37%;
+    --primary-foreground: 220 30% 8%;
 
-    --secondary: 268 100% 96%;
-    --secondary-foreground: 244 49% 14%;
+    --secondary: 220 18% 89%;
+    --secondary-foreground: 222 28% 11%;
 
-    --muted: 268 100% 96%;
-    --muted-foreground: 258 38% 36%;
+    --muted: 220 18% 89%;
+    --muted-foreground: 220 12% 38%;
 
-    --accent: 270 100% 65%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 39 92% 54%;
+    --accent-foreground: 222 28% 11%;
 
-    --success: 152 58% 52%;
-    --success-foreground: 244 49% 14%;
+    --success: 155 62% 38%;
+    --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 58%;
-    --warning-foreground: 244 49% 14%;
+    --warning: 39 92% 48%;
+    --warning-foreground: 222 28% 11%;
 
-    --destructive: 6 78% 62%;
+    --destructive: 4 74% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    --radius: 0.625rem;
+    --radius: 0.5rem;
   }
 
   .dark {
-    --background: 258 24% 14%;
-    --foreground: 230 20% 96%;
+    --background: 222 28% 7%;
+    --foreground: 210 25% 94%;
 
-    --surface: 258 22% 18%;
-    --surface-elevated: 258 20% 24%;
+    --surface: 220 20% 10%;
+    --surface-elevated: 220 18% 14%;
 
-    --border: 258 18% 30%;
-    --input: 258 18% 30%;
-    --ring: 270 100% 65%;
+    --border: 220 16% 20%;
+    --input: 220 16% 20%;
+    --ring: 187 92% 56%;
 
-    --card: 258 22% 18%;
-    --card-foreground: 230 20% 96%;
+    --card: 220 22% 10%;
+    --card-foreground: 210 25% 94%;
 
-    --popover: 258 22% 18%;
-    --popover-foreground: 230 20% 96%;
+    --popover: 220 20% 12%;
+    --popover-foreground: 210 25% 94%;
 
-    --primary: 270 100% 65%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 187 92% 56%;
+    --primary-foreground: 222 28% 7%;
 
-    --secondary: 258 20% 24%;
-    --secondary-foreground: 230 20% 96%;
+    --secondary: 220 18% 15%;
+    --secondary-foreground: 210 25% 94%;
 
-    --muted: 258 18% 22%;
-    --muted-foreground: 258 14% 68%;
+    --muted: 220 16% 15%;
+    --muted-foreground: 220 12% 62%;
 
-    --accent: 266 100% 62%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 39 92% 58%;
+    --accent-foreground: 222 28% 7%;
 
-    --success: 152 58% 52%;
-    --success-foreground: 258 24% 14%;
+    --success: 155 62% 48%;
+    --success-foreground: 222 28% 7%;
 
-    --warning: 38 92% 58%;
-    --warning-foreground: 258 24% 14%;
+    --warning: 39 92% 58%;
+    --warning-foreground: 222 28% 7%;
 
-    --destructive: 6 78% 62%;
-    --destructive-foreground: 230 20% 96%;
+    --destructive: 4 74% 60%;
+    --destructive-foreground: 210 25% 94%;
   }
 }
 
@@ -102,13 +102,8 @@
     font-feature-settings: "cv11", "ss01";
     text-rendering: optimizeLegibility;
     background-color: hsl(var(--background));
-    background-image:
-      radial-gradient(ellipse 80% 60% at 50% -10%, hsl(var(--ring) / 0.16) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 50% at 82% 34%, hsl(var(--primary) / 0.1) 0%, transparent 50%),
-      radial-gradient(ellipse 50% 50% at 18% 68%, hsl(var(--accent) / 0.1) 0%, transparent 50%);
-    background-size: 200% 200%;
-    background-attachment: fixed;
-    animation: gradient-shift 20s ease-in-out infinite alternate;
+    background-image: radial-gradient(hsl(var(--foreground) / 0.06) 1px, transparent 1px);
+    background-size: 26px 26px;
   }
 
   ::selection {
@@ -128,13 +123,21 @@
 
   .bg-grid {
     background-image:
-      linear-gradient(hsl(var(--border) / 0.4) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--border) / 0.4) 1px, transparent 1px);
+      linear-gradient(hsl(var(--border) / 0.28) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.28) 1px, transparent 1px);
     background-size: 48px 48px;
   }
 
   .mask-fade-b {
     mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  }
+
+  .surface-glow {
+    box-shadow: 0 24px 80px hsl(220 28% 4% / 0.32), 0 0 0 1px hsl(var(--border) / 0.4);
+  }
+
+  .reveal-up {
+    animation: reveal-up 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 }
 
@@ -145,6 +148,11 @@
   50% {
     background-position: 100% 50%;
   }
+}
+
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (prefers-reduced-motion: reduce) {
