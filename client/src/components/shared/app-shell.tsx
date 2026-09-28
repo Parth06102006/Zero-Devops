@@ -9,10 +9,21 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Logo } from "@/components/shared/logo";
-import { UserMenu } from "@/features/auth/components/user-menu";
-import { NewDeploymentDialog } from "@/components/dashboard/new-deployment-dialog";
+import { UserMenu } from "@/features/auth";
+import { NewDeploymentDialog } from "@/features/projects";
 
-const nav = [
+import type { ComponentProps } from "react";
+
+type LinkHref = ComponentProps<typeof Link>["href"];
+
+interface NavItem {
+  href: LinkHref;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  soon?: boolean;
+}
+
+const nav: readonly NavItem[] = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/projects", label: "Projects", icon: FolderKanban },
   { href: "/deployments", label: "Deployments", icon: Rocket },
@@ -20,13 +31,15 @@ const nav = [
   { href: "/environment-variables", label: "Environment Variables", icon: SlidersHorizontal, soon: true },
   { href: "/github", label: "GitHub", icon: Github },
   { href: "/settings", label: "Settings", icon: Settings },
-] as const;
+];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [newDeploymentOpen, setNewDeploymentOpen] = useState(false);
-  const active = nav.find((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
+  const active = nav.find(
+    (item) => pathname === String(item.href) || pathname.startsWith(`${String(item.href)}/`),
+  );
 
   return (
     <div className="min-h-dvh bg-[#050505] text-white">
@@ -42,8 +55,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           <p className="px-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/25">Workspace</p>
           <nav className="mt-2 space-y-0.5">
             {nav.map(({ href, label, icon: Icon, soon }) => {
-              const isActive = pathname === href || pathname.startsWith(`${href}/`);
-              return <Link key={href} href={href} onClick={() => setMobileOpen(false)} className={cn("group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] transition", isActive ? "bg-white/[0.09] text-white shadow-[inset_2px_0_0_rgba(255,255,255,.8)]" : "text-white/55 hover:bg-white/[0.045] hover:text-white")}>
+              const hrefStr = String(href);
+              const isActive = pathname === hrefStr || pathname.startsWith(`${hrefStr}/`);
+              return <Link key={hrefStr} href={href} onClick={() => setMobileOpen(false)} className={cn("group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] transition", isActive ? "bg-white/[0.09] text-white shadow-[inset_2px_0_0_rgba(255,255,255,.8)]" : "text-white/55 hover:bg-white/[0.045] hover:text-white")}>
                 <Icon className={cn("size-4", isActive ? "text-white" : "text-white/40 group-hover:text-white/70")} />
                 <span className="flex-1">{label}</span>{soon ? <span className="rounded-full border border-white/10 px-1.5 py-0.5 text-[8px] uppercase tracking-wider text-white/25">Soon</span> : null}
               </Link>;

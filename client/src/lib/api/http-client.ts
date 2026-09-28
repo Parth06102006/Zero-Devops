@@ -42,9 +42,13 @@ httpClient.interceptors.response.use(
   },
 );
 
-function normalizeError(error: AxiosError<ApiErrorBody>): ApiError {
-  if (axios.isCancel(error)) return new ApiError({ message: "Request was cancelled.", code: "REQUEST_CANCELLED", status: 0 });
-  if (!error.response) return new ApiError({ message: "Network error. Check your connection and try again.", code: "NETWORK_ERROR", status: 0 });
+function normalizeError(error: unknown): ApiError {
+  if (axios.isCancel(error)) {
+    return new ApiError({ message: "Request was cancelled.", code: "REQUEST_CANCELLED", status: 0 });
+  }
+  if (!axios.isAxiosError<ApiErrorBody>(error) || !error.response) {
+    return new ApiError({ message: "Network error. Check your connection and try again.", code: "NETWORK_ERROR", status: 0 });
+  }
   const body = error.response.data;
   return new ApiError({
     message: body?.error?.message ?? "Something went wrong. Please try again.",

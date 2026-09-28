@@ -43,7 +43,6 @@
   .gradient-border { position:relative; }
   .gradient-border::before { content:""; position:absolute; inset:0; padding:1px; border-radius:inherit; background:linear-gradient(135deg,rgba(103,232,249,.45),rgba(217,70,239,.28),rgba(134,239,172,.28)); -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
   .mesh-glow { background:radial-gradient(circle at 15% 15%,rgba(34,211,238,.09),transparent 28%),radial-gradient(circle at 85% 25%,rgba(217,70,239,.09),transparent 28%),radial-gradient(circle at 45% 100%,rgba(52,211,153,.07),transparent 30%); }
-  .bg-grid { background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px); background-size:48px 48px; }
 }
 
 @keyframes gradient-shift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }

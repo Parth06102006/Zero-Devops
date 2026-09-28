@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { GitBranch, MonitorCheck, PackageCheck, Rocket } from "lucide-react";
 
-import { Container } from "@/components/shared/container";
+import { Container } from "./container";
 
 const steps = [
   { icon: GitBranch, number: "01", title: "Connect a repository", description: "Authorize GitHub and choose the repo that should become a live service." },

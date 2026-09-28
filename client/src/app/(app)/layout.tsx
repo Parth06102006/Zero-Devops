@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import { AppShell } from "@/components/shared/app-shell";
-import { AuthGuard } from "@/features/auth/components/auth-guard";
+import { AuthGuard } from "@/features/auth";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (

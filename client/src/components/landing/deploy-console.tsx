@@ -1,71 +1,86 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Check, GitBranch } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronRight, Terminal, X } from "lucide-react";
+import { demoSteps } from "./data/landing-content";
 
-const steps = [
-  { label: "Detected framework", detail: "Next.js 15 · App Router" },
-  { label: "Provisioned runtime", detail: "no Dockerfile, no cluster" },
-  { label: "Configured TLS + domain", detail: "app.Zero-DevOps.dev" },
-  { label: "Deployed", detail: "3 regions · autoscaled" },
-];
+interface DeployConsoleProps {
+  open: boolean;
+  onClose: () => void;
+}
 
-const container = {
-  hidden: {},
-  show: {
-    transition: { staggerChildren: 0.35, delayChildren: 0.3 },
-  },
-};
-
-const item = {
-  hidden: { opacity: 0, y: 8 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
-};
-
-export function DeployConsole() {
+export function DeployConsole({ open, onClose }: DeployConsoleProps) {
   return (
-    <div className="relative">
-      <div
-        aria-hidden
-        className="absolute -inset-6 -z-10 rounded-[2rem] bg-primary/20 blur-3xl"
-      />
-      <div className="w-full max-w-md overflow-hidden rounded-xl border border-border bg-surface shadow-2xl shadow-black/40">
-        <div className="flex items-center gap-1.5 border-b border-border px-4 py-3">
-          <span className="size-2.5 rounded-full bg-destructive/70" />
-          <span className="size-2.5 rounded-full bg-warning/70" />
-          <span className="size-2.5 rounded-full bg-success/70" />
-          <span className="ml-3 flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
-            <GitBranch className="size-3.5" />
-            main
-          </span>
-        </div>
-
-        <motion.ul
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="flex flex-col gap-4 p-5 font-mono text-[13px]"
+    <AnimatePresence>
+      {open ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-xl"
         >
-          {steps.map((step) => (
-            <motion.li key={step.label} variants={item} className="flex items-start gap-3">
-              <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-success/15 text-success">
-                <Check className="size-3" strokeWidth={3} />
-              </span>
-              <span className="flex flex-col gap-0.5">
-                <span className="text-foreground">{step.label}</span>
-                <span className="text-muted-foreground">{step.detail}</span>
-              </span>
-            </motion.li>
-          ))}
-          <motion.li
-            variants={item}
-            className="flex items-center gap-2 pl-7 text-muted-foreground"
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.97, y: 12 }}
+            className="max-h-[90vh] w-full max-w-5xl overflow-auto rounded-3xl border border-white/10 bg-[#090909] shadow-2xl"
           >
-            <span className="inline-block h-3.5 w-1.5 animate-pulse bg-primary" aria-hidden />
-            live in 41s
-          </motion.li>
-        </motion.ul>
-      </div>
-    </div>
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/[0.07] bg-[#090909]/90 px-6 py-5 backdrop-blur">
+              <div>
+                <p className="text-xs uppercase tracking-[.18em] text-white/30">Interactive demo</p>
+                <h3 className="mt-1 text-lg font-semibold">From Git push to deployment</h3>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-lg border border-white/10 p-2 text-white/45 hover:text-white"
+                aria-label="Close demo"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+            <div className="grid gap-4 p-6 md:grid-cols-[.9fr_1.1fr]">
+              <div className="space-y-2">
+                {demoSteps.map(({ icon: Icon, number, title }) => (
+                  <div
+                    key={number}
+                    className="flex items-center gap-4 rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4"
+                  >
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.05]">
+                      <Icon className="size-4 text-white/60" />
+                    </span>
+                    <span>
+                      <span className="block text-[10px] text-white/25">{number}</span>
+                      <span className="mt-0.5 block text-sm text-white/65">{title}</span>
+                    </span>
+                    <ChevronRight className="ml-auto size-4 text-white/15" />
+                  </div>
+                ))}
+              </div>
+              <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#050505]">
+                <div className="flex items-center gap-2 border-b border-white/[0.07] px-4 py-3">
+                  <Terminal className="size-3.5 text-white/25" />
+                  <span className="font-mono text-[10px] text-white/30">workflow-preview</span>
+                </div>
+                <div className="p-5 font-mono text-[11px] leading-7 text-white/45">
+                  <p>
+                    <span className="text-emerald-300">$</span> git push origin main
+                  </p>
+                  <p className="text-cyan-200/70">✓ webhook received</p>
+                  <p className="text-fuchsia-200/70">✓ build queued</p>
+                  <p>→ worker receives approved configuration</p>
+                  <p>→ build status: pending</p>
+                  <p>→ build status: building</p>
+                  <p>→ deployment result is read from the backend</p>
+                  <p className="mt-4 border-t border-white/[0.06] pt-4 text-white/25">
+                    This demo is illustrative. It does not execute these commands.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
   );
 }

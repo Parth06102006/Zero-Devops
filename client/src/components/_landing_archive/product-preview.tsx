@@ -1,7 +1,7 @@
 import { Activity, Check, Copy, GitCommitHorizontal, Globe2, Terminal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { DeploymentTimeline } from "@/components/landing/deployment-timeline";
+import { DeploymentTimeline } from "./deployment-timeline";
 
 const logs = [
   "clone github.com/acme/web",
