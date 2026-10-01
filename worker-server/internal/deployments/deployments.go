@@ -30,7 +30,10 @@ const (
 	templateDockerfile = "Dockerfile"
 	builderDocker      = "docker"
 
-	outputDirDist = "dist"
+	outputDirDist  = "dist"
+	outputDirBuild = "build"
+
+	depVike = "vike"
 
 	frameworkVite      = "vite"
 	frameworkNextJS    = "nextjs"

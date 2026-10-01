@@ -113,7 +113,7 @@ var (
 		Name:             frameworkReact,
 		Deps:             []string{frameworkReact, "react-dom"},
 		Template:         "static/Dockerfile.react.tmpl",
-		DefaultOutputDir: "build",
+		DefaultOutputDir: outputDirBuild,
 	}
 
 	// nodeBuilder is the generic JS fallback — not in the builders slice because it has
@@ -213,7 +213,7 @@ var ignoredDirs = map[string]bool{
 	"node_modules": true,
 	".git":         true,
 	outputDirDist:  true,
-	"build":        true,
+	outputDirBuild: true,
 	".next":        true,
 	".cache":       true,
 	"__pycache__":  true,
@@ -255,7 +255,7 @@ var viteSSRRecipes = map[string]*Builder{
 // Inherently incomplete (private forks, hand-rolled SSR setups won't appear here);
 // resolveOutputDir's index.html check is the real ground truth for everything else.
 var viteSSRMetaFrameworkDeps = map[string]string{
-	"vike":                  "vike",
+	depVike:                 depVike,
 	"vite-plugin-ssr":       "vike (vite-plugin-ssr)",
 	"@builder.io/qwik-city": "Qwik City",
 	"waku":                  "Waku",
