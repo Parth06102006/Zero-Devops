@@ -1,0 +1,37 @@
+# Shared by both Maven and Gradle detection (pom.xml / build.gradle[.kts]) —
+# the two toolchains produce jars in different directories (target/ vs
+# build/libs/), so the build step branches on which marker file is present.
+# Gradle projects are built via their own wrapper when present (the
+# recommended, version-pinned way); falls back to a system Gradle otherwise.
+FROM eclipse-temurin:21-jdk-alpine AS builder
+
+WORKDIR /app
+
+COPY . .
+
+RUN if [ -f pom.xml ]; then \
+      apk add --no-cache maven && \
+      mvn -q -DskipTests package && \
+      find target -maxdepth 1 -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' -exec cp {} /app/app.jar \; ; \
+    elif [ -f gradlew ]; then \
+      chmod +x gradlew && ./gradlew build -x test --no-daemon && \
+      find build/libs -maxdepth 1 -name '*.jar' ! -name '*-plain.jar' -exec cp {} /app/app.jar \; ; \
+    else \
+      apk add --no-cache gradle && \
+      gradle build -x test --no-daemon && \
+      find build/libs -maxdepth 1 -name '*.jar' ! -name '*-plain.jar' -exec cp {} /app/app.jar \; ; \
+    fi
+
+FROM eclipse-temurin:21-jre-alpine
+
+WORKDIR /app
+
+RUN addgroup -S app && adduser -S app -G app
+
+COPY --from=builder /app/app.jar /app/app.jar
+
+USER app
+
+EXPOSE 8080
+
+CMD ["java", "-jar", "/app/app.jar"]

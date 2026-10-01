@@ -1,0 +1,29 @@
+# `mix release` names its output directory after the app (from mix.exs),
+# which isn't known ahead of time — since exactly one release is built,
+# the generated start script is found by globbing rel/*/bin/* instead of
+# needing that name.
+FROM elixir:1.16-alpine AS builder
+
+WORKDIR /app
+
+ENV MIX_ENV=prod
+
+RUN apk add --no-cache build-base git
+
+COPY mix.exs mix.lock* ./
+RUN mix local.hex --force && mix local.rebar --force && mix deps.get --only prod
+
+COPY . .
+RUN mix compile && mix release
+
+FROM alpine:3.20
+
+WORKDIR /app
+
+RUN apk add --no-cache libstdc++ openssl ncurses-libs
+
+COPY --from=builder /app/_build/prod/rel ./rel
+
+EXPOSE 4000
+
+CMD ["sh", "-c", "$(find rel -maxdepth 2 -path '*/bin/*' -type f -executable ! -name '*.bat' | head -1) start"]

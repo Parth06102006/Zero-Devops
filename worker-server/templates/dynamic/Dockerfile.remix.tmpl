@@ -1,3 +1,5 @@
+# Relies on the project's own "start" script, which the default Remix
+# template sets to `remix-serve ./build/server/index.js`.
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -8,7 +10,7 @@ RUN npm ci --ignore-scripts
 COPY . .
 RUN npm run build
 
-FROM node:20-alpine
+FROM node:20-alpine AS runtime
 
 WORKDIR /app
 
@@ -18,6 +20,7 @@ COPY package*.json ./
 RUN npm ci --ignore-scripts --omit=dev
 
 COPY --from=builder /app/build ./build
+COPY --from=builder /app/public ./public
 
 EXPOSE 3000
 

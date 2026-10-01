@@ -135,6 +135,10 @@ func run() error {
 	authUsecase := _authUcase.NewAuthUsecase(userRepo, providers, timeoutContext)
 	_authHttp.NewAuthHandler(e, authUsecase)
 
+	e.GET("/", func(c *echo.Context) error {
+		return c.JSON(http.StatusOK, map[string]string{"message": "logged in successfully"})
+	})
+
 	ttl := time.Duration(viper.GetInt("REDIS_REPOSITORY_CACHE_TTL_SECONDS")) * time.Second
 	cacheUsecase := cache.NewRedisRepositoryListCache(rdb, ttl)
 

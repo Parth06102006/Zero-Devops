@@ -1,0 +1,26 @@
+# Assumes a single binary crate: copies whichever executable Cargo produces
+# directly under target/release (not its deps/ subdirectory) to a fixed
+# name, since the actual binary name depends on Cargo.toml's [package] name.
+FROM rust:1-alpine AS builder
+
+WORKDIR /app
+
+RUN apk add --no-cache musl-dev
+
+COPY . .
+RUN cargo build --release
+RUN find target/release -maxdepth 1 -type f -executable -exec cp {} /app/server \;
+
+FROM alpine:3.20
+
+WORKDIR /app
+
+RUN addgroup -S app && adduser -S app -G app
+
+COPY --from=builder /app/server /app/server
+
+USER app
+
+EXPOSE 8080
+
+CMD ["/app/server"]

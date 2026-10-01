@@ -46,6 +46,115 @@ func TestDetectFrameworkByConfigFile(t *testing.T) {
 	}
 }
 
+func TestDetectFrameworkRejectsViteSSRMetaFramework(t *testing.T) {
+	tests := []struct {
+		name        string
+		packageJSON string
+	}{
+		{
+			name:        "vike",
+			packageJSON: `{"dependencies":{"vike":"^0.4.0"},"devDependencies":{"vite":"^5.0.0"}}`,
+		},
+		{
+			name:        "qwik city",
+			packageJSON: `{"dependencies":{"@builder.io/qwik-city":"^1.0.0"},"devDependencies":{"vite":"^5.0.0"}}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repoPath := t.TempDir()
+			writeFile(t, repoPath, "vite.config.ts", "export default {}")
+			writeFile(t, repoPath, "package.json", tt.packageJSON)
+
+			builder, err := detectFramework(repoPath)
+			if err == nil {
+				t.Fatalf("detectFramework() = %+v, nil; want an error refusing the SSR meta-framework", builder)
+			}
+			if builder != nil {
+				t.Fatalf("detectFramework() builder = %+v, want nil on error", builder)
+			}
+		})
+	}
+}
+
+func TestDetectFrameworkRoutesTanStackStartToItsOwnRecipe(t *testing.T) {
+	repoPath := t.TempDir()
+	writeFile(t, repoPath, "vite.config.ts", "export default {}")
+	writeFile(t, repoPath, "package.json", `{"dependencies":{"@tanstack/react-start":"^1.0.0","vite":"^5.0.0"}}`)
+
+	builder, err := detectFramework(repoPath)
+	if err != nil {
+		t.Fatalf("detectFramework returned error for TanStack Start: %v", err)
+	}
+	if builder.Name != frameworkTanStack {
+		t.Fatalf("builder.Name = %q, want %q", builder.Name, frameworkTanStack)
+	}
+	if builder.Template != "dynamic/Dockerfile.tanstack-start.tmpl" {
+		t.Fatalf("builder.Template = %q, want the tanstack-start template", builder.Template)
+	}
+}
+
+func TestDetectFrameworkAcceptsPlainVite(t *testing.T) {
+	repoPath := t.TempDir()
+	writeFile(t, repoPath, "vite.config.ts", "export default {}")
+	writeFile(t, repoPath, "package.json", `{"dependencies":{"react":"^18.0.0","react-dom":"^18.0.0"},"devDependencies":{"vite":"^5.0.0"}}`)
+
+	builder, err := detectFramework(repoPath)
+	if err != nil {
+		t.Fatalf("detectFramework returned error for plain Vite app: %v", err)
+	}
+	if builder.Name != frameworkVite {
+		t.Fatalf("builder.Name = %q, want %q", builder.Name, frameworkVite)
+	}
+}
+
+func TestDetectFrameworkRejectsAstroSSRAdapter(t *testing.T) {
+	repoPath := t.TempDir()
+	writeFile(t, repoPath, "astro.config.mjs", "export default {}")
+	writeFile(t, repoPath, "package.json", `{"dependencies":{"astro":"^4.0.0","@astrojs/node":"^8.0.0"}}`)
+
+	builder, err := detectFramework(repoPath)
+	if err == nil {
+		t.Fatalf("detectFramework() = %+v, nil; want an error refusing Astro SSR mode", builder)
+	}
+}
+
+func TestDetectFrameworkAcceptsStaticAstro(t *testing.T) {
+	repoPath := t.TempDir()
+	writeFile(t, repoPath, "astro.config.mjs", "export default {}")
+	writeFile(t, repoPath, "package.json", `{"dependencies":{"astro":"^4.0.0"}}`)
+
+	builder, err := detectFramework(repoPath)
+	if err != nil {
+		t.Fatalf("detectFramework returned error for static Astro app: %v", err)
+	}
+	if builder.Name != frameworkAstro {
+		t.Fatalf("builder.Name = %q, want %q", builder.Name, frameworkAstro)
+	}
+}
+
+func TestHasStartScript(t *testing.T) {
+	tests := []struct {
+		name string
+		pkg  *packageJSON
+		want bool
+	}{
+		{name: "present", pkg: &packageJSON{Scripts: map[string]string{"start": "node server.js"}}, want: true},
+		{name: "empty string", pkg: &packageJSON{Scripts: map[string]string{"start": "   "}}, want: false},
+		{name: "missing", pkg: &packageJSON{Scripts: map[string]string{"build": "vite build"}}, want: false},
+		{name: "nil scripts", pkg: &packageJSON{}, want: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := hasStartScript(tt.pkg); got != tt.want {
+				t.Errorf("hasStartScript() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestDetectFrameworkByPackageDependencies(t *testing.T) {
 	tests := []struct {
 		name        string

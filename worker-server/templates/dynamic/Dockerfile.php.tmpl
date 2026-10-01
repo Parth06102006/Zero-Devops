@@ -1,0 +1,21 @@
+# Serves from public/ when present (Laravel and most modern frameworks'
+# convention), falling back to the repo root for frameworks without one.
+# PHP's built-in server is single-threaded and not meant for real production
+# load — swap for php-fpm + nginx before this needs to handle real traffic.
+FROM composer:2 AS vendor
+
+WORKDIR /app
+
+COPY composer.json composer.lock* ./
+RUN composer install --no-dev --no-interaction --no-progress --optimize-autoloader
+
+FROM php:8.3-cli-alpine
+
+WORKDIR /app
+
+COPY --from=vendor /app/vendor ./vendor
+COPY . .
+
+EXPOSE 8080
+
+CMD ["sh", "-c", "php -S 0.0.0.0:8080 -t $( [ -d public ] && echo public || echo . )"]

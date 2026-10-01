@@ -1,0 +1,25 @@
+# dotnet publish auto-discovers the project file when exactly one
+# .csproj/.fsproj exists under the working directory. At runtime, the entry
+# assembly is found via its .runtimeconfig.json — only the entry point gets
+# one, dependency DLLs don't — so no project name needs to be known ahead of time.
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS builder
+
+WORKDIR /app
+
+COPY . .
+RUN dotnet publish -c Release -o /out
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine
+
+WORKDIR /app
+
+RUN addgroup -S app && adduser -S app -G app
+
+COPY --from=builder /out .
+
+USER app
+
+EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
+
+CMD ["sh", "-c", "dotnet \"$(basename \"$(ls *.runtimeconfig.json)\" .runtimeconfig.json).dll\""]
