@@ -29,11 +29,19 @@ func NewSCMHandler(e *echo.Echo, gh domain.GithubUsecase) {
 	handler := &SCMHandler{
 		scmUsecase: gh,
 	}
+
+	// Uniform SCM GitHub routes
+	e.GET("/integrations/scm/github/installation", handler.GetInstallationStatus)
+	e.POST("/integrations/scm/github/installation", handler.Installation)
+	e.DELETE("/integrations/scm/github/installation", handler.DeleteInstallation)
+	e.GET("/integrations/scm/github/repositories", handler.ListRepositories)
+
+	// Backward-compatible aliases
+	e.POST("/integrations/scm/github/install", handler.Installation)
 	e.POST("/integration/scm/github/install", handler.Installation)
+	e.GET("/integration/scm/github", handler.GetInstallation)
 	e.GET("/integration/scm/github/", handler.GetInstallation)
 	e.DELETE("/integration/scm/github/delete", handler.DeleteInstallation)
-
-	// I have to change the api end points here
 	e.GET("/integrations/github/repositories", handler.ListRepositories)
 	e.GET("/integrations/github/installation", handler.GetInstallationStatus)
 }

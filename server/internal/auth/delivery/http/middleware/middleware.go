@@ -76,7 +76,10 @@ func isPublicPath(c *echo.Context) bool {
 	case "/auth/github/login",
 		"/auth/github/login/callback",
 		"/auth/refresh",
-		"/webhooks/github":
+		"/webhooks/github",
+		"/health",
+		"/health/live",
+		"/health/ready":
 		return true
 	}
 	return false
@@ -84,6 +87,9 @@ func isPublicPath(c *echo.Context) bool {
 
 // Skipper determines if a request should skip authentication
 func (a *AuthMiddlewareHandler) Skipper(c *echo.Context) bool {
+	if c.Request().Method == http.MethodOptions {
+		return true
+	}
 	return isPublicPath(c)
 }
 

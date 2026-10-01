@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/labstack/echo/v5"
@@ -108,19 +109,46 @@ func TestCORS_AllowsConfiguredMethods(t *testing.T) {
 
 	e := echo.New()
 	e.Use(NewCORS())
-	e.POST("/test", func(c *echo.Context) error {
+	e.PATCH("/test", func(c *echo.Context) error {
 		return c.String(http.StatusOK, "ok")
 	})
 
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodOptions, "/test", http.NoBody)
 	req.Header.Set("Origin", "https://myapp.com")
-	req.Header.Set("Access-Control-Request-Method", "POST")
+	req.Header.Set("Access-Control-Request-Method", "PATCH")
 	rec := httptest.NewRecorder()
 	e.ServeHTTP(rec, req)
 
 	methods := rec.Header().Get("Access-Control-Allow-Methods")
 	if methods == "" {
 		t.Error("expected Access-Control-Allow-Methods header in preflight response")
+	}
+	if !strings.Contains(methods, "PATCH") {
+		t.Errorf("expected Access-Control-Allow-Methods to contain PATCH, got %q", methods)
+	}
+	if !strings.Contains(methods, "OPTIONS") {
+		t.Errorf("expected Access-Control-Allow-Methods to contain OPTIONS, got %q", methods)
+	}
+}
+
+func TestCORS_ExposeHeaders(t *testing.T) {
+	resetViperForCORS()
+	viper.Set("ALLOWED_ORIGINS", []string{"https://myapp.com"})
+
+	e := echo.New()
+	e.Use(NewCORS())
+	e.GET("/test", func(c *echo.Context) error {
+		return c.String(http.StatusOK, "ok")
+	})
+
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/test", http.NoBody)
+	req.Header.Set("Origin", "https://myapp.com")
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	exposed := rec.Header().Get("Access-Control-Expose-Headers")
+	if !strings.Contains(exposed, "X-Request-ID") {
+		t.Errorf("expected Access-Control-Expose-Headers to contain 'X-Request-ID', got %q", exposed)
 	}
 }
 

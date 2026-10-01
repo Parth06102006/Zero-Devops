@@ -18,7 +18,14 @@ func NewCORS() echo.MiddlewareFunc {
 	return echomw.CORSWithConfig(echomw.CORSConfig{
 		AllowOrigins:     allowedOrigins,
 		AllowCredentials: true,
-		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodDelete},
+		AllowMethods: []string{
+			http.MethodGet,
+			http.MethodPost,
+			http.MethodPatch,
+			http.MethodDelete,
+			http.MethodOptions,
+		},
+		ExposeHeaders: []string{"X-Request-ID"},
 	})
 }
 

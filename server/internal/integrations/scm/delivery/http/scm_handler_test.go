@@ -367,3 +367,39 @@ func TestGetStatusCode(t *testing.T) {
 		})
 	}
 }
+
+func TestNewSCMHandler_RouteRegistrations(t *testing.T) {
+	e := echo.New()
+	NewSCMHandler(e, &mockGithubUsecase{})
+
+	endpoints := []struct {
+		method string
+		path   string
+	}{
+		{http.MethodGet, "/integrations/scm/github/installation"},
+		{http.MethodPost, "/integrations/scm/github/installation"},
+		{http.MethodDelete, "/integrations/scm/github/installation"},
+		{http.MethodGet, "/integrations/scm/github/repositories"},
+		{http.MethodPost, "/integrations/scm/github/install"},
+		{http.MethodPost, "/integration/scm/github/install"},
+		{http.MethodGet, "/integration/scm/github"},
+		{http.MethodGet, "/integration/scm/github/"},
+		{http.MethodDelete, "/integration/scm/github/delete"},
+		{http.MethodGet, "/integrations/github/repositories"},
+		{http.MethodGet, "/integrations/github/installation"},
+	}
+
+	for _, ep := range endpoints {
+		t.Run(ep.method+" "+ep.path, func(t *testing.T) {
+			req := httptest.NewRequest(ep.method, ep.path, nil)
+			rec := httptest.NewRecorder()
+			e.ServeHTTP(rec, req)
+
+			// If the route was registered, it reaches the handler and returns 401 (unauthorized because user context is not set)
+			// or 404 with custom error if not found by usecase, but NEVER 404 "Not Found" Echo router default.
+			if rec.Code == http.StatusNotFound && strings.Contains(rec.Body.String(), "Not Found") {
+				t.Errorf("route %s %s was not found by router", ep.method, ep.path)
+			}
+		})
+	}
+}
