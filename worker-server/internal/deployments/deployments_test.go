@@ -9,7 +9,7 @@ import (
 )
 
 func TestDockerBuild_InvalidPath(t *testing.T) {
-	err := buildImage(context.Background(), "/nonexistent/path", "test-image:latest")
+	_, err := buildImage(context.Background(), "/nonexistent/path", "test-image:latest")
 	if err == nil {
 		t.Fatal("expected error for invalid path")
 	}
@@ -33,7 +33,7 @@ func TestDockerBuild_WithDockerfile(t *testing.T) {
 	}
 
 	imageTag := "docker-test-alpine:latest"
-	err := buildImage(context.Background(), tmpDir, imageTag)
+	_, err := buildImage(context.Background(), tmpDir, imageTag)
 	if err != nil {
 		t.Fatalf("docker build failed: %v", err)
 	}

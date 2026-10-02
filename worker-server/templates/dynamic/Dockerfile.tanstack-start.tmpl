@@ -1,0 +1,31 @@
+# TanStack Start builds on Nitro (same engine as Nuxt), which defaults its
+# target to whatever preset the repo's own vite.config.ts sets — often
+# Cloudflare Workers, which isn't a runnable container at all. NITRO_PRESET
+# overrides that at build time regardless of the repo's committed config,
+# forcing standard node-server output (.output/server/index.mjs), the same
+# shape the Nuxt template already relies on.
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+ENV NITRO_PRESET=node-server
+
+COPY package*.json ./
+RUN npm ci --ignore-scripts
+
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine AS runtime
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOST=0.0.0.0
+
+COPY --from=builder /app/.output ./.output
+
+EXPOSE 3000
+
+CMD ["node", ".output/server/index.mjs"]

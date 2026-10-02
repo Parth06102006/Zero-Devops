@@ -399,6 +399,7 @@ Roadmap: [`docs/projected-direction.md`](docs/projected-direction.md). Buildah/w
 | [`docs/architecture.md`](docs/architecture.md) | Current and planned architecture, data model, completion status. |
 | [`docs/projected-direction.md`](docs/projected-direction.md) | Roadmap: end state, gap analysis, phased plan. |
 | [`docs/buildah-webhook-worker-architecture.md`](docs/buildah-webhook-worker-architecture.md) | Deep design for webhook ingress and the Buildah-based worker. |
+| [`docs/deployment-pipeline.md`](docs/deployment-pipeline.md) | The worker's actual build pipeline today — every step, why it exists, static/SSR detection, retry and finalize behavior. |
 | [`schemas/deploy-jobs-v1.schema.json`](schemas/deploy-jobs-v1.schema.json) | Shared `deploy.jobs` V1 JSON Schema. |
 | [`server/_reference/deploy-jobs-contract.md`](server/_reference/deploy-jobs-contract.md) | Contract versioning and wire-format policy. |
 | [`server/README.md`](server/README.md) | Server setup, APIs, config, local workflow. |

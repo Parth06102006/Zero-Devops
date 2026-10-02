@@ -1,0 +1,29 @@
+# Assumes @sveltejs/adapter-node output (build/index.js). A repo using
+# adapter-static should be classified as a static build instead; other
+# platform adapters (vercel/netlify/cloudflare) aren't deployable via this
+# generic recipe and will fail this build with a missing build/index.js.
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --ignore-scripts
+
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine AS runtime
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=3000
+
+COPY package*.json ./
+RUN npm ci --ignore-scripts --omit=dev
+
+COPY --from=builder /app/build ./build
+
+EXPOSE 3000
+
+CMD ["node", "build"]

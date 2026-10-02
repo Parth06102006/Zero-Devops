@@ -1,0 +1,30 @@
+# Assumes a Rack-based app (config.ru) — the common ground across Rails,
+# Sinatra, and Hanami, run via rackup rather than a framework-specific
+# server command that would need to be guessed.
+FROM ruby:3.3-alpine AS builder
+
+WORKDIR /app
+
+RUN apk add --no-cache build-base
+
+COPY Gemfile Gemfile.lock* ./
+RUN bundle install --deployment --without development test
+
+COPY . .
+
+FROM ruby:3.3-alpine
+
+WORKDIR /app
+
+RUN apk add --no-cache libpq tzdata && \
+    addgroup -S app && adduser -S app -G app
+
+COPY --from=builder /usr/local/bundle /usr/local/bundle
+COPY --from=builder /app /app
+
+USER app
+
+EXPOSE 3000
+ENV RACK_ENV=production
+
+CMD ["bundle", "exec", "rackup", "--host", "0.0.0.0", "--port", "3000"]
