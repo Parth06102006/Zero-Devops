@@ -10,7 +10,9 @@ import {
 import { cn } from "@/lib/utils/cn";
 import { Logo } from "@/components/shared/logo";
 import { UserMenu } from "@/features/auth";
-import { NewDeploymentDialog } from "@/features/projects";
+import { ImportRepositoryDialog, CreateProjectWizard } from "@/features/projects";
+import { useGithubInstallation } from "@/features/github";
+import { getGithubAppInstallUrl } from "@/features/github";
 
 import type { ComponentProps } from "react";
 
@@ -36,10 +38,33 @@ const nav: readonly NavItem[] = [
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [newDeploymentOpen, setNewDeploymentOpen] = useState(false);
+  const [importRepoOpen, setImportRepoOpen] = useState(false);
+  const [createWizardOpen, setCreateWizardOpen] = useState(false);
+  const [selectedRepo, setSelectedRepo] = useState<{
+    id: number;
+    full_name: string;
+    name: string;
+    owner: string;
+    default_branch: string;
+    clone_url: string;
+    private: boolean;
+  } | null>(null);
+  const installation = useGithubInstallation();
+  const githubHref = (installation.data ? "/github" : getGithubAppInstallUrl("/github")) as LinkHref;
   const active = nav.find(
     (item) => pathname === String(item.href) || pathname.startsWith(`${String(item.href)}/`),
   );
+
+  const handleImportSelect = (repo: typeof selectedRepo) => {
+    setSelectedRepo(repo);
+    setImportRepoOpen(false);
+    setCreateWizardOpen(true);
+  };
+
+  const handleWizardComplete = (_projectId: string) => {
+    setCreateWizardOpen(false);
+    setSelectedRepo(null);
+  };
 
   return (
     <div className="min-h-dvh bg-[#050505] text-white">
@@ -57,7 +82,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             {nav.map(({ href, label, icon: Icon, soon }) => {
               const hrefStr = String(href);
               const isActive = pathname === hrefStr || pathname.startsWith(`${hrefStr}/`);
-              return <Link key={hrefStr} href={href} onClick={() => setMobileOpen(false)} className={cn("group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] transition", isActive ? "bg-white/[0.09] text-white shadow-[inset_2px_0_0_rgba(255,255,255,.8)]" : "text-white/55 hover:bg-white/[0.045] hover:text-white")}>
+              const linkHref = hrefStr === "/github" ? githubHref : href;
+              return <Link key={hrefStr} href={linkHref} onClick={() => setMobileOpen(false)} className={cn("group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] transition", isActive ? "bg-white/[0.09] text-white shadow-[inset_2px_0_0_rgba(255,255,255,.8)]" : "text-white/55 hover:bg-white/[0.045] hover:text-white")}>
                 <Icon className={cn("size-4", isActive ? "text-white" : "text-white/40 group-hover:text-white/70")} />
                 <span className="flex-1">{label}</span>{soon ? <span className="rounded-full border border-white/10 px-1.5 py-0.5 text-[8px] uppercase tracking-wider text-white/25">Soon</span> : null}
               </Link>;
@@ -78,7 +104,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="flex h-[66px] items-center gap-3 px-4 sm:px-6">
             <button onClick={() => setMobileOpen(true)} className="rounded-lg border border-white/10 p-2 text-white/60 lg:hidden" aria-label="Open sidebar"><Menu className="size-4" /></button>
             <div className="flex min-w-0 items-center gap-2 text-sm"><button className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-white/70 hover:bg-white/[0.05] hover:text-white"><span className="truncate font-medium">All Projects</span><ChevronDown className="size-3.5 text-white/35" /></button><span className="text-white/15">/</span><span className="truncate text-white/35">{active?.label ?? "Workspace"}</span></div>
-            <div className="ml-auto flex items-center gap-2"><Link href="/github" className="hidden items-center gap-2 rounded-lg px-3 py-2 text-xs text-white/50 hover:bg-white/[0.05] hover:text-white sm:flex"><Github className="size-3.5" /> GitHub</Link><Link href="/deployments" className="hidden items-center gap-2 rounded-lg px-3 py-2 text-xs text-white/50 hover:bg-white/[0.05] hover:text-white md:flex"><BarChart3 className="size-3.5" /> Activity</Link><button onClick={() => setNewDeploymentOpen(true)} className="inline-flex h-9 items-center gap-2 rounded-lg bg-white px-3.5 text-xs font-semibold text-black shadow-[0_8px_30px_rgba(255,255,255,.08)] transition hover:bg-white/90"><Rocket className="size-3.5" /> New Deployment</button></div>
+            <div className="ml-auto flex items-center gap-2"><Link href={githubHref} className="hidden items-center gap-2 rounded-lg px-3 py-2 text-xs text-white/50 hover:bg-white/[0.05] hover:text-white sm:flex"><Github className="size-3.5" /> GitHub</Link><Link href="/deployments" className="hidden items-center gap-2 rounded-lg px-3 py-2 text-xs text-white/50 hover:bg-white/[0.05] hover:text-white md:flex"><BarChart3 className="size-3.5" /> Activity</Link><button onClick={() => setImportRepoOpen(true)} className="inline-flex h-9 items-center gap-2 rounded-lg bg-white px-3.5 text-xs font-semibold text-black shadow-[0_8px_30px_rgba(255,255,255,.08)] transition hover:bg-white/90"><Rocket className="size-3.5" /> New Deployment</button></div>
           </div>
         </header>
         <main className="relative overflow-hidden">
@@ -87,7 +113,17 @@ export function AppShell({ children }: { children: ReactNode }) {
         </main>
       </div>
       {mobileOpen ? <button aria-label="Close sidebar overlay" onClick={() => setMobileOpen(false)} className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm lg:hidden" /> : null}
-      <NewDeploymentDialog open={newDeploymentOpen} onOpenChange={setNewDeploymentOpen} />
+      <ImportRepositoryDialog
+        open={importRepoOpen}
+        onOpenChange={setImportRepoOpen}
+        onSelectRepository={handleImportSelect}
+      />
+      <CreateProjectWizard
+        open={createWizardOpen}
+        onOpenChange={setCreateWizardOpen}
+        selectedRepo={selectedRepo}
+        onComplete={handleWizardComplete}
+      />
     </div>
   );
 }

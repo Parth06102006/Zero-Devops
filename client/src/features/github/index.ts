@@ -7,4 +7,6 @@ export {
   getGithubInstallation,
   listGithubRepositories,
   deleteGithubInstallation,
+  getGithubAppInstallUrl,
+  installGithubApp,
 } from "./api/github-api";

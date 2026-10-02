@@ -2,19 +2,19 @@
 
 import Link from "next/link";
 import {
-  ArrowUpRight,
   FolderKanban,
-  GitBranch,
-  Github,
   Grid2X2,
   List,
   Search,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useProjects } from "@/features/projects";
+import { useAllDeployments } from "@/features/deployments";
+import { ProjectCard } from "@/features/projects";
 
 export default function ProjectsPage() {
   const { data, isPending, isError, error } = useProjects();
+  const builds = useAllDeployments(data ?? []);
   const [search, setSearch] = useState("");
   const [list, setList] = useState(false);
 
@@ -101,47 +101,18 @@ export default function ProjectsPage() {
             list ? "space-y-2" : "grid gap-3 md:grid-cols-2 xl:grid-cols-3"
           }`}
         >
-          {filtered.map((project, index) => (
-            <Link
-              key={project.id}
-              href={`/projects/${project.id}`}
-              className={`group overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.02] transition hover:-translate-y-0.5 hover:border-white/[0.16] ${
-                list ? "flex items-center gap-4 p-4" : "p-5"
-              }`}
-            >
-              <div className="flex items-start justify-between">
-                <span
-                  className={`flex size-9 items-center justify-center rounded-lg bg-gradient-to-br ${
-                    index % 3 === 0
-                      ? "from-cyan-400/15 to-blue-500/10"
-                      : index % 3 === 1
-                        ? "from-fuchsia-400/15 to-violet-500/10"
-                        : "from-emerald-400/15 to-cyan-500/10"
-                  }`}
-                >
-                  <Github className="size-4 text-white/65" />
-                </span>
-                {!list && (
-                  <ArrowUpRight className="size-4 text-white/20 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-white/60" />
-                )}
-              </div>
-              <div className={list ? "min-w-0 flex-1" : ""}>
-                <p className="mt-4 truncate text-sm font-medium group-hover:text-white">
-                  {project.repository_name}
-                </p>
-                <p className="mt-1 truncate text-xs text-white/35">
-                  {project.repository_full_name}
-                </p>
-                <div className="mt-4 flex flex-wrap items-center gap-3 text-[10px] text-white/35">
-                  <span className="inline-flex items-center gap-1">
-                    <GitBranch className="size-3" />
-                    {project.configured_branch.replace("refs/heads/", "")}
-                  </span>
-                  <span>{new Date(project.updated_at).toLocaleDateString()}</span>
-                </div>
-              </div>
-            </Link>
-          ))}
+          {filtered.map((project) => {
+            const latestDeployment = builds?.data?.find(d => d.project_id === project.id) ?? null;
+            return (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                latestDeployment={latestDeployment}
+                variant={list ? "list" : "dashboard"}
+                onClick={() => {}}
+              />
+            );
+          })}
         </div>
       ) : (
         <div className="mt-5 rounded-2xl border border-dashed border-white/10 p-16 text-center">

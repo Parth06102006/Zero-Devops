@@ -7,14 +7,15 @@ import {
   Boxes,
   CheckCircle2,
   Clock3,
-  GitBranch,
-  Github,
+  Plus,
   Rocket,
   Sparkles,
 } from "lucide-react";
 import { useProjects } from "@/features/projects";
-import { useAllDeployments, StatusPill } from "@/features/deployments";
+import { useAllDeployments } from "@/features/deployments";
 import { useCurrentUser } from "@/features/auth";
+import { ProjectCard, DeploymentStatusBadge } from "@/features/projects";
+import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
   const projects = useProjects();
@@ -111,9 +112,9 @@ export default function DashboardPage() {
           </div>
 
           {projects.isPending ? (
-            <div className="mt-5 grid gap-2 sm:grid-cols-2">
-              {[1, 2, 3, 4].map((n) => (
-                <div key={n} className="h-28 animate-pulse rounded-xl bg-white/[0.04]" />
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <div key={n} className="h-40 animate-pulse rounded-xl bg-white/[0.04]" />
               ))}
             </div>
           ) : projects.isError ? (
@@ -121,36 +122,16 @@ export default function DashboardPage() {
               {projects.error.message}
             </div>
           ) : projects.data?.length ? (
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              {projects.data.slice(0, 6).map((project, index) => (
-                <Link
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {projects.data.slice(0, 6).map((project) => (
+                <ProjectCard
                   key={project.id}
-                  href={`/projects/${project.id}`}
-                  className="group rounded-xl border border-white/[0.08] bg-black/20 p-4 transition hover:-translate-y-0.5 hover:border-cyan-300/20"
-                >
-                  <div className="flex items-start justify-between">
-                    <span
-                      className={`flex size-8 items-center justify-center rounded-lg bg-gradient-to-br ${
-                        index % 2 === 0
-                          ? "from-cyan-400/15 to-blue-500/10"
-                          : "from-fuchsia-400/15 to-violet-500/10"
-                      }`}
-                    >
-                      <Github className="size-4 text-white/65" />
-                    </span>
-                    <span className="size-2 rounded-full bg-emerald-300 shadow-[0_0_12px_rgba(110,231,183,.5)]" />
-                  </div>
-                  <p className="mt-4 truncate text-sm font-medium group-hover:text-white">
-                    {project.repository_name}
-                  </p>
-                  <p className="mt-1 truncate text-xs text-white/35">
-                    {project.repository_full_name}
-                  </p>
-                  <div className="mt-4 flex items-center gap-2 text-[10px] text-white/35">
-                    <GitBranch className="size-3" />{" "}
-                    {project.configured_branch.replace("refs/heads/", "")}
-                  </div>
-                </Link>
+                  project={project}
+                  latestDeployment={(builds.data ?? []).find(d => d.project_id === project.id) ?? null}
+                  variant="dashboard"
+                  showActions
+                  onClick={() => {}}
+                />
               ))}
             </div>
           ) : (
@@ -158,8 +139,17 @@ export default function DashboardPage() {
               <Boxes className="mx-auto size-6 text-white/20" />
               <p className="mt-3 text-sm text-white/50">No projects yet.</p>
               <p className="mt-1 text-xs text-white/25">
-                Use New Deployment to connect a repository.
+                Import a GitHub repository to get started.
               </p>
+              <Button
+                variant="default"
+                className="mt-4 gap-2"
+                onClick={() => {
+                  // Trigger the import dialog - we'll need to handle this
+                }}
+              >
+                <Plus className="size-3.5" /> Import Repository
+              </Button>
             </div>
           )}
         </div>
@@ -197,7 +187,7 @@ export default function DashboardPage() {
                       "No revision"}
                   </span>
                 </span>
-                <StatusPill status={deployment.status} />
+                <DeploymentStatusBadge status={deployment.status} size="sm" />
               </Link>
             ))}
             {!deployments.length ? (

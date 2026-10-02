@@ -8,8 +8,14 @@ export function useGithubInstallation() {
   return useQuery({ queryKey: queryKeys.github.installation(), queryFn: ({ signal }) => getGithubInstallation(signal), retry: false });
 }
 
-export function useGithubRepositories(search = "") {
-  return useQuery({ queryKey: queryKeys.github.repositories(search), queryFn: ({ signal }) => listGithubRepositories(search, signal), staleTime: 30_000 });
+export function useGithubRepositories(search = "", enabled = true) {
+  return useQuery({ 
+    queryKey: queryKeys.github.repositories(search), 
+    queryFn: ({ signal }) => listGithubRepositories(search, signal), 
+    staleTime: 30_000,
+    enabled,
+    retry: false,
+  });
 }
 
 export function useDeleteGithubInstallation() {

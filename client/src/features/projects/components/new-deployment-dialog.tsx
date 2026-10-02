@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useGithubRepositories } from "@/features/github";
+import { useGithubRepositories, useGithubInstallation } from "@/features/github";
+import { getGithubAppInstallUrl } from "@/features/github";
 import { useCreateProject } from "../hooks/use-projects";
 import { cn } from "@/lib/utils/cn";
 
@@ -27,12 +28,15 @@ export function NewDeploymentDialog({
   const [branch, setBranch] = useState("");
   const [command, setCommand] = useState("npm run build");
   const [workingDir, setWorkingDir] = useState(".");
-  const repos = useGithubRepositories(search);
+  const installation = useGithubInstallation();
+  const repos = useGithubRepositories(search, !!installation.data);
   const create = useCreateProject();
   const selected = useMemo(
     () => repos.data?.repositories.find((repo) => repo.id === selectedId),
     [repos.data, selectedId],
   );
+
+  const isNotInstalled = !installation.isPending && !installation.data;
 
   const choose = (id: number, defaultBranch: string) => {
     setSelectedId(id);
@@ -87,13 +91,36 @@ export function NewDeploymentDialog({
               />
             </div>
             <div className="mt-2 max-h-40 overflow-auto rounded-xl border border-white/[0.08] bg-white/[0.02]">
-              {repos.isPending ? (
+              {isNotInstalled ? (
+                <div className="p-4 space-y-2 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-3">
+                    <span className="flex size-10 items-center justify-center rounded-xl bg-cyan-400/15">
+                      <Github className="size-5 text-cyan-300" />
+                    </span>
+                  </div>
+                  <p className="text-xs text-amber-200/70">GitHub App not connected</p>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => window.location.assign(getGithubAppInstallUrl("/projects"))}
+                  >
+                    <Github className="size-3.5 mr-2" /> Connect GitHub App
+                  </Button>
+                </div>
+              ) : repos.isPending ? (
                 <div className="flex items-center gap-2 p-4 text-xs text-white/40">
                   <Loader2 className="size-4 animate-spin" /> Loading repositories…
                 </div>
               ) : repos.isError ? (
-                <div className="p-4 text-xs leading-5 text-amber-200/70">
-                  GitHub repositories are unavailable. Make sure your GitHub App installation is connected.
+                <div className="p-4 space-y-2">
+                  <p className="text-xs text-amber-200/70">GitHub App not connected.</p>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => window.location.assign(getGithubAppInstallUrl("/projects"))}
+                  >
+                    <Github className="size-3.5 mr-2" /> Connect GitHub App
+                  </Button>
                 </div>
               ) : repos.data?.repositories.length ? (
                 repos.data.repositories.map((repo) => (
