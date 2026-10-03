@@ -5,10 +5,12 @@ import { Github, Link2Off, Loader2, RefreshCw, Plus } from "lucide-react";
 import { useGithubInstallation, useDeleteGithubInstallation } from "@/features/github";
 import { getGithubAppInstallUrl } from "@/features/github";
 import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/features/auth/store/auth-store";
 
 export default function GithubPage() {
   const installation = useGithubInstallation();
   const remove = useDeleteGithubInstallation();
+  const user = useAuthStore((state) => state.user);
   const data = installation.data;
 
   // Force refetch on mount to pick up new installation
@@ -57,7 +59,7 @@ export default function GithubPage() {
             <Button
               variant="default"
               className="gap-2"
-              onClick={() => window.location.assign(getGithubAppInstallUrl("/github"))}
+              onClick={() => window.location.assign(getGithubAppInstallUrl("/github", user?.id))}
             >
               <Plus className="size-3.5" /> Connect GitHub App
             </Button>
@@ -106,7 +108,7 @@ export default function GithubPage() {
             <Button
               variant="default"
               className="gap-2"
-              onClick={() => window.location.assign(getGithubAppInstallUrl("/github"))}
+              onClick={() => window.location.assign(getGithubAppInstallUrl("/github", user?.id))}
             >
               <Plus className="size-3.5" /> Connect GitHub App
             </Button>

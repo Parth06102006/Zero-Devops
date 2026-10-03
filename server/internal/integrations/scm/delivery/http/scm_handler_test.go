@@ -376,6 +376,7 @@ func TestNewSCMHandler_RouteRegistrations(t *testing.T) {
 		method string
 		path   string
 	}{
+		{http.MethodGet, "/github/install/callback"},
 		{http.MethodGet, "/integrations/scm/github/installation"},
 		{http.MethodPost, "/integrations/scm/github/installation"},
 		{http.MethodDelete, "/integrations/scm/github/installation"},

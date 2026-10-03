@@ -4,9 +4,10 @@ import { env } from "@/lib/config/env";
 import type { ApiSuccess } from "@/types/api";
 import type { GithubInstallation, GithubRepositoryList } from "@/types/domain";
 
-export function getGithubAppInstallUrl(returnTo = "/dashboard"): string {
+export function getGithubAppInstallUrl(returnTo = "/dashboard", userId?: string): string {
   const appSlug = env.NEXT_PUBLIC_GITHUB_APP_SLUG;
-  const callbackUrl = `${env.NEXT_PUBLIC_APP_URL}/github/install/callback?return_to=${encodeURIComponent(returnTo)}`;
+  const baseCallbackUrl = `${env.NEXT_PUBLIC_APP_URL}/github/install/callback?return_to=${encodeURIComponent(returnTo)}`;
+  const callbackUrl = userId ? `${baseCallbackUrl}&user_id=${encodeURIComponent(userId)}` : baseCallbackUrl;
   return `https://github.com/apps/${appSlug}/installations/new?return_to=${encodeURIComponent(callbackUrl)}`;
 }
 

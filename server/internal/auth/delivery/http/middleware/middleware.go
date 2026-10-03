@@ -77,6 +77,7 @@ func isPublicPath(c *echo.Context) bool {
 		"/auth/github/login/callback",
 		"/auth/refresh",
 		"/webhooks/github",
+		"/github/install/callback",
 		"/health",
 		"/health/live",
 		"/health/ready":

@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { useGithubRepositories, useGithubInstallation } from "@/features/github";
 import { getGithubAppInstallUrl } from "@/features/github";
 import { ProjectCard } from "./ui";
+import { useAuthStore } from "@/features/auth/store/auth-store";
 
 interface ImportRepositoryDialogProps {
   open: boolean;
@@ -41,6 +42,7 @@ export function ImportRepositoryDialog({
 
   const installation = useGithubInstallation();
   const repos = useGithubRepositories(search, !!installation.data);
+  const user = useAuthStore((state) => state.user);
 
   const filteredRepos = useMemo(() => {
     if (!repos.data) return [];
@@ -91,7 +93,7 @@ export function ImportRepositoryDialog({
               <Button
                 variant="default"
                 className="gap-2"
-                onClick={() => window.location.assign(getGithubAppInstallUrl("/projects"))}
+                onClick={() => window.location.assign(getGithubAppInstallUrl("/projects", user?.id))}
               >
                 <Plus className="size-3.5" /> Connect GitHub App
               </Button>
