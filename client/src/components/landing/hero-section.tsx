@@ -1,30 +1,118 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowUpRight, CheckCircle2, Github, ShieldCheck, Sparkles } from "lucide-react";
-import Link from "next/link";
+import { CircleDot, Code2, Play, Sparkles, Zap } from "lucide-react";
+import { GithubLoginButton } from "@/features/auth";
+import { heroSteps } from "./data/landing-content";
 
-import { Container } from "@/components/shared/container";
-import { ProductPreview } from "@/components/landing/product-preview";
+interface HeroSectionProps {
+  onOpenDemo: () => void;
+}
 
-export function HeroSection() {
+export function HeroSection({ onOpenDemo }: HeroSectionProps) {
   return (
-    <section className="relative overflow-hidden border-b border-border/70">
-      <div className="pointer-events-none absolute inset-0 bg-grid mask-fade-b opacity-50" />
-      <div className="pointer-events-none absolute -left-48 top-20 size-[34rem] rounded-full bg-primary/10 blur-3xl" />
-      <Container className="relative grid items-center gap-14 py-20 md:py-28 lg:grid-cols-[0.85fr_1.15fr] lg:gap-10 lg:py-32">
-        <div className="reveal-up flex flex-col items-start gap-7">
-          <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-primary"><Sparkles className="size-3.5" /> Git push to production</span>
-          <div className="space-y-5">
-            <h1 className="max-w-2xl text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.055em] text-foreground sm:text-6xl lg:text-7xl">Ship the product.<span className="block text-muted-foreground">Skip the platform queue.</span></h1>
-            <p className="max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">ghost detects your app, builds it, provisions the runtime, and ships a monitored deployment with TLS, logs, autoscaling, and rollback points already wired.</p>
+    <section className="mx-auto max-w-7xl px-5 pb-20 pt-20 lg:px-8 lg:pb-28 lg:pt-28">
+      <div className="grid items-center gap-16 lg:grid-cols-[.9fr_1.1fr]">
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+        >
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-3 py-1.5 text-[10px] uppercase tracking-[.18em] text-white/45">
+            <Sparkles className="size-3.5 text-fuchsia-300" /> Git push to production
           </div>
-          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row"><Link href="/login" className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-[0_12px_30px_hsl(var(--primary)/0.22)] transition-transform hover:-translate-y-0.5">Continue with GitHub <ArrowUpRight className="size-4" /></Link><Link href="#workflow" className="inline-flex h-12 items-center justify-center rounded-md border border-border bg-surface/50 px-6 text-sm font-medium text-foreground transition-colors hover:bg-surface">See the workflow</Link></div>
-          <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground"><span className="inline-flex items-center gap-1.5"><Github className="size-3.5 text-primary" /> GitHub OAuth</span><span className="inline-flex items-center gap-1.5"><CheckCircle2 className="size-3.5 text-success" /> No credit card to start</span><span className="inline-flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-accent" /> TLS and rollback included</span></div>
-        </div>
-        <motion.div initial={{ opacity: 0, x: 28 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }} className="lg:pl-4"><ProductPreview /></motion.div>
-      </Container>
-      <div className="mx-auto flex max-w-6xl items-center gap-3 px-6 pb-5 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/70"><span className="size-1.5 rounded-full bg-success" /> Systems online <span className="h-px flex-1 bg-border" /> zero-deploy / 01</div>
+          <h1 className="mt-7 max-w-3xl text-balance text-5xl font-semibold leading-[.98] tracking-[-.06em] sm:text-6xl lg:text-[76px]">
+            Deploy without becoming a <span className="gradient-text">DevOps team.</span>
+          </h1>
+          <p className="mt-6 max-w-xl text-base leading-7 text-white/40 sm:text-lg">
+            Zero-DevOps turns a configured GitHub repository into a reproducible build and deployment
+            workflow, while keeping the infrastructure visible when you need it.
+          </p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <GithubLoginButton
+              label="Continue with GitHub"
+              size="lg"
+              className="h-12 rounded-xl bg-white px-6 font-semibold text-black hover:bg-white/90"
+            />
+            <button
+              type="button"
+              onClick={onOpenDemo}
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.025] px-6 text-sm text-white/70 hover:bg-white/[0.06] hover:text-white"
+            >
+              <Play className="size-4" /> See how it works
+            </button>
+          </div>
+          <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-[11px] text-white/30">
+            <span className="inline-flex items-center gap-1.5">
+              <CircleDot className="size-3 text-emerald-300" /> GitHub OAuth
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Zap className="size-3 text-cyan-300" /> Reproducible builds
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Code2 className="size-3 text-fuchsia-300" /> Backend unchanged
+            </span>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, x: 24 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, delay: 0.15 }}
+          className="relative"
+        >
+          <div className="absolute -inset-10 bg-gradient-to-r from-cyan-400/8 via-fuchsia-500/8 to-emerald-400/8 blur-3xl" />
+          <div className="relative overflow-hidden rounded-3xl border border-white/[0.1] bg-[#080808]/90 shadow-2xl shadow-black/50">
+            <div className="flex items-center gap-2 border-b border-white/[0.07] px-5 py-4">
+              <span className="size-2 rounded-full bg-rose-400/70" />
+              <span className="size-2 rounded-full bg-amber-300/70" />
+              <span className="size-2 rounded-full bg-emerald-300/70" />
+              <span className="ml-3 font-mono text-[10px] text-white/25">
+                zero-devops / deployment-flow
+              </span>
+            </div>
+            <div className="relative p-5 sm:p-8">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {heroSteps.map(({ icon: Icon, title, subtitle }, index) => (
+                  <motion.div
+                    key={title}
+                    animate={{ y: [0, -5, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, delay: index * 0.25 }}
+                    className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-4"
+                  >
+                    <div
+                      className={`flex size-9 items-center justify-center rounded-xl bg-gradient-to-br ${
+                        index % 2 === 0
+                          ? "from-cyan-400/15 to-blue-500/10"
+                          : "from-fuchsia-400/15 to-violet-500/10"
+                      }`}
+                    >
+                      <Icon className="size-4 text-white/70" />
+                    </div>
+                    <p className="mt-4 text-xs font-medium">{title}</p>
+                    <p className="mt-1 text-[10px] leading-4 text-white/30">{subtitle}</p>
+                  </motion.div>
+                ))}
+              </div>
+              <div className="my-5 h-px bg-gradient-to-r from-cyan-300/0 via-white/15 to-fuchsia-300/0" />
+              <div className="rounded-2xl border border-white/[0.07] bg-black/50 p-4 font-mono text-[10px] leading-6 text-white/35">
+                <p>
+                  <span className="text-emerald-300/80">$</span> git push origin main
+                </p>
+                <p>
+                  <span className="text-cyan-300/80">→</span> webhook accepted · build queued
+                </p>
+                <p>
+                  <span className="text-fuchsia-300/80">→</span> worker receives immutable build job
+                </p>
+                <p>
+                  <span className="text-amber-200/70">→</span> output is published when the backend reports success
+                </p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
     </section>
   );
 }

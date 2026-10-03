@@ -3,11 +3,11 @@
 import { motion } from "framer-motion";
 import { GitBranch, MonitorCheck, PackageCheck, Rocket } from "lucide-react";
 
-import { Container } from "@/components/shared/container";
+import { Container } from "./container";
 
 const steps = [
   { icon: GitBranch, number: "01", title: "Connect a repository", description: "Authorize GitHub and choose the repo that should become a live service." },
-  { icon: PackageCheck, number: "02", title: "Let ghost detect it", description: "The platform reads the framework, package manager, build command, and runtime needs." },
+  { icon: PackageCheck, number: "02", title: "Let Zero-DevOps detect it", description: "The platform reads the framework, package manager, build command, and runtime needs." },
   { icon: Rocket, number: "03", title: "Ship on every push", description: "Builds produce immutable releases with live URLs, TLS, regions, and rollback points." },
   { icon: MonitorCheck, number: "04", title: "Operate from one place", description: "Watch status, logs, health, and deployment history without wiring separate tools." },
 ] as const;

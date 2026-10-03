@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Container } from "@/components/shared/container";
+import { Container } from "./container";
 import { Logo } from "@/components/shared/logo";
 import { siteConfig } from "@/lib/config/site";
 

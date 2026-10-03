@@ -1,50 +1,80 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { useState } from "react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-
-import { Button } from "@/components/ui/button";
-import { Container } from "@/components/shared/container";
+import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/shared/logo";
-import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { GithubLoginButton } from "@/features/auth";
 
-const links = [
-  { href: "#product", label: "Capabilities" },
-  { href: "#workflow", label: "Workflow" },
-] as const;
+interface NavbarProps {
+  onOpenDemo: () => void;
+}
 
-export function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+export function Navbar({ onOpenDemo }: NavbarProps) {
+  const [menu, setMenu] = useState(false);
 
   return (
-    <>
-      <motion.header initial={{ y: -24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? "border-b border-border/80 bg-background/85 shadow-lg shadow-black/10 backdrop-blur-xl" : "bg-transparent"}`}>
-        <Container className="flex h-[4.5rem] items-center justify-between">
-          <Logo />
-          <nav className="hidden items-center gap-8 md:flex">
-            {links.map((link) => <Link key={link.href} href={link.href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">{link.label}</Link>)}
-          </nav>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex"><Link href="/login">Log in</Link></Button>
-            <Button asChild size="sm" className="hidden sm:inline-flex"><Link href="/login">Start free <span aria-hidden>↗</span></Link></Button>
-            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setOpen((value) => !value)} aria-label={open ? "Close menu" : "Open menu"}>{open ? <X /> : <Menu />}</Button>
+    <header className="relative z-30 border-b border-white/[0.06] bg-[#050505]/65 backdrop-blur-2xl">
+      <div className="mx-auto flex h-[72px] max-w-7xl items-center gap-6 px-5 lg:px-8">
+        <Logo />
+        <div className="hidden flex-1 justify-center md:flex">
+          <span className="text-xs text-white/35">
+            Infrastructure that disappears behind your code.
+          </span>
+        </div>
+        <nav className="ml-auto hidden items-center gap-2 sm:flex">
+          <button
+            type="button"
+            onClick={onOpenDemo}
+            className="rounded-lg px-3 py-2 text-xs text-white/55 hover:bg-white/[0.05] hover:text-white"
+          >
+            Demo
+          </button>
+          <Link
+            href="/login"
+            className="rounded-lg px-3 py-2 text-xs text-white/55 hover:bg-white/[0.05] hover:text-white"
+          >
+            Login
+          </Link>
+          <GithubLoginButton
+            size="sm"
+            label="Sign Up"
+            className="h-9 rounded-lg bg-white px-4 text-xs font-semibold text-black hover:bg-white/90"
+          />
+        </nav>
+        <button
+          type="button"
+          onClick={() => setMenu((value) => !value)}
+          className="ml-auto rounded-lg border border-white/10 p-2 sm:hidden"
+          aria-label="Menu"
+        >
+          {menu ? <X className="size-4" /> : <Menu className="size-4" />}
+        </button>
+      </div>
+
+      {menu ? (
+        <div className="border-t border-white/[0.06] px-5 py-4 sm:hidden">
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                onOpenDemo();
+                setMenu(false);
+              }}
+              className="rounded-lg px-3 py-3 text-left text-sm text-white/60"
+            >
+              Demo
+            </button>
+            <Link
+              href="/login"
+              className="rounded-lg px-3 py-3 text-sm text-white/60"
+            >
+              Login
+            </Link>
+            <GithubLoginButton label="Sign Up with GitHub" className="w-full" />
           </div>
-        </Container>
-      </motion.header>
-      <AnimatePresence>
-        {open ? <motion.nav initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="sticky top-[4.5rem] z-40 overflow-hidden border-b border-border bg-background/95 px-6 py-4 backdrop-blur-xl md:hidden"><div className="mx-auto flex max-w-6xl flex-col gap-1">{links.map((link) => <Link key={link.href} href={link.href} onClick={() => setOpen(false)} className="rounded-md px-3 py-3 text-sm text-muted-foreground hover:bg-surface hover:text-foreground">{link.label}</Link>)}<Link href="/login" onClick={() => setOpen(false)} className="mt-2 rounded-md bg-primary px-3 py-3 text-center text-sm font-medium text-primary-foreground">Continue with GitHub</Link></div></motion.nav> : null}
-      </AnimatePresence>
-    </>
+        </div>
+      ) : null}
+    </header>
   );
 }

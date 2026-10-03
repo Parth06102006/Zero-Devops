@@ -35,17 +35,40 @@ const (
 	stateCookieMaxAge = 600
 )
 
+// writeCookie builds an HTTP cookie whose security attributes adapt to the
+// deployment environment:
+//
+//   - Production (COOKIE_DOMAIN is set): Secure=true, SameSite=None so the
+//     cookie travels over HTTPS between ghost.parthgarg.me (client) and
+//     dev.parthgarg.me (server) which are different origins even though they
+//     share the same registrable domain.
+//
+//   - Local development (COOKIE_DOMAIN is empty): Secure=false, SameSite=Lax
+//     so the cookie works on plain http://localhost without needing a Cloudflare
+//     Tunnel. SameSite=Lax still blocks third-party cross-site requests and is
+//     perfectly safe for same-host local development.
+//
 //nolint:gosec
 func writeCookie(token, cookieName string, expiryTime time.Duration, sameSite http.SameSite) *http.Cookie {
+	domain := cookieDomain()
+	secure := domain != "" // Secure=true only when a real domain is configured (production)
+
+	// In local dev (no COOKIE_DOMAIN), downgrade SameSite=None → Lax.
+	// Browsers refuse to store SameSite=None cookies without Secure=true, so
+	// they would silently drop the cookie on plain http://localhost.
+	if !secure && sameSite == http.SameSiteNoneMode {
+		sameSite = http.SameSiteLaxMode
+	}
+
 	return &http.Cookie{
 		Name:     cookieName,
 		Value:    token,
 		MaxAge:   int(expiryTime.Seconds()),
-		Secure:   true,
+		Secure:   secure,
 		HttpOnly: true,
-		SameSite: sameSite, // added the isNone during development since the client and server are on different origins
+		SameSite: sameSite,
 		Path:     "/",
-		Domain:   cookieDomain(),
+		Domain:   domain,
 	}
 }
 

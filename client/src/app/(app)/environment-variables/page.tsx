@@ -1,0 +1,3 @@
+export default function EnvironmentVariablesPage() {
+  return <div className="mx-auto max-w-[1100px] px-4 py-8 sm:px-6 lg:px-8"><div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-8 sm:p-12"><div className="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-fuchsia-400/15 to-cyan-400/15 text-cyan-200">⌘</div><p className="mt-6 text-xs uppercase tracking-[0.18em] text-white/30">Environment Variables</p><h1 className="mt-2 text-2xl font-semibold">Coming soon</h1><p className="mt-3 max-w-xl text-sm leading-6 text-white/40">The current backend does not expose environment-variable endpoints, so this UI stays intentionally read-only until secure server-side support is available.</p></div></div>;
+}

@@ -23,6 +23,7 @@ import (
 	_deploymentRepo "Zero_Devops/server/internal/deployments/repository/pgsql"
 	_deploymentUsecase "Zero_Devops/server/internal/deployments/usecase"
 	domain "Zero_Devops/server/internal/domain"
+	_healthHttp "Zero_Devops/server/internal/health/delivery/http"
 	_appHttp "Zero_Devops/server/internal/integrations/scm/delivery/http"
 	"Zero_Devops/server/internal/integrations/scm/github/cache"
 	_githubClient "Zero_Devops/server/internal/integrations/scm/github/client"
@@ -110,6 +111,7 @@ func run() error {
 	e := echo.New()
 
 	e.Use(middleware.NewCORS())
+	e.Use(middleware.NewCSRFOriginMiddleware())
 	e.Use(middleware.RequestIDMiddleware)
 	e.Use(middleware.RequestLoggerMiddleware(baseLogger))
 
@@ -180,6 +182,15 @@ func run() error {
 	// signal context as the outbox dispatcher and HTTP server.
 	deploymentUsecase := _deploymentUsecase.NewDeploymentUsecase(ctx, deploymentRepo, githubRepo, tokenProvider, rmqConn, projectRepo, repositoryClient)
 	_deploymentHttp.NewDeploymentHandler(e, deploymentUsecase)
+
+	// Health check handler (liveness, readiness, composite)
+	redisWrapper := _healthHttp.RedisClientWrapper{
+		PingFunc: func(pingCtx context.Context) error {
+			return rdb.Ping(pingCtx).Err()
+		},
+	}
+	rmqWrapper := _healthHttp.AMQPWrapper{Connection: rmqConn}
+	_healthHttp.NewHealthHandler(e, dbConn, redisWrapper, rmqWrapper, viper.GetString("APP_VERSION"))
 
 	// Outbox dispatcher (Task 5, plan-server-12-08.md): the only deploy.jobs
 	// producer. Manual and webhook builds both write their deployment row and

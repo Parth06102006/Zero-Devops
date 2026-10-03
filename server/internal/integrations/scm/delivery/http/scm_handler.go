@@ -9,11 +9,14 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v5"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
@@ -29,11 +32,22 @@ func NewSCMHandler(e *echo.Echo, gh domain.GithubUsecase) {
 	handler := &SCMHandler{
 		scmUsecase: gh,
 	}
+
+	// GitHub App installation callback (from GitHub redirect)
+	e.GET("/github/install/callback", handler.GithubInstallCallback)
+
+	// Uniform SCM GitHub routes
+	e.GET("/integrations/scm/github/installation", handler.GetInstallationStatus)
+	e.POST("/integrations/scm/github/installation", handler.Installation)
+	e.DELETE("/integrations/scm/github/installation", handler.DeleteInstallation)
+	e.GET("/integrations/scm/github/repositories", handler.ListRepositories)
+
+	// Backward-compatible aliases
+	e.POST("/integrations/scm/github/install", handler.Installation)
 	e.POST("/integration/scm/github/install", handler.Installation)
+	e.GET("/integration/scm/github", handler.GetInstallation)
 	e.GET("/integration/scm/github/", handler.GetInstallation)
 	e.DELETE("/integration/scm/github/delete", handler.DeleteInstallation)
-
-	// I have to change the api end points here
 	e.GET("/integrations/github/repositories", handler.ListRepositories)
 	e.GET("/integrations/github/installation", handler.GetInstallationStatus)
 }
@@ -70,6 +84,103 @@ func (inst *SCMHandler) Installation(c *echo.Context) error {
 
 	log.Info("GitHub App installed successfully", zap.String("user_id", userID))
 	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(nil, "", reqID, helper.WithMessage("Github App Installed Successfully")))
+}
+
+// GithubInstallCallback handles the GitHub App installation redirect from GitHub.
+// It completes the installation server-side and redirects to the frontend.
+func (inst *SCMHandler) GithubInstallCallback(c *echo.Context) error {
+	reqID := middleware.GetRequestID(c)
+	log := middleware.LoggerFromContext(c.Request().Context())
+
+	code := strings.TrimSpace(c.QueryParam("code"))
+	installationID := c.QueryParam("installation_id")
+	setupAction := c.QueryParam("setup_action")
+	returnTo := c.QueryParam("return_to")
+	userIDFromURL := c.QueryParam("user_id")
+
+	if returnTo == "" {
+		returnTo = "/projects"
+	}
+
+	frontendURL := viper.GetString("FRONTEND_URL")
+	if frontendURL == "" {
+		log.Error("FRONTEND_URL not configured")
+		return c.JSON(http.StatusInternalServerError, helper.BuildErrorResponse("frontend not configured", fmt.Errorf("FRONTEND_URL not set"), reqID))
+	}
+
+	// Handle installation update flow (repo selection changed) - no code exchange needed
+	if installationID != "" && setupAction == "update" {
+		redirectURL := fmt.Sprintf("%s%s", frontendURL, returnTo)
+		log.Info("GitHub App installation updated, redirecting to frontend", zap.String("redirect_url", redirectURL))
+		return c.Redirect(http.StatusTemporaryRedirect, redirectURL)
+	}
+
+	// Handle initial OAuth flow - complete installation server-side
+	if code != "" {
+		ctx := c.Request().Context()
+
+		// First try to get userID from URL parameter (passed by frontend)
+		userID := userIDFromURL
+		cookieValue := ""
+
+		// Fallback: Extract userID from JWT cookie manually (since this path skips auth middleware)
+		if userID == "" {
+			if cookie, err := c.Cookie("access_token"); err == nil && cookie.Value != "" {
+				cookieValue = cookie.Value
+				secretKey := viper.GetString("JWT_SECRET")
+				if secretKey != "" {
+					if parsedToken, err := jwt.Parse(cookie.Value, func(t *jwt.Token) (interface{}, error) {
+						if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+							return nil, fmt.Errorf("unexpected signing method")
+						}
+						return []byte(secretKey), nil
+					}); err == nil && parsedToken.Valid {
+						if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok {
+							if uid, ok := claims["user_id"].(string); ok {
+								userID = uid
+							}
+						}
+					} else {
+						log.Warn("JWT parse failed", zap.Error(err))
+					}
+				} else {
+					log.Warn("JWT_SECRET not configured")
+				}
+			} else {
+				log.Warn("access_token cookie not found", zap.Error(err))
+			}
+		}
+
+		if userID == "" {
+			log.Warn("User ID not found in URL or cookie, redirecting to frontend for manual completion",
+				zap.String("url_user_id_present", fmt.Sprintf("%v", userIDFromURL != "")),
+				zap.String("cookie_present", fmt.Sprintf("%v", cookieValue != "")),
+				zap.String("cookie_length", fmt.Sprintf("%d", len(cookieValue))),
+			)
+			callbackURL := fmt.Sprintf("%s/github/install/callback?code=%s&return_to=%s", frontendURL, url.QueryEscape(code), url.QueryEscape(returnTo))
+			return c.Redirect(http.StatusTemporaryRedirect, callbackURL)
+		}
+
+		log.Info("Installing GitHub App", zap.String("user_id", userID), zap.String("source", func() string { if userIDFromURL != "" { return "url" }; return "cookie" }()))
+		client := createProductionClient()
+
+		err := inst.scmUsecase.InstallGithubApp(ctx, client, code, userID)
+		if err != nil {
+			log.Error("Failed to install GitHub app", zap.Error(err), zap.String("user_id", userID))
+			// Redirect to frontend with error
+			errorURL := fmt.Sprintf("%s/github?error=%s", frontendURL, url.QueryEscape(err.Error()))
+			return c.Redirect(http.StatusTemporaryRedirect, errorURL)
+		}
+
+		log.Info("GitHub App installed successfully", zap.String("user_id", userID))
+		redirectURL := fmt.Sprintf("%s%s", frontendURL, returnTo)
+		return c.Redirect(http.StatusTemporaryRedirect, redirectURL)
+	}
+
+	// No code - redirect to GitHub settings page on frontend
+	redirectURL := fmt.Sprintf("%s/github", frontendURL)
+	log.Info("No code provided, redirecting to GitHub settings", zap.String("redirect_url", redirectURL))
+	return c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 }
 
 // GetInstallation returns the current user's GitHub App installation

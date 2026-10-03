@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -85,6 +86,11 @@ func (g *githubAppUsecase) InstallGithubApp(ctx context.Context, client *http.Cl
 	githubAppClientSecret := viper.GetString("GITHUB_APP_CLIENT_SECRET")
 	githubAppID := viper.GetInt64("GITHUB_APP_ID")
 
+	if githubAppClientID == "" || githubAppClientSecret == "" || githubAppID == 0 {
+		log.Error("GitHub App credentials not configured")
+		return fmt.Errorf("github app credentials missing")
+	}
+
 	data := url.Values{}
 	data.Add("client_id", githubAppClientID)
 	data.Add("client_secret", githubAppClientSecret)
@@ -111,6 +117,7 @@ func (g *githubAppUsecase) InstallGithubApp(ctx context.Context, client *http.Cl
 		}
 	}()
 
+	log.Info("GitHub token exchange response", zap.Int("status", response.StatusCode))
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
 		return domain.ErrInvalidCode
 	}
@@ -141,6 +148,7 @@ func (g *githubAppUsecase) InstallGithubApp(ctx context.Context, client *http.Cl
 		}
 	}()
 
+	log.Info("GitHub installations fetch response", zap.Int("status", responseInstallation.StatusCode))
 	if responseInstallation.StatusCode < 200 || responseInstallation.StatusCode >= 300 {
 		return domain.ErrGithubInstallationFetchFailed
 	}
@@ -150,8 +158,10 @@ func (g *githubAppUsecase) InstallGithubApp(ctx context.Context, client *http.Cl
 		return err
 	}
 
+	log.Info("GitHub installations received", zap.Int("count", len(githubAppInstallationList.Installations)), zap.Int64("expected_app_id", githubAppID))
 	for _, inst := range githubAppInstallationList.Installations {
-		if inst.Account.Type == "User" && inst.AppID == githubAppID {
+		log.Info("Found installation", zap.Int64("installation_id", inst.ID), zap.String("account_type", inst.Account.Type), zap.String("account_login", inst.Account.Login), zap.Int64("app_id", inst.AppID))
+		if (inst.Account.Type == "User" || inst.Account.Type == "Organization") && inst.AppID == githubAppID {
 			githubAppInstallation := domain.GithubInstallation{
 				UserID:         userID,
 				InstallationID: inst.ID,
@@ -163,8 +173,12 @@ func (g *githubAppUsecase) InstallGithubApp(ctx context.Context, client *http.Cl
 			}
 			err := g.githubRepo.StoreInstallation(ctx, &githubAppInstallation)
 			if err != nil {
+				log.Error("Failed to store installation", zap.Error(err), zap.Int64("installation_id", inst.ID))
 				return err
 			}
+			log.Info("Stored GitHub installation", zap.String("user_id", userID), zap.Int64("installation_id", inst.ID), zap.String("account_type", inst.Account.Type))
+		} else {
+			log.Info("Skipping installation (type or app_id mismatch)", zap.String("account_type", inst.Account.Type), zap.Int64("app_id", inst.AppID), zap.Int64("expected_app_id", githubAppID))
 		}
 	}
 	return nil

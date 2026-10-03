@@ -135,8 +135,10 @@ func TestLogin_Success(t *testing.T) {
 	if stateCookie.SameSite != http.SameSiteLaxMode {
 		t.Errorf("expected gh_oauth_state cookie SameSite=Lax, got %v", stateCookie.SameSite)
 	}
-	if !stateCookie.Secure {
-		t.Error("expected gh_oauth_state cookie to be Secure")
+	// In local dev (COOKIE_DOMAIN=""), Secure must be false so the cookie
+	// works on plain http://localhost without a Cloudflare Tunnel.
+	if stateCookie.Secure {
+		t.Error("expected gh_oauth_state cookie Secure=false in local dev (no COOKIE_DOMAIN)")
 	}
 }
 
@@ -218,11 +220,13 @@ func TestRefresh_Success(t *testing.T) {
 	if accessCookie == nil {
 		t.Fatal("expected access_token cookie to be set")
 	}
-	if accessCookie.SameSite != http.SameSiteNoneMode {
-		t.Errorf("expected access_token cookie SameSite=None, got %v", accessCookie.SameSite)
+	// In local dev (COOKIE_DOMAIN=""), SameSite=None is downgraded to Lax and
+	// Secure is set to false so the cookie works on plain http://localhost.
+	if accessCookie.SameSite != http.SameSiteLaxMode {
+		t.Errorf("expected access_token cookie SameSite=Lax in local dev, got %v", accessCookie.SameSite)
 	}
-	if !accessCookie.Secure {
-		t.Error("expected access_token cookie to be Secure")
+	if accessCookie.Secure {
+		t.Error("expected access_token cookie Secure=false in local dev (no COOKIE_DOMAIN)")
 	}
 	if accessCookie.Domain != "" {
 		t.Errorf("expected host-only access_token cookie when COOKIE_DOMAIN is unset, got Domain=%q", accessCookie.Domain)
@@ -232,11 +236,11 @@ func TestRefresh_Success(t *testing.T) {
 	if refreshCookie == nil {
 		t.Fatal("expected refresh_token cookie to be set")
 	}
-	if refreshCookie.SameSite != http.SameSiteNoneMode {
-		t.Errorf("expected refresh_token cookie SameSite=None, got %v", refreshCookie.SameSite)
+	if refreshCookie.SameSite != http.SameSiteLaxMode {
+		t.Errorf("expected refresh_token cookie SameSite=Lax in local dev, got %v", refreshCookie.SameSite)
 	}
-	if !refreshCookie.Secure {
-		t.Error("expected refresh_token cookie to be Secure")
+	if refreshCookie.Secure {
+		t.Error("expected refresh_token cookie Secure=false in local dev (no COOKIE_DOMAIN)")
 	}
 	if refreshCookie.Domain != "" {
 		t.Errorf("expected host-only refresh_token cookie when COOKIE_DOMAIN is unset, got Domain=%q", refreshCookie.Domain)
@@ -667,22 +671,24 @@ func TestLoginCallback_Success(t *testing.T) {
 	if accessCookie == nil {
 		t.Fatal("expected access_token cookie to be set")
 	}
-	if accessCookie.SameSite != http.SameSiteNoneMode {
-		t.Errorf("expected access_token cookie SameSite=None, got %v", accessCookie.SameSite)
+	// In local dev (COOKIE_DOMAIN=""), SameSite=None is downgraded to Lax and
+	// Secure is false so the cookie works on plain http://localhost.
+	if accessCookie.SameSite != http.SameSiteLaxMode {
+		t.Errorf("expected access_token cookie SameSite=Lax in local dev, got %v", accessCookie.SameSite)
 	}
-	if !accessCookie.Secure {
-		t.Error("expected access_token cookie to be Secure")
+	if accessCookie.Secure {
+		t.Error("expected access_token cookie Secure=false in local dev (no COOKIE_DOMAIN)")
 	}
 
 	refreshCookie := findCookie(cookies, "refresh_token")
 	if refreshCookie == nil {
 		t.Fatal("expected refresh_token cookie to be set")
 	}
-	if refreshCookie.SameSite != http.SameSiteNoneMode {
-		t.Errorf("expected refresh_token cookie SameSite=None, got %v", refreshCookie.SameSite)
+	if refreshCookie.SameSite != http.SameSiteLaxMode {
+		t.Errorf("expected refresh_token cookie SameSite=Lax in local dev, got %v", refreshCookie.SameSite)
 	}
-	if !refreshCookie.Secure {
-		t.Error("expected refresh_token cookie to be Secure")
+	if refreshCookie.Secure {
+		t.Error("expected refresh_token cookie Secure=false in local dev (no COOKIE_DOMAIN)")
 	}
 }
 

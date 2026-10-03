@@ -1,22 +1,225 @@
-import { Activity, ArrowRight, CheckCircle2, GitBranch, Rocket, Settings, ShieldCheck } from "lucide-react";
+"use client";
+
 import Link from "next/link";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = { title: "Overview" };
-
-const stats = [
-  { label: "Deployments", value: "—", detail: "Connect a repo to start", icon: Rocket },
-  { label: "Projects", value: "—", detail: "No projects yet", icon: GitBranch },
-  { label: "GitHub status", value: "Ready", detail: "OAuth connection available", icon: ShieldCheck },
-  { label: "System status", value: "Online", detail: "API and workers available", icon: Activity },
-] as const;
-
-const workflow = [
-  ["01", "Connect a repository", "Authorize GitHub and choose the repo that should become a live service."],
-  ["02", "Let ghost detect it", "Framework, package manager, build command, and runtime needs are identified."],
-  ["03", "Ship on every push", "Builds produce immutable releases with live URLs, TLS, and rollback points."],
-] as const;
+import {
+  Activity,
+  ArrowUpRight,
+  Boxes,
+  CheckCircle2,
+  Clock3,
+  Plus,
+  Rocket,
+  Sparkles,
+} from "lucide-react";
+import { useProjects } from "@/features/projects";
+import { useAllDeployments } from "@/features/deployments";
+import { useCurrentUser } from "@/features/auth";
+import { ProjectCard, DeploymentStatusBadge } from "@/features/projects";
+import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
-  return <div className="flex flex-col gap-10"><section className="relative overflow-hidden rounded-lg border border-primary/25 bg-card p-6 surface-glow md:p-8"><div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-primary/10 blur-3xl" /><div className="relative max-w-3xl"><span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-primary"><CheckCircle2 className="size-3.5" /> Workspace ready</span><h1 className="mt-5 text-3xl font-semibold leading-tight tracking-[-0.04em] text-foreground sm:text-4xl">Your path from commit to production starts here.</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">Connect GitHub, let ghost detect your app, then ship monitored deployments with TLS, logs, autoscaling, and rollback points already wired.</p><div className="mt-6 flex flex-wrap gap-3"><Link href="/deployments" className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground">View deployments <ArrowRight className="size-4" /></Link><Link href="/settings" className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-surface"><Settings className="size-4" /> Settings</Link></div></div></section><section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{stats.map(({ label, value, detail, icon: Icon }) => <div key={label} className="rounded-md border border-border bg-card p-4"><div className="flex items-center justify-between"><p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{label}</p><Icon className="size-4 text-primary" /></div><p className="mt-5 text-2xl font-semibold text-foreground">{value}</p><p className="mt-1 text-xs text-muted-foreground">{detail}</p></div>)}</section><section><div className="flex items-end justify-between gap-4"><div><p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">Getting started</p><h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-foreground">A deployment workflow that stays visible</h2></div><span className="hidden font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground sm:block">connect / detect / ship</span></div><div className="mt-5 grid gap-3 lg:grid-cols-3">{workflow.map(([number, title, description]) => <article key={number} className="min-h-48 rounded-md border border-border bg-card p-5 transition-colors hover:border-primary/40"><span className="font-mono text-xs text-primary">{number}</span><h3 className="mt-10 text-sm font-medium text-foreground">{title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p></article>)}</div></section><section className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]"><div className="rounded-md border border-border bg-card p-5"><div className="flex items-start justify-between"><div><h2 className="font-medium text-foreground">Recent activity</h2><p className="mt-1 text-sm text-muted-foreground">Builds, releases, and health events will appear here.</p></div><Activity className="size-4 text-primary" /></div><div className="mt-6 rounded-md border border-dashed border-border p-7 text-center"><p className="text-sm font-medium text-foreground">No activity yet</p><p className="mt-1 text-sm text-muted-foreground">Connect a GitHub repository to see your first deployment.</p></div></div><div className="rounded-md border border-border bg-surface p-5"><h2 className="font-medium text-foreground">Quick actions</h2><div className="mt-4 grid gap-2"><Link href="/deployments" className="flex items-center justify-between rounded-md border border-border bg-card p-3 text-sm hover:border-primary/40"><span className="flex items-center gap-3"><Rocket className="size-4 text-primary" /> View deployments</span><ArrowRight className="size-4 text-muted-foreground" /></Link><Link href="/settings" className="flex items-center justify-between rounded-md border border-border bg-card p-3 text-sm hover:border-primary/40"><span className="flex items-center gap-3"><Settings className="size-4 text-primary" /> Manage account</span><ArrowRight className="size-4 text-muted-foreground" /></Link></div></div></section></div>;
+  const projects = useProjects();
+  const user = useCurrentUser();
+  const builds = useAllDeployments(projects.data ?? []);
+  const deployments = (builds.data ?? []).sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
+  const successful = deployments.filter((d) => d.status === "success").length;
+  const active = deployments.filter(
+    (d) => d.status === "pending" || d.status === "building",
+  ).length;
+
+  const statCards = [
+    {
+      label: "Projects",
+      value: projects.data?.length ?? 0,
+      icon: Boxes,
+      tone: "from-cyan-400/20 to-blue-500/5",
+    },
+    {
+      label: "Deployments",
+      value: deployments.length,
+      icon: Rocket,
+      tone: "from-fuchsia-500/20 to-purple-500/5",
+    },
+    {
+      label: "Successful builds",
+      value: successful,
+      icon: CheckCircle2,
+      tone: "from-emerald-400/20 to-cyan-400/5",
+    },
+    {
+      label: "Active builds",
+      value: active,
+      icon: Activity,
+      tone: "from-amber-400/20 to-rose-400/5",
+    },
+  ];
+
+  return (
+    <div className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8">
+      {/* Header */}
+      <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-medium text-white/35">Overview</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-[-0.035em]">
+            Good to see you
+            {user.data?.user.username ? `, ${user.data.user.username}` : ""}.
+          </h1>
+          <p className="mt-1 text-sm text-white/35">
+            Your repositories, builds and deployment activity in one place.
+          </p>
+        </div>
+        <Link
+          href="/projects"
+          className="inline-flex w-fit items-center gap-2 rounded-lg border border-white/10 px-3.5 py-2 text-xs text-white/65 hover:bg-white/[0.05] hover:text-white"
+        >
+          Manage projects <ArrowUpRight className="size-3.5" />
+        </Link>
+      </div>
+
+      {/* Metrics Row */}
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {statCards.map(({ label, value, icon: Icon, tone }) => (
+          <div
+            key={label}
+            className="relative overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.025] p-4"
+          >
+            <div
+              className={`pointer-events-none absolute -right-10 -top-10 size-28 rounded-full bg-gradient-to-br ${tone} blur-2xl`}
+            />
+            <div className="relative flex items-center justify-between">
+              <span className="text-xs text-white/40">{label}</span>
+              <Icon className="size-4 text-white/35" />
+            </div>
+            <p className="relative mt-5 text-2xl font-semibold">{value}</p>
+          </div>
+        ))}
+      </section>
+
+      {/* Projects & Activity Grid */}
+      <section className="mt-6 grid gap-4 xl:grid-cols-[1.35fr_.65fr]">
+        {/* Projects panel */}
+        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Projects</p>
+              <p className="mt-1 text-xs text-white/35">Configured repositories ready to build.</p>
+            </div>
+            <Link href="/projects" className="text-xs text-white/45 hover:text-white">
+              View all
+            </Link>
+          </div>
+
+          {projects.isPending ? (
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <div key={n} className="h-40 animate-pulse rounded-xl bg-white/[0.04]" />
+              ))}
+            </div>
+          ) : projects.isError ? (
+            <div className="mt-5 rounded-xl border border-rose-400/15 bg-rose-400/5 p-4 text-xs text-rose-200/70">
+              {projects.error.message}
+            </div>
+          ) : projects.data?.length ? (
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {projects.data.slice(0, 6).map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  latestDeployment={(builds.data ?? []).find(d => d.project_id === project.id) ?? null}
+                  variant="dashboard"
+                  showActions
+                  onClick={() => {}}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="mt-5 rounded-xl border border-dashed border-white/10 p-10 text-center">
+              <Boxes className="mx-auto size-6 text-white/20" />
+              <p className="mt-3 text-sm text-white/50">No projects yet.</p>
+              <p className="mt-1 text-xs text-white/25">
+                Import a GitHub repository to get started.
+              </p>
+              <Button
+                variant="default"
+                className="mt-4 gap-2"
+                onClick={() => {
+                  // Trigger the import dialog - we'll need to handle this
+                }}
+              >
+                <Plus className="size-3.5" /> Import Repository
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Recent activity panel */}
+        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Recent activity</p>
+              <p className="mt-1 text-xs text-white/35">Latest builds across your projects.</p>
+            </div>
+            <Activity className="size-4 text-white/25" />
+          </div>
+          <div className="mt-5 space-y-2">
+            {deployments.slice(0, 6).map((deployment) => (
+              <Link
+                key={deployment.id}
+                href={
+                  deployment.project_id
+                    ? `/projects/${deployment.project_id}`
+                    : "/deployments"
+                }
+                className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-black/20 p-3 hover:bg-white/[0.04]"
+              >
+                <span className="flex size-8 items-center justify-center rounded-lg bg-white/[0.04]">
+                  <Rocket className="size-3.5 text-white/40" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-xs text-white/70">
+                    Build #{deployment.build_number ?? "—"}
+                  </span>
+                  <span className="mt-0.5 block truncate text-[10px] text-white/30">
+                    {deployment.commit_sha?.slice(0, 7) ??
+                      deployment.requested_ref ??
+                      "No revision"}
+                  </span>
+                </span>
+                <DeploymentStatusBadge status={deployment.status} size="sm" />
+              </Link>
+            ))}
+            {!deployments.length ? (
+              <div className="rounded-xl border border-dashed border-white/10 p-8 text-center">
+                <Clock3 className="mx-auto size-5 text-white/20" />
+                <p className="mt-2 text-xs text-white/35">No deployment activity yet.</p>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </section>
+
+      {/* Deployment flow explainer banner */}
+      <section className="mt-4 rounded-2xl border border-white/[0.08] bg-gradient-to-r from-cyan-400/[0.05] via-fuchsia-500/[0.035] to-emerald-400/[0.05] p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-white/[0.06]">
+            <Sparkles className="size-4 text-cyan-200" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium">Zero-DevOps deployment flow</p>
+            <p className="mt-1 text-xs leading-5 text-white/35">
+              GitHub push → webhook → build queue → worker → immutable build → deployment.
+            </p>
+          </div>
+          <Link
+            href="/deployments"
+            className="inline-flex items-center gap-2 text-xs text-white/55 hover:text-white"
+          >
+            Open activity <ArrowUpRight className="size-3.5" />
+          </Link>
+        </div>
+      </section>
+    </div>
+  );
 }
