@@ -16,17 +16,19 @@ import (
 )
 
 type workerUsecase struct {
-	queueClient      domain.QueueUsecase
-	repo             domain.DeploymentRepository
-	artifactUploader domain.UploadUsecase
+	queueClient        domain.QueueUsecase
+	repo               domain.DeploymentRepository
+	artifactUploader   domain.UploadUsecase
+	credentialProvider domain.CloneCredentialProvider
 }
 
 // NewWorkerUsecase creates a new WorkerUsecase with the given dependencies.
-func NewWorkerUsecase(queueClient domain.QueueUsecase, repo domain.DeploymentRepository, artifactUploader domain.UploadUsecase) domain.WorkerUsecase {
+func NewWorkerUsecase(queueClient domain.QueueUsecase, repo domain.DeploymentRepository, artifactUploader domain.UploadUsecase, credentialProvider domain.CloneCredentialProvider) domain.WorkerUsecase {
 	return &workerUsecase{
-		queueClient:      queueClient,
-		repo:             repo,
-		artifactUploader: artifactUploader,
+		queueClient:        queueClient,
+		repo:               repo,
+		artifactUploader:   artifactUploader,
+		credentialProvider: credentialProvider,
 	}
 }
 
@@ -84,7 +86,12 @@ func (w *workerUsecase) StartWorker(baseLogger *zap.Logger) error {
 
 		logger.Info("received deploy job message", zap.Uint64("delivery_tag", msg.DeliveryTag))
 
-		err = deployments.ProcessDeployment(ctx, w.repo, job, w.artifactUploader, w.queueClient, job.RetryCount, logger)
+		credential, credentialErr := w.credentialProvider.GetCloneCredential(ctx, job.DeploymentID)
+		if credentialErr != nil {
+			err = fmt.Errorf("get clone credential: %w", credentialErr)
+		} else {
+			err = deployments.ProcessDeployment(ctx, w.repo, job, credential, w.artifactUploader, w.queueClient, job.RetryCount, logger)
+		}
 
 		maxRetriesCount := viper.GetInt("MAX_RETRIES_COUNT")
 

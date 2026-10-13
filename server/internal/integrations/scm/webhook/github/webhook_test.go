@@ -219,6 +219,9 @@ func (f *fakeDeploymentRepository) GetByUserID(_ context.Context, _ string) ([]d
 func (f *fakeDeploymentRepository) GetByID(_ context.Context, _, _ string) (*domain.Deployment, error) {
 	return nil, domain.ErrNotFound
 }
+func (f *fakeDeploymentRepository) GetInternalByID(_ context.Context, _ string) (*domain.Deployment, error) {
+	return nil, domain.ErrNotFound
+}
 func (f *fakeDeploymentRepository) GetByProjectID(_ context.Context, _, _ string) ([]domain.Deployment, error) {
 	return nil, nil
 }

@@ -6,6 +6,7 @@ import (
 	"context"
 	"net/http"
 	"path"
+	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v5"
@@ -93,6 +94,11 @@ func isPublicPath(c *echo.Context) bool {
 // Skipper determines if a request should skip authentication
 func (a *AuthMiddlewareHandler) Skipper(c *echo.Context) bool {
 	if c.Request().Method == http.MethodOptions {
+		return true
+	}
+	// Internal worker endpoints are authenticated by the dedicated worker
+	// middleware, never by a browser session JWT.
+	if strings.HasPrefix(c.Request().URL.Path, "/internal/") {
 		return true
 	}
 	return isPublicPath(c)

@@ -1,6 +1,7 @@
 package deployments
 
 import (
+	"Zero_Devops/worker_server/internal/domain"
 	"context"
 	"os"
 	"os/exec"
@@ -97,7 +98,7 @@ func TestValidateCloneURL_RejectsNonGithubHost(t *testing.T) {
 }
 
 func TestCloneRepo_RejectsInvalidCommitSHA(t *testing.T) {
-	if _, err := cloneRepo("https://github.com/user/repo.git", "deployment-id", "not-a-sha"); err == nil {
+	if _, err := cloneRepo("https://github.com/user/repo.git", "deployment-id", "not-a-sha", domain.CloneCredential{}); err == nil {
 		t.Fatal("cloneRepo() = nil, want error for invalid commit SHA")
 	}
 }

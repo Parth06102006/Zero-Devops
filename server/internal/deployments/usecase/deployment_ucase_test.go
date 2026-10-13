@@ -26,6 +26,10 @@ func (m *deploymentRepoMock) GetByUserID(ctx context.Context, userID string) ([]
 	return nil, nil
 }
 
+func (m *deploymentRepoMock) GetInternalByID(_ context.Context, _ string) (*domain.Deployment, error) {
+	return nil, domain.ErrNotFound
+}
+
 func (m *deploymentRepoMock) GetByID(ctx context.Context, userID, id string) (*domain.Deployment, error) {
 	if m.getIDFn != nil {
 		return m.getIDFn(ctx, userID, id)

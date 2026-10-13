@@ -18,6 +18,7 @@ import (
 	_userRepo "Zero_Devops/server/internal/auth/repository/pgsql"
 	_authUcase "Zero_Devops/server/internal/auth/usecase"
 	_authProvider "Zero_Devops/server/internal/auth/usecase/auth_provider"
+	_deploymentCredentials "Zero_Devops/server/internal/deployments/credentials"
 	_deploymentHttp "Zero_Devops/server/internal/deployments/delivery/http"
 	_outboxDispatcher "Zero_Devops/server/internal/deployments/dispatcher"
 	_deploymentRepo "Zero_Devops/server/internal/deployments/repository/pgsql"
@@ -183,6 +184,8 @@ func run() error {
 	// signal context as the outbox dispatcher and HTTP server.
 	deploymentUsecase := _deploymentUsecase.NewDeploymentUsecase(ctx, deploymentRepo, githubRepo, tokenProvider, rmqConn, projectRepo, repositoryClient)
 	_deploymentHttp.NewDeploymentHandler(e, deploymentUsecase)
+	workerCredentialUsecase := _deploymentCredentials.New(deploymentRepo, githubRepo, tokenProvider)
+	_deploymentHttp.NewWorkerCredentialHandler(e, workerCredentialUsecase, middleware.WorkerAuthMiddleware)
 
 	// Health check handler (liveness, readiness, composite)
 	redisWrapper := _healthHttp.RedisClientWrapper{
