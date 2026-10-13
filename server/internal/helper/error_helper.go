@@ -60,9 +60,9 @@ func GetStatusCode(err error) int {
 		return http.StatusInternalServerError
 	case domain.ErrNotFound:
 		return http.StatusNotFound
-	case domain.ErrConflict:
+	case domain.ErrConflict, domain.ErrInvalidStatus, domain.ErrInstallationOwnershipConflict:
 		return http.StatusConflict
-	case domain.ErrCommandDenied:
+	case domain.ErrCommandDenied, domain.ErrBadParamInput:
 		return http.StatusBadRequest
 	case domain.ErrMissingGithubEventHeader,
 		domain.ErrMissingGithubDeliveryHeader,

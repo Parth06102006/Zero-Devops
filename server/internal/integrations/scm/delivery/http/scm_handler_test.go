@@ -21,6 +21,8 @@ type mockGithubUsecase struct {
 	deleteFn               func(ctx context.Context, userID string) error
 	listRepositoriesFn     func(ctx context.Context, userID, cursor, query string, perPage int) (*domain.RepositoryList, error)
 	getRepositoryDetailsFn func(ctx context.Context, userID string, repoID int64) (*domain.RepositoryPicker, error)
+	listInstallationsFn    func(ctx context.Context, userID string) ([]*domain.GithubInstallation, error)
+	updateConnFn           func(ctx context.Context, userID, installationDBID string, status domain.GithubConnectionStatus) (*domain.GithubInstallation, error)
 }
 
 func (m *mockGithubUsecase) InstallGithubApp(ctx context.Context, client *http.Client, code, userID string) error {
@@ -60,6 +62,20 @@ func (m *mockGithubUsecase) GetRepositoryDetails(ctx context.Context, userID str
 
 func (m *mockGithubUsecase) InvalidateRepositoryCache(_ context.Context, _ int64) error {
 	return nil
+}
+
+func (m *mockGithubUsecase) ListGithubAppInstallations(ctx context.Context, userID string) ([]*domain.GithubInstallation, error) {
+	if m.listInstallationsFn != nil {
+		return m.listInstallationsFn(ctx, userID)
+	}
+	return nil, nil
+}
+
+func (m *mockGithubUsecase) UpdateConnectionStatus(ctx context.Context, userID, installationDBID string, status domain.GithubConnectionStatus) (*domain.GithubInstallation, error) {
+	if m.updateConnFn != nil {
+		return m.updateConnFn(ctx, userID, installationDBID, status)
+	}
+	return &domain.GithubInstallation{ID: installationDBID, UserID: userID, ConnectionStatus: status}, nil
 }
 
 func newSCMTestContext(method, target string) (*httptest.ResponseRecorder, *echo.Context) {
@@ -381,6 +397,7 @@ func TestNewSCMHandler_RouteRegistrations(t *testing.T) {
 		{http.MethodPost, "/integrations/scm/github/installation"},
 		{http.MethodDelete, "/integrations/scm/github/installation"},
 		{http.MethodGet, "/integrations/scm/github/repositories"},
+		{http.MethodGet, "/integrations/scm/github/install"},
 		{http.MethodPost, "/integrations/scm/github/install"},
 		{http.MethodPost, "/integration/scm/github/install"},
 		{http.MethodGet, "/integration/scm/github"},
@@ -388,6 +405,10 @@ func TestNewSCMHandler_RouteRegistrations(t *testing.T) {
 		{http.MethodDelete, "/integration/scm/github/delete"},
 		{http.MethodGet, "/integrations/github/repositories"},
 		{http.MethodGet, "/integrations/github/installation"},
+		{http.MethodGet, "/integrations/scm/github/installations"},
+		{http.MethodGet, "/integrations/github/installations"},
+		{http.MethodPatch, "/integrations/scm/github/installation"},
+		{http.MethodPatch, "/integrations/github/installation"},
 	}
 
 	for _, ep := range endpoints {
@@ -402,5 +423,89 @@ func TestNewSCMHandler_RouteRegistrations(t *testing.T) {
 				t.Errorf("route %s %s was not found by router", ep.method, ep.path)
 			}
 		})
+	}
+}
+
+func TestUpdateConnectionStatus_HandlerSuccess(t *testing.T) {
+	rec, c := newSCMTestContext(http.MethodPatch, "/integrations/scm/github/installation")
+	setUserID(c, "user-123")
+	reqBody := `{"id":"inst-1","connection_status":"connected"}`
+	(*c).SetRequest(httptest.NewRequest(http.MethodPatch, "/integrations/scm/github/installation", strings.NewReader(reqBody)))
+	(*c).Request().Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
+	handler := &SCMHandler{
+		scmUsecase: &mockGithubUsecase{
+			updateConnFn: func(_ context.Context, userID, id string, status domain.GithubConnectionStatus) (*domain.GithubInstallation, error) {
+				return &domain.GithubInstallation{ID: id, UserID: userID, ConnectionStatus: status}, nil
+			},
+		},
+	}
+
+	if err := handler.UpdateConnectionStatus(c); err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK, got %d", rec.Code)
+	}
+}
+
+func TestUpdateConnectionStatus_HandlerInvalidStatus(t *testing.T) {
+	rec, c := newSCMTestContext(http.MethodPatch, "/integrations/scm/github/installation")
+	setUserID(c, "user-123")
+	reqBody := `{"id":"inst-1","connection_status":"invalid"}`
+	(*c).SetRequest(httptest.NewRequest(http.MethodPatch, "/integrations/scm/github/installation", strings.NewReader(reqBody)))
+	(*c).Request().Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
+	handler := &SCMHandler{scmUsecase: &mockGithubUsecase{}}
+	if err := handler.UpdateConnectionStatus(c); err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 Bad Request, got %d", rec.Code)
+	}
+}
+
+func TestUpdateConnectionStatus_HandlerConflict(t *testing.T) {
+	rec, c := newSCMTestContext(http.MethodPatch, "/integrations/scm/github/installation")
+	setUserID(c, "user-123")
+	reqBody := `{"id":"inst-1","connection_status":"connected"}`
+	(*c).SetRequest(httptest.NewRequest(http.MethodPatch, "/integrations/scm/github/installation", strings.NewReader(reqBody)))
+	(*c).Request().Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
+	handler := &SCMHandler{
+		scmUsecase: &mockGithubUsecase{
+			updateConnFn: func(_ context.Context, _, _ string, _ domain.GithubConnectionStatus) (*domain.GithubInstallation, error) {
+				return nil, domain.ErrInvalidStatus
+			},
+		},
+	}
+
+	if err := handler.UpdateConnectionStatus(c); err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("expected 409 Conflict, got %d", rec.Code)
+	}
+}
+
+func TestListInstallations_HandlerSuccess(t *testing.T) {
+	rec, c := newSCMTestContext(http.MethodGet, "/integrations/scm/github/installations")
+	setUserID(c, "user-123")
+
+	handler := &SCMHandler{
+		scmUsecase: &mockGithubUsecase{
+			listInstallationsFn: func(_ context.Context, userID string) ([]*domain.GithubInstallation, error) {
+				return []*domain.GithubInstallation{
+					{ID: "inst-1", UserID: userID, ConnectionStatus: domain.GithubConnectionStatusConnected},
+				}, nil
+			},
+		},
+	}
+
+	if err := handler.ListInstallations(c); err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK, got %d", rec.Code)
 	}
 }

@@ -214,8 +214,10 @@ func writeDockerfile(repoPath string, builder *Builder, pm string) error {
 			// Only swap the builder stage and unnamed runtime stages — a stage named
 			// "AS runtime" just serves static files via npm's bundled `serve` and must
 			// stay on node regardless of which pm built the project.
-			content = strings.ReplaceAll(content, "FROM node:20-alpine AS builder", "FROM oven/bun:1-alpine AS builder")
-			content = strings.ReplaceAll(content, "FROM node:20-alpine\n", "FROM oven/bun:1-alpine\n")
+			// Use fully-qualified image name (docker.io/...) to avoid short-name resolution
+			// errors in non-interactive buildah/podman environments.
+			content = strings.ReplaceAll(content, "FROM node:20-alpine AS builder", "FROM docker.io/oven/bun:1-alpine AS builder")
+			content = strings.ReplaceAll(content, "FROM node:20-alpine\n", "FROM docker.io/oven/bun:1-alpine\n")
 			content = strings.ReplaceAll(content, "--omit=dev", "--production")
 		}
 		content = strings.ReplaceAll(content, "npm ci --ignore-scripts", installCmd)

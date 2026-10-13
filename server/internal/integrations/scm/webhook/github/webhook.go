@@ -239,21 +239,37 @@ func (webH *webhookUsecase) handlePushEvent(
 	}
 
 	// Global installation gate: GitHub only delivers webhooks for an active
-	// installation. A suspended/uninstalled installation blocks webhook builds
-	// for every project of the user, independent of per-project settings.
-	installationStatus, err := webH.githubRepo.GetInstallationStatusByID(ctx, githubInstallationDBID)
+	// and connected installation. A disconnected, suspended, or uninstalled
+	// installation blocks webhook builds for every project of the user.
+	inst, err := webH.githubRepo.GetInstallationByID(ctx, githubInstallationDBID)
 	if err == domain.ErrNotFound {
 		return nil
 	}
 	if err != nil {
-		return err
-	}
-	if installationStatus != domain.GithubInstallationStatusActive {
-		log.Info("push event skipped: installation not active",
+		installationStatus, statusErr := webH.githubRepo.GetInstallationStatusByID(ctx, githubInstallationDBID)
+		if statusErr == domain.ErrNotFound {
+			return nil
+		}
+		if statusErr != nil {
+			return statusErr
+		}
+		if installationStatus != domain.GithubInstallationStatusActive {
+			log.Info("push event skipped: installation not active",
+				zap.String("github_delivery_id", githubDeliveryID),
+				zap.String("webhook_delivery_db_id", webhookDeliveryDBID),
+				zap.String("installation_db_id", githubInstallationDBID),
+				zap.String("installation_status", installationStatus),
+				zap.Int64("github_repository_id", payload.Repository.ID),
+			)
+			return nil
+		}
+	} else if inst.Status != domain.GithubInstallationStatusActive || inst.ConnectionStatus != domain.GithubConnectionStatusConnected {
+		log.Info("push event skipped: installation not active or not connected",
 			zap.String("github_delivery_id", githubDeliveryID),
 			zap.String("webhook_delivery_db_id", webhookDeliveryDBID),
 			zap.String("installation_db_id", githubInstallationDBID),
-			zap.String("installation_status", installationStatus),
+			zap.String("installation_status", inst.Status),
+			zap.String("connection_status", string(inst.ConnectionStatus)),
 			zap.Int64("github_repository_id", payload.Repository.ID),
 		)
 		return nil

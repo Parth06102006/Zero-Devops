@@ -17,6 +17,7 @@ export const queryKeys = {
   github: {
     all: ["github"] as const,
     installation: () => [...queryKeys.github.all, "installation"] as const,
+    installations: () => [...queryKeys.github.all, "installations"] as const,
     repositories: (query: string) => [...queryKeys.github.all, "repositories", query] as const,
   },
 } as const;

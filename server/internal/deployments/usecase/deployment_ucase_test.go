@@ -118,6 +118,21 @@ func (m *githubRepoMock) GetInstallationStatusByID(_ context.Context, _ string) 
 	return domain.GithubInstallationStatusActive, nil
 }
 
+func (m *githubRepoMock) GetInstallationByID(ctx context.Context, id string) (*domain.GithubInstallation, error) {
+	if m.getInstFn != nil {
+		return m.getInstFn(ctx, id)
+	}
+	return nil, nil
+}
+
+func (m *githubRepoMock) ListInstallationsByUserID(_ context.Context, _ string) ([]*domain.GithubInstallation, error) {
+	return nil, nil
+}
+
+func (m *githubRepoMock) UpdateConnectionStatus(_ context.Context, _, _ string, _ domain.GithubConnectionStatus) error {
+	return nil
+}
+
 func TestGetDeployments_PassesThrough(t *testing.T) {
 	want := []domain.Deployment{{ID: "1", UserID: "2"}}
 	uc := NewDeploymentUsecase(context.Background(), &deploymentRepoMock{

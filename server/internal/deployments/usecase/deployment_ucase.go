@@ -388,7 +388,7 @@ func (d *deploymentUsecase) CreateProjectBuild(ctx context.Context, userID strin
 		log.Error("failed to get github installation for manual build", zap.Error(err), zap.String("user_id", userID))
 		return nil, err
 	}
-	if installation.Status != domain.GithubInstallationStatusActive {
+	if installation.Status != domain.GithubInstallationStatusActive || installation.ConnectionStatus != domain.GithubConnectionStatusConnected {
 		return nil, domain.ErrInvalidStatus
 	}
 	if project.InstallationID != installation.ID {

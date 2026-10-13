@@ -14,9 +14,12 @@ import (
 )
 
 type mockGithubRepository struct {
-	storeFn  func(ctx context.Context, inst *domain.GithubInstallation) error
-	getFn    func(ctx context.Context, userID string) (*domain.GithubInstallation, error)
-	deleteFn func(ctx context.Context, userID string) error
+	storeFn      func(ctx context.Context, inst *domain.GithubInstallation) error
+	getFn        func(ctx context.Context, userID string) (*domain.GithubInstallation, error)
+	getByIDFn    func(ctx context.Context, id string) (*domain.GithubInstallation, error)
+	listFn       func(ctx context.Context, userID string) ([]*domain.GithubInstallation, error)
+	updateConnFn func(ctx context.Context, userID, installationDBID string, status domain.GithubConnectionStatus) error
+	deleteFn     func(ctx context.Context, userID string) error
 }
 
 func (m *mockGithubRepository) StoreInstallation(ctx context.Context, inst *domain.GithubInstallation) error {
@@ -58,6 +61,27 @@ func (m *mockGithubRepository) UpdateInstallationExternalIDByID(_ context.Contex
 
 func (m *mockGithubRepository) GetInstallationStatusByID(_ context.Context, _ string) (string, error) {
 	return domain.GithubInstallationStatusActive, nil
+}
+
+func (m *mockGithubRepository) GetInstallationByID(ctx context.Context, id string) (*domain.GithubInstallation, error) {
+	if m.getByIDFn != nil {
+		return m.getByIDFn(ctx, id)
+	}
+	return nil, domain.ErrNotFound
+}
+
+func (m *mockGithubRepository) ListInstallationsByUserID(ctx context.Context, userID string) ([]*domain.GithubInstallation, error) {
+	if m.listFn != nil {
+		return m.listFn(ctx, userID)
+	}
+	return nil, nil
+}
+
+func (m *mockGithubRepository) UpdateConnectionStatus(ctx context.Context, userID, installationDBID string, status domain.GithubConnectionStatus) error {
+	if m.updateConnFn != nil {
+		return m.updateConnFn(ctx, userID, installationDBID, status)
+	}
+	return nil
 }
 
 type roundTripFunc func(*http.Request) (*http.Response, error)
@@ -266,5 +290,119 @@ func TestInstallGithubApp_DefaultsStatusToActive(t *testing.T) {
 	}
 	if stored.Status != domain.GithubInstallationStatusActive {
 		t.Fatalf("expected status %s, got %s", domain.GithubInstallationStatusActive, stored.Status)
+	}
+}
+
+func TestUpdateConnectionStatus_ConnectedWhenActive(t *testing.T) {
+	repo := &mockGithubRepository{
+		getByIDFn: func(_ context.Context, id string) (*domain.GithubInstallation, error) {
+			return &domain.GithubInstallation{ID: id, UserID: "user-1", Status: domain.GithubInstallationStatusActive, ConnectionStatus: domain.GithubConnectionStatusDisconnected}, nil
+		},
+		updateConnFn: func(_ context.Context, userID, id string, status domain.GithubConnectionStatus) error {
+			if userID != "user-1" || id != "inst-1" || status != domain.GithubConnectionStatusConnected {
+				t.Fatalf("unexpected update args: user=%s, id=%s, status=%s", userID, id, status)
+			}
+			return nil
+		},
+	}
+
+	uc := NewGithubAppUsecase(repo)
+	res, err := uc.UpdateConnectionStatus(context.Background(), "user-1", "inst-1", domain.GithubConnectionStatusConnected)
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if res.ConnectionStatus != domain.GithubConnectionStatusConnected {
+		t.Fatalf("expected status connected, got %s", res.ConnectionStatus)
+	}
+}
+
+func TestUpdateConnectionStatus_ConnectedWhenSuspended(t *testing.T) {
+	repo := &mockGithubRepository{
+		getByIDFn: func(_ context.Context, id string) (*domain.GithubInstallation, error) {
+			return &domain.GithubInstallation{ID: id, UserID: "user-1", Status: domain.GithubInstallationStatusSuspended, ConnectionStatus: domain.GithubConnectionStatusDisconnected}, nil
+		},
+	}
+
+	uc := NewGithubAppUsecase(repo)
+	_, err := uc.UpdateConnectionStatus(context.Background(), "user-1", "inst-1", domain.GithubConnectionStatusConnected)
+	if !errors.Is(err, domain.ErrInvalidStatus) {
+		t.Fatalf("expected ErrInvalidStatus, got %v", err)
+	}
+}
+
+func TestUpdateConnectionStatus_ConnectedWhenUninstalled(t *testing.T) {
+	repo := &mockGithubRepository{
+		getByIDFn: func(_ context.Context, id string) (*domain.GithubInstallation, error) {
+			return &domain.GithubInstallation{ID: id, UserID: "user-1", Status: domain.GithubInstallationStatusUninstalled, ConnectionStatus: domain.GithubConnectionStatusDisconnected}, nil
+		},
+	}
+
+	uc := NewGithubAppUsecase(repo)
+	_, err := uc.UpdateConnectionStatus(context.Background(), "user-1", "inst-1", domain.GithubConnectionStatusConnected)
+	if !errors.Is(err, domain.ErrInvalidStatus) {
+		t.Fatalf("expected ErrInvalidStatus, got %v", err)
+	}
+}
+
+func TestUpdateConnectionStatus_DisconnectedFromAnyState(t *testing.T) {
+	repo := &mockGithubRepository{
+		getByIDFn: func(_ context.Context, id string) (*domain.GithubInstallation, error) {
+			return &domain.GithubInstallation{ID: id, UserID: "user-1", InstallationID: 99, Status: domain.GithubInstallationStatusSuspended, ConnectionStatus: domain.GithubConnectionStatusConnected}, nil
+		},
+		updateConnFn: func(_ context.Context, userID, id string, status domain.GithubConnectionStatus) error {
+			return nil
+		},
+	}
+
+	uc := NewGithubAppUsecase(repo)
+	res, err := uc.UpdateConnectionStatus(context.Background(), "user-1", "inst-1", domain.GithubConnectionStatusDisconnected)
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if res.ConnectionStatus != domain.GithubConnectionStatusDisconnected {
+		t.Fatalf("expected status disconnected, got %s", res.ConnectionStatus)
+	}
+}
+
+func TestUpdateConnectionStatus_InvalidStatusInput(t *testing.T) {
+	repo := &mockGithubRepository{}
+	uc := NewGithubAppUsecase(repo)
+	_, err := uc.UpdateConnectionStatus(context.Background(), "user-1", "inst-1", "invalid_status")
+	if !errors.Is(err, domain.ErrBadParamInput) {
+		t.Fatalf("expected ErrBadParamInput, got %v", err)
+	}
+}
+
+func TestUpdateConnectionStatus_UserMismatch(t *testing.T) {
+	repo := &mockGithubRepository{
+		getByIDFn: func(_ context.Context, id string) (*domain.GithubInstallation, error) {
+			return &domain.GithubInstallation{ID: id, UserID: "other-user", Status: domain.GithubInstallationStatusActive}, nil
+		},
+	}
+
+	uc := NewGithubAppUsecase(repo)
+	_, err := uc.UpdateConnectionStatus(context.Background(), "user-1", "inst-1", domain.GithubConnectionStatusConnected)
+	if !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("expected ErrNotFound on user mismatch, got %v", err)
+	}
+}
+
+func TestListGithubAppInstallations(t *testing.T) {
+	repo := &mockGithubRepository{
+		listFn: func(_ context.Context, userID string) ([]*domain.GithubInstallation, error) {
+			return []*domain.GithubInstallation{
+				{ID: "inst-1", UserID: userID, ConnectionStatus: domain.GithubConnectionStatusConnected},
+				{ID: "inst-2", UserID: userID, ConnectionStatus: domain.GithubConnectionStatusDisconnected},
+			}, nil
+		},
+	}
+
+	uc := NewGithubAppUsecase(repo)
+	list, err := uc.ListGithubAppInstallations(context.Background(), "user-1")
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if len(list) != 2 {
+		t.Fatalf("expected 2 installations, got %d", len(list))
 	}
 }

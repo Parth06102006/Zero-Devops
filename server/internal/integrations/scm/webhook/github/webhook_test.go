@@ -66,6 +66,7 @@ type fakeGithubRepository struct {
 	dbIDByExternal map[int64]string
 	statusByExt    map[int64]string
 	statusByID     map[string]string
+	connStatusByID map[string]domain.GithubConnectionStatus
 	updateErr      error
 }
 
@@ -120,6 +121,39 @@ func (f *fakeGithubRepository) GetInstallationStatusByID(_ context.Context, inst
 		return "", domain.ErrNotFound
 	}
 	return status, nil
+}
+
+func (f *fakeGithubRepository) GetInstallationByID(_ context.Context, id string) (*domain.GithubInstallation, error) {
+	if f.statusByID == nil {
+		return nil, domain.ErrNotFound
+	}
+	status, ok := f.statusByID[id]
+	if !ok {
+		return nil, domain.ErrNotFound
+	}
+	connStatus := domain.GithubConnectionStatusConnected
+	if f.connStatusByID != nil {
+		if cs, exists := f.connStatusByID[id]; exists {
+			connStatus = cs
+		}
+	}
+	return &domain.GithubInstallation{
+		ID:               id,
+		Status:           status,
+		ConnectionStatus: connStatus,
+	}, nil
+}
+
+func (f *fakeGithubRepository) ListInstallationsByUserID(_ context.Context, _ string) ([]*domain.GithubInstallation, error) {
+	return nil, nil
+}
+
+func (f *fakeGithubRepository) UpdateConnectionStatus(_ context.Context, _, id string, status domain.GithubConnectionStatus) error {
+	if f.connStatusByID == nil {
+		f.connStatusByID = map[string]domain.GithubConnectionStatus{}
+	}
+	f.connStatusByID[id] = status
+	return nil
 }
 
 type fakeProjectRepository struct {

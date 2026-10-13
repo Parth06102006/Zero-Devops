@@ -32,6 +32,8 @@ var (
 	ErrInvalidStatusTransition = errors.New("invalid status transition")
 	// ErrGithubInstallationFetchFailed is returned when fetching the GitHub installation fails
 	ErrGithubInstallationFetchFailed = errors.New("github installation failed: error installing github app")
+	// ErrInstallationOwnershipConflict is returned when attempting to connect an installation owned by another user
+	ErrInstallationOwnershipConflict = errors.New("github installation is linked to another user")
 	// ErrUserLookupFailed is returned when looking up a user fails
 	ErrUserLookupFailed = errors.New("user lookup failed")
 

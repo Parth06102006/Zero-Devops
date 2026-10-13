@@ -5,6 +5,7 @@ import (
 	"Zero_Devops/server/internal/domain"
 	"context"
 	"net/http"
+	"path"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v5"
@@ -72,12 +73,15 @@ func (a *AuthMiddlewareHandler) Validator(c *echo.Context, token string) (string
 }
 
 func isPublicPath(c *echo.Context) bool {
-	switch c.Path() {
+	p := c.Path()
+	if p == "" && c.Request() != nil && c.Request().URL != nil {
+		p = path.Clean(c.Request().URL.Path)
+	}
+	switch p {
 	case "/auth/github/login",
 		"/auth/github/login/callback",
 		"/auth/refresh",
 		"/webhooks/github",
-		"/github/install/callback",
 		"/health",
 		"/health/live",
 		"/health/ready":

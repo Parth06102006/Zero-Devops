@@ -86,9 +86,10 @@ func installationFor(status string) *mockGithubRepository {
 				return nil, errors.New("unexpected user")
 			}
 			return &domain.GithubInstallation{
-				UserID:         uid,
-				InstallationID: 10,
-				Status:         status,
+				UserID:           uid,
+				InstallationID:   10,
+				Status:           status,
+				ConnectionStatus: domain.GithubConnectionStatusConnected,
 			}, nil
 		},
 	}
@@ -99,6 +100,24 @@ func TestListRepositories_InactiveInstallation(t *testing.T) {
 	_, err := uc.ListRepositories(context.Background(), "u", "", "", 30)
 	if !errors.Is(err, domain.ErrInvalidStatus) {
 		t.Fatalf("expected ErrInvalidStatus, got %v", err)
+	}
+}
+
+func TestListRepositories_DisconnectedInstallation(t *testing.T) {
+	repo := &mockGithubRepository{
+		getFn: func(_ context.Context, uid string) (*domain.GithubInstallation, error) {
+			return &domain.GithubInstallation{
+				UserID:           uid,
+				InstallationID:   10,
+				Status:           domain.GithubInstallationStatusActive,
+				ConnectionStatus: domain.GithubConnectionStatusDisconnected,
+			}, nil
+		},
+	}
+	uc := NewGithubAppUsecase(repo)
+	_, err := uc.ListRepositories(context.Background(), "u", "", "", 30)
+	if !errors.Is(err, domain.ErrInvalidStatus) {
+		t.Fatalf("expected ErrInvalidStatus on disconnected installation, got %v", err)
 	}
 }
 
@@ -187,9 +206,9 @@ func TestListRepositories_KeyIsolationByInstallation(t *testing.T) {
 	repo := &mockGithubRepository{
 		getFn: func(_ context.Context, uid string) (*domain.GithubInstallation, error) {
 			if uid == "a" {
-				return &domain.GithubInstallation{UserID: "a", InstallationID: 10, Status: domain.GithubInstallationStatusActive}, nil
+				return &domain.GithubInstallation{UserID: "a", InstallationID: 10, Status: domain.GithubInstallationStatusActive, ConnectionStatus: domain.GithubConnectionStatusConnected}, nil
 			}
-			return &domain.GithubInstallation{UserID: "b", InstallationID: 20, Status: domain.GithubInstallationStatusActive}, nil
+			return &domain.GithubInstallation{UserID: "b", InstallationID: 20, Status: domain.GithubInstallationStatusActive, ConnectionStatus: domain.GithubConnectionStatusConnected}, nil
 		},
 	}
 	uc := NewGithubAppUsecase(repo, &mockInstallationTokenProvider{}, client, cache)

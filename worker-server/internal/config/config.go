@@ -2,13 +2,14 @@
 package config
 
 import (
+	"os"
 	"strings"
 
 	"github.com/spf13/viper"
 )
 
-// LoadConfig loads configuration from the .env file and system environment variables.
-// It panics if the .env file cannot be read.
+// LoadConfig loads configuration from an optional .env file and system environment
+// variables. Docker containers receive configuration through their environment.
 func LoadConfig() {
 	// Set up for Environment Variables
 	viper.SetConfigFile(".env")
@@ -16,8 +17,7 @@ func LoadConfig() {
 
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-	// Check if the env file can be read or not
-	if err := viper.ReadInConfig(); err != nil {
+	if err := viper.ReadInConfig(); err != nil && !os.IsNotExist(err) {
 		panic("Error reading config file: " + err.Error())
 	}
 

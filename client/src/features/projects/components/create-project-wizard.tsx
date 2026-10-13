@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { FrameworkBadge, FrameworkSelector } from "./ui/framework-badge";
 import { EnvVarTable, EnvVarImport } from "./ui/env-var-table";
 import { detectFramework, FRAMEWORK_PRESETS, type FrameworkPreset } from "@/features/projects/lib/framework-detector";
+import { createProjectBuild } from "../api/builds-api";
 import { useCreateProject } from "../hooks/use-projects";
 
 interface SelectedRepo {
@@ -103,9 +104,10 @@ export function CreateProjectWizard({
     
     setIsDeploying(true);
     try {
+      const configuredBranch = branch.startsWith("refs/heads/") ? branch : `refs/heads/${branch}`;
       const result = await create.mutateAsync({
         repository_id: selectedRepo.id,
-        configured_branch: branch.startsWith("refs/heads/") ? branch : `refs/heads/${branch}`,
+        configured_branch: configuredBranch,
         project_webhook_enabled: true,
         build_configuration: {
           executable: buildCommand.trim().split(/\s+/)[0] ?? "npm",
@@ -114,6 +116,9 @@ export function CreateProjectWizard({
           scanner_policy_version: "v1",
         },
       });
+      // TEMP(local testing): enqueue the initial build client-side. Replace this
+      // with server-side project-creation dispatch before production rollout.
+      await createProjectBuild(result.id, configuredBranch);
       onComplete?.(result.id);
       onOpenChange(false);
     } catch (error) {

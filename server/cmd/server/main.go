@@ -110,6 +110,7 @@ func run() error {
 
 	e := echo.New()
 
+	e.Pre(middleware.CleanPathMiddleware)
 	e.Use(middleware.NewCORS())
 	e.Use(middleware.NewCSRFOriginMiddleware())
 	e.Use(middleware.RequestIDMiddleware)

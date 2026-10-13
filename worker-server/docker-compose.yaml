@@ -16,6 +16,39 @@ services:
       timeout: 5s
       retries: 10
 
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zero_devops_worker
+    # Required for Buildah's local Linux container/image namespaces.
+    privileged: true
+    security_opt:
+      - seccomp=unconfined
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: "5432"
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASS: ${DATABASE_PASS}
+      DATABASE_NAME: ${DATABASE_NAME}
+      # Use host.docker.internal: localhost would be this worker container.
+      RABBITMQ_CONNECTION_STRING: ${WORKER_RABBITMQ_CONNECTION_STRING:?set WORKER_RABBITMQ_CONNECTION_STRING in .env}
+      CLOUDFLARE_BUCKET_NAME: ${CLOUDFLARE_BUCKET_NAME}
+      CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID}
+      CLOUDFLARE_ACCESS_KEY_ID: ${CLOUDFLARE_ACCESS_KEY_ID}
+      CLOUDFLARE_ACCESS_KEY_SECRET: ${CLOUDFLARE_ACCESS_KEY_SECRET}
+      CLOUDFLARE_PUBLIC_BASE_URL: ${CLOUDFLARE_PUBLIC_BASE_URL:-}
+      APP_ENV: ${APP_ENV:-development}
+      MAX_RETRIES_COUNT: ${MAX_RETRIES_COUNT:-3}
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    volumes:
+      - buildah_storage:/var/lib/containers
+    restart: unless-stopped
+
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: zero_devops_rabbitmq
@@ -33,3 +66,4 @@ services:
 
 volumes:
   worker_pgdata:
+  buildah_storage:

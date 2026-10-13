@@ -167,9 +167,10 @@ func (g *githubAppUsecase) InstallGithubApp(ctx context.Context, client *http.Cl
 				InstallationID: inst.ID,
 				AccountType:    inst.Account.Type,
 				AccountLogin:   inst.Account.Login,
-				Status:         domain.GithubInstallationStatusActive,
-				CreatedAt:      time.Now(),
-				UpdatedAt:      time.Now(),
+				Status:           domain.GithubInstallationStatusActive,
+				ConnectionStatus: domain.GithubConnectionStatusConnected,
+				CreatedAt:        time.Now(),
+				UpdatedAt:        time.Now(),
 			}
 			err := g.githubRepo.StoreInstallation(ctx, &githubAppInstallation)
 			if err != nil {
@@ -194,8 +195,61 @@ func (g *githubAppUsecase) GetGithubAppInstallation(ctx context.Context, userID 
 	return githubRepo, nil
 }
 
+func (g *githubAppUsecase) ListGithubAppInstallations(ctx context.Context, userID string) ([]*domain.GithubInstallation, error) {
+	return g.githubRepo.ListInstallationsByUserID(ctx, userID)
+}
+
 func (g *githubAppUsecase) DeleteGithubApp(ctx context.Context, userID string) error {
 	return g.githubRepo.DeleteInstallationByUserID(ctx, userID)
+}
+
+func (g *githubAppUsecase) UpdateConnectionStatus(ctx context.Context, userID, installationDBID string, status domain.GithubConnectionStatus) (*domain.GithubInstallation, error) {
+	if !status.IsValid() {
+		return nil, domain.ErrBadParamInput
+	}
+
+	var inst *domain.GithubInstallation
+	var err error
+	if installationDBID != "" {
+		inst, err = g.githubRepo.GetInstallationByID(ctx, installationDBID)
+		if err != nil {
+			return nil, err
+		}
+		if inst == nil || inst.UserID != userID {
+			return nil, domain.ErrNotFound
+		}
+	} else {
+		inst, err = g.githubRepo.GetInstallationByUserID(ctx, userID)
+		if err != nil {
+			return nil, err
+		}
+		if inst == nil {
+			return nil, domain.ErrNotFound
+		}
+	}
+
+	if status == domain.GithubConnectionStatusConnected {
+		switch inst.Status {
+		case domain.GithubInstallationStatusActive:
+			// allowed
+		case domain.GithubInstallationStatusSuspended, domain.GithubInstallationStatusUninstalled:
+			return nil, domain.ErrInvalidStatus
+		default:
+			return nil, domain.ErrInvalidStatus
+		}
+	}
+
+	if err := g.githubRepo.UpdateConnectionStatus(ctx, userID, inst.ID, status); err != nil {
+		return nil, err
+	}
+
+	if status == domain.GithubConnectionStatusDisconnected {
+		_ = g.InvalidateRepositoryCache(ctx, inst.InstallationID)
+	}
+
+	inst.ConnectionStatus = status
+	inst.UpdatedAt = time.Now()
+	return inst, nil
 }
 
 func (g *githubAppUsecase) ListRepositories(ctx context.Context, userID, cursor, query string, perPage int) (*domain.RepositoryList, error) {
@@ -203,7 +257,7 @@ func (g *githubAppUsecase) ListRepositories(ctx context.Context, userID, cursor,
 	if err != nil {
 		return nil, err
 	}
-	if installation.Status != domain.GithubInstallationStatusActive {
+	if installation.Status != domain.GithubInstallationStatusActive || installation.ConnectionStatus != domain.GithubConnectionStatusConnected {
 		return nil, domain.ErrInvalidStatus
 	}
 
@@ -271,7 +325,7 @@ func (g *githubAppUsecase) GetRepositoryDetails(ctx context.Context, userID stri
 	if err != nil {
 		return nil, err
 	}
-	if installation.Status != domain.GithubInstallationStatusActive {
+	if installation.Status != domain.GithubInstallationStatusActive || installation.ConnectionStatus != domain.GithubConnectionStatusConnected {
 		return nil, domain.ErrInvalidStatus
 	}
 	if g.tokenProvider == nil || g.repositoryClient == nil {
