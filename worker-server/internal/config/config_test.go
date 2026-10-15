@@ -40,7 +40,7 @@ func TestLoadConfigReadsDotEnvFile(t *testing.T) {
 	}
 }
 
-func TestLoadConfigPanicsWhenDotEnvMissing(t *testing.T) {
+func TestLoadConfigDoesNotPanicWhenDotEnvMissing(t *testing.T) {
 	originalDir, err := os.Getwd()
 	if err != nil {
 		t.Fatal(err)
@@ -59,8 +59,8 @@ func TestLoadConfigPanicsWhenDotEnvMissing(t *testing.T) {
 	}
 
 	defer func() {
-		if recover() == nil {
-			t.Fatal("LoadConfig did not panic for missing .env")
+		if r := recover(); r != nil {
+			t.Fatalf("LoadConfig panicked for missing .env: %v", r)
 		}
 	}()
 

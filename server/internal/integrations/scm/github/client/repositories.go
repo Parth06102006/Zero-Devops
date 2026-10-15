@@ -206,6 +206,79 @@ func (c *RepositoryClient) ResolveCommit(ctx context.Context, installationToken,
 	return sha, nil
 }
 
+// ListRepositoryDirectories fetches directories in a repository for a given branch or ref.
+func (c *RepositoryClient) ListRepositoryDirectories(ctx context.Context, installationToken, owner, repo, branch string) ([]string, error) {
+	branch = strings.TrimSpace(branch)
+	if branch == "" {
+		branch = "HEAD"
+	}
+	branch = strings.TrimPrefix(branch, "refs/heads/")
+
+	path := fmt.Sprintf("%s/repos/%s/%s/git/trees/%s?recursive=1",
+		c.baseURL,
+		url.PathEscape(owner),
+		url.PathEscape(repo),
+		url.PathEscape(branch),
+	)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, path, http.NoBody)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", "Bearer "+installationToken)
+	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return []string{"."}, nil
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("github tree API returned status %d", resp.StatusCode)
+	}
+
+	var payload struct {
+		Tree []struct {
+			Path string `json:"path"`
+			Type string `json:"type"`
+		} `json:"tree"`
+	}
+	decoder := json.NewDecoder(io.LimitReader(resp.Body, maxResponseSize))
+	if err := decoder.Decode(&payload); err != nil {
+		return nil, err
+	}
+
+	const maxDirectoryDepth = 6
+	dirs := []string{"."}
+	for _, item := range payload.Tree {
+		if item.Type != "tree" {
+			continue
+		}
+		parts := strings.Split(item.Path, "/")
+		if len(parts) > maxDirectoryDepth {
+			continue
+		}
+		skip := false
+		for _, part := range parts {
+			if strings.HasPrefix(part, ".") || part == "node_modules" || part == "vendor" || part == "dist" || part == "build" || part == "target" {
+				skip = true
+				break
+			}
+		}
+		if !skip {
+			dirs = append(dirs, item.Path)
+		}
+	}
+
+	return dirs, nil
+}
+
 func normalizeQuery(query string) string {
 	return strings.Join(strings.Fields(strings.ToLower(query)), " ")
 }

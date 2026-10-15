@@ -20,6 +20,7 @@ type DeployJob struct {
 	CommitSHA    string `json:"commit_sha"`
 	RetryCount   int    `json:"retry_count"`
 	RequestID    string `json:"request_id"`
+	WorkingDir   string `json:"working_dir,omitempty"`
 }
 
 // DeployStatusMessage represents a status update for a deployment.

@@ -3,6 +3,7 @@ export {
   useGithubInstallations,
   useUpdateGithubConnectionStatus,
   useGithubRepositories,
+  useGithubDirectories,
   useDeleteGithubInstallation,
 } from "./hooks/use-github";
 export {
@@ -10,6 +11,7 @@ export {
   listGithubInstallations,
   updateGithubConnectionStatus,
   listGithubRepositories,
+  listRepositoryDirectories,
   deleteGithubInstallation,
   getGithubAppInstallUrl,
   installGithubApp,

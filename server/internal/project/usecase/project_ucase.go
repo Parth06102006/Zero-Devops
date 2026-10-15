@@ -5,6 +5,9 @@ import (
 	"Zero_Devops/server/internal/domain"
 	appmiddleware "Zero_Devops/server/internal/middleware"
 	"context"
+	"crypto/rand"
+	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -45,8 +48,14 @@ func (p *projectUsecase) CreateProject(ctx context.Context, userID string, param
 		return nil, domain.ErrCommandDenied
 	}
 
+	projectName := strings.TrimSpace(params.Name)
+	if projectName == "" {
+		projectName = picker.Name
+	}
+
 	project := &domain.Project{
 		UserID:                    userID,
+		Name:                      projectName,
 		InstallationID:            installation.ID,
 		GitHubRepositoryID:        picker.ID,
 		RepositoryOwner:           picker.Owner,
@@ -65,6 +74,16 @@ func (p *projectUsecase) CreateProject(ctx context.Context, userID string, param
 	}
 
 	if err := p.projectRepo.Store(ctx, project); err != nil {
+		if errors.Is(err, domain.ErrConflict) && strings.TrimSpace(params.Name) == "" {
+			// If default name conflicted, automatically append random 4-character suffix
+			const randomSuffixLength = 4
+			project.Name = fmt.Sprintf("%s-%s", picker.Name, generateRandomChars(randomSuffixLength))
+			if retryErr := p.projectRepo.Store(ctx, project); retryErr != nil {
+				log.Error("failed to store project with generated suffix", zap.Error(retryErr))
+				return nil, retryErr
+			}
+			return project, nil
+		}
 		log.Error("failed to store project", zap.Error(err))
 		return nil, err
 	}
@@ -97,6 +116,9 @@ func (p *projectUsecase) UpdateProject(ctx context.Context, userID, projectID st
 		return nil, err
 	}
 
+	if params.Name != nil && strings.TrimSpace(*params.Name) != "" {
+		project.Name = strings.TrimSpace(*params.Name)
+	}
 	if params.ConfiguredBranch != nil {
 		project.ConfiguredBranch = toFullRef(*params.ConfiguredBranch, project.RepositoryName)
 	}
@@ -147,4 +169,16 @@ func toFullRef(branch, fallback string) string {
 		return branch
 	}
 	return "refs/heads/" + strings.TrimPrefix(branch, "/")
+}
+
+func generateRandomChars(n int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
+	b := make([]byte, n)
+	if _, err := rand.Read(b); err != nil {
+		return "x7k9"
+	}
+	for i := range b {
+		b[i] = charset[int(b[i])%len(charset)]
+	}
+	return string(b)
 }

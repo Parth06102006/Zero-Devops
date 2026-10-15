@@ -432,7 +432,7 @@ func (m *pgSQLGithubRepository) ListInstallationsByUserID(ctx context.Context, u
 		log.Error("failed to list github installations", zap.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var installations []*domain.GithubInstallation
 	for rows.Next() {

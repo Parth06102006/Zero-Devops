@@ -8,11 +8,13 @@ import (
 	"strings"
 )
 
+// CloneCredential represents a short-lived username/token pair for git operations.
 type CloneCredential struct {
 	Username string
 	Token    string
 }
 
+// Usecase defines operations for retrieving deployment clone credentials.
 type Usecase interface {
 	GetCloneCredential(ctx context.Context, deploymentID string) (*CloneCredential, error)
 }
@@ -23,6 +25,7 @@ type usecase struct {
 	tokens        domain.InstallationTokenProvider
 }
 
+// New creates a new credentials Usecase.
 func New(deployments domain.DeploymentRepository, installations domain.GithubRepository, tokens domain.InstallationTokenProvider) Usecase {
 	return &usecase{deployments: deployments, installations: installations, tokens: tokens}
 }

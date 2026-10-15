@@ -186,8 +186,11 @@ func validateCreateProjectRequest(req domain.CreateProjectParams) error {
 }
 
 func validateUpdateProjectRequest(req domain.UpdateProjectParams) error {
-	if req.ConfiguredBranch == nil && req.ProjectWebhookEnabled == nil && req.BuildConfiguration == nil {
+	if req.Name == nil && req.ConfiguredBranch == nil && req.ProjectWebhookEnabled == nil && req.BuildConfiguration == nil {
 		return fmt.Errorf("at least one project field is required")
+	}
+	if req.Name != nil && strings.TrimSpace(*req.Name) == "" {
+		return fmt.Errorf("name cannot be empty")
 	}
 	if req.ConfiguredBranch != nil && strings.TrimSpace(*req.ConfiguredBranch) == "" {
 		return fmt.Errorf("configured_branch cannot be empty")

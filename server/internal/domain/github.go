@@ -18,11 +18,13 @@ const (
 // GithubConnectionStatus represents the user connection preference
 type GithubConnectionStatus string
 
+// GitHub connection status values.
 const (
 	GithubConnectionStatusConnected    GithubConnectionStatus = "connected"
 	GithubConnectionStatusDisconnected GithubConnectionStatus = "disconnected"
 )
 
+// IsValid reports whether the connection status is a valid defined value.
 func (s GithubConnectionStatus) IsValid() bool {
 	return s == GithubConnectionStatusConnected || s == GithubConnectionStatusDisconnected
 }
@@ -48,6 +50,7 @@ type GithubUsecase interface {
 	ListGithubAppInstallations(ctx context.Context, userID string) ([]*GithubInstallation, error)
 	ListRepositories(ctx context.Context, userID, cursor, query string, perPage int) (*RepositoryList, error)
 	GetRepositoryDetails(ctx context.Context, userID string, repoID int64) (*RepositoryPicker, error)
+	ListRepositoryDirectories(ctx context.Context, userID string, repoID int64, branch string) ([]string, error)
 	InvalidateRepositoryCache(ctx context.Context, installationID int64) error
 	UpdateConnectionStatus(ctx context.Context, userID, installationDBID string, status GithubConnectionStatus) (*GithubInstallation, error)
 }
@@ -93,5 +96,6 @@ type RepositoryList struct {
 type GithubRepositoryClient interface {
 	ListRepositories(ctx context.Context, installationToken string, cursor string, query string, perPage int) (*RepositoryList, error)
 	GetRepositoryDetails(ctx context.Context, installationToken string, repoID int64) (*RepositoryPicker, error)
+	ListRepositoryDirectories(ctx context.Context, installationToken, owner, repo, branch string) ([]string, error)
 	ResolveCommit(ctx context.Context, installationToken, owner, repo, shaOrRef string) (string, error)
 }

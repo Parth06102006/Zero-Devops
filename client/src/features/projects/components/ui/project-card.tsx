@@ -1,6 +1,6 @@
 "use client";
 
-import { Github, Lock, Clock, ExternalLink, GitBranch } from "lucide-react";
+import { Github, Lock, Clock, ExternalLink, GitBranch, Folder } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { FrameworkBadge } from "./framework-badge";
 import { DeploymentStatusBadge } from "./deployment-status-badge";
@@ -27,6 +27,8 @@ export function ProjectCard({
 }: ProjectCardProps) {
   const branch = project.configured_branch.replace("refs/heads/", "");
   const isPrivate = !project.repository_available;
+  const displayName = project.name || project.repository_name;
+  const workingDir = project.build_configuration?.working_dir;
 
   const baseClasses = "group relative overflow-hidden rounded-2xl border transition-all hover:-translate-y-0.5 hover:border-white/[0.15]";
   const variantClasses = {
@@ -50,7 +52,7 @@ export function ProjectCard({
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <h3 className="truncate font-medium text-white group-hover:text-white">{project.repository_name}</h3>
+              <h3 className="truncate font-medium text-white group-hover:text-white">{displayName}</h3>
               {isPrivate && <Lock className="size-3.5 text-amber-300/70" aria-label="Private" />}
             </div>
             <p className="mt-1 truncate text-xs text-white/35">{project.repository_full_name}</p>
@@ -80,8 +82,17 @@ export function ProjectCard({
             <Github className="size-4.5 text-white/65" />
           </span>
           <div className="min-w-0">
-            <h3 className="truncate font-medium text-white group-hover:text-white">{project.repository_name}</h3>
-            <p className="truncate text-xs text-white/35">{project.repository_full_name}</p>
+            <h3 className="truncate font-medium text-white group-hover:text-white">{displayName}</h3>
+            <a
+              href={`https://github.com/${project.repository_full_name}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="truncate text-xs text-white/35 hover:text-cyan-300 hover:underline inline-flex items-center gap-1"
+            >
+              {project.repository_full_name}
+              <ExternalLink className="size-2.5 inline opacity-60" />
+            </a>
           </div>
         </div>
         {isPrivate && (
@@ -93,6 +104,12 @@ export function ProjectCard({
 
       <div className="mt-4 flex flex-wrap items-center gap-3 text-[10px] text-white/35">
         <FrameworkBadge framework={project.build_configuration?.executable ?? "node"} />
+        {workingDir && workingDir !== "." && (
+          <span className="inline-flex items-center gap-1 rounded-md bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-mono text-cyan-300/90 border border-white/[0.08]">
+            <Folder className="size-2.5 text-cyan-400" />
+            {workingDir}
+          </span>
+        )}
         <span className="inline-flex items-center gap-1">
           <Clock className="size-3" />
           {branch}

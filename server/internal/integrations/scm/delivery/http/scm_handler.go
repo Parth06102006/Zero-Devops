@@ -45,6 +45,7 @@ func NewSCMHandler(e *echo.Echo, gh domain.GithubUsecase) {
 	e.PATCH("/integrations/scm/github/installation", handler.UpdateConnectionStatus)
 	e.DELETE("/integrations/scm/github/installation", handler.DeleteInstallation)
 	e.GET("/integrations/scm/github/repositories", handler.ListRepositories)
+	e.GET("/integrations/scm/github/repositories/:id/directories", handler.ListRepositoryDirectories)
 
 	// Backward-compatible aliases
 	e.POST("/integrations/scm/github/install", handler.Installation)
@@ -55,6 +56,7 @@ func NewSCMHandler(e *echo.Echo, gh domain.GithubUsecase) {
 	e.PATCH("/integrations/github/installation", handler.UpdateConnectionStatus)
 	e.DELETE("/integration/scm/github/delete", handler.DeleteInstallation)
 	e.GET("/integrations/github/repositories", handler.ListRepositories)
+	e.GET("/integrations/github/repositories/:id/directories", handler.ListRepositoryDirectories)
 	e.GET("/integrations/github/installation", handler.GetInstallationStatus)
 }
 
@@ -328,7 +330,8 @@ func (inst *SCMHandler) UpdateConnectionStatus(c *echo.Context) error {
 	}
 
 	if !req.ConnectionStatus.IsValid() {
-		return c.JSON(http.StatusBadRequest, helper.BuildErrorResponse("invalid connection_status, must be connected or disconnected", domain.ErrBadParamInput, reqID))
+		msg := "invalid connection_status, must be connected or disconnected"
+		return c.JSON(http.StatusBadRequest, helper.BuildErrorResponse(msg, domain.ErrBadParamInput, reqID))
 	}
 
 	ctx := c.Request().Context()
@@ -342,6 +345,39 @@ func (inst *SCMHandler) UpdateConnectionStatus(c *echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(updated, "", reqID, helper.WithMessage("connection status updated successfully")))
+}
+
+// ListRepositoryDirectories returns the directories/submodules for a given repository.
+func (inst *SCMHandler) ListRepositoryDirectories(c *echo.Context) error {
+	reqID := middleware.GetRequestID(c)
+	userID, ok := authmiddleware.GetUserID(c)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, helper.BuildErrorResponse("user id not found", fmt.Errorf("user id not found in context"), reqID))
+	}
+
+	repoIDStr := strings.TrimSpace(c.Param("id"))
+	repoID, err := strconv.ParseInt(repoIDStr, 10, 64)
+	if err != nil || repoID <= 0 {
+		return c.JSON(http.StatusBadRequest, helper.BuildErrorResponse("invalid repository id", domain.ErrBadParamInput, reqID))
+	}
+
+	branch := strings.TrimSpace(c.QueryParam("branch"))
+
+	dirs, err := inst.scmUsecase.ListRepositoryDirectories(c.Request().Context(), userID, repoID, branch)
+	if err != nil {
+		status := helper.GetStatusCode(err)
+		if errors.Is(err, domain.ErrBadParamInput) {
+			status = http.StatusBadRequest
+		}
+		if errors.Is(err, domain.ErrInvalidStatus) {
+			status = http.StatusConflict
+		}
+		resp := helper.BuildErrorResponse(err.Error(), err, reqID)
+		resp.Error.Code = status
+		return c.JSON(status, resp)
+	}
+
+	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(dirs, "", reqID))
 }
 
 func createProductionClient() *http.Client {

@@ -10,6 +10,8 @@ import (
 	"go.uber.org/zap"
 )
 
+const errResponseKey = "error"
+
 // mutatingMethods are the HTTP methods that change server state.  All of them
 // require origin validation when the app is running in production.
 var mutatingMethods = map[string]bool{
@@ -72,7 +74,7 @@ func NewCSRFOriginMiddleware() echo.MiddlewareFunc {
 				parsed, err := url.Parse(ref)
 				if err != nil {
 					return c.JSON(http.StatusForbidden, map[string]string{
-						"error": "invalid Referer header",
+						errResponseKey: "invalid Referer header",
 					})
 				}
 				origin = parsed.Scheme + "://" + parsed.Host
@@ -86,7 +88,7 @@ func NewCSRFOriginMiddleware() echo.MiddlewareFunc {
 					zap.String("origin", origin),
 				)
 				return c.JSON(http.StatusForbidden, map[string]string{
-					"error": "request origin not allowed",
+					errResponseKey: "request origin not allowed",
 				})
 			}
 

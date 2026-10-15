@@ -37,6 +37,14 @@ export async function listGithubRepositories(query = "", signal?: AbortSignal): 
   return data.data;
 }
 
+export async function listRepositoryDirectories(repositoryId: number, branch?: string, signal?: AbortSignal): Promise<string[]> {
+  const { data } = await httpClient.get<ApiSuccess<string[]>>(
+    endpoints.github.directories(repositoryId, branch),
+    signal ? { signal } : undefined
+  );
+  return data.data ?? [];
+}
+
 export async function installGithubApp(code: string): Promise<void> {
   try {
     await httpClient.post(endpoints.github.install(code));

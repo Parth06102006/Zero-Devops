@@ -16,6 +16,7 @@ export interface CommandScanResult {
 
 export interface Project {
   id: string;
+  name: string;
   user_id: string;
   installation_id: string;
   github_repository_id: number;

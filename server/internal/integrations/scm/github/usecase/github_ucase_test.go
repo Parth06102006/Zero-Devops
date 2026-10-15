@@ -349,7 +349,7 @@ func TestUpdateConnectionStatus_DisconnectedFromAnyState(t *testing.T) {
 		getByIDFn: func(_ context.Context, id string) (*domain.GithubInstallation, error) {
 			return &domain.GithubInstallation{ID: id, UserID: "user-1", InstallationID: 99, Status: domain.GithubInstallationStatusSuspended, ConnectionStatus: domain.GithubConnectionStatusConnected}, nil
 		},
-		updateConnFn: func(_ context.Context, userID, id string, status domain.GithubConnectionStatus) error {
+		updateConnFn: func(_ context.Context, _, _ string, _ domain.GithubConnectionStatus) error {
 			return nil
 		},
 	}

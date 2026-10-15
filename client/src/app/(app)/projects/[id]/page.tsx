@@ -15,6 +15,8 @@ import {
   Key,
   Zap,
   Clock,
+  ExternalLink,
+  Folder,
 } from "lucide-react";
 import {
   useProject,
@@ -100,13 +102,27 @@ export default function ProjectDetailPage() {
             </span>
             <div className="min-w-0">
               <h1 className="truncate text-2xl font-semibold tracking-[-0.035em]">
-                {p.repository_name}
+                {p.name || p.repository_name}
               </h1>
-              <p className="truncate text-sm text-white/35">{p.repository_full_name}</p>
+              <a
+                href={`https://github.com/${p.repository_full_name}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="truncate text-sm text-white/35 hover:text-cyan-300 hover:underline inline-flex items-center gap-1.5"
+              >
+                {p.repository_full_name}
+                <ExternalLink className="size-3 inline opacity-60" />
+              </a>
             </div>
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-white/35">
             <FrameworkBadge framework={p.build_configuration?.executable ?? "node"} size="sm" />
+            {p.build_configuration?.working_dir && p.build_configuration.working_dir !== "." && (
+              <span className="inline-flex items-center gap-1 rounded-md bg-white/[0.04] px-2 py-0.5 text-xs font-mono text-cyan-300/90 border border-white/[0.08]">
+                <Folder className="size-3 text-cyan-400" />
+                {p.build_configuration.working_dir}
+              </span>
+            )}
             <span className="inline-flex items-center gap-1.5">
               <GitBranch className="size-3.5" />
               {branch}

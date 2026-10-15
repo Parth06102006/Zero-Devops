@@ -78,6 +78,10 @@ func (m *mockGithubUsecase) UpdateConnectionStatus(ctx context.Context, userID, 
 	return &domain.GithubInstallation{ID: installationDBID, UserID: userID, ConnectionStatus: status}, nil
 }
 
+func (m *mockGithubUsecase) ListRepositoryDirectories(_ context.Context, _ string, _ int64, _ string) ([]string, error) {
+	return []string{"."}, nil
+}
+
 func newSCMTestContext(method, target string) (*httptest.ResponseRecorder, *echo.Context) {
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequestWithContext(context.Background(), method, target, http.NoBody)
@@ -413,7 +417,7 @@ func TestNewSCMHandler_RouteRegistrations(t *testing.T) {
 
 	for _, ep := range endpoints {
 		t.Run(ep.method+" "+ep.path, func(t *testing.T) {
-			req := httptest.NewRequest(ep.method, ep.path, nil)
+			req := httptest.NewRequestWithContext(context.Background(), ep.method, ep.path, http.NoBody)
 			rec := httptest.NewRecorder()
 			e.ServeHTTP(rec, req)
 
@@ -430,7 +434,7 @@ func TestUpdateConnectionStatus_HandlerSuccess(t *testing.T) {
 	rec, c := newSCMTestContext(http.MethodPatch, "/integrations/scm/github/installation")
 	setUserID(c, "user-123")
 	reqBody := `{"id":"inst-1","connection_status":"connected"}`
-	(*c).SetRequest(httptest.NewRequest(http.MethodPatch, "/integrations/scm/github/installation", strings.NewReader(reqBody)))
+	(*c).SetRequest(httptest.NewRequestWithContext(context.Background(), http.MethodPatch, "/integrations/scm/github/installation", strings.NewReader(reqBody)))
 	(*c).Request().Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 	handler := &SCMHandler{
@@ -453,7 +457,7 @@ func TestUpdateConnectionStatus_HandlerInvalidStatus(t *testing.T) {
 	rec, c := newSCMTestContext(http.MethodPatch, "/integrations/scm/github/installation")
 	setUserID(c, "user-123")
 	reqBody := `{"id":"inst-1","connection_status":"invalid"}`
-	(*c).SetRequest(httptest.NewRequest(http.MethodPatch, "/integrations/scm/github/installation", strings.NewReader(reqBody)))
+	(*c).SetRequest(httptest.NewRequestWithContext(context.Background(), http.MethodPatch, "/integrations/scm/github/installation", strings.NewReader(reqBody)))
 	(*c).Request().Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 	handler := &SCMHandler{scmUsecase: &mockGithubUsecase{}}
@@ -469,7 +473,7 @@ func TestUpdateConnectionStatus_HandlerConflict(t *testing.T) {
 	rec, c := newSCMTestContext(http.MethodPatch, "/integrations/scm/github/installation")
 	setUserID(c, "user-123")
 	reqBody := `{"id":"inst-1","connection_status":"connected"}`
-	(*c).SetRequest(httptest.NewRequest(http.MethodPatch, "/integrations/scm/github/installation", strings.NewReader(reqBody)))
+	(*c).SetRequest(httptest.NewRequestWithContext(context.Background(), http.MethodPatch, "/integrations/scm/github/installation", strings.NewReader(reqBody)))
 	(*c).Request().Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 	handler := &SCMHandler{

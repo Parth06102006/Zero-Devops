@@ -7,6 +7,7 @@ import {
   getGithubInstallation,
   listGithubInstallations,
   listGithubRepositories,
+  listRepositoryDirectories,
   updateGithubConnectionStatus,
 } from "../api/github-api";
 
@@ -37,6 +38,16 @@ export function useGithubRepositories(search = "", enabled = true) {
     queryFn: ({ signal }) => listGithubRepositories(search, signal), 
     staleTime: 30_000,
     enabled,
+    retry: false,
+  });
+}
+
+export function useGithubDirectories(repositoryId?: number, branch?: string, enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.github.directories(repositoryId ?? 0, branch),
+    queryFn: ({ signal }) => (repositoryId ? listRepositoryDirectories(repositoryId, branch, signal) : Promise.resolve([])),
+    staleTime: 60_000,
+    enabled: enabled && Boolean(repositoryId),
     retry: false,
   });
 }

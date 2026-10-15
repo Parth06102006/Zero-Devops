@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
+
+	"go.uber.org/zap"
 )
 
 func TestDockerBuild_InvalidPath(t *testing.T) {
@@ -113,5 +115,59 @@ func TestValidateCloneURL_RejectsMalformedURL(t *testing.T) {
 		if err := validateCloneURL(u); err == nil {
 			t.Errorf("validateCloneURL(%q) = nil, want error for malformed URL", u)
 		}
+	}
+}
+
+func TestCloneAndPrepare_WithNestedAppDir(t *testing.T) {
+	repoPath := t.TempDir()
+	// Monorepo layout: Node app in client/, Python manifest in backend/
+	reactPkg := `{"dependencies":{"react":"latest","react-dom":"latest"},"scripts":{"build":"react-scripts build"}}`
+	writeFile(t, repoPath, filepath.Join("client", "package.json"), reactPkg)
+	writeFile(t, repoPath, filepath.Join("client", "package-lock.json"), "{}")
+	writeFile(t, repoPath, filepath.Join("backend", "requirements.txt"), "flask\n")
+
+	job := domain.DeployJob{
+		DeploymentID: "dep-nested-app-1",
+		CloneURL:     "https://github.com/user/monorepo.git",
+		CommitSHA:    "0123456789abcdef0123456789abcdef01234567",
+		WorkingDir:   "client",
+	}
+
+	appDir, err := ResolveAppDir(repoPath, job.WorkingDir)
+	if err != nil {
+		t.Fatalf("ResolveAppDir failed: %v", err)
+	}
+	wantAppDir := filepath.Join(repoPath, "client")
+	if appDir != wantAppDir {
+		t.Fatalf("appDir = %q, want %q", appDir, wantAppDir)
+	}
+
+	logger := zap.NewNop()
+	builder, pm, err := cloneAndPrepare(appDir, job, logger, false)
+	if err != nil {
+		t.Fatalf("cloneAndPrepare failed: %v", err)
+	}
+
+	if builder.Name != "react" {
+		t.Fatalf("builder.Name = %q, want react", builder.Name)
+	}
+	if pm != "npm" {
+		t.Fatalf("pm = %q, want npm", pm)
+	}
+
+	// Verify Dockerfile was written inside client/, NOT in root repoPath
+	clientDockerfile := filepath.Join(appDir, "Dockerfile")
+	//nolint:gosec // clientDockerfile is constructed within test TempDir
+	content, err := os.ReadFile(clientDockerfile)
+	if err != nil {
+		t.Fatalf("Dockerfile was not written to appDir: %v", err)
+	}
+	if len(content) == 0 {
+		t.Fatal("Dockerfile content is empty")
+	}
+
+	rootDockerfile := filepath.Join(repoPath, "Dockerfile")
+	if _, err := os.Stat(rootDockerfile); !os.IsNotExist(err) {
+		t.Fatalf("Dockerfile should NOT exist in repo root: %s", rootDockerfile)
 	}
 }

@@ -23,7 +23,12 @@ type workerUsecase struct {
 }
 
 // NewWorkerUsecase creates a new WorkerUsecase with the given dependencies.
-func NewWorkerUsecase(queueClient domain.QueueUsecase, repo domain.DeploymentRepository, artifactUploader domain.UploadUsecase, credentialProvider domain.CloneCredentialProvider) domain.WorkerUsecase {
+func NewWorkerUsecase(
+	queueClient domain.QueueUsecase,
+	repo domain.DeploymentRepository,
+	artifactUploader domain.UploadUsecase,
+	credentialProvider domain.CloneCredentialProvider,
+) domain.WorkerUsecase {
 	return &workerUsecase{
 		queueClient:        queueClient,
 		repo:               repo,
@@ -79,6 +84,7 @@ func (w *workerUsecase) StartWorker(baseLogger *zap.Logger) error {
 			CommitSHA:    request.CommitSHA,
 			RetryCount:   request.RetryCount,
 			RequestID:    request.CorrelationID,
+			WorkingDir:   request.Configuration.WorkingDir,
 		}
 
 		logger := baseLogger.With(zap.String("request_id", job.RequestID))

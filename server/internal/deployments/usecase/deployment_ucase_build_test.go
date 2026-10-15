@@ -35,6 +35,9 @@ func (m *projectRepoMock) UpdateProjectRepoAvailability(_ context.Context, _ str
 func (m *projectRepoMock) GetByInstallationAndRepositoryID(_ context.Context, _ string, _ int64) (*domain.Project, error) {
 	return nil, nil
 }
+func (m *projectRepoMock) ListByInstallationAndRepositoryID(_ context.Context, _ string, _ int64) ([]domain.Project, error) {
+	return nil, nil
+}
 
 type repositoryClientMock struct{}
 
@@ -43,6 +46,9 @@ func (m *repositoryClientMock) ListRepositories(_ context.Context, _, _, _ strin
 }
 func (m *repositoryClientMock) GetRepositoryDetails(_ context.Context, _ string, _ int64) (*domain.RepositoryPicker, error) {
 	return &domain.RepositoryPicker{}, nil
+}
+func (m *repositoryClientMock) ListRepositoryDirectories(_ context.Context, _, _, _, _ string) ([]string, error) {
+	return []string{"."}, nil
 }
 func (m *repositoryClientMock) ResolveCommit(_ context.Context, _, _, _, _ string) (string, error) {
 	return "0", nil

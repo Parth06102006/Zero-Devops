@@ -20,6 +20,7 @@ type client struct {
 	httpClient *http.Client
 }
 
+// New creates a new CloneCredentialProvider for obtaining short-lived clone credentials.
 func New(serverURL, authToken string) (domain.CloneCredentialProvider, error) {
 	if strings.TrimSpace(serverURL) == "" || strings.TrimSpace(authToken) == "" {
 		return nil, errors.New("SERVER_INTERNAL_URL and WORKER_INTERNAL_AUTH_TOKEN are required")
@@ -46,7 +47,7 @@ func (c *client) GetCloneCredential(ctx context.Context, deploymentID string) (d
 	if err != nil {
 		return domain.CloneCredential{}, fmt.Errorf("request clone credential: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
 		return domain.CloneCredential{}, fmt.Errorf("clone credential endpoint returned %s", resp.Status)
 	}
