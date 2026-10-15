@@ -359,7 +359,7 @@ func writeDockerfile(repoPath string, builder *Builder, pm string) error {
 	data, err := os.ReadFile(templatePath)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			altPath := filepath.Join("..", "..", "templates", builder.Template)
+			altPath := filepath.Join(parentDir, parentDir, "templates", builder.Template)
 			//nolint:gosec // altPath is constructed internally, not user input
 			if altData, altErr := os.ReadFile(altPath); altErr == nil {
 				data = altData

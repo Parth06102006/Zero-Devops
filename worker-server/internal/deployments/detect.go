@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+const parentDir = ".."
+
 // Builder describes a detected framework with its config files, dependencies, and Docker template.
 // DefaultOutputDir is the conventional build output directory for the framework; it is only
 // set for builders whose Dockerfile template serves a static build output directly (see
@@ -475,7 +477,7 @@ func ResolveAppDir(repoPath, workingDir string) (string, error) {
 		}
 
 		cleanRel := filepath.Clean(filepath.ToSlash(workingDir))
-		if cleanRel == ".." || strings.HasPrefix(cleanRel, "../") || cleanRel == "/" {
+		if cleanRel == parentDir || strings.HasPrefix(cleanRel, parentDir+"/") || cleanRel == "/" {
 			return "", fmt.Errorf("invalid working directory %q: path escapes repository root", workingDir)
 		}
 
@@ -483,7 +485,7 @@ func ResolveAppDir(repoPath, workingDir string) (string, error) {
 
 		// Containment check via filepath.Rel
 		rel, err := filepath.Rel(repoPath, appPath)
-		if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		if err != nil || rel == parentDir || strings.HasPrefix(rel, parentDir+string(filepath.Separator)) {
 			return "", fmt.Errorf("invalid working directory %q: path escapes repository root", workingDir)
 		}
 
@@ -680,7 +682,7 @@ func sanitizeOutputDir(dir string) string {
 	dir = strings.TrimSpace(dir)
 	dir = strings.TrimPrefix(dir, "./")
 	dir = filepath.Clean(dir)
-	if dir == "." || dir == "" || filepath.IsAbs(dir) || strings.HasPrefix(dir, "..") {
+	if dir == "." || dir == "" || filepath.IsAbs(dir) || strings.HasPrefix(dir, parentDir) {
 		return ""
 	}
 	return dir

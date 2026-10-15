@@ -73,19 +73,29 @@ func (a *AuthMiddlewareHandler) Validator(c *echo.Context, token string) (string
 	return userID, nil
 }
 
+const (
+	pathAuthGithubLogin         = "/auth/github/login"
+	pathAuthGithubLoginCallback = "/auth/github/login/callback"
+	pathAuthRefresh             = "/auth/refresh"
+	pathWebhooksGithub          = "/webhooks/github"
+	pathHealth                  = "/health"
+	pathHealthLive              = "/health/live"
+	pathHealthReady             = "/health/ready"
+)
+
 func isPublicPath(c *echo.Context) bool {
 	p := c.Path()
 	if p == "" && c.Request() != nil && c.Request().URL != nil {
 		p = path.Clean(c.Request().URL.Path)
 	}
 	switch p {
-	case "/auth/github/login",
-		"/auth/github/login/callback",
-		"/auth/refresh",
-		"/webhooks/github",
-		"/health",
-		"/health/live",
-		"/health/ready":
+	case pathAuthGithubLogin,
+		pathAuthGithubLoginCallback,
+		pathAuthRefresh,
+		pathWebhooksGithub,
+		pathHealth,
+		pathHealthLive,
+		pathHealthReady:
 		return true
 	}
 	return false
