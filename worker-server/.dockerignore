@@ -1,0 +1,9 @@
+.env
+.air.toml
+.git
+.gocache
+tmp
+worker-engine
+worker-engine.exe
+build-errors.log
+*.test

@@ -6,3 +6,4 @@ export {
   DeploymentStatusPill 
 } from "./deployment-status-badge";
 export { EnvVarTable, EnvVarImport } from "./env-var-table";
+export { DirectoryTreeSelector, buildDirectoryTree } from "./directory-tree-selector";

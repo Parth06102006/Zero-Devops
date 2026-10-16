@@ -8,6 +8,7 @@ import (
 
 	"Zero_Devops/worker_server/internal/config"
 	deploymentRepo "Zero_Devops/worker_server/internal/deployments/repository/pgsql"
+	"Zero_Devops/worker_server/internal/githubcredentials"
 	"Zero_Devops/worker_server/internal/logger"
 	"Zero_Devops/worker_server/internal/queue"
 	"Zero_Devops/worker_server/internal/upload"
@@ -106,8 +107,16 @@ func main() {
 	// Deployment Repository
 	depRepo := deploymentRepo.NewPgSQLDeploymentRepository(db)
 
+	credentialProvider, err := githubcredentials.New(
+		viper.GetString("SERVER_INTERNAL_URL"),
+		viper.GetString("WORKER_INTERNAL_AUTH_TOKEN"),
+	)
+	if err != nil {
+		baseLogger.Fatal("invalid worker credential configuration", zap.Error(err))
+	}
+
 	// Worker Usecase
-	workerUsecase := worker.NewWorkerUsecase(queueClient, depRepo, artifactUploader)
+	workerUsecase := worker.NewWorkerUsecase(queueClient, depRepo, artifactUploader, credentialProvider)
 	if err := workerUsecase.StartWorker(baseLogger); err != nil {
 		baseLogger.Fatal("worker stopped", zap.Error(err))
 	}

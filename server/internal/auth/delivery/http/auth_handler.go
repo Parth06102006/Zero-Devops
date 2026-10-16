@@ -50,8 +50,8 @@ const (
 //
 //nolint:gosec
 func writeCookie(token, cookieName string, expiryTime time.Duration, sameSite http.SameSite) *http.Cookie {
-	domain := cookieDomain()
-	secure := domain != "" // Secure=true only when a real domain is configured (production)
+	cDomain := cookieDomain()
+	secure := cDomain != "" // Secure=true only when a real domain is configured (production)
 
 	// In local dev (no COOKIE_DOMAIN), downgrade SameSite=None → Lax.
 	// Browsers refuse to store SameSite=None cookies without Secure=true, so
@@ -68,7 +68,7 @@ func writeCookie(token, cookieName string, expiryTime time.Duration, sameSite ht
 		HttpOnly: true,
 		SameSite: sameSite,
 		Path:     "/",
-		Domain:   domain,
+		Domain:   cDomain,
 	}
 }
 

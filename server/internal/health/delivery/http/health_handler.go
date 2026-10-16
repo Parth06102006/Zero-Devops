@@ -18,6 +18,11 @@ type DBPinger interface {
 	PingContext(ctx context.Context) error
 }
 
+const (
+	statusUp   = "up"
+	statusDown = "down"
+)
+
 // RedisPinger abstracts Redis pinging for health checks.
 type RedisPinger interface {
 	Ping(ctx context.Context) error
@@ -138,13 +143,13 @@ func (h *HealthHandler) runChecks(parentCtx context.Context) (map[string]Compone
 		if err != nil {
 			allHealthy = false
 			checks["database"] = ComponentHealth{
-				Status:  "down",
+				Status:  statusDown,
 				Details: "database ping failed",
 				Latency: latency,
 			}
 		} else {
 			checks["database"] = ComponentHealth{
-				Status:  "up",
+				Status:  statusUp,
 				Latency: latency,
 			}
 		}
@@ -163,13 +168,13 @@ func (h *HealthHandler) runChecks(parentCtx context.Context) (map[string]Compone
 			// but we mark unready if caching is required.
 			allHealthy = false
 			checks["redis"] = ComponentHealth{
-				Status:  "down",
+				Status:  statusDown,
 				Details: "redis ping failed",
 				Latency: latency,
 			}
 		} else {
 			checks["redis"] = ComponentHealth{
-				Status:  "up",
+				Status:  statusUp,
 				Latency: latency,
 			}
 		}
@@ -180,12 +185,12 @@ func (h *HealthHandler) runChecks(parentCtx context.Context) (map[string]Compone
 		if !h.rabbitmq.IsConnected() {
 			allHealthy = false
 			checks["rabbitmq"] = ComponentHealth{
-				Status:  "down",
+				Status:  statusDown,
 				Details: "rabbitmq connection is closed",
 			}
 		} else {
 			checks["rabbitmq"] = ComponentHealth{
-				Status: "up",
+				Status: statusUp,
 			}
 		}
 	}

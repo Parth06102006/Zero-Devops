@@ -7,8 +7,11 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 )
+
+const parentDir = ".."
 
 // Builder describes a detected framework with its config files, dependencies, and Docker template.
 // DefaultOutputDir is the conventional build output directory for the framework; it is only
@@ -233,6 +236,18 @@ var packageManagers = []struct {
 	{"package-lock.json", pkgManagerNPM},
 }
 
+// pythonPackageManagers defines Python package managers in priority order.
+// uv is preferred when uv.lock exists, then poetry, pipenv, and finally pip (requirements.txt).
+var pythonPackageManagers = []struct {
+	lockFile string
+	name     string
+}{
+	{"uv.lock", pkgManagerUV},
+	{"poetry.lock", pkgManagerPoetry},
+	{"Pipfile.lock", pkgManagerPipenv},
+	{"requirements.txt", pkgManagerPip},
+}
+
 type packageJSON struct {
 	Dependencies    map[string]string `json:"dependencies"`
 	DevDependencies map[string]string `json:"devDependencies"`
@@ -374,51 +389,154 @@ func hasConfigFile(repoPath, configFile string) bool {
 	return err == nil && !info.IsDir()
 }
 
-// walkForFile searches root and its subdirectories for a file named filename.
-// Traversal skips ignoredDirs; matching is case-insensitive.
-func walkForFile(root, filename string) (bool, error) {
-	var found bool
-	err := filepath.WalkDir(root, func(_ string, d os.DirEntry, err error) error {
+// hasRootManifest reports whether dir contains an identifiable framework manifest or Dockerfile at its root.
+func hasRootManifest(dir string) bool {
+	rootFiles := buildRootFileSet(dir)
+	if len(rootFiles) == 0 {
+		return false
+	}
+	for _, b := range builders {
+		for _, cfg := range b.ConfigFiles {
+			if rootFiles[strings.ToLower(cfg)] {
+				return true
+			}
+		}
+	}
+	if rootFiles["package.json"] {
+		pkg, err := readPackageJSON(dir)
+		if err == nil && pkg != nil {
+			if len(pkg.Dependencies) > 0 || len(pkg.DevDependencies) > 0 || len(pkg.Scripts) > 0 {
+				return true
+			}
+		}
+	}
+	if rootFiles[strings.ToLower(templateDockerfile)] {
+		return true
+	}
+	return false
+}
+
+// discoverAppCandidates scans subdirectories under repoPath (up to depth 2) to find directories
+// containing an application framework manifest. It skips ignored and hidden directories.
+func discoverAppCandidates(repoPath string) ([]string, error) {
+	var candidates []string
+
+	err := filepath.WalkDir(repoPath, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return nil
 		}
-		if d.IsDir() && ignoredDirs[d.Name()] {
+		if path == repoPath {
+			return nil
+		}
+		if !d.IsDir() {
+			return nil
+		}
+		name := d.Name()
+		if strings.HasPrefix(name, ".") || ignoredDirs[name] {
 			return filepath.SkipDir
 		}
-		if !d.IsDir() && strings.EqualFold(d.Name(), filename) {
-			found = true
-			return filepath.SkipAll
+		rel, err := filepath.Rel(repoPath, path)
+		if err != nil {
+			return nil
+		}
+		relSlash := filepath.ToSlash(rel)
+		// Limit depth to 2 levels (e.g. "client" or "apps/web")
+		if strings.Count(relSlash, "/") > 1 {
+			return filepath.SkipDir
+		}
+		if hasRootManifest(path) {
+			candidates = append(candidates, relSlash)
+			return filepath.SkipDir // Do not traverse inside an identified application candidate
 		}
 		return nil
 	})
-	return found, err
+	if err != nil {
+		return nil, err
+	}
+	sort.Strings(candidates)
+	return candidates, nil
 }
 
-// detectFramework identifies the framework or language of a repository.
-// Detection runs in four ordered phases, returning on the first match:
+// ResolveAppDir resolves and validates the application root directory within repoPath.
 //
-//  1. Config-file phase: looks for well-known config files at the repo root via a
-//     single os.ReadDir call. Builders in the slice are checked in priority order,
-//     so the result is deterministic regardless of map iteration.
+//  1. If workingDir is explicitly specified (not empty and not "."), it is normalized,
+//     checked for containment within repoPath (preventing directory traversal), and
+//     verified to exist and be a directory.
 //
-//  2. Package.json dep phase: for JS/TS repos without a config-file match, scans
-//     declared dependencies. Builder order in the slice determines precedence
-//     (e.g. Next.js before React).
-//
-//  3. Python deep-walk phase: walks the directory tree for Python config files that
-//     may live in a subdirectory (common in monorepos).
-//
-//  4. Dockerfile fallback: returns a bare Builder when a Dockerfile is present at root.
-func detectFramework(repoPath string) (*Builder, error) {
-	// Phase 1: one ReadDir → O(1) per-file checks, deterministic order.
-	rootFiles := buildRootFileSet(repoPath)
+//  2. If workingDir is empty or ".", ResolveAppDir preserves root-project behavior by checking
+//     repoPath directly. If no framework manifest exists at the root, it searches subdirectories
+//     for candidates. If exactly one candidate is found, it is selected. If multiple candidates
+//     exist, ResolveAppDir fails closed to prevent ambiguous builds.
+func ResolveAppDir(repoPath, workingDir string) (string, error) {
+	workingDir = strings.TrimSpace(workingDir)
+
+	if workingDir != "" && workingDir != "." {
+		// Reject absolute paths
+		if filepath.IsAbs(workingDir) || strings.HasPrefix(workingDir, "/") || strings.HasPrefix(workingDir, "\\") {
+			return "", fmt.Errorf("invalid working directory %q: absolute paths are not allowed", workingDir)
+		}
+
+		cleanRel := filepath.Clean(filepath.ToSlash(workingDir))
+		if cleanRel == parentDir || strings.HasPrefix(cleanRel, parentDir+"/") || cleanRel == "/" {
+			return "", fmt.Errorf("invalid working directory %q: path escapes repository root", workingDir)
+		}
+
+		appPath := filepath.Join(repoPath, filepath.FromSlash(cleanRel))
+
+		// Containment check via filepath.Rel
+		rel, err := filepath.Rel(repoPath, appPath)
+		if err != nil || rel == parentDir || strings.HasPrefix(rel, parentDir+string(filepath.Separator)) {
+			return "", fmt.Errorf("invalid working directory %q: path escapes repository root", workingDir)
+		}
+
+		info, err := os.Stat(appPath)
+		if err != nil {
+			if os.IsNotExist(err) {
+				return "", fmt.Errorf("working directory %q does not exist", workingDir)
+			}
+			return "", fmt.Errorf("failed to access working directory %q: %w", workingDir, err)
+		}
+		if !info.IsDir() {
+			return "", fmt.Errorf("working directory %q is not a directory", workingDir)
+		}
+
+		return appPath, nil
+	}
+
+	// workingDir is empty or "."
+	// Preserve root-project behavior if repoPath contains a manifest
+	if hasRootManifest(repoPath) {
+		return repoPath, nil
+	}
+
+	// Discover nested candidates
+	candidates, err := discoverAppCandidates(repoPath)
+	if err != nil {
+		return "", fmt.Errorf("discovering application candidates: %w", err)
+	}
+
+	if len(candidates) > 1 {
+		return "", fmt.Errorf("ambiguous application root: multiple candidates found (%s); specify working_dir in project settings", strings.Join(candidates, ", "))
+	}
+	if len(candidates) == 1 {
+		return filepath.Join(repoPath, filepath.FromSlash(candidates[0])), nil
+	}
+
+	// No candidates found; fallback to repoPath (detection will report no framework detected)
+	return repoPath, nil
+}
+
+// detectFrameworkAtRoot identifies the framework or language of an application directory
+// by checking only root-level config files, package.json dependencies, and Dockerfile.
+func detectFrameworkAtRoot(appDir string) (*Builder, error) {
+	rootFiles := buildRootFileSet(appDir)
 
 	for _, b := range builders {
 		for _, cfg := range b.ConfigFiles {
 			if !rootFiles[strings.ToLower(cfg)] {
 				continue
 			}
-			if recipeBuilder, refusalName := checkSSRMetaFramework(repoPath, b); recipeBuilder != nil {
+			if recipeBuilder, refusalName := checkSSRMetaFramework(appDir, b); recipeBuilder != nil {
 				return recipeBuilder, nil
 			} else if refusalName != "" {
 				return nil, fmt.Errorf(
@@ -432,7 +550,7 @@ func detectFramework(repoPath string) (*Builder, error) {
 
 	// Phase 2: package.json dependency scan (JS/TS only).
 	if rootFiles["package.json"] {
-		pkg, err := readPackageJSON(repoPath)
+		pkg, err := readPackageJSON(appDir)
 		if err == nil && pkg != nil {
 			for _, b := range builders {
 				if b.Deps == nil {
@@ -451,21 +569,40 @@ func detectFramework(repoPath string) (*Builder, error) {
 		}
 	}
 
-	// Phase 3: Python deep-walk for configs not at the repo root.
-	for _, cfg := range pythonBuilder.ConfigFiles {
-		found, err := walkForFile(repoPath, cfg)
-		if err != nil {
-			// Non-fatal: permission errors on some directories should not block detection.
-			continue
-		}
-		if found {
-			return pythonBuilder, nil
-		}
-	}
-
-	// Phase 4: bare Dockerfile fallback.
+	// Phase 3: bare Dockerfile fallback.
 	if rootFiles[strings.ToLower(templateDockerfile)] {
 		return &Builder{Name: builderDocker, Template: templateDockerfile}, nil
+	}
+
+	return nil, errors.New("no framework detected")
+}
+
+// detectFramework identifies the framework or language of an application directory.
+// Detection runs against appDir's root-level files:
+//  1. Config-file phase: checks builders in priority order.
+//  2. Package.json dep phase: for JS/TS repos without a config-file match.
+//  3. Dockerfile fallback: returns a bare Builder when Dockerfile is present.
+//
+// If appDir has no root-level manifest, it checks for a single nested candidate or fails closed
+// on ambiguity.
+func detectFramework(appDir string) (*Builder, error) {
+	builder, err := detectFrameworkAtRoot(appDir)
+	if err == nil {
+		return builder, nil
+	}
+	if strings.Contains(err.Error(), "no static or dynamic deployment recipe exists") {
+		return nil, err
+	}
+
+	candidates, candErr := discoverAppCandidates(appDir)
+	if candErr != nil {
+		return nil, candErr
+	}
+	if len(candidates) > 1 {
+		return nil, fmt.Errorf("ambiguous application root: multiple candidates found (%s); specify working_dir in project settings", strings.Join(candidates, ", "))
+	}
+	if len(candidates) == 1 {
+		return detectFrameworkAtRoot(filepath.Join(appDir, filepath.FromSlash(candidates[0])))
 	}
 
 	return nil, errors.New("no framework detected")
@@ -479,7 +616,24 @@ func detectPackageManager(repoPath string) string {
 			return pm.name
 		}
 	}
+
+	// Check for Python package managers if no Node.js lockfile found
+	if pythonPM := detectPythonPackageManager(repoPath); pythonPM != "" {
+		return pythonPM
+	}
+
 	return pkgManagerNPM
+}
+
+// detectPythonPackageManager returns the Python package manager inferred from lockfile presence.
+// Order matters: uv > poetry > pipenv > pip. Returns empty string if no Python lockfile found.
+func detectPythonPackageManager(repoPath string) string {
+	for _, pm := range pythonPackageManagers {
+		if hasConfigFile(repoPath, pm.lockFile) {
+			return pm.name
+		}
+	}
+	return ""
 }
 
 // outDirConfigPattern matches a JS/TS config object's outDir field, e.g. `outDir: "output"`.
@@ -528,7 +682,7 @@ func sanitizeOutputDir(dir string) string {
 	dir = strings.TrimSpace(dir)
 	dir = strings.TrimPrefix(dir, "./")
 	dir = filepath.Clean(dir)
-	if dir == "." || dir == "" || filepath.IsAbs(dir) || strings.HasPrefix(dir, "..") {
+	if dir == "." || dir == "" || filepath.IsAbs(dir) || strings.HasPrefix(dir, parentDir) {
 		return ""
 	}
 	return dir

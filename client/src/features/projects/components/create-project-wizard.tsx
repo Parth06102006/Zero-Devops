@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Check, Loader2, Rocket, Github, Settings2, Key, Zap } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { ChevronLeft, ChevronRight, Check, Loader2, Rocket, Github, Settings2, Key, Zap, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import {
   Dialog,
@@ -15,9 +15,12 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { FrameworkBadge, FrameworkSelector } from "./ui/framework-badge";
+import { DirectoryTreeSelector } from "./ui/directory-tree-selector";
 import { EnvVarTable, EnvVarImport } from "./ui/env-var-table";
 import { detectFramework, FRAMEWORK_PRESETS, type FrameworkPreset } from "@/features/projects/lib/framework-detector";
-import { useCreateProject } from "../hooks/use-projects";
+import { createProjectBuild } from "../api/builds-api";
+import { useCreateProject, useProjects } from "../hooks/use-projects";
+import { useGithubDirectories } from "@/features/github";
 
 interface SelectedRepo {
   id: number;
@@ -44,6 +47,15 @@ const STEPS: Array<{ id: WizardStep; title: string; icon: React.ComponentType<{ 
   { id: "deploy", title: "Deploy", icon: Rocket, description: "Review & create project" },
 ];
 
+function generateRandomChars(len = 4): string {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < len; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
 export function CreateProjectWizard({
   open,
   onOpenChange,
@@ -51,6 +63,7 @@ export function CreateProjectWizard({
   onComplete,
 }: CreateProjectWizardProps) {
   const [step, setStep] = useState<WizardStep>("configure");
+  const [projectName, setProjectName] = useState("");
   const [framework, setFramework] = useState<string>("node");
   const [buildCommand, setBuildCommand] = useState("");
   const [outputDir, setOutputDir] = useState("");
@@ -60,11 +73,29 @@ export function CreateProjectWizard({
   const [envVars, setEnvVars] = useState<Array<{ key: string; value: string; isSecret: boolean }>>([]);
   const [detectedFramework, setDetectedFramework] = useState<FrameworkPreset | null>(null);
 
+  const projectsQuery = useProjects();
   const create = useCreateProject();
   const [isDeploying, setIsDeploying] = useState(false);
 
-  useMemo(() => {
+  const directoriesQuery = useGithubDirectories(
+    selectedRepo?.id,
+    branch || selectedRepo?.default_branch,
+    open && Boolean(selectedRepo?.id)
+  );
+
+  useEffect(() => {
     if (selectedRepo) {
+      const existingProjects = projectsQuery.data ?? [];
+      const repoAlreadyUsed = existingProjects.some(
+        (p) => p.github_repository_id === selectedRepo.id || p.name === selectedRepo.name
+      );
+
+      if (repoAlreadyUsed) {
+        setProjectName(`${selectedRepo.name}-${generateRandomChars(4)}`);
+      } else {
+        setProjectName(selectedRepo.name);
+      }
+
       const detected = detectFramework(selectedRepo.name, null);
       if (detected) {
         setDetectedFramework(detected);
@@ -79,8 +110,9 @@ export function CreateProjectWizard({
         setInstallCommand("npm install");
       }
       setBranch(selectedRepo.default_branch);
+      setWorkingDir(".");
     }
-  }, [selectedRepo]);
+  }, [selectedRepo, projectsQuery.data]);
 
   const currentStepIndex = STEPS.findIndex((s) => s.id === step);
 
@@ -103,9 +135,11 @@ export function CreateProjectWizard({
     
     setIsDeploying(true);
     try {
+      const configuredBranch = branch.startsWith("refs/heads/") ? branch : `refs/heads/${branch}`;
       const result = await create.mutateAsync({
+        name: projectName.trim() || selectedRepo.name,
         repository_id: selectedRepo.id,
-        configured_branch: branch.startsWith("refs/heads/") ? branch : `refs/heads/${branch}`,
+        configured_branch: configuredBranch,
         project_webhook_enabled: true,
         build_configuration: {
           executable: buildCommand.trim().split(/\s+/)[0] ?? "npm",
@@ -114,6 +148,9 @@ export function CreateProjectWizard({
           scanner_policy_version: "v1",
         },
       });
+      // TEMP(local testing): enqueue the initial build client-side. Replace this
+      // with server-side project-creation dispatch before production rollout.
+      await createProjectBuild(result.id, configuredBranch);
       onComplete?.(result.id);
       onOpenChange(false);
     } catch (error) {
@@ -136,9 +173,23 @@ export function CreateProjectWizard({
             {selectedRepo ? `Configure: ${selectedRepo.name}` : "New Project"}
           </DialogTitle>
           <DialogDescription className="text-white/45">
-            {selectedRepo 
-              ? `Repository: ${selectedRepo.full_name} • Branch: ${branch || selectedRepo.default_branch}`
-              : "Select a repository to continue"}
+            {selectedRepo ? (
+              <span className="inline-flex items-center gap-2 flex-wrap text-xs">
+                <span>Repository:</span>
+                <a
+                  href={`https://github.com/${selectedRepo.full_name}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-cyan-300 hover:text-cyan-200 hover:underline"
+                >
+                  {selectedRepo.full_name}
+                  <ExternalLink className="size-3" />
+                </a>
+                <span>• Branch: {branch || selectedRepo.default_branch}</span>
+              </span>
+            ) : (
+              "Select a repository to continue"
+            )}
           </DialogDescription>
         </DialogHeader>
 
@@ -175,8 +226,51 @@ export function CreateProjectWizard({
         <div className="flex-1 overflow-y-auto p-6">
           {step === "configure" && (
             <div className="space-y-6">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <Label htmlFor="projectName" className="text-xs font-medium text-white/60">Project Name</Label>
+                  <Input
+                    id="projectName"
+                    value={projectName}
+                    onChange={(e) => setProjectName(e.target.value)}
+                    placeholder={selectedRepo?.name ?? "project-name"}
+                    className="border-white/10 bg-white/[0.03] text-white placeholder:text-white/25 mt-1"
+                  />
+                  <p className="mt-1 text-[10px] text-white/40">
+                    Unique project identifier. Multiple projects can share a repo with unique names.
+                  </p>
+                </div>
+                <div>
+                  <Label htmlFor="branch" className="text-xs font-medium text-white/60">Branch</Label>
+                  <Input
+                    id="branch"
+                    value={branch}
+                    onChange={(e) => setBranch(e.target.value)}
+                    placeholder="main"
+                    className="border-white/10 bg-white/[0.03] text-white placeholder:text-white/25 mt-1"
+                  />
+                  <p className="mt-1 text-[10px] text-white/40">
+                    Git branch to track for automated deployments.
+                  </p>
+                </div>
+              </div>
+
               <div>
-                <Label className="text-xs font-medium text-white/60">Framework Preset</Label>
+                <Label className="text-xs font-medium text-white/60 mb-2 block">
+                  Root Directory (Submodules & Monorepo Explorer)
+                </Label>
+                <DirectoryTreeSelector
+                  directories={directoriesQuery.data ?? []}
+                  selectedPath={workingDir}
+                  onSelect={(path) => setWorkingDir(path)}
+                  isLoading={directoriesQuery.isFetching}
+                />
+              </div>
+
+              <Separator />
+
+              <div>
+                <Label className="text-xs font-medium text-white/60 mb-2 block">Framework Preset</Label>
                 <FrameworkSelector value={framework} onChange={(v) => {
                   setFramework(v);
                   const p = FRAMEWORK_PRESETS[v];
@@ -192,31 +286,6 @@ export function CreateProjectWizard({
                     — you can override if needed.
                   </p>
                 )}
-              </div>
-
-              <Separator />
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <Label htmlFor="branch" className="text-xs font-medium text-white/60">Branch</Label>
-                  <Input
-                    id="branch"
-                    value={branch}
-                    onChange={(e) => setBranch(e.target.value)}
-                    placeholder="main"
-                    className="border-white/10 bg-white/[0.03] text-white placeholder:text-white/25"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="workingDir" className="text-xs font-medium text-white/60">Root Directory</Label>
-                  <Input
-                    id="workingDir"
-                    value={workingDir}
-                    onChange={(e) => setWorkingDir(e.target.value)}
-                    placeholder="."
-                    className="border-white/10 bg-white/[0.03] text-white placeholder:text-white/25"
-                  />
-                </div>
               </div>
 
               <div>
@@ -292,10 +361,28 @@ export function CreateProjectWizard({
                 <h4 className="text-sm font-medium">Review Configuration</h4>
                 <dl className="mt-4 space-y-3 text-sm">
                   <div className="flex justify-between gap-4">
+                    <dt className="text-white/30">Project Name</dt>
+                    <dd className="font-medium text-right text-cyan-300 truncate max-w-[60%]">
+                      {projectName.trim() || selectedRepo?.name}
+                    </dd>
+                  </div>
+                  <div className="flex justify-between gap-4">
                     <dt className="text-white/30">Repository</dt>
                     <dd className="font-mono text-right text-white/60 truncate max-w-[60%]">
-                      {selectedRepo?.full_name ?? "—"}
+                      <a
+                        href={`https://github.com/${selectedRepo?.full_name}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-white/70 hover:text-cyan-300 hover:underline"
+                      >
+                        {selectedRepo?.full_name ?? "—"}
+                        <ExternalLink className="size-3" />
+                      </a>
                     </dd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-white/30">Root / Submodule</dt>
+                    <dd className="font-mono text-right text-white/60">{workingDir || "."}</dd>
                   </div>
                   <div className="flex justify-between gap-4">
                     <dt className="text-white/30">Branch</dt>

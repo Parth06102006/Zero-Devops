@@ -38,16 +38,16 @@ func (m *pgSQLProjectRepository) Store(ctx context.Context, p *domain.Project) e
 
 	query := `
 		INSERT INTO projects (
-			user_id, github_installation_id, github_repository_id,
+			user_id, name, github_installation_id, github_repository_id,
 			repository_owner, repository_name, repository_full_name,
 			configured_branch, project_webhook_enabled, repository_available, desired_revision_generation,
 			build_configuration, configuration_version, command_policy_version,
 			command_scan_result, created_at, updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
 		RETURNING id
 	`
 	if err := m.Conn.QueryRowContext(ctx, query,
-		p.UserID, p.InstallationID, p.GitHubRepositoryID,
+		p.UserID, p.Name, p.InstallationID, p.GitHubRepositoryID,
 		p.RepositoryOwner, p.RepositoryName, p.RepositoryFullName,
 		p.ConfiguredBranch, p.ProjectWebhookEnabled, p.RepositoryAvailable, p.DesiredRevisionGeneration,
 		buildConfig, p.ConfigurationVersion, p.CommandPolicyVersion,
@@ -66,7 +66,7 @@ func (m *pgSQLProjectRepository) Store(ctx context.Context, p *domain.Project) e
 // ListByUserID returns all projects owned by the user, newest first.
 func (m *pgSQLProjectRepository) ListByUserID(ctx context.Context, userID string) ([]domain.Project, error) {
 	query := `
-		SELECT id, user_id, github_installation_id, github_repository_id,
+		SELECT id, user_id, name, github_installation_id, github_repository_id,
 			repository_owner, repository_name, repository_full_name,
 			configured_branch, project_webhook_enabled, repository_available, desired_revision_generation,
 			build_configuration, configuration_version, command_policy_version,
@@ -92,7 +92,7 @@ func (m *pgSQLProjectRepository) ListByUserID(ctx context.Context, userID string
 		var p domain.Project
 		var buildConfig, scanResult []byte
 		if err := rows.Scan(
-			&p.ID, &p.UserID, &p.InstallationID, &p.GitHubRepositoryID,
+			&p.ID, &p.UserID, &p.Name, &p.InstallationID, &p.GitHubRepositoryID,
 			&p.RepositoryOwner, &p.RepositoryName, &p.RepositoryFullName,
 			&p.ConfiguredBranch, &p.ProjectWebhookEnabled, &p.RepositoryAvailable, &p.DesiredRevisionGeneration,
 			&buildConfig, &p.ConfigurationVersion, &p.CommandPolicyVersion,
@@ -120,7 +120,7 @@ func (m *pgSQLProjectRepository) ListByUserID(ctx context.Context, userID string
 // GetByID returns a single project scoped to the user, or ErrNotFound.
 func (m *pgSQLProjectRepository) GetByID(ctx context.Context, userID, id string) (*domain.Project, error) {
 	query := `
-		SELECT id, user_id, github_installation_id, github_repository_id,
+		SELECT id, user_id, name, github_installation_id, github_repository_id,
 			repository_owner, repository_name, repository_full_name,
 			configured_branch, project_webhook_enabled, repository_available, desired_revision_generation,
 			build_configuration, configuration_version, command_policy_version,
@@ -131,7 +131,7 @@ func (m *pgSQLProjectRepository) GetByID(ctx context.Context, userID, id string)
 	var p domain.Project
 	var buildConfig, scanResult []byte
 	if err := m.Conn.QueryRowContext(ctx, query, id, userID).Scan(
-		&p.ID, &p.UserID, &p.InstallationID, &p.GitHubRepositoryID,
+		&p.ID, &p.UserID, &p.Name, &p.InstallationID, &p.GitHubRepositoryID,
 		&p.RepositoryOwner, &p.RepositoryName, &p.RepositoryFullName,
 		&p.ConfiguredBranch, &p.ProjectWebhookEnabled, &p.RepositoryAvailable, &p.DesiredRevisionGeneration,
 		&buildConfig, &p.ConfigurationVersion, &p.CommandPolicyVersion,
@@ -155,7 +155,7 @@ func (m *pgSQLProjectRepository) GetByID(ctx context.Context, userID, id string)
 
 // Update persists the mutable columns of an existing project. It writes only:
 //
-//	configured_branch, project_webhook_enabled, repository_available, build_configuration,
+//	name, configured_branch, project_webhook_enabled, repository_available, build_configuration,
 //	configuration_version, command_policy_version, command_scan_result, updated_at
 //
 // Identity/immutable columns (id, user_id, installation_id, github_repository_id,
@@ -174,21 +174,25 @@ func (m *pgSQLProjectRepository) Update(ctx context.Context, p *domain.Project) 
 
 	query := `
 		UPDATE projects SET
-			configured_branch = $1,
-			project_webhook_enabled = $2,
-			repository_available = $3,
-			build_configuration = $4,
-			configuration_version = $5,
-			command_policy_version = $6,
-			command_scan_result = $7,
+			name = COALESCE(NULLIF($1, ''), name),
+			configured_branch = $2,
+			project_webhook_enabled = $3,
+			repository_available = $4,
+			build_configuration = $5,
+			configuration_version = $6,
+			command_policy_version = $7,
+			command_scan_result = $8,
 			updated_at = NOW()
-		WHERE id = $8 AND user_id = $9
+		WHERE id = $9 AND user_id = $10
 	`
 	res, err := m.Conn.ExecContext(ctx, query,
-		p.ConfiguredBranch, p.ProjectWebhookEnabled, p.RepositoryAvailable, buildConfig,
+		p.Name, p.ConfiguredBranch, p.ProjectWebhookEnabled, p.RepositoryAvailable, buildConfig,
 		p.ConfigurationVersion, p.CommandPolicyVersion, scanResult, p.ID, p.UserID,
 	)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+			return domain.ErrConflict
+		}
 		log := appmiddleware.LoggerFromContext(ctx)
 		log.Error("failed to update project", zap.Error(err))
 		return err
@@ -223,49 +227,78 @@ func (m *pgSQLProjectRepository) Delete(ctx context.Context, userID, id string) 
 	return nil
 }
 
-// //// ****** THIS FUNCTION WAS NOT MADE BY ME IT WAS MADE BY GLM 5.3 THE CASE LOOKS FINE AND IT HAS ADDED OTHER LOGGER AS WELL WHICH I HAVE TO ADD
-// GetByInstallationAndRepositoryID returns the project selected for the given
-// repository under the given installation, or ErrNotFound. This is the webhook
-// push lookup: it is deliberately NOT user-scoped because webhooks carry no
-// user context — installation identity plus GitHub repository ID is the durable
-// key (one installation belongs to one user in V1, so at most one row matches).
-func (m *pgSQLProjectRepository) GetByInstallationAndRepositoryID(
+// ListByInstallationAndRepositoryID returns all projects matching the given installation and repo.
+func (m *pgSQLProjectRepository) ListByInstallationAndRepositoryID(
 	ctx context.Context,
 	githubInstallationID string,
 	githubRepositoryID int64,
-) (*domain.Project, error) {
+) ([]domain.Project, error) {
 	query := `
-		SELECT id, user_id, github_installation_id, github_repository_id,
+		SELECT id, user_id, name, github_installation_id, github_repository_id,
 			repository_owner, repository_name, repository_full_name,
 			configured_branch, project_webhook_enabled, repository_available, desired_revision_generation,
 			build_configuration, configuration_version, command_policy_version,
 			command_scan_result, created_at, updated_at
 		FROM projects
 		WHERE github_installation_id = $1 AND github_repository_id = $2
+		ORDER BY created_at ASC
 	`
-	var p domain.Project
-	var buildConfig, scanResult []byte
-	if err := m.Conn.QueryRowContext(ctx, query, githubInstallationID, githubRepositoryID).Scan(
-		&p.ID, &p.UserID, &p.InstallationID, &p.GitHubRepositoryID,
-		&p.RepositoryOwner, &p.RepositoryName, &p.RepositoryFullName,
-		&p.ConfiguredBranch, &p.ProjectWebhookEnabled, &p.RepositoryAvailable, &p.DesiredRevisionGeneration,
-		&buildConfig, &p.ConfigurationVersion, &p.CommandPolicyVersion,
-		&scanResult, &p.CreatedAt, &p.UpdatedAt,
-	); err != nil {
-		if err == sql.ErrNoRows {
-			return nil, domain.ErrNotFound
-		}
+	rows, err := m.Conn.QueryContext(ctx, query, githubInstallationID, githubRepositoryID)
+	if err != nil {
 		log := appmiddleware.LoggerFromContext(ctx)
-		log.Error("failed to get project by installation and repository ID", zap.Error(err))
+		log.Error("failed to list projects by installation and repo ID", zap.Error(err))
 		return nil, err
 	}
-	if err := json.Unmarshal(buildConfig, &p.BuildConfiguration); err != nil {
-		return nil, fmt.Errorf("unmarshal build configuration: %w", err)
+	defer func() {
+		if err := rows.Close(); err != nil {
+			appmiddleware.LoggerFromContext(ctx).Error("failed to close rows", zap.Error(err))
+		}
+	}()
+
+	var projects []domain.Project
+	for rows.Next() {
+		var p domain.Project
+		var buildConfig, scanResult []byte
+		if err := rows.Scan(
+			&p.ID, &p.UserID, &p.Name, &p.InstallationID, &p.GitHubRepositoryID,
+			&p.RepositoryOwner, &p.RepositoryName, &p.RepositoryFullName,
+			&p.ConfiguredBranch, &p.ProjectWebhookEnabled, &p.RepositoryAvailable, &p.DesiredRevisionGeneration,
+			&buildConfig, &p.ConfigurationVersion, &p.CommandPolicyVersion,
+			&scanResult, &p.CreatedAt, &p.UpdatedAt,
+		); err != nil {
+			log := appmiddleware.LoggerFromContext(ctx)
+			log.Error("failed to scan project", zap.Error(err))
+			return nil, err
+		}
+		if err := json.Unmarshal(buildConfig, &p.BuildConfiguration); err != nil {
+			return nil, fmt.Errorf("unmarshal build configuration: %w", err)
+		}
+		if err := json.Unmarshal(scanResult, &p.CommandScanResult); err != nil {
+			return nil, fmt.Errorf("unmarshal command scan result: %w", err)
+		}
+		projects = append(projects, p)
 	}
-	if err := json.Unmarshal(scanResult, &p.CommandScanResult); err != nil {
-		return nil, fmt.Errorf("unmarshal command scan result: %w", err)
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
-	return &p, nil
+	return projects, nil
+}
+
+// GetByInstallationAndRepositoryID returns the first project selected for the given
+// repository under the given installation, or ErrNotFound.
+func (m *pgSQLProjectRepository) GetByInstallationAndRepositoryID(
+	ctx context.Context,
+	githubInstallationID string,
+	githubRepositoryID int64,
+) (*domain.Project, error) {
+	projects, err := m.ListByInstallationAndRepositoryID(ctx, githubInstallationID, githubRepositoryID)
+	if err != nil {
+		return nil, err
+	}
+	if len(projects) == 0 {
+		return nil, domain.ErrNotFound
+	}
+	return &projects[0], nil
 }
 
 func (m *pgSQLProjectRepository) GetProjectRepoAvailability(ctx context.Context, githubInstallationID string) (map[int64]bool, error) {

@@ -35,8 +35,16 @@ export const endpoints = {
       return qs ? `/integrations/scm/github/repositories?${qs}` : "/integrations/scm/github/repositories";
     },
     installation: "/integrations/scm/github/installation",
+    installations: "/integrations/scm/github/installations",
+    installCallback: "/github/install/callback",
+    startInstall: (returnTo?: string) =>
+      returnTo ? `/integrations/scm/github/install?return_to=${encodeURIComponent(returnTo)}` : "/integrations/scm/github/install",
     install: (code?: string) =>
       code ? `/integrations/scm/github/installation?code=${encodeURIComponent(code)}` : "/integrations/scm/github/installation",
+    directories: (repoId: number, branch?: string) => {
+      const qs = branch ? `?branch=${encodeURIComponent(branch)}` : "";
+      return `/integrations/scm/github/repositories/${repoId}/directories${qs}`;
+    },
     deleteInstallation: "/integrations/scm/github/installation",
   },
 } as const;

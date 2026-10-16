@@ -157,6 +157,9 @@ type DeploymentRepository interface {
 	StoreWebhookBuildWithOutbox(ctx context.Context, params StoreWebhookBuildParams) (*Deployment, error)
 	GetByUserID(ctx context.Context, userID string) ([]Deployment, error)
 	GetByID(ctx context.Context, userID, id string) (*Deployment, error)
+	// GetInternalByID is reserved for trusted service-to-service operations.
+	// It must never be exposed through a user-facing handler without ownership checks.
+	GetInternalByID(ctx context.Context, id string) (*Deployment, error)
 	GetByProjectID(ctx context.Context, userID, projectID string) ([]Deployment, error)
 	StoreProjectBuildWithOutbox(ctx context.Context, params StoreProjectBuildWithOutboxParams) (*Deployment, error)
 	ClaimOutboxBatch(ctx context.Context, limit int) ([]OutboxEvent, error)

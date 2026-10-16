@@ -294,6 +294,27 @@ func (m *pgSQLDeploymentRepository) GetByID(ctx context.Context, userID, id stri
 	return &d, nil
 }
 
+// GetInternalByID loads a deployment for trusted worker-only operations. User
+// ownership is deliberately not accepted here; callers must authenticate the
+// worker before using this method.
+func (m *pgSQLDeploymentRepository) GetInternalByID(ctx context.Context, id string) (*domain.Deployment, error) {
+	query := `
+		SELECT ` + deploymentColumns + `
+		FROM deployments
+		WHERE id = $1
+	`
+	d, err := scanDeployment(m.Conn.QueryRowContext(ctx, query, id))
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrNotFound
+		}
+		log := appmiddleware.LoggerFromContext(ctx)
+		log.Error("failed to scan deployment for worker credential", zap.Error(err))
+		return nil, err
+	}
+	return &d, nil
+}
+
 func (m *pgSQLDeploymentRepository) queryDeployments(ctx context.Context, query string, args ...any) ([]domain.Deployment, error) {
 	rows, err := m.Conn.QueryContext(ctx, query, args...)
 	if err != nil {

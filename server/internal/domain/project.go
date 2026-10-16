@@ -67,6 +67,7 @@ type CommandScanner interface {
 type Project struct {
 	ID                        string             `json:"id"`
 	UserID                    string             `json:"user_id"`
+	Name                      string             `json:"name"`
 	InstallationID            string             `json:"installation_id"` // FK -> github_installations.id (UUID)
 	GitHubRepositoryID        int64              `json:"github_repository_id"`
 	RepositoryOwner           string             `json:"repository_owner"`
@@ -91,6 +92,7 @@ type Project struct {
 // the scanner/policy on the build command, and persisting the resulting
 // snapshot. Do not persist the entire GitHub repository inventory here.
 type CreateProjectParams struct {
+	Name                  string             `json:"name,omitempty"`
 	RepositoryID          int64              `json:"repository_id"`
 	ConfiguredBranch      string             `json:"configured_branch"`
 	ProjectWebhookEnabled bool               `json:"project_webhook_enabled"`
@@ -102,6 +104,7 @@ type CreateProjectParams struct {
 // The configured branch may be changed only through this authenticated API;
 // webhook handling reads the persisted value and never a client-supplied ref.
 type UpdateProjectParams struct {
+	Name                  *string             `json:"name,omitempty"`
 	ConfiguredBranch      *string             `json:"configured_branch,omitempty"`
 	ProjectWebhookEnabled *bool               `json:"project_webhook_enabled,omitempty"`
 	BuildConfiguration    *BuildConfiguration `json:"build_configuration,omitempty"`
@@ -131,6 +134,7 @@ type ProjectRepository interface {
 	GetProjectRepoAvailability(ctx context.Context, githubInstallationID string) (map[int64]bool, error)
 	UpdateProjectRepoAvailability(ctx context.Context, githubInstallationID string, listOfRepos map[int64]bool) error
 	GetByInstallationAndRepositoryID(ctx context.Context, githubInstallationID string, githubRepositoryID int64) (*Project, error)
+	ListByInstallationAndRepositoryID(ctx context.Context, githubInstallationID string, githubRepositoryID int64) ([]Project, error)
 	// (IncrementDesiredRevisionGeneration was removed 2026-09-06: its only
 	// caller incremented before the store transaction, so webhook redelivery
 	// bumped the counter without creating a build. The bump now happens inside

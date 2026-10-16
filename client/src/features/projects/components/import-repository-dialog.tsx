@@ -188,6 +188,7 @@ export function ImportRepositoryDialog({
                         key={repo.id}
                         project={{
                           id: String(repo.id),
+                          name: repo.name,
                           user_id: "",
                           installation_id: "",
                           github_repository_id: repo.id,

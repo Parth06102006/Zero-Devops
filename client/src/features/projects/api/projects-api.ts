@@ -4,6 +4,7 @@ import type { ApiSuccess } from "@/types/api";
 import type { BuildConfiguration, Project } from "@/types/domain";
 
 export interface CreateProjectInput {
+  name?: string;
   repository_id: number;
   configured_branch: string;
   project_webhook_enabled: boolean;

@@ -66,6 +66,7 @@ type fakeGithubRepository struct {
 	dbIDByExternal map[int64]string
 	statusByExt    map[int64]string
 	statusByID     map[string]string
+	connStatusByID map[string]domain.GithubConnectionStatus
 	updateErr      error
 }
 
@@ -122,10 +123,44 @@ func (f *fakeGithubRepository) GetInstallationStatusByID(_ context.Context, inst
 	return status, nil
 }
 
+func (f *fakeGithubRepository) GetInstallationByID(_ context.Context, id string) (*domain.GithubInstallation, error) {
+	if f.statusByID == nil {
+		return nil, domain.ErrNotFound
+	}
+	status, ok := f.statusByID[id]
+	if !ok {
+		return nil, domain.ErrNotFound
+	}
+	connStatus := domain.GithubConnectionStatusConnected
+	if f.connStatusByID != nil {
+		if cs, exists := f.connStatusByID[id]; exists {
+			connStatus = cs
+		}
+	}
+	return &domain.GithubInstallation{
+		ID:               id,
+		Status:           status,
+		ConnectionStatus: connStatus,
+	}, nil
+}
+
+func (f *fakeGithubRepository) ListInstallationsByUserID(_ context.Context, _ string) ([]*domain.GithubInstallation, error) {
+	return nil, nil
+}
+
+func (f *fakeGithubRepository) UpdateConnectionStatus(_ context.Context, _, id string, status domain.GithubConnectionStatus) error {
+	if f.connStatusByID == nil {
+		f.connStatusByID = map[string]domain.GithubConnectionStatus{}
+	}
+	f.connStatusByID[id] = status
+	return nil
+}
+
 type fakeProjectRepository struct {
 	availability map[int64]bool
 	updated      map[int64]bool
 	project      *domain.Project
+	projects     []domain.Project
 	projectErr   error
 	lookups      []lookupArgs
 }
@@ -163,6 +198,17 @@ func (f *fakeProjectRepository) GetByInstallationAndRepositoryID(_ context.Conte
 	return f.project, nil
 }
 
+func (f *fakeProjectRepository) ListByInstallationAndRepositoryID(ctx context.Context, installationDBID string, repositoryID int64) ([]domain.Project, error) {
+	if len(f.projects) > 0 {
+		return f.projects, nil
+	}
+	proj, err := f.GetByInstallationAndRepositoryID(ctx, installationDBID, repositoryID)
+	if err != nil {
+		return nil, err
+	}
+	return []domain.Project{*proj}, nil
+}
+
 type fakeDeploymentRepository struct {
 	stored     []domain.StoreWebhookBuildParams
 	storeErr   error
@@ -183,6 +229,9 @@ func (f *fakeDeploymentRepository) GetByUserID(_ context.Context, _ string) ([]d
 	return nil, nil
 }
 func (f *fakeDeploymentRepository) GetByID(_ context.Context, _, _ string) (*domain.Deployment, error) {
+	return nil, domain.ErrNotFound
+}
+func (f *fakeDeploymentRepository) GetInternalByID(_ context.Context, _ string) (*domain.Deployment, error) {
 	return nil, domain.ErrNotFound
 }
 func (f *fakeDeploymentRepository) GetByProjectID(_ context.Context, _, _ string) ([]domain.Deployment, error) {
@@ -637,5 +686,43 @@ func TestHandleGithubWebhook_PushProjectLookupErrorFailsDelivery(t *testing.T) {
 
 	if len(repo.statusUpdates) != 1 || repo.statusUpdates[0] != domain.ProcessingStatusFailed {
 		t.Fatalf("expected delivery marked failed, got %v", repo.statusUpdates)
+	}
+}
+
+func TestHandleGithubWebhook_PushMultiProjectSubmodulePathFiltering(t *testing.T) {
+	projA := eligibleProject()
+	projA.ID = "project-a-id"
+	projA.BuildConfiguration.WorkingDir = "submoduleA"
+
+	projB := eligibleProject()
+	projB.ID = "project-b-id"
+	projB.BuildConfiguration.WorkingDir = "submoduleB"
+
+	projectRepository := &fakeProjectRepository{projects: []domain.Project{*projA, *projB}}
+	deploymentRepository := &fakeDeploymentRepository{}
+	hook, repo := newPushHook(t, projectRepository, deploymentRepository)
+
+	// Commit modifies only submoduleB/main.go
+	body := `{
+		"ref": "refs/heads/main",
+		"after": "9999999999999999999999999999999999999999",
+		"repository": {"id": 7, "clone_url": "https://github.com/u/r.git"},
+		"installation": {"id": 42},
+		"commits": [
+			{"modified": ["submoduleB/main.go"]}
+		]
+	}`
+
+	if _, err := hook.HandleGithubWebhook(context.Background(), newRequest(t, "push", "del-push-submodule", "secret", body)); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	assertAccepted(t, repo)
+
+	if len(deploymentRepository.stored) != 1 {
+		t.Fatalf("expected exactly 1 build triggered, got %d", len(deploymentRepository.stored))
+	}
+	if deploymentRepository.stored[0].ProjectID != "project-b-id" {
+		t.Fatalf("expected build triggered for project-b-id, got %s", deploymentRepository.stored[0].ProjectID)
 	}
 }

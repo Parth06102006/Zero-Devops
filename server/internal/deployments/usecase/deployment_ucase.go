@@ -361,6 +361,32 @@ func isPermanentStatusError(err error) bool {
 		errors.Is(err, domain.ErrBadParamInput)
 }
 
+func (d *deploymentUsecase) resolveRepositoryCommit(
+	ctx context.Context,
+	installationID int64,
+	project *domain.Project,
+	shaOrRef string,
+) (cloneURL, commitSHA string, err error) {
+	log := appmiddleware.LoggerFromContext(ctx)
+	token, err := d.tokenProvider.CreateInstallationToken(ctx, installationID)
+	if err != nil {
+		log.Error("failed to create installation token for manual build", zap.Error(err), zap.Int64("installation_id", installationID))
+		return "", "", err
+	}
+
+	repoDetails, err := d.repositoryClient.GetRepositoryDetails(ctx, token, project.GitHubRepositoryID)
+	if err != nil {
+		log.Error("failed to refresh repository details for manual build", zap.Error(err), zap.Int64("repository_id", project.GitHubRepositoryID))
+		return "", "", err
+	}
+	commitSHA, err = d.repositoryClient.ResolveCommit(ctx, token, project.RepositoryOwner, project.RepositoryName, shaOrRef)
+	if err != nil {
+		log.Error("failed to resolve manual build ref", zap.Error(err), zap.String("sha_or_ref", shaOrRef), zap.String("project_id", project.ID))
+		return "", "", err
+	}
+	return repoDetails.CloneURL, commitSHA, nil
+}
+
 func (d *deploymentUsecase) CreateProjectBuild(ctx context.Context, userID string, params domain.CreateProjectBuildParams) (*domain.Deployment, error) {
 	log := appmiddleware.LoggerFromContext(ctx)
 	projectID := strings.TrimSpace(params.ProjectID)
@@ -388,27 +414,15 @@ func (d *deploymentUsecase) CreateProjectBuild(ctx context.Context, userID strin
 		log.Error("failed to get github installation for manual build", zap.Error(err), zap.String("user_id", userID))
 		return nil, err
 	}
-	if installation.Status != domain.GithubInstallationStatusActive {
+	if installation.Status != domain.GithubInstallationStatusActive || installation.ConnectionStatus != domain.GithubConnectionStatusConnected {
 		return nil, domain.ErrInvalidStatus
 	}
 	if project.InstallationID != installation.ID {
 		return nil, domain.ErrNotFound
 	}
 
-	token, err := d.tokenProvider.CreateInstallationToken(ctx, installation.InstallationID)
+	cloneURL, commitSHA, err := d.resolveRepositoryCommit(ctx, installation.InstallationID, project, shaOrRef)
 	if err != nil {
-		log.Error("failed to create installation token for manual build", zap.Error(err), zap.Int64("installation_id", installation.InstallationID))
-		return nil, err
-	}
-
-	repoDetails, err := d.repositoryClient.GetRepositoryDetails(ctx, token, project.GitHubRepositoryID)
-	if err != nil {
-		log.Error("failed to refresh repository details for manual build", zap.Error(err), zap.Int64("repository_id", project.GitHubRepositoryID))
-		return nil, err
-	}
-	commitSHA, err := d.repositoryClient.ResolveCommit(ctx, token, project.RepositoryOwner, project.RepositoryName, shaOrRef)
-	if err != nil {
-		log.Error("failed to resolve manual build ref", zap.Error(err), zap.String("sha_or_ref", shaOrRef), zap.String("project_id", projectID))
 		return nil, err
 	}
 
@@ -424,7 +438,7 @@ func (d *deploymentUsecase) CreateProjectBuild(ctx context.Context, userID strin
 	deployment := &domain.Deployment{
 		UserID:                    userID,
 		RepoID:                    project.GitHubRepositoryID,
-		CloneURL:                  repoDetails.CloneURL,
+		CloneURL:                  cloneURL,
 		Status:                    domain.DeploymentStatusPending,
 		ProjectID:                 project.ID,
 		GithubInstallationID:      installation.ID,

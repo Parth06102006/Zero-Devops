@@ -35,6 +35,9 @@ func (m *projectRepoMock) UpdateProjectRepoAvailability(_ context.Context, _ str
 func (m *projectRepoMock) GetByInstallationAndRepositoryID(_ context.Context, _ string, _ int64) (*domain.Project, error) {
 	return nil, nil
 }
+func (m *projectRepoMock) ListByInstallationAndRepositoryID(_ context.Context, _ string, _ int64) ([]domain.Project, error) {
+	return nil, nil
+}
 
 type repositoryClientMock struct{}
 
@@ -43,6 +46,9 @@ func (m *repositoryClientMock) ListRepositories(_ context.Context, _, _, _ strin
 }
 func (m *repositoryClientMock) GetRepositoryDetails(_ context.Context, _ string, _ int64) (*domain.RepositoryPicker, error) {
 	return &domain.RepositoryPicker{}, nil
+}
+func (m *repositoryClientMock) ListRepositoryDirectories(_ context.Context, _, _, _, _ string) ([]string, error) {
+	return []string{"."}, nil
 }
 func (m *repositoryClientMock) ResolveCommit(_ context.Context, _, _, _, _ string) (string, error) {
 	return "0", nil
@@ -57,7 +63,7 @@ func newBuildUsecase(pr domain.ProjectRepository, gh domain.GithubRepository, tp
 func newOutboxBuildUsecase(repo *deploymentRepoMock, pr domain.ProjectRepository) domain.DeploymentUsecase {
 	return NewDeploymentUsecase(context.Background(), repo, &githubRepoMock{
 		getInstFn: func(_ context.Context, _ string) (*domain.GithubInstallation, error) {
-			return &domain.GithubInstallation{ID: "inst-1", InstallationID: 10, Status: domain.GithubInstallationStatusActive}, nil
+			return &domain.GithubInstallation{ID: "inst-1", InstallationID: 10, Status: domain.GithubInstallationStatusActive, ConnectionStatus: domain.GithubConnectionStatusConnected}, nil
 		},
 	}, &installationTokenProviderMock{}, nil, pr, &repositoryClientMock{})
 }
@@ -143,7 +149,7 @@ func TestCreateProjectBuild_InstallationMismatch(t *testing.T) {
 	gh := &githubRepoMock{
 		getInstFn: func(_ context.Context, _ string) (*domain.GithubInstallation, error) {
 			// Active, but belongs to a different installation than the project.
-			return &domain.GithubInstallation{ID: "inst-2", InstallationID: 20, Status: domain.GithubInstallationStatusActive}, nil
+			return &domain.GithubInstallation{ID: "inst-2", InstallationID: 20, Status: domain.GithubInstallationStatusActive, ConnectionStatus: domain.GithubConnectionStatusConnected}, nil
 		},
 	}
 	uc := newBuildUsecase(pr, gh, &installationTokenProviderMock{})
@@ -154,6 +160,28 @@ func TestCreateProjectBuild_InstallationMismatch(t *testing.T) {
 	})
 	if !errors.Is(err, domain.ErrNotFound) {
 		t.Fatalf("expected ErrNotFound on installation mismatch, got %v", err)
+	}
+}
+
+func TestCreateProjectBuild_InstallationDisconnected(t *testing.T) {
+	pr := &projectRepoMock{
+		getFn: func(_ context.Context, _, _ string) (*domain.Project, error) {
+			return &domain.Project{ID: "p1", UserID: "u", InstallationID: "inst-1", GitHubRepositoryID: 99}, nil
+		},
+	}
+	gh := &githubRepoMock{
+		getInstFn: func(_ context.Context, _ string) (*domain.GithubInstallation, error) {
+			return &domain.GithubInstallation{ID: "inst-1", InstallationID: 10, Status: domain.GithubInstallationStatusActive, ConnectionStatus: domain.GithubConnectionStatusDisconnected}, nil
+		},
+	}
+	uc := newBuildUsecase(pr, gh, &installationTokenProviderMock{})
+	_, err := uc.CreateProjectBuild(context.Background(), "u", domain.CreateProjectBuildParams{
+		ProjectID:      "p1",
+		ShaOrRef:       "main",
+		IdempotencyKey: uuid.NewString(),
+	})
+	if !errors.Is(err, domain.ErrInvalidStatus) {
+		t.Fatalf("expected ErrInvalidStatus on disconnected installation, got %v", err)
 	}
 }
 

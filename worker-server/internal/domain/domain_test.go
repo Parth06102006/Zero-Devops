@@ -44,6 +44,7 @@ func TestDeployJobStruct(t *testing.T) {
 		CloneURL:     "https://github.com/user/repo.git",
 		RetryCount:   1,
 		RequestID:    "req-123",
+		WorkingDir:   "client",
 	}
 	if job.DeploymentID != "42" {
 		t.Errorf("expected DeploymentID 42, got %s", job.DeploymentID)
@@ -56,6 +57,9 @@ func TestDeployJobStruct(t *testing.T) {
 	}
 	if job.RequestID != "req-123" {
 		t.Errorf("expected RequestID 'req-123', got '%s'", job.RequestID)
+	}
+	if job.WorkingDir != "client" {
+		t.Errorf("expected WorkingDir 'client', got '%s'", job.WorkingDir)
 	}
 }
 

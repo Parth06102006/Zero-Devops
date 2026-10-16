@@ -65,13 +65,17 @@ func TestSkipper(t *testing.T) {
 
 	tests := []struct {
 		path     string
+		setPath  string
 		expected bool
 	}{
-		{"/auth/github/login", true},
-		{"/auth/github/login/callback", true},
-		{"/auth/refresh", true},
-		{"/auth/user/me", false},
-		{"/other/path", false},
+		{pathAuthGithubLogin, pathAuthGithubLogin, true},
+		{pathAuthGithubLoginCallback, pathAuthGithubLoginCallback, true},
+		{pathAuthRefresh, pathAuthRefresh, true},
+		{pathWebhooksGithub, pathWebhooksGithub, true},
+		{"//" + pathWebhooksGithub[1:], "", true},
+		{pathHealth, pathHealth, true},
+		{"/auth/user/me", "/auth/user/me", false},
+		{"/other/path", "/other/path", false},
 	}
 
 	e := echo.New()
@@ -79,11 +83,13 @@ func TestSkipper(t *testing.T) {
 		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, tt.path, http.NoBody)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath(tt.path)
+		if tt.setPath != "" {
+			c.SetPath(tt.setPath)
+		}
 
 		result := handler.Skipper(c)
 		if result != tt.expected {
-			t.Errorf("expected %v for path %s, got %v", tt.expected, tt.path, result)
+			t.Errorf("expected %v for path %s (setPath=%s), got %v", tt.expected, tt.path, tt.setPath, result)
 		}
 	}
 }
@@ -205,9 +211,9 @@ func TestAuthMiddleware_SkipsAuthPaths(t *testing.T) {
 	middlewareFunc := handler.AuthMiddleware(next)
 
 	e := echo.New()
-	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/auth/github/login/callback", http.NoBody)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, pathAuthGithubLoginCallback, http.NoBody)
 	c := e.NewContext(req, httptest.NewRecorder())
-	c.SetPath("/auth/github/login/callback")
+	c.SetPath(pathAuthGithubLoginCallback)
 
 	err := middlewareFunc(c)
 	if err != nil {

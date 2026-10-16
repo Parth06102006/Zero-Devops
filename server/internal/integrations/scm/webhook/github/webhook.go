@@ -10,6 +10,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -201,6 +202,134 @@ func isZeroSHA(sha string) bool {
 // revision generation and durably records the deployment plus its deploy.jobs
 // V1 outbox event in one repository transaction; a later dispatcher publishes
 // the outbox row to RabbitMQ.
+func (webH *webhookUsecase) isInstallationActiveAndConnected(ctx context.Context, installationID string) (bool, error) {
+	inst, err := webH.githubRepo.GetInstallationByID(ctx, installationID)
+	if err == domain.ErrNotFound {
+		return false, nil
+	}
+	if err != nil {
+		installationStatus, statusErr := webH.githubRepo.GetInstallationStatusByID(ctx, installationID)
+		if statusErr == domain.ErrNotFound {
+			return false, nil
+		}
+		if statusErr != nil {
+			return false, statusErr
+		}
+		return installationStatus == domain.GithubInstallationStatusActive, nil
+	}
+	return inst.Status == domain.GithubInstallationStatusActive && inst.ConnectionStatus == domain.GithubConnectionStatusConnected, nil
+}
+
+func extractModifiedFiles(payload *domain.PushPayload) []string {
+	var modifiedFiles []string
+	for i := range payload.Commits {
+		c := &payload.Commits[i]
+		modifiedFiles = append(modifiedFiles, c.Added...)
+		modifiedFiles = append(modifiedFiles, c.Modified...)
+		modifiedFiles = append(modifiedFiles, c.Removed...)
+	}
+	modifiedFiles = append(modifiedFiles, payload.HeadCommit.Added...)
+	modifiedFiles = append(modifiedFiles, payload.HeadCommit.Modified...)
+	modifiedFiles = append(modifiedFiles, payload.HeadCommit.Removed...)
+	return modifiedFiles
+}
+
+func matchesPathFilter(workingDir string, modifiedFiles []string) bool {
+	workingDir = strings.TrimSpace(workingDir)
+	workingDir = strings.TrimPrefix(workingDir, "./")
+	workingDir = strings.TrimSuffix(workingDir, "/")
+	if workingDir == "" || workingDir == "." || len(modifiedFiles) == 0 {
+		return true
+	}
+	for _, file := range modifiedFiles {
+		cleanFile := strings.TrimSpace(file)
+		if strings.HasPrefix(cleanFile, workingDir+"/") || cleanFile == workingDir || !strings.Contains(cleanFile, "/") {
+			return true
+		}
+	}
+	return false
+}
+
+func (webH *webhookUsecase) triggerBuildForProject(
+	ctx context.Context,
+	project *domain.Project,
+	payload *domain.PushPayload,
+	githubInstallationDBID, githubDeliveryID, webhookDeliveryDBID string,
+	modifiedFiles []string,
+	log *zap.Logger,
+) error {
+	if !project.RepositoryAvailable || !project.ProjectWebhookEnabled {
+		log.Info("push event skipped: project not available or webhook builds disabled",
+			zap.String("github_delivery_id", githubDeliveryID),
+			zap.String("webhook_delivery_db_id", webhookDeliveryDBID),
+			zap.String("project_id", project.ID),
+			zap.Bool("repository_available", project.RepositoryAvailable),
+			zap.Bool("webhook_enabled", project.ProjectWebhookEnabled),
+		)
+		return nil
+	}
+
+	if payload.Ref != project.ConfiguredBranch {
+		log.Info("push event skipped: ref does not match configured branch",
+			zap.String("github_delivery_id", githubDeliveryID),
+			zap.String("webhook_delivery_db_id", webhookDeliveryDBID),
+			zap.String("project_id", project.ID),
+			zap.String("ref", payload.Ref),
+			zap.String("configured_branch", project.ConfiguredBranch),
+		)
+		return nil
+	}
+
+	if !matchesPathFilter(project.BuildConfiguration.WorkingDir, modifiedFiles) {
+		log.Info("push event skipped: no modified files in project working_dir",
+			zap.String("github_delivery_id", githubDeliveryID),
+			zap.String("project_id", project.ID),
+			zap.String("working_dir", project.BuildConfiguration.WorkingDir),
+		)
+		return nil
+	}
+
+	deployment, err := webH.deploymentRepo.StoreWebhookBuildWithOutbox(ctx, domain.StoreWebhookBuildParams{
+		ProjectID:             project.ID,
+		UserID:                project.UserID,
+		RepoID:                payload.Repository.ID,
+		CloneURL:              payload.Repository.CloneURL,
+		GithubInstallationID:  githubInstallationDBID,
+		WebhookDeliveryID:     webhookDeliveryDBID,
+		CommitSHA:             payload.After,
+		RequestedRef:          payload.Ref,
+		ConfigurationSnapshot: project.BuildConfiguration,
+		ConfigurationVersion:  project.ConfigurationVersion,
+		CommandPolicyVersion:  project.CommandPolicyVersion,
+		CommandScanResult:     project.CommandScanResult,
+		EventID:               uuid.NewString(),
+		InstallationID:        int64(payload.Installation.ID),
+		CorrelationID:         uuid.NewString(),
+	})
+	if err == domain.ErrConflict {
+		log.Info("push event redelivery: build already exists for delivery",
+			zap.String("github_delivery_id", githubDeliveryID),
+			zap.String("webhook_delivery_db_id", webhookDeliveryDBID),
+			zap.String("project_id", project.ID),
+		)
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+
+	log.Info("webhook push created build",
+		zap.String("github_delivery_id", githubDeliveryID),
+		zap.String("webhook_delivery_db_id", webhookDeliveryDBID),
+		zap.String("deployment_id", deployment.ID),
+		zap.Int64("github_repository_id", payload.Repository.ID),
+		zap.String("commit_sha", payload.After),
+		zap.Int64("desired_revision_generation", deployment.DesiredRevisionGeneration),
+		zap.Int64("build_number", deployment.BuildNumber),
+	)
+	return nil
+}
+
 func (webH *webhookUsecase) handlePushEvent(
 	ctx context.Context,
 	githubInstallationDBID, githubDeliveryID, webhookDeliveryDBID string,
@@ -238,29 +367,25 @@ func (webH *webhookUsecase) handlePushEvent(
 		return domain.ErrInternalServerError
 	}
 
-	// Global installation gate: GitHub only delivers webhooks for an active
-	// installation. A suspended/uninstalled installation blocks webhook builds
-	// for every project of the user, independent of per-project settings.
-	installationStatus, err := webH.githubRepo.GetInstallationStatusByID(ctx, githubInstallationDBID)
-	if err == domain.ErrNotFound {
-		return nil
-	}
+	activeAndConnected, err := webH.isInstallationActiveAndConnected(ctx, githubInstallationDBID)
 	if err != nil {
 		return err
 	}
-	if installationStatus != domain.GithubInstallationStatusActive {
-		log.Info("push event skipped: installation not active",
+	if !activeAndConnected {
+		log.Info("push event skipped: installation not active or not connected",
 			zap.String("github_delivery_id", githubDeliveryID),
 			zap.String("webhook_delivery_db_id", webhookDeliveryDBID),
 			zap.String("installation_db_id", githubInstallationDBID),
-			zap.String("installation_status", installationStatus),
 			zap.Int64("github_repository_id", payload.Repository.ID),
 		)
 		return nil
 	}
 
-	project, err := webH.projectRepo.GetByInstallationAndRepositoryID(ctx, githubInstallationDBID, payload.Repository.ID)
-	if err == domain.ErrNotFound {
+	projects, err := webH.projectRepo.ListByInstallationAndRepositoryID(ctx, githubInstallationDBID, payload.Repository.ID)
+	if err != nil && !errors.Is(err, domain.ErrNotFound) {
+		return err
+	}
+	if errors.Is(err, domain.ErrNotFound) || len(projects) == 0 {
 		// The pushed repository is not a selected project: no build, not an error.
 		log.Info("push event skipped: repository not a selected project",
 			zap.String("github_delivery_id", githubDeliveryID),
@@ -270,82 +395,17 @@ func (webH *webhookUsecase) handlePushEvent(
 		)
 		return nil
 	}
-	if err != nil {
-		return err
-	}
 
-	// Webhook builds require the repository to still be available on the
-	// installation and the project to have webhook builds enabled.
-	if !project.RepositoryAvailable || !project.ProjectWebhookEnabled {
-		log.Info("push event skipped: project not available or webhook builds disabled",
-			zap.String("github_delivery_id", githubDeliveryID),
-			zap.String("webhook_delivery_db_id", webhookDeliveryDBID),
-			zap.String("project_id", project.ID),
-			zap.Bool("repository_available", project.RepositoryAvailable),
-			zap.Bool("webhook_enabled", project.ProjectWebhookEnabled),
-		)
-		return nil
+	modifiedFiles := extractModifiedFiles(&payload)
+	for i := range projects {
+		if err := webH.triggerBuildForProject(
+			ctx, &projects[i], &payload,
+			githubInstallationDBID, githubDeliveryID, webhookDeliveryDBID,
+			modifiedFiles, log,
+		); err != nil {
+			return err
+		}
 	}
-
-	// Only pushes whose ref exactly matches the persisted configured branch
-	// (stored as a full ref, e.g. refs/heads/main) create a build. The webhook
-	// never trusts a client-supplied branch.
-	if payload.Ref != project.ConfiguredBranch {
-		log.Info("push event skipped: ref does not match configured branch",
-			zap.String("github_delivery_id", githubDeliveryID),
-			zap.String("webhook_delivery_db_id", webhookDeliveryDBID),
-			zap.String("project_id", project.ID),
-			zap.String("ref", payload.Ref),
-			zap.String("configured_branch", project.ConfiguredBranch),
-		)
-		return nil
-	}
-
-	// The desired-revision generation is advanced by
-	// StoreWebhookBuildWithOutbox inside the same transaction as the build
-	// insert, so an older queued/running result cannot become the project's
-	// current result after this revision is accepted — and a redelivered
-	// delivery cannot bump the counter without creating a build.
-	deployment, err := webH.deploymentRepo.StoreWebhookBuildWithOutbox(ctx, domain.StoreWebhookBuildParams{
-		ProjectID:             project.ID,
-		UserID:                project.UserID,
-		RepoID:                payload.Repository.ID,
-		CloneURL:              payload.Repository.CloneURL,
-		GithubInstallationID:  githubInstallationDBID,
-		WebhookDeliveryID:     webhookDeliveryDBID,
-		CommitSHA:             payload.After,
-		RequestedRef:          payload.Ref,
-		ConfigurationSnapshot: project.BuildConfiguration,
-		ConfigurationVersion:  project.ConfigurationVersion,
-		CommandPolicyVersion:  project.CommandPolicyVersion,
-		CommandScanResult:     project.CommandScanResult,
-		EventID:               uuid.NewString(),
-		InstallationID:        int64(payload.Installation.ID),
-		CorrelationID:         uuid.NewString(),
-	})
-	if err == domain.ErrConflict {
-		// The unique (webhook_delivery_id) index already recorded a build for
-		// this delivery (concurrent redelivery): not an error, build exists.
-		log.Info("push event redelivery: build already exists for delivery",
-			zap.String("github_delivery_id", githubDeliveryID),
-			zap.String("webhook_delivery_db_id", webhookDeliveryDBID),
-			zap.String("project_id", project.ID),
-		)
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-
-	log.Info("webhook push created build",
-		zap.String("github_delivery_id", githubDeliveryID),
-		zap.String("webhook_delivery_db_id", webhookDeliveryDBID),
-		zap.String("deployment_id", deployment.ID),
-		zap.Int64("github_repository_id", payload.Repository.ID),
-		zap.String("commit_sha", payload.After),
-		zap.Int64("desired_revision_generation", deployment.DesiredRevisionGeneration),
-		zap.Int64("build_number", deployment.BuildNumber),
-	)
 	return nil
 }
 

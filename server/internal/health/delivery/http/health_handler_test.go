@@ -15,7 +15,7 @@ type mockDBPinger struct {
 	pingErr error
 }
 
-func (m *mockDBPinger) PingContext(ctx context.Context) error {
+func (m *mockDBPinger) PingContext(_ context.Context) error {
 	return m.pingErr
 }
 
@@ -23,7 +23,7 @@ type mockRedisPinger struct {
 	pingErr error
 }
 
-func (m *mockRedisPinger) Ping(ctx context.Context) error {
+func (m *mockRedisPinger) Ping(_ context.Context) error {
 	return m.pingErr
 }
 
@@ -39,7 +39,7 @@ func TestHealthHandler_Liveness(t *testing.T) {
 	e := echo.New()
 	handler := NewHealthHandler(e, &mockDBPinger{pingErr: errors.New("db down")}, &mockRedisPinger{pingErr: errors.New("redis down")}, &mockRabbitMQPinger{connected: false}, "1.0.0")
 
-	req := httptest.NewRequest(http.MethodGet, "/health/live", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/health/live", http.NoBody)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
@@ -65,7 +65,7 @@ func TestHealthHandler_Readiness_Healthy(t *testing.T) {
 	e := echo.New()
 	handler := NewHealthHandler(e, &mockDBPinger{pingErr: nil}, &mockRedisPinger{pingErr: nil}, &mockRabbitMQPinger{connected: true}, "1.0.0")
 
-	req := httptest.NewRequest(http.MethodGet, "/health/ready", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/health/ready", http.NoBody)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
@@ -91,7 +91,7 @@ func TestHealthHandler_Readiness_Unhealthy(t *testing.T) {
 	e := echo.New()
 	handler := NewHealthHandler(e, &mockDBPinger{pingErr: errors.New("connection refused")}, &mockRedisPinger{pingErr: nil}, &mockRabbitMQPinger{connected: true}, "1.0.0")
 
-	req := httptest.NewRequest(http.MethodGet, "/health/ready", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/health/ready", http.NoBody)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
@@ -117,7 +117,7 @@ func TestHealthHandler_CompositeHealth(t *testing.T) {
 	e := echo.New()
 	handler := NewHealthHandler(e, &mockDBPinger{pingErr: nil}, &mockRedisPinger{pingErr: nil}, &mockRabbitMQPinger{connected: true}, "2.4.0")
 
-	req := httptest.NewRequest(http.MethodGet, "/health", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/health", http.NoBody)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 

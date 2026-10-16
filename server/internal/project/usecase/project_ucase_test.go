@@ -55,6 +55,9 @@ func (m *projectRepoMock) UpdateProjectRepoAvailability(_ context.Context, _ str
 func (m *projectRepoMock) GetByInstallationAndRepositoryID(_ context.Context, _ string, _ int64) (*domain.Project, error) {
 	return nil, nil
 }
+func (m *projectRepoMock) ListByInstallationAndRepositoryID(_ context.Context, _ string, _ int64) ([]domain.Project, error) {
+	return nil, nil
+}
 
 type githubUsecaseMock struct {
 	detailsFn func(ctx context.Context, userID string, repoID int64) (*domain.RepositoryPicker, error)
@@ -80,7 +83,16 @@ func (m *githubUsecaseMock) GetRepositoryDetails(ctx context.Context, userID str
 	}
 	return nil, nil
 }
+func (m *githubUsecaseMock) ListRepositoryDirectories(_ context.Context, _ string, _ int64, _ string) ([]string, error) {
+	return []string{"."}, nil
+}
 func (m *githubUsecaseMock) InvalidateRepositoryCache(_ context.Context, _ int64) error { return nil }
+func (m *githubUsecaseMock) ListGithubAppInstallations(_ context.Context, _ string) ([]*domain.GithubInstallation, error) {
+	return nil, nil
+}
+func (m *githubUsecaseMock) UpdateConnectionStatus(_ context.Context, _, _ string, _ domain.GithubConnectionStatus) (*domain.GithubInstallation, error) {
+	return nil, nil
+}
 
 type commandScannerMock struct {
 	scanFn func(ctx context.Context, cfg domain.BuildConfiguration) domain.CommandScanResult

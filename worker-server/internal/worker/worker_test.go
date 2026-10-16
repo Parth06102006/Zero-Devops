@@ -37,6 +37,12 @@ func (f *fakeQueueUsecase) PublishStatusUpdate(_ domain.DeployStatusMessage) err
 	return nil
 }
 
+type fakeCredentialProvider struct{}
+
+func (f *fakeCredentialProvider) GetCloneCredential(_ context.Context, _ string) (domain.CloneCredential, error) {
+	return domain.CloneCredential{Username: "x-access-token", Token: "token"}, nil
+}
+
 type fakeUploadUsecase struct {
 	url string
 }
@@ -76,8 +82,9 @@ func TestNewWorkerUsecaseStoresDependencies(t *testing.T) {
 	queueClient := &fakeQueueUsecase{channel: &amqp.Channel{}}
 	repo := &fakeDeploymentRepo{}
 	uploader := &fakeUploadUsecase{url: "s3://bucket/image.tar"}
+	credentials := &fakeCredentialProvider{}
 
-	usecase := NewWorkerUsecase(queueClient, repo, uploader)
+	usecase := NewWorkerUsecase(queueClient, repo, uploader, credentials)
 
 	workerClient, ok := usecase.(*workerUsecase)
 	if !ok {
@@ -91,6 +98,9 @@ func TestNewWorkerUsecaseStoresDependencies(t *testing.T) {
 	}
 	if workerClient.artifactUploader != uploader {
 		t.Fatal("upload dependency was not stored")
+	}
+	if workerClient.credentialProvider != credentials {
+		t.Fatal("credential dependency was not stored")
 	}
 }
 

@@ -20,17 +20,20 @@ var (
 )
 
 type githubTestDBState struct {
-	mu               sync.Mutex
-	lastQueryUserID  string
-	lastDeleteUser   string
-	lastUpdateUser   string
-	lastUpdateStatus string
-	queryRowErr      error
-	deleteErr        error
+	mu                       sync.Mutex
+	lastQueryUserID          string
+	lastDeleteUser           string
+	lastUpdateUser           string
+	lastUpdateStatus         string
+	installationExists       bool
+	existingInstallationUser string
+	queryRowErr              error
+	deleteErr                error
 }
 
 type githubTestDriver struct{}
 type githubTestConn struct{}
+type githubTestTx struct{}
 type githubTestStmt struct {
 	query string
 }
@@ -43,6 +46,9 @@ type githubTestRows struct {
 	vals [][]driver.Value
 	idx  int
 }
+
+func (tx *githubTestTx) Commit() error   { return nil }
+func (tx *githubTestTx) Rollback() error { return nil }
 
 func registerGithubTestDriver() {
 	githubTestDriverOnce.Do(func() {
@@ -61,7 +67,11 @@ func (c *githubTestConn) Prepare(query string) (driver.Stmt, error) {
 func (c *githubTestConn) Close() error { return nil }
 
 func (c *githubTestConn) Begin() (driver.Tx, error) {
-	return nil, errors.New("transactions not supported")
+	return &githubTestTx{}, nil
+}
+
+func (c *githubTestConn) BeginTx(_ context.Context, _ driver.TxOptions) (driver.Tx, error) {
+	return &githubTestTx{}, nil
 }
 
 func (c *githubTestConn) QueryContext(_ context.Context, query string, args []driver.NamedValue) (driver.Rows, error) {
@@ -79,6 +89,18 @@ func (c *githubTestConn) QueryContext(_ context.Context, query string, args []dr
 	}
 
 	switch {
+	case queryContains(query, "WHERE installation_id =") && queryContains(query, "FOR UPDATE"):
+		if githubTestState.installationExists {
+			user := githubTestState.existingInstallationUser
+			if user == "" {
+				user = "7"
+			}
+			return &githubTestRows{
+				cols: []string{"id", "user_id", "status"},
+				vals: [][]driver.Value{{"existing-uuid", user, domain.GithubInstallationStatusUninstalled}},
+			}, nil
+		}
+		return &githubTestRows{cols: []string{"id", "user_id", "status"}}, nil
 	case queryContains(query, "INSERT INTO github_installations"):
 		return &githubTestRows{
 			cols: []string{"id"},
@@ -86,7 +108,7 @@ func (c *githubTestConn) QueryContext(_ context.Context, query string, args []dr
 		}, nil
 	case queryContains(query, "FROM github_installations"):
 		return &githubTestRows{
-			cols: []string{"id", "user_id", "installation_id", "account_type", "account_login", "status", "created_at", "updated_at"},
+			cols: []string{"id", "user_id", "installation_id", "account_type", "account_login", "status", "connection_status", "created_at", "updated_at"},
 			vals: [][]driver.Value{{
 				"1",
 				githubTestState.lastQueryUserID,
@@ -94,6 +116,7 @@ func (c *githubTestConn) QueryContext(_ context.Context, query string, args []dr
 				"User",
 				"octocat",
 				domain.GithubInstallationStatusActive,
+				domain.GithubConnectionStatusConnected,
 				time.Now(),
 				time.Now(),
 			}},
@@ -203,6 +226,8 @@ func resetGithubTestState() {
 	githubTestState.lastDeleteUser = ""
 	githubTestState.lastUpdateUser = ""
 	githubTestState.lastUpdateStatus = ""
+	githubTestState.installationExists = false
+	githubTestState.existingInstallationUser = ""
 	githubTestState.queryRowErr = nil
 	githubTestState.deleteErr = nil
 }
@@ -227,6 +252,33 @@ func TestStoreInstallation(t *testing.T) {
 	}
 	if inst.ID == "" {
 		t.Fatal("expected returned ID to be set")
+	}
+}
+
+func TestStoreInstallation_Reactivate(t *testing.T) {
+	resetGithubTestState()
+	githubTestState.installationExists = true
+	db := newGithubTestDB(t)
+
+	repo := NewPgSQLGithubRepository(db)
+	inst := &domain.GithubInstallation{
+		UserID:         "7",
+		InstallationID: 88,
+		AccountType:    "User",
+		AccountLogin:   "octocat",
+		Status:         domain.GithubInstallationStatusActive,
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
+	}
+
+	if err := repo.StoreInstallation(context.Background(), inst); err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if inst.ID != "existing-uuid" {
+		t.Fatalf("expected existing-uuid, got %s", inst.ID)
+	}
+	if inst.Status != domain.GithubInstallationStatusActive {
+		t.Fatalf("expected status active, got %s", inst.Status)
 	}
 }
 
@@ -289,6 +341,83 @@ func TestUpdateInstallationStatus_InvalidStatus(t *testing.T) {
 
 	repo := NewPgSQLGithubRepository(db)
 	if err := repo.UpdateInstallationStatus(context.Background(), "55", "broken"); err != domain.ErrInvalidStatus {
+		t.Fatalf("expected ErrInvalidStatus, got %v", err)
+	}
+}
+
+func TestStoreInstallation_OwnershipConflict(t *testing.T) {
+	resetGithubTestState()
+	githubTestState.installationExists = true
+	githubTestState.existingInstallationUser = "different-user"
+	db := newGithubTestDB(t)
+
+	repo := NewPgSQLGithubRepository(db)
+	inst := &domain.GithubInstallation{
+		UserID:         "7",
+		InstallationID: 88,
+		AccountType:    "User",
+		AccountLogin:   "octocat",
+	}
+
+	err := repo.StoreInstallation(context.Background(), inst)
+	if !errors.Is(err, domain.ErrInstallationOwnershipConflict) {
+		t.Fatalf("expected ErrInstallationOwnershipConflict, got %v", err)
+	}
+}
+
+func TestGetInstallationByID(t *testing.T) {
+	resetGithubTestState()
+	db := newGithubTestDB(t)
+
+	repo := NewPgSQLGithubRepository(db)
+	inst, err := repo.GetInstallationByID(context.Background(), "inst-uuid-1")
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if inst.ID != "1" {
+		t.Fatalf("expected id 1, got %s", inst.ID)
+	}
+	if inst.ConnectionStatus != domain.GithubConnectionStatusConnected {
+		t.Fatalf("expected connection status connected, got %s", inst.ConnectionStatus)
+	}
+}
+
+func TestListInstallationsByUserID(t *testing.T) {
+	resetGithubTestState()
+	db := newGithubTestDB(t)
+
+	repo := NewPgSQLGithubRepository(db)
+	list, err := repo.ListInstallationsByUserID(context.Background(), "123")
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if len(list) != 1 {
+		t.Fatalf("expected 1 installation, got %d", len(list))
+	}
+	if list[0].ConnectionStatus != domain.GithubConnectionStatusConnected {
+		t.Fatalf("expected connection status connected, got %s", list[0].ConnectionStatus)
+	}
+}
+
+func TestUpdateConnectionStatus(t *testing.T) {
+	resetGithubTestState()
+	db := newGithubTestDB(t)
+
+	repo := NewPgSQLGithubRepository(db)
+	if err := repo.UpdateConnectionStatus(context.Background(), "user-1", "inst-1", domain.GithubConnectionStatusConnected); err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+	if err := repo.UpdateConnectionStatus(context.Background(), "user-1", "inst-1", domain.GithubConnectionStatusDisconnected); err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+}
+
+func TestUpdateConnectionStatus_Invalid(t *testing.T) {
+	resetGithubTestState()
+	db := newGithubTestDB(t)
+
+	repo := NewPgSQLGithubRepository(db)
+	if err := repo.UpdateConnectionStatus(context.Background(), "user-1", "inst-1", "unknown"); !errors.Is(err, domain.ErrInvalidStatus) {
 		t.Fatalf("expected ErrInvalidStatus, got %v", err)
 	}
 }

@@ -26,6 +26,10 @@ func (m *deploymentRepoMock) GetByUserID(ctx context.Context, userID string) ([]
 	return nil, nil
 }
 
+func (m *deploymentRepoMock) GetInternalByID(_ context.Context, _ string) (*domain.Deployment, error) {
+	return nil, domain.ErrNotFound
+}
+
 func (m *deploymentRepoMock) GetByID(ctx context.Context, userID, id string) (*domain.Deployment, error) {
 	if m.getIDFn != nil {
 		return m.getIDFn(ctx, userID, id)
@@ -116,6 +120,21 @@ func (m *githubRepoMock) UpdateInstallationExternalIDByID(_ context.Context, _, 
 
 func (m *githubRepoMock) GetInstallationStatusByID(_ context.Context, _ string) (string, error) {
 	return domain.GithubInstallationStatusActive, nil
+}
+
+func (m *githubRepoMock) GetInstallationByID(ctx context.Context, id string) (*domain.GithubInstallation, error) {
+	if m.getInstFn != nil {
+		return m.getInstFn(ctx, id)
+	}
+	return nil, nil
+}
+
+func (m *githubRepoMock) ListInstallationsByUserID(_ context.Context, _ string) ([]*domain.GithubInstallation, error) {
+	return nil, nil
+}
+
+func (m *githubRepoMock) UpdateConnectionStatus(_ context.Context, _, _ string, _ domain.GithubConnectionStatus) error {
+	return nil
 }
 
 func TestGetDeployments_PassesThrough(t *testing.T) {

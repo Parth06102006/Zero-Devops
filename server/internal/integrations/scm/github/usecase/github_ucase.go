@@ -78,6 +78,67 @@ type GithubInstallationList struct {
 	Installations []Installation `json:"installations"`
 }
 
+func exchangeOAuthCode(ctx context.Context, client *http.Client, code, clientID, clientSecret string) (*GithubTokenResponse, error) {
+	data := url.Values{}
+	data.Add("client_id", clientID)
+	data.Add("client_secret", clientSecret)
+	data.Add("code", code)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://github.com/login/oauth/access_token", strings.NewReader(data.Encode()))
+	if err != nil {
+		return nil, domain.ErrInvalidCode
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Accept", "application/json")
+
+	response, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = response.Body.Close()
+	}()
+
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return nil, domain.ErrInvalidCode
+	}
+
+	var tokenResp GithubTokenResponse
+	if err := json.NewDecoder(response.Body).Decode(&tokenResp); err != nil {
+		return nil, err
+	}
+	return &tokenResp, nil
+}
+
+func fetchUserInstallations(ctx context.Context, client *http.Client, accessToken string) (*GithubInstallationList, error) {
+	reqInstallation, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://api.github.com/user/installations", http.NoBody)
+	if err != nil {
+		return nil, err
+	}
+
+	reqInstallation.Header.Set("Authorization", "Bearer "+accessToken)
+	reqInstallation.Header.Set("Accept", "application/vnd.github+json")
+
+	responseInstallation, err := client.Do(reqInstallation)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = responseInstallation.Body.Close()
+	}()
+
+	if responseInstallation.StatusCode < 200 || responseInstallation.StatusCode >= 300 {
+		return nil, domain.ErrGithubInstallationFetchFailed
+	}
+
+	var list GithubInstallationList
+	if err := json.NewDecoder(responseInstallation.Body).Decode(&list); err != nil {
+		return nil, err
+	}
+	return &list, nil
+}
+
 func (g *githubAppUsecase) InstallGithubApp(ctx context.Context, client *http.Client, code, userID string) error {
 	log := appmiddleware.LoggerFromContext(ctx)
 	log.Info("Starting GitHub App installation", zap.String("user_id", userID))
@@ -91,85 +152,36 @@ func (g *githubAppUsecase) InstallGithubApp(ctx context.Context, client *http.Cl
 		return fmt.Errorf("github app credentials missing")
 	}
 
-	data := url.Values{}
-	data.Add("client_id", githubAppClientID)
-	data.Add("client_secret", githubAppClientSecret)
-	data.Add("code", code)
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://github.com/login/oauth/access_token", strings.NewReader(data.Encode()))
-
-	if err != nil {
-		return domain.ErrInvalidCode
-	}
-
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("Accept", "application/json")
-
-	response, err := client.Do(req)
+	tokenResp, err := exchangeOAuthCode(ctx, client, code, githubAppClientID, githubAppClientSecret)
 	if err != nil {
 		log.Error("Failed to perform access token request", zap.Error(err))
 		return err
 	}
 
-	defer func() {
-		if err := response.Body.Close(); err != nil {
-			log.Error("failed to close response body", zap.Error(err))
-		}
-	}()
-
-	log.Info("GitHub token exchange response", zap.Int("status", response.StatusCode))
-	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		return domain.ErrInvalidCode
-	}
-
-	var githubTokenResponse GithubTokenResponse
-	if err := json.NewDecoder(response.Body).Decode(&githubTokenResponse); err != nil {
-		return err
-	}
-
-	reqInstallation, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://api.github.com/user/installations", http.NoBody)
-
-	if err != nil {
-		return err
-	}
-
-	reqInstallation.Header.Set("Authorization", "Bearer "+githubTokenResponse.AccessToken)
-	reqInstallation.Header.Set("Accept", "application/vnd.github+json")
-
-	responseInstallation, err := client.Do(reqInstallation)
+	installationList, err := fetchUserInstallations(ctx, client, tokenResp.AccessToken)
 	if err != nil {
 		log.Error("Failed to perform installations fetch request", zap.Error(err))
 		return err
 	}
 
-	defer func() {
-		if err := responseInstallation.Body.Close(); err != nil {
-			log.Error("failed to close installation response body", zap.Error(err))
-		}
-	}()
-
-	log.Info("GitHub installations fetch response", zap.Int("status", responseInstallation.StatusCode))
-	if responseInstallation.StatusCode < 200 || responseInstallation.StatusCode >= 300 {
-		return domain.ErrGithubInstallationFetchFailed
-	}
-
-	var githubAppInstallationList GithubInstallationList
-	if err := json.NewDecoder(responseInstallation.Body).Decode(&githubAppInstallationList); err != nil {
-		return err
-	}
-
-	log.Info("GitHub installations received", zap.Int("count", len(githubAppInstallationList.Installations)), zap.Int64("expected_app_id", githubAppID))
-	for _, inst := range githubAppInstallationList.Installations {
-		log.Info("Found installation", zap.Int64("installation_id", inst.ID), zap.String("account_type", inst.Account.Type), zap.String("account_login", inst.Account.Login), zap.Int64("app_id", inst.AppID))
+	log.Info("GitHub installations received", zap.Int("count", len(installationList.Installations)), zap.Int64("expected_app_id", githubAppID))
+	for _, inst := range installationList.Installations {
+		log.Info("Found installation",
+			zap.Int64("installation_id", inst.ID),
+			zap.String("account_type", inst.Account.Type),
+			zap.String("account_login", inst.Account.Login),
+			zap.Int64("app_id", inst.AppID),
+		)
 		if (inst.Account.Type == "User" || inst.Account.Type == "Organization") && inst.AppID == githubAppID {
 			githubAppInstallation := domain.GithubInstallation{
-				UserID:         userID,
-				InstallationID: inst.ID,
-				AccountType:    inst.Account.Type,
-				AccountLogin:   inst.Account.Login,
-				Status:         domain.GithubInstallationStatusActive,
-				CreatedAt:      time.Now(),
-				UpdatedAt:      time.Now(),
+				UserID:           userID,
+				InstallationID:   inst.ID,
+				AccountType:      inst.Account.Type,
+				AccountLogin:     inst.Account.Login,
+				Status:           domain.GithubInstallationStatusActive,
+				ConnectionStatus: domain.GithubConnectionStatusConnected,
+				CreatedAt:        time.Now(),
+				UpdatedAt:        time.Now(),
 			}
 			err := g.githubRepo.StoreInstallation(ctx, &githubAppInstallation)
 			if err != nil {
@@ -178,7 +190,11 @@ func (g *githubAppUsecase) InstallGithubApp(ctx context.Context, client *http.Cl
 			}
 			log.Info("Stored GitHub installation", zap.String("user_id", userID), zap.Int64("installation_id", inst.ID), zap.String("account_type", inst.Account.Type))
 		} else {
-			log.Info("Skipping installation (type or app_id mismatch)", zap.String("account_type", inst.Account.Type), zap.Int64("app_id", inst.AppID), zap.Int64("expected_app_id", githubAppID))
+			log.Info("Skipping installation (type or app_id mismatch)",
+				zap.String("account_type", inst.Account.Type),
+				zap.Int64("app_id", inst.AppID),
+				zap.Int64("expected_app_id", githubAppID),
+			)
 		}
 	}
 	return nil
@@ -194,8 +210,65 @@ func (g *githubAppUsecase) GetGithubAppInstallation(ctx context.Context, userID 
 	return githubRepo, nil
 }
 
+func (g *githubAppUsecase) ListGithubAppInstallations(ctx context.Context, userID string) ([]*domain.GithubInstallation, error) {
+	return g.githubRepo.ListInstallationsByUserID(ctx, userID)
+}
+
 func (g *githubAppUsecase) DeleteGithubApp(ctx context.Context, userID string) error {
 	return g.githubRepo.DeleteInstallationByUserID(ctx, userID)
+}
+
+func (g *githubAppUsecase) UpdateConnectionStatus(
+	ctx context.Context,
+	userID, installationDBID string,
+	status domain.GithubConnectionStatus,
+) (*domain.GithubInstallation, error) {
+	if !status.IsValid() {
+		return nil, domain.ErrBadParamInput
+	}
+
+	var inst *domain.GithubInstallation
+	var err error
+	if installationDBID != "" {
+		inst, err = g.githubRepo.GetInstallationByID(ctx, installationDBID)
+		if err != nil {
+			return nil, err
+		}
+		if inst == nil || inst.UserID != userID {
+			return nil, domain.ErrNotFound
+		}
+	} else {
+		inst, err = g.githubRepo.GetInstallationByUserID(ctx, userID)
+		if err != nil {
+			return nil, err
+		}
+		if inst == nil {
+			return nil, domain.ErrNotFound
+		}
+	}
+
+	if status == domain.GithubConnectionStatusConnected {
+		switch inst.Status {
+		case domain.GithubInstallationStatusActive:
+			// allowed
+		case domain.GithubInstallationStatusSuspended, domain.GithubInstallationStatusUninstalled:
+			return nil, domain.ErrInvalidStatus
+		default:
+			return nil, domain.ErrInvalidStatus
+		}
+	}
+
+	if err := g.githubRepo.UpdateConnectionStatus(ctx, userID, inst.ID, status); err != nil {
+		return nil, err
+	}
+
+	if status == domain.GithubConnectionStatusDisconnected {
+		_ = g.InvalidateRepositoryCache(ctx, inst.InstallationID)
+	}
+
+	inst.ConnectionStatus = status
+	inst.UpdatedAt = time.Now()
+	return inst, nil
 }
 
 func (g *githubAppUsecase) ListRepositories(ctx context.Context, userID, cursor, query string, perPage int) (*domain.RepositoryList, error) {
@@ -203,7 +276,7 @@ func (g *githubAppUsecase) ListRepositories(ctx context.Context, userID, cursor,
 	if err != nil {
 		return nil, err
 	}
-	if installation.Status != domain.GithubInstallationStatusActive {
+	if installation.Status != domain.GithubInstallationStatusActive || installation.ConnectionStatus != domain.GithubConnectionStatusConnected {
 		return nil, domain.ErrInvalidStatus
 	}
 
@@ -271,7 +344,7 @@ func (g *githubAppUsecase) GetRepositoryDetails(ctx context.Context, userID stri
 	if err != nil {
 		return nil, err
 	}
-	if installation.Status != domain.GithubInstallationStatusActive {
+	if installation.Status != domain.GithubInstallationStatusActive || installation.ConnectionStatus != domain.GithubConnectionStatusConnected {
 		return nil, domain.ErrInvalidStatus
 	}
 	if g.tokenProvider == nil || g.repositoryClient == nil {
@@ -283,6 +356,35 @@ func (g *githubAppUsecase) GetRepositoryDetails(ctx context.Context, userID stri
 		return nil, err
 	}
 	return g.repositoryClient.GetRepositoryDetails(ctx, token, repoID)
+}
+
+func (g *githubAppUsecase) ListRepositoryDirectories(ctx context.Context, userID string, repoID int64, branch string) ([]string, error) {
+	installation, err := g.githubRepo.GetInstallationByUserID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if installation.Status != domain.GithubInstallationStatusActive || installation.ConnectionStatus != domain.GithubConnectionStatusConnected {
+		return nil, domain.ErrInvalidStatus
+	}
+	if g.tokenProvider == nil || g.repositoryClient == nil {
+		return nil, domain.ErrInternalServerError
+	}
+
+	token, err := g.tokenProvider.CreateInstallationToken(ctx, installation.InstallationID)
+	if err != nil {
+		return nil, err
+	}
+
+	repoDetails, err := g.repositoryClient.GetRepositoryDetails(ctx, token, repoID)
+	if err != nil {
+		return nil, err
+	}
+
+	if strings.TrimSpace(branch) == "" {
+		branch = repoDetails.DefaultBranch
+	}
+
+	return g.repositoryClient.ListRepositoryDirectories(ctx, token, repoDetails.Owner, repoDetails.Name, branch)
 }
 
 func repositoryCacheKey(installationID int64, cursor, query string, perPage int) string {

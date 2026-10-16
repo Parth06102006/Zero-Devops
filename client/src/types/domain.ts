@@ -16,6 +16,7 @@ export interface CommandScanResult {
 
 export interface Project {
   id: string;
+  name: string;
   user_id: string;
   installation_id: string;
   github_repository_id: number;
@@ -75,13 +76,18 @@ export interface GithubRepositoryList {
   next_cursor?: string;
 }
 
+export type GithubConnectionStatus = "connected" | "disconnected";
+export type GithubInstallationStatus = "active" | "suspended" | "uninstalled" | string;
+
 export interface GithubInstallation {
   id: string;
   user_id: string;
   installation_id: number;
   account_type: string;
   account_login: string;
-  status: string;
+  status: GithubInstallationStatus;
+  connection_status: GithubConnectionStatus;
   created_at: string;
   updated_at: string;
 }
+

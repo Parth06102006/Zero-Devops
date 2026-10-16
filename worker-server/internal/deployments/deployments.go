@@ -27,6 +27,12 @@ const (
 	pkgManagerYarn = "yarn"
 	pkgManagerBun  = "bun"
 
+	// Python package managers
+	pkgManagerUV     = "uv"
+	pkgManagerPoetry = "poetry"
+	pkgManagerPipenv = "pipenv"
+	pkgManagerPip    = "pip"
+
 	templateDockerfile = "Dockerfile"
 	builderDocker      = "docker"
 
@@ -79,6 +85,22 @@ var pmInstallCommands = map[string]string{
 	pkgManagerBun:  "bun install --frozen-lockfile --ignore-scripts",
 }
 
+// Production dependency installation is not a syntactic substitution for npm's
+// --omit=dev: pnpm, yarn, and bun use different flags.
+var pmProductionInstallCommands = map[string]string{
+	pkgManagerNPM:  "npm ci --ignore-scripts --omit=dev",
+	pkgManagerPNPM: "pnpm install --frozen-lockfile --ignore-scripts --prod",
+	pkgManagerYarn: "yarn install --frozen-lockfile --ignore-scripts --production=true",
+	pkgManagerBun:  "bun install --frozen-lockfile --ignore-scripts --production",
+}
+
+var pmManifestCopies = map[string]string{
+	pkgManagerNPM:  "COPY package.json package-lock.json ./",
+	pkgManagerPNPM: "COPY package.json pnpm-lock.yaml ./",
+	pkgManagerYarn: "COPY package.json yarn.lock ./",
+	pkgManagerBun:  "COPY package.json bun.lock* ./",
+}
+
 var buildRoot = func() string {
 	if root := os.Getenv("BUILD_ROOT"); root != "" {
 		return root
@@ -114,7 +136,7 @@ var commitSHAPattern = regexp.MustCompile(`^[0-9a-f]{40}$`)
 // cloneRepo materializes the exact commitSHA in destPath. It never clones the
 // moving default-branch tip: the worktree is created from the immutable commit
 // the job was accepted for. GitHub supports fetching an arbitrary reachable SHA.
-func cloneRepo(cloneURL, deploymentID, commitSHA string) (string, error) {
+func cloneRepo(cloneURL, deploymentID, commitSHA string, credential domain.CloneCredential) (string, error) {
 	if err := validateCloneURL(cloneURL); err != nil {
 		return "", fmt.Errorf("clone rejected: %w", err)
 	}
@@ -136,22 +158,76 @@ func cloneRepo(cloneURL, deploymentID, commitSHA string) (string, error) {
 	defer cancel()
 
 	//nolint:gosec // cloneURL validated by validateCloneURL and commitSHA by commitSHAPattern above
-	commands := [][]string{
+	setupCommands := [][]string{
 		{"init", destPath},
 		{gitChangeDirFlag, destPath, "remote", "add", "origin", cloneURL},
-		{gitChangeDirFlag, destPath, "fetch", "--depth", "1", "origin", commitSHA},
-		{gitChangeDirFlag, destPath, "checkout", "FETCH_HEAD"},
 	}
-	for _, args := range commands {
+	for _, args := range setupCommands {
 		if err := runGit(ctx, args); err != nil {
 			return "", fmt.Errorf("git %s failed: %w", args[0], err)
 		}
 	}
 
+	askpassPath, cleanupAskpass, err := createGitAskPass(credential)
+	if err != nil {
+		return "", err
+	}
+	defer cleanupAskpass()
+	gitEnv := []string{
+		"GIT_TERMINAL_PROMPT=0",
+		"GIT_ASKPASS=" + askpassPath,
+		"GITHUB_INSTALLATION_TOKEN=" + credential.Token,
+	}
+	if err := runGitWithEnv(ctx, []string{gitChangeDirFlag, destPath, "fetch", "--depth", "1", "origin", commitSHA}, gitEnv); err != nil {
+		return "", fmt.Errorf("git fetch failed: %w", err)
+	}
+	if err := runGit(ctx, []string{gitChangeDirFlag, destPath, "checkout", "FETCH_HEAD"}); err != nil {
+		return "", fmt.Errorf("git checkout failed: %w", err)
+	}
+
 	return destPath, nil
 }
 
-const gitWaitDelay = 5 * time.Second
+const (
+	gitWaitDelay    = 5 * time.Second
+	gitAskPassPerms = 0o700
+)
+
+// createGitAskPass keeps the token out of the remote URL and Git config. Git
+// receives the token only through the child process environment during fetch.
+func createGitAskPass(credential domain.CloneCredential) (path string, cleanup func(), err error) {
+	if credential.Username != "x-access-token" || credential.Token == "" {
+		return "", nil, errors.New("invalid GitHub clone credential")
+	}
+	file, err := os.CreateTemp("", "zerodevops-git-askpass-*")
+	if err != nil {
+		return "", nil, err
+	}
+	path = file.Name()
+	cleanup = func() { _ = os.Remove(path) }
+	if err := file.Chmod(gitAskPassPerms); err != nil {
+		_ = file.Close()
+		cleanup()
+		return "", nil, err
+	}
+	// The token is read from the short-lived environment of git, never written
+	// to disk. Git's prompts contain either Username or Password.
+	script := "#!/bin/sh\n" +
+		"case \"$1\" in\n" +
+		"  *Username*) printf '%s\\n' 'x-access-token' ;;\n" +
+		"  *Password*) printf '%s\\n' \"$GITHUB_INSTALLATION_TOKEN\" ;;\n" +
+		"esac\n"
+	if _, err := file.WriteString(script); err != nil {
+		_ = file.Close()
+		cleanup()
+		return "", nil, err
+	}
+	if err := file.Close(); err != nil {
+		cleanup()
+		return "", nil, err
+	}
+	return path, cleanup, nil
+}
 
 // runGit executes a git command with the shared clone timeout and captures stderr.
 //
@@ -161,7 +237,12 @@ const gitWaitDelay = 5 * time.Second
 // deadline. Setpgid+Cancel kill the whole process group; WaitDelay force-closes
 // the pipes as a backstop if anything survives that.
 func runGit(ctx context.Context, args []string) error {
+	return runGitWithEnv(ctx, args, nil)
+}
+
+func runGitWithEnv(ctx context.Context, args, extraEnv []string) error {
 	cmd := exec.CommandContext(ctx, "git", args...) //nolint:gosec // arguments are constructed internally above
+	cmd.Env = append(os.Environ(), extraEnv...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	cmd.Cancel = func() error {
 		if cmd.Process == nil {
@@ -195,6 +276,79 @@ func publishStatusUpdate(queueUsecase domain.QueueUsecase, deploymentID, status,
 	})
 }
 
+// renderNodePackageManagerTemplate makes a Node template match the repository's
+// lockfile. pnpm and yarn are activated with Corepack in every stage that runs
+// them; Corepack honors a version pinned in package.json's packageManager field.
+func renderNodePackageManagerTemplate(content, pm string) string {
+	if pm == pkgManagerNPM {
+		return content
+	}
+
+	installCmd, knownManager := pmInstallCommands[pm]
+	productionInstallCmd := pmProductionInstallCommands[pm]
+	manifestCopy := pmManifestCopies[pm]
+	if !knownManager || productionInstallCmd == "" || manifestCopy == "" {
+		return content
+	}
+
+	// package*.json excludes pnpm-lock.yaml, yarn.lock, and Bun lockfiles.
+	// Copying the detected lockfile before installation makes frozen installs
+	// reproducible and preserves Docker-layer caching for normal single-package
+	// projects.
+	content = strings.ReplaceAll(content, "COPY package*.json ./", manifestCopy)
+	content = strings.ReplaceAll(content, "npm ci --ignore-scripts --omit=dev", productionInstallCmd)
+	content = strings.ReplaceAll(content, "npm ci --ignore-scripts", installCmd)
+	content = strings.ReplaceAll(content, "npm run", pm+" run")
+	content = strings.ReplaceAll(content, `"npm`, `"`+pm)
+
+	switch pm {
+	case pkgManagerPNPM, pkgManagerYarn:
+		// node:20 includes Corepack but it is disabled by default. Prefix every
+		// install command, including the production runtime stage.
+		content = strings.ReplaceAll(content, "RUN "+installCmd, "RUN corepack enable\nRUN "+installCmd)
+		content = strings.ReplaceAll(content, "RUN "+productionInstallCmd, "RUN corepack enable\nRUN "+productionInstallCmd)
+	case pkgManagerBun:
+		// Only swap the builder stage and unnamed runtime stages — a stage named
+		// "AS runtime" serves static files via npm's bundled `serve` and must
+		// remain Node regardless of the package manager that built the project.
+		content = strings.ReplaceAll(content, "FROM node:20-alpine AS builder", "FROM docker.io/oven/bun:1-alpine AS builder")
+		content = strings.ReplaceAll(content, "FROM node:20-alpine\n", "FROM docker.io/oven/bun:1-alpine\n")
+	}
+	return content
+}
+
+// renderPythonPackageManagerTemplate makes a Python template match the repository's
+// lockfile by replacing the dependency installation placeholder.
+func renderPythonPackageManagerTemplate(content, pm string) string {
+	switch pm {
+	case pkgManagerUV:
+		// uv: use the official uv image for faster, cached installs
+		// Install uv in the base image, then sync dependencies
+		content = strings.ReplaceAll(content, "__PYTHON_DEPS_INSTALL__", `COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY pyproject.toml uv.lock ./
+RUN uv sync --locked --no-dev`)
+	case pkgManagerPoetry:
+		// Poetry: install poetry and install dependencies
+		content = strings.ReplaceAll(content, "__PYTHON_DEPS_INSTALL__", `RUN pip install --no-cache-dir poetry
+COPY pyproject.toml poetry.lock ./
+RUN poetry install --no-dev --no-interaction --no-ansi`)
+	case pkgManagerPipenv:
+		// Pipenv: install pipenv and install dependencies
+		content = strings.ReplaceAll(content, "__PYTHON_DEPS_INSTALL__", `RUN pip install --no-cache-dir pipenv
+COPY Pipfile Pipfile.lock ./
+RUN pipenv install --deploy --ignore-pipfile`)
+	case pkgManagerPip:
+		// pip: traditional requirements.txt approach
+		content = strings.ReplaceAll(content, "__PYTHON_DEPS_INSTALL__", `COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt`)
+	default:
+		// Fallback to pip/requirements.txt for backward compatibility
+		content = strings.ReplaceAll(content, "__PYTHON_DEPS_INSTALL__", `COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt`)
+	}
+	return content
+}
+
 func writeDockerfile(repoPath string, builder *Builder, pm string) error {
 	templatePath := filepath.Join("templates", builder.Template)
 	if builder.Template == templateDockerfile {
@@ -204,23 +358,26 @@ func writeDockerfile(repoPath string, builder *Builder, pm string) error {
 	//nolint:gosec // path is constructed internally, not user input
 	data, err := os.ReadFile(templatePath)
 	if err != nil {
-		return err
+		if errors.Is(err, os.ErrNotExist) {
+			altPath := filepath.Join(parentDir, parentDir, "templates", builder.Template)
+			//nolint:gosec // altPath is constructed internally, not user input
+			if altData, altErr := os.ReadFile(altPath); altErr == nil {
+				data = altData
+				err = nil
+			}
+		}
+		if err != nil {
+			return err
+		}
 	}
 
 	content := string(data)
-	installCmd := pmInstallCommands[pm]
-	if installCmd != "" && pm != pkgManagerNPM {
-		if pm == pkgManagerBun {
-			// Only swap the builder stage and unnamed runtime stages — a stage named
-			// "AS runtime" just serves static files via npm's bundled `serve` and must
-			// stay on node regardless of which pm built the project.
-			content = strings.ReplaceAll(content, "FROM node:20-alpine AS builder", "FROM oven/bun:1-alpine AS builder")
-			content = strings.ReplaceAll(content, "FROM node:20-alpine\n", "FROM oven/bun:1-alpine\n")
-			content = strings.ReplaceAll(content, "--omit=dev", "--production")
-		}
-		content = strings.ReplaceAll(content, "npm ci --ignore-scripts", installCmd)
-		content = strings.ReplaceAll(content, "npm run", pm+" run")
-		content = strings.ReplaceAll(content, `"npm`, `"`+pm)
+
+	// Apply package-manager-specific template rendering
+	if builder.Name == langPython {
+		content = renderPythonPackageManagerTemplate(content, pm)
+	} else {
+		content = renderNodePackageManagerTemplate(content, pm)
 	}
 
 	if outDir := resolveOutputDir(repoPath, builder); outDir != "" {
@@ -285,13 +442,13 @@ func prepareAndMarkBuilding(
 	return publishStatusUpdate(queueUsecase, job.DeploymentID, "building", "", "")
 }
 
-func cloneAndPrepare(repoPath string, job domain.DeployJob, logger *zap.Logger, useBuildpacks bool) (*Builder, string, error) {
+func cloneAndPrepare(appDir string, job domain.DeployJob, logger *zap.Logger, useBuildpacks bool) (*Builder, string, error) {
 	logger.Info("detecting framework", zap.String("deployment_id", job.DeploymentID))
-	builder, err := detectFramework(repoPath)
+	builder, err := detectFramework(appDir)
 	if err != nil {
 		return nil, "", err
 	}
-	pm := detectPackageManager(repoPath)
+	pm := detectPackageManager(appDir)
 	logger.Info("framework detected", zap.String("deployment_id", job.DeploymentID), zap.String("framework", builder.Name), zap.String("package_manager", pm))
 
 	if useBuildpacks {
@@ -301,7 +458,7 @@ func cloneAndPrepare(repoPath string, job domain.DeployJob, logger *zap.Logger, 
 
 	if builder.Name != builderDocker {
 		logger.Info("writing Dockerfile from template", zap.String("deployment_id", job.DeploymentID), zap.String("template", builder.Template))
-		if err := writeDockerfile(repoPath, builder, pm); err != nil {
+		if err := writeDockerfile(appDir, builder, pm); err != nil {
 			return nil, "", err
 		}
 	}
@@ -310,14 +467,14 @@ func cloneAndPrepare(repoPath string, job domain.DeployJob, logger *zap.Logger, 
 
 // buildAndSaveImage builds the image and saves it to a tar, returning the captured
 // build output alongside any error so the caller can classify the failure.
-func buildAndSaveImage(ctx context.Context, job domain.DeployJob, repoPath, imageTag string, logger *zap.Logger) (tarPath, buildOutput string, err error) {
+func buildAndSaveImage(ctx context.Context, job domain.DeployJob, appDir, imageTag string, logger *zap.Logger) (tarPath, buildOutput string, err error) {
 	logger.Info("building image with buildah", zap.String("deployment_id", job.DeploymentID), zap.String("image_tag", imageTag))
-	buildOutput, err = buildImage(ctx, repoPath, imageTag)
+	buildOutput, err = buildImage(ctx, appDir, imageTag)
 	if err != nil {
 		return "", buildOutput, err
 	}
 
-	tarPath = filepath.Join(repoPath, fmt.Sprintf("%s.tar", job.DeploymentID))
+	tarPath = filepath.Join(appDir, fmt.Sprintf("%s.tar", job.DeploymentID))
 	logger.Info("saving image tar", zap.String("deployment_id", job.DeploymentID), zap.String("tar_path", tarPath))
 	if err := saveImageTar(ctx, imageTag, tarPath); err != nil {
 		return "", buildOutput, err
@@ -336,8 +493,8 @@ func truncate(s string, n int) string {
 // retryAsDynamic handles an SSR-mismatch build failure by retrying once through the
 // generic dynamic Node path — only when a "start" script proves a server entrypoint
 // actually exists, never a blind guess.
-func retryAsDynamic(ctx context.Context, repoPath string, job domain.DeployJob, imageTag string, logger *zap.Logger) (string, error) {
-	pkg, err := readPackageJSON(repoPath)
+func retryAsDynamic(ctx context.Context, appDir string, job domain.DeployJob, imageTag string, logger *zap.Logger) (string, error) {
+	pkg, err := readPackageJSON(appDir)
 	if err != nil || pkg == nil || !hasStartScript(pkg) {
 		return "", errors.New(`no runnable server entrypoint found (no "start" script in package.json) — set deployment_type manually in project settings`)
 	}
@@ -345,17 +502,17 @@ func retryAsDynamic(ctx context.Context, repoPath string, job domain.DeployJob, 
 	logger.Info("SSR mismatch: retrying once via generic dynamic path",
 		zap.String("deployment_id", job.DeploymentID))
 
-	pm := detectPackageManager(repoPath)
-	if err := writeDockerfile(repoPath, nodeBuilder, pm); err != nil {
+	pm := detectPackageManager(appDir)
+	if err := writeDockerfile(appDir, nodeBuilder, pm); err != nil {
 		return "", fmt.Errorf("writing dynamic fallback Dockerfile: %w", err)
 	}
 
-	output, err := buildImage(ctx, repoPath, imageTag)
+	output, err := buildImage(ctx, appDir, imageTag)
 	if err != nil {
 		return "", fmt.Errorf("dynamic fallback build also failed: %w (output: %s)", err, truncate(output, maxCapturedOutputInError))
 	}
 
-	tarPath := filepath.Join(repoPath, fmt.Sprintf("%s.tar", job.DeploymentID))
+	tarPath := filepath.Join(appDir, fmt.Sprintf("%s.tar", job.DeploymentID))
 	if err := saveImageTar(ctx, imageTag, tarPath); err != nil {
 		return "", fmt.Errorf("saving dynamic fallback image tar: %w", err)
 	}
@@ -403,7 +560,7 @@ func finalizeDynamicStub(
 
 // ProcessDeployment processes a deployment job end-to-end: preparing, cloning, building, and uploading.
 func ProcessDeployment(
-	ctx context.Context, repo domain.DeploymentRepository, job domain.DeployJob,
+	ctx context.Context, repo domain.DeploymentRepository, job domain.DeployJob, credential domain.CloneCredential,
 	artifactUploader domain.UploadUsecase, queueUsecase domain.QueueUsecase,
 	retryCount int, logger *zap.Logger,
 ) error {
@@ -416,14 +573,19 @@ func ProcessDeployment(
 		return markFailed(ctx, repo, job, "failed to read image tag: "+err.Error())
 	}
 
-	repoPath, err := cloneRepo(job.CloneURL, job.DeploymentID, job.CommitSHA)
+	repoPath, err := cloneRepo(job.CloneURL, job.DeploymentID, job.CommitSHA, credential)
 	if err != nil {
 		return markFailed(ctx, repo, job, "git checkout failed: "+err.Error())
 	}
 
 	defer func() { _ = os.RemoveAll(repoPath) }()
 
-	builder, _, err := cloneAndPrepare(repoPath, job, logger, false)
+	appDir, err := ResolveAppDir(repoPath, job.WorkingDir)
+	if err != nil {
+		return markFailed(ctx, repo, job, "resolve application directory failed: "+err.Error())
+	}
+
+	builder, _, err := cloneAndPrepare(appDir, job, logger, false)
 	if err != nil {
 		return markFailed(ctx, repo, job, "clone/prepare failed: "+err.Error())
 	}
@@ -433,13 +595,13 @@ func ProcessDeployment(
 	buildCtx, cancel := context.WithTimeout(context.Background(), dockerBuildTimeout)
 	defer cancel()
 
-	tarPath, buildOutput, err := buildAndSaveImage(buildCtx, job, repoPath, imageTag, logger)
+	tarPath, buildOutput, err := buildAndSaveImage(buildCtx, job, appDir, imageTag, logger)
 	if err != nil {
 		if !strings.Contains(buildOutput, ssrMismatchSentinel) {
 			return markFailed(ctx, repo, job, "build failed: "+err.Error())
 		}
 
-		retryTarPath, retryErr := retryAsDynamic(buildCtx, repoPath, job, imageTag, logger)
+		retryTarPath, retryErr := retryAsDynamic(buildCtx, appDir, job, imageTag, logger)
 		if retryErr != nil {
 			return markFailed(ctx, repo, job,
 				"detected server-side rendering (build succeeded but produced no static output): "+retryErr.Error())

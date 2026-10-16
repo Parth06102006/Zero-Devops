@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v5"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -33,22 +32,31 @@ func NewSCMHandler(e *echo.Echo, gh domain.GithubUsecase) {
 		scmUsecase: gh,
 	}
 
+	// GitHub App installation start (redirects to GitHub App new installation)
+	e.GET("/integrations/scm/github/install", handler.StartInstallation)
+
 	// GitHub App installation callback (from GitHub redirect)
 	e.GET("/github/install/callback", handler.GithubInstallCallback)
 
 	// Uniform SCM GitHub routes
 	e.GET("/integrations/scm/github/installation", handler.GetInstallationStatus)
+	e.GET("/integrations/scm/github/installations", handler.ListInstallations)
 	e.POST("/integrations/scm/github/installation", handler.Installation)
+	e.PATCH("/integrations/scm/github/installation", handler.UpdateConnectionStatus)
 	e.DELETE("/integrations/scm/github/installation", handler.DeleteInstallation)
 	e.GET("/integrations/scm/github/repositories", handler.ListRepositories)
+	e.GET("/integrations/scm/github/repositories/:id/directories", handler.ListRepositoryDirectories)
 
 	// Backward-compatible aliases
 	e.POST("/integrations/scm/github/install", handler.Installation)
 	e.POST("/integration/scm/github/install", handler.Installation)
 	e.GET("/integration/scm/github", handler.GetInstallation)
 	e.GET("/integration/scm/github/", handler.GetInstallation)
+	e.GET("/integrations/github/installations", handler.ListInstallations)
+	e.PATCH("/integrations/github/installation", handler.UpdateConnectionStatus)
 	e.DELETE("/integration/scm/github/delete", handler.DeleteInstallation)
 	e.GET("/integrations/github/repositories", handler.ListRepositories)
+	e.GET("/integrations/github/repositories/:id/directories", handler.ListRepositoryDirectories)
 	e.GET("/integrations/github/installation", handler.GetInstallationStatus)
 }
 
@@ -86,6 +94,17 @@ func (inst *SCMHandler) Installation(c *echo.Context) error {
 	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(nil, "", reqID, helper.WithMessage("Github App Installed Successfully")))
 }
 
+// StartInstallation redirects the authenticated user to install the GitHub App
+func (inst *SCMHandler) StartInstallation(c *echo.Context) error {
+	reqID := middleware.GetRequestID(c)
+	appName := viper.GetString("GITHUB_APP_NAME")
+	if appName == "" {
+		return c.JSON(http.StatusInternalServerError, helper.BuildErrorResponse("github app name not configured", fmt.Errorf("GITHUB_APP_NAME missing"), reqID))
+	}
+	installURL := fmt.Sprintf("https://github.com/apps/%s/installations/new", appName)
+	return c.Redirect(http.StatusTemporaryRedirect, installURL)
+}
+
 // GithubInstallCallback handles the GitHub App installation redirect from GitHub.
 // It completes the installation server-side and redirects to the frontend.
 func (inst *SCMHandler) GithubInstallCallback(c *echo.Context) error {
@@ -96,7 +115,6 @@ func (inst *SCMHandler) GithubInstallCallback(c *echo.Context) error {
 	installationID := c.QueryParam("installation_id")
 	setupAction := c.QueryParam("setup_action")
 	returnTo := c.QueryParam("return_to")
-	userIDFromURL := c.QueryParam("user_id")
 
 	if returnTo == "" {
 		returnTo = "/projects"
@@ -119,49 +137,14 @@ func (inst *SCMHandler) GithubInstallCallback(c *echo.Context) error {
 	if code != "" {
 		ctx := c.Request().Context()
 
-		// First try to get userID from URL parameter (passed by frontend)
-		userID := userIDFromURL
-		cookieValue := ""
-
-		// Fallback: Extract userID from JWT cookie manually (since this path skips auth middleware)
-		if userID == "" {
-			if cookie, err := c.Cookie("access_token"); err == nil && cookie.Value != "" {
-				cookieValue = cookie.Value
-				secretKey := viper.GetString("JWT_SECRET")
-				if secretKey != "" {
-					if parsedToken, err := jwt.Parse(cookie.Value, func(t *jwt.Token) (interface{}, error) {
-						if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-							return nil, fmt.Errorf("unexpected signing method")
-						}
-						return []byte(secretKey), nil
-					}); err == nil && parsedToken.Valid {
-						if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok {
-							if uid, ok := claims["user_id"].(string); ok {
-								userID = uid
-							}
-						}
-					} else {
-						log.Warn("JWT parse failed", zap.Error(err))
-					}
-				} else {
-					log.Warn("JWT_SECRET not configured")
-				}
-			} else {
-				log.Warn("access_token cookie not found", zap.Error(err))
-			}
+		userID, ok := authmiddleware.GetUserID(c)
+		if !ok || userID == "" {
+			log.Warn("User ID not found in session for GitHub installation callback")
+			loginURL := fmt.Sprintf("%s/login?return_to=%s", frontendURL, url.QueryEscape(returnTo))
+			return c.Redirect(http.StatusTemporaryRedirect, loginURL)
 		}
 
-		if userID == "" {
-			log.Warn("User ID not found in URL or cookie, redirecting to frontend for manual completion",
-				zap.String("url_user_id_present", fmt.Sprintf("%v", userIDFromURL != "")),
-				zap.String("cookie_present", fmt.Sprintf("%v", cookieValue != "")),
-				zap.String("cookie_length", fmt.Sprintf("%d", len(cookieValue))),
-			)
-			callbackURL := fmt.Sprintf("%s/github/install/callback?code=%s&return_to=%s", frontendURL, url.QueryEscape(code), url.QueryEscape(returnTo))
-			return c.Redirect(http.StatusTemporaryRedirect, callbackURL)
-		}
-
-		log.Info("Installing GitHub App", zap.String("user_id", userID), zap.String("source", func() string { if userIDFromURL != "" { return "url" }; return "cookie" }()))
+		log.Info("Installing GitHub App", zap.String("user_id", userID))
 		client := createProductionClient()
 
 		err := inst.scmUsecase.InstallGithubApp(ctx, client, code, userID)
@@ -295,6 +278,106 @@ func (inst *SCMHandler) DeleteInstallation(c *echo.Context) error {
 
 	log.Info("GitHub App uninstalled successfully", zap.String("user_id", userID))
 	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(nil, "", reqID, helper.WithMessage("GitHub App uninstalled successfully")))
+}
+
+// ListInstallations returns all saved GitHub App installations for the current user
+func (inst *SCMHandler) ListInstallations(c *echo.Context) error {
+	reqID := middleware.GetRequestID(c)
+	log := middleware.LoggerFromContext(c.Request().Context())
+
+	userID, ok := authmiddleware.GetUserID(c)
+	if !ok {
+		log.Warn("User ID not found in context")
+		return c.JSON(http.StatusUnauthorized, helper.BuildErrorResponse("user id not found", fmt.Errorf("user id not found in context"), reqID))
+	}
+
+	ctx := c.Request().Context()
+	installations, err := inst.scmUsecase.ListGithubAppInstallations(ctx, userID)
+	if err != nil {
+		log.Error("Failed to list GitHub app installations", zap.Error(err), zap.String("user_id", userID))
+		status := helper.GetStatusCode(err)
+		resp := helper.BuildErrorResponse(err.Error(), err, reqID)
+		resp.Error.Code = status
+		return c.JSON(status, resp)
+	}
+
+	if installations == nil {
+		installations = []*domain.GithubInstallation{}
+	}
+
+	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(installations, "", reqID))
+}
+
+type updateConnectionStatusRequest struct {
+	ID               string                        `json:"id"`
+	ConnectionStatus domain.GithubConnectionStatus `json:"connection_status"`
+}
+
+// UpdateConnectionStatus updates the user's connection status preference for an installation
+func (inst *SCMHandler) UpdateConnectionStatus(c *echo.Context) error {
+	reqID := middleware.GetRequestID(c)
+	log := middleware.LoggerFromContext(c.Request().Context())
+
+	userID, ok := authmiddleware.GetUserID(c)
+	if !ok {
+		log.Warn("User ID not found in context")
+		return c.JSON(http.StatusUnauthorized, helper.BuildErrorResponse("user id not found", fmt.Errorf("user id not found in context"), reqID))
+	}
+
+	var req updateConnectionStatusRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.BuildErrorResponse("invalid request body", domain.ErrBadParamInput, reqID))
+	}
+
+	if !req.ConnectionStatus.IsValid() {
+		msg := "invalid connection_status, must be connected or disconnected"
+		return c.JSON(http.StatusBadRequest, helper.BuildErrorResponse(msg, domain.ErrBadParamInput, reqID))
+	}
+
+	ctx := c.Request().Context()
+	updated, err := inst.scmUsecase.UpdateConnectionStatus(ctx, userID, req.ID, req.ConnectionStatus)
+	if err != nil {
+		log.Error("Failed to update connection status", zap.Error(err), zap.String("user_id", userID))
+		status := helper.GetStatusCode(err)
+		resp := helper.BuildErrorResponse(err.Error(), err, reqID)
+		resp.Error.Code = status
+		return c.JSON(status, resp)
+	}
+
+	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(updated, "", reqID, helper.WithMessage("connection status updated successfully")))
+}
+
+// ListRepositoryDirectories returns the directories/submodules for a given repository.
+func (inst *SCMHandler) ListRepositoryDirectories(c *echo.Context) error {
+	reqID := middleware.GetRequestID(c)
+	userID, ok := authmiddleware.GetUserID(c)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, helper.BuildErrorResponse("user id not found", fmt.Errorf("user id not found in context"), reqID))
+	}
+
+	repoIDStr := strings.TrimSpace(c.Param("id"))
+	repoID, err := strconv.ParseInt(repoIDStr, 10, 64)
+	if err != nil || repoID <= 0 {
+		return c.JSON(http.StatusBadRequest, helper.BuildErrorResponse("invalid repository id", domain.ErrBadParamInput, reqID))
+	}
+
+	branch := strings.TrimSpace(c.QueryParam("branch"))
+
+	dirs, err := inst.scmUsecase.ListRepositoryDirectories(c.Request().Context(), userID, repoID, branch)
+	if err != nil {
+		status := helper.GetStatusCode(err)
+		if errors.Is(err, domain.ErrBadParamInput) {
+			status = http.StatusBadRequest
+		}
+		if errors.Is(err, domain.ErrInvalidStatus) {
+			status = http.StatusConflict
+		}
+		resp := helper.BuildErrorResponse(err.Error(), err, reqID)
+		resp.Error.Code = status
+		return c.JSON(status, resp)
+	}
+
+	return c.JSON(http.StatusOK, helper.BuildSuccessResponse(dirs, "", reqID))
 }
 
 func createProductionClient() *http.Client {

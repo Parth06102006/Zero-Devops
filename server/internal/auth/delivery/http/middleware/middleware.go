@@ -5,6 +5,8 @@ import (
 	"Zero_Devops/server/internal/domain"
 	"context"
 	"net/http"
+	"path"
+	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v5"
@@ -71,16 +73,29 @@ func (a *AuthMiddlewareHandler) Validator(c *echo.Context, token string) (string
 	return userID, nil
 }
 
+const (
+	pathAuthGithubLogin         = "/auth/github/login"
+	pathAuthGithubLoginCallback = "/auth/github/login/callback"
+	pathAuthRefresh             = "/auth/refresh"
+	pathWebhooksGithub          = "/webhooks/github"
+	pathHealth                  = "/health"
+	pathHealthLive              = "/health/live"
+	pathHealthReady             = "/health/ready"
+)
+
 func isPublicPath(c *echo.Context) bool {
-	switch c.Path() {
-	case "/auth/github/login",
-		"/auth/github/login/callback",
-		"/auth/refresh",
-		"/webhooks/github",
-		"/github/install/callback",
-		"/health",
-		"/health/live",
-		"/health/ready":
+	p := c.Path()
+	if p == "" && c.Request() != nil && c.Request().URL != nil {
+		p = path.Clean(c.Request().URL.Path)
+	}
+	switch p {
+	case pathAuthGithubLogin,
+		pathAuthGithubLoginCallback,
+		pathAuthRefresh,
+		pathWebhooksGithub,
+		pathHealth,
+		pathHealthLive,
+		pathHealthReady:
 		return true
 	}
 	return false
@@ -89,6 +104,11 @@ func isPublicPath(c *echo.Context) bool {
 // Skipper determines if a request should skip authentication
 func (a *AuthMiddlewareHandler) Skipper(c *echo.Context) bool {
 	if c.Request().Method == http.MethodOptions {
+		return true
+	}
+	// Internal worker endpoints are authenticated by the dedicated worker
+	// middleware, never by a browser session JWT.
+	if strings.HasPrefix(c.Request().URL.Path, "/internal/") {
 		return true
 	}
 	return isPublicPath(c)

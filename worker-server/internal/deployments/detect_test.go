@@ -3,6 +3,7 @@ package deployments
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -249,5 +250,168 @@ func TestDetectPackageManager(t *testing.T) {
 func TestDetectPackageManagerDefaultsToNPM(t *testing.T) {
 	if got := detectPackageManager(t.TempDir()); got != "npm" {
 		t.Fatalf("detectPackageManager = %q, want %q", got, "npm")
+	}
+}
+
+func TestResolveAppDir_ExplicitWorkingDir(t *testing.T) {
+	repoPath := t.TempDir()
+	writeFile(t, repoPath, filepath.Join("client", "package.json"), `{"dependencies":{"react":"latest"}}`)
+	writeFile(t, repoPath, filepath.Join("api", "requirements.txt"), "flask\n")
+
+	// Explicit "client"
+	appDir, err := ResolveAppDir(repoPath, "client")
+	if err != nil {
+		t.Fatalf("ResolveAppDir(client) error: %v", err)
+	}
+	wantClient := filepath.Join(repoPath, "client")
+	if appDir != wantClient {
+		t.Fatalf("ResolveAppDir(client) = %q, want %q", appDir, wantClient)
+	}
+
+	builder, err := detectFramework(appDir)
+	if err != nil {
+		t.Fatalf("detectFramework(client) error: %v", err)
+	}
+	if builder.Name != "react" {
+		t.Fatalf("builder.Name = %q, want react", builder.Name)
+	}
+
+	// Explicit "./api"
+	appDir, err = ResolveAppDir(repoPath, "./api")
+	if err != nil {
+		t.Fatalf("ResolveAppDir(./api) error: %v", err)
+	}
+	wantAPI := filepath.Join(repoPath, "api")
+	if appDir != wantAPI {
+		t.Fatalf("ResolveAppDir(./api) = %q, want %q", appDir, wantAPI)
+	}
+
+	builder, err = detectFramework(appDir)
+	if err != nil {
+		t.Fatalf("detectFramework(api) error: %v", err)
+	}
+	if builder.Name != "python" {
+		t.Fatalf("builder.Name = %q, want python", builder.Name)
+	}
+}
+
+func TestResolveAppDir_PathTraversalRejected(t *testing.T) {
+	repoPath := t.TempDir()
+	writeFile(t, repoPath, "package.json", `{"dependencies":{"express":"latest"}}`)
+
+	badPaths := []string{
+		"../outside",
+		"../../etc",
+		"sub/../../outside",
+		"/etc/passwd",
+		"/app",
+		"../",
+		"..",
+	}
+
+	for _, p := range badPaths {
+		t.Run(p, func(t *testing.T) {
+			_, err := ResolveAppDir(repoPath, p)
+			if err == nil {
+				t.Fatalf("ResolveAppDir(%q) should have failed with path traversal error", p)
+			}
+		})
+	}
+}
+
+func TestResolveAppDir_PreservesRootProject(t *testing.T) {
+	repoPath := t.TempDir()
+	// Node at root, Python utility script nested
+	writeFile(t, repoPath, "package.json", `{"dependencies":{"express":"latest"}}`)
+	writeFile(t, repoPath, filepath.Join("scripts", "requirements.txt"), "requests\n")
+
+	for _, wd := range []string{"", ".", "  "} {
+		appDir, err := ResolveAppDir(repoPath, wd)
+		if err != nil {
+			t.Fatalf("ResolveAppDir(%q) error: %v", wd, err)
+		}
+		if appDir != repoPath {
+			t.Fatalf("ResolveAppDir(%q) = %q, want repoPath %q", wd, appDir, repoPath)
+		}
+
+		builder, err := detectFramework(appDir)
+		if err != nil {
+			t.Fatalf("detectFramework error: %v", err)
+		}
+		if builder.Name != "node" {
+			t.Fatalf("builder.Name = %q, want 'node' (must not be misclassified as python!)", builder.Name)
+		}
+	}
+}
+
+func TestResolveAppDir_AmbiguityFailsClosed(t *testing.T) {
+	repoPath := t.TempDir()
+	// Nested Node app and nested Python manifest, no root manifest
+	writeFile(t, repoPath, filepath.Join("frontend", "package.json"), `{"dependencies":{"react":"latest"}}`)
+	writeFile(t, repoPath, filepath.Join("backend", "requirements.txt"), "django\n")
+
+	// With empty or "." working directory, must fail closed
+	for _, wd := range []string{"", "."} {
+		_, err := ResolveAppDir(repoPath, wd)
+		if err == nil {
+			t.Fatalf("ResolveAppDir(%q) expected ambiguity error, got nil", wd)
+		}
+		if !strings.Contains(err.Error(), "ambiguous application root: multiple candidates found") {
+			t.Fatalf("unexpected error message: %v", err)
+		}
+	}
+
+	// detectFramework on repoPath must also fail closed with ambiguity error
+	_, err := detectFramework(repoPath)
+	if err == nil {
+		t.Fatal("detectFramework expected ambiguity error, got nil")
+	}
+	if !strings.Contains(err.Error(), "ambiguous application root: multiple candidates found") {
+		t.Fatalf("unexpected error message from detectFramework: %v", err)
+	}
+}
+
+func TestResolveAppDir_SingleNestedCandidate(t *testing.T) {
+	repoPath := t.TempDir()
+	writeFile(t, repoPath, filepath.Join("apps", "web", "package.json"), `{"dependencies":{"next":"latest"}}`)
+
+	appDir, err := ResolveAppDir(repoPath, "")
+	if err != nil {
+		t.Fatalf("ResolveAppDir error: %v", err)
+	}
+	want := filepath.Join(repoPath, "apps", "web")
+	if appDir != want {
+		t.Fatalf("ResolveAppDir = %q, want %q", appDir, want)
+	}
+
+	builder, err := detectFramework(appDir)
+	if err != nil {
+		t.Fatalf("detectFramework error: %v", err)
+	}
+	if builder.Name != "nextjs" {
+		t.Fatalf("builder.Name = %q, want nextjs", builder.Name)
+	}
+}
+
+func TestResolveAppDir_NonexistentOrFile(t *testing.T) {
+	repoPath := t.TempDir()
+	writeFile(t, repoPath, "hello.txt", "hello")
+
+	// Non-existent directory
+	_, err := ResolveAppDir(repoPath, "missing-dir")
+	if err == nil {
+		t.Fatal("expected error for non-existent working dir")
+	}
+	if !strings.Contains(err.Error(), "does not exist") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Regular file instead of directory
+	_, err = ResolveAppDir(repoPath, "hello.txt")
+	if err == nil {
+		t.Fatal("expected error for file passed as working dir")
+	}
+	if !strings.Contains(err.Error(), "is not a directory") {
+		t.Fatalf("unexpected error: %v", err)
 	}
 }

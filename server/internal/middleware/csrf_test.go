@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,6 +13,10 @@ import (
 // okHandler is a simple next handler that records it was reached.
 func okHandler(c *echo.Context) error {
 	return c.String(http.StatusOK, "ok")
+}
+
+func newCSRFRequest(method, target string) *http.Request {
+	return httptest.NewRequestWithContext(context.Background(), method, target, http.NoBody)
 }
 
 // setupCSRFTest sets COOKIE_DOMAIN and ALLOWED_ORIGINS for the duration of the
@@ -42,7 +47,7 @@ func applyCSRF(req *http.Request) *httptest.ResponseRecorder {
 func TestCSRF_LocalDev_Skipped(t *testing.T) {
 	setupCSRFTest(t, "", "http://localhost:3000")
 
-	req := httptest.NewRequest(http.MethodPost, "/projects", http.NoBody)
+	req := newCSRFRequest(http.MethodPost, "/projects")
 	req.Header.Set("Origin", "https://evil-site.example")
 
 	rec := applyCSRF(req)
@@ -58,7 +63,7 @@ func TestCSRF_LocalDev_Skipped(t *testing.T) {
 func TestCSRF_GetMethod_Skipped(t *testing.T) {
 	setupCSRFTest(t, ".parthgarg.me", "https://ghost.parthgarg.me")
 
-	req := httptest.NewRequest(http.MethodGet, "/projects", http.NoBody)
+	req := newCSRFRequest(http.MethodGet, "/projects")
 	req.Header.Set("Origin", "https://evil-site.example")
 
 	rec := applyCSRF(req)
@@ -70,7 +75,7 @@ func TestCSRF_GetMethod_Skipped(t *testing.T) {
 func TestCSRF_OptionsMethod_Skipped(t *testing.T) {
 	setupCSRFTest(t, ".parthgarg.me", "https://ghost.parthgarg.me")
 
-	req := httptest.NewRequest(http.MethodOptions, "/projects", http.NoBody)
+	req := newCSRFRequest(http.MethodOptions, "/projects")
 	req.Header.Set("Origin", "https://evil-site.example")
 
 	rec := applyCSRF(req)
@@ -88,7 +93,7 @@ func TestCSRF_AllowedOrigin_Passes(t *testing.T) {
 
 	for _, origin := range []string{"https://ghost.parthgarg.me", "http://localhost:3000"} {
 		t.Run(origin, func(t *testing.T) {
-			req := httptest.NewRequest(http.MethodPost, "/projects", http.NoBody)
+			req := newCSRFRequest(http.MethodPost, "/projects")
 			req.Header.Set("Origin", origin)
 
 			rec := applyCSRF(req)
@@ -106,7 +111,7 @@ func TestCSRF_AllowedOrigin_Passes(t *testing.T) {
 func TestCSRF_UnknownOrigin_Blocked(t *testing.T) {
 	setupCSRFTest(t, ".parthgarg.me", "https://ghost.parthgarg.me")
 
-	req := httptest.NewRequest(http.MethodPost, "/projects", http.NoBody)
+	req := newCSRFRequest(http.MethodPost, "/projects")
 	req.Header.Set("Origin", "https://evil-site.example")
 
 	rec := applyCSRF(req)
@@ -118,7 +123,7 @@ func TestCSRF_UnknownOrigin_Blocked(t *testing.T) {
 func TestCSRF_DeleteUnknownOrigin_Blocked(t *testing.T) {
 	setupCSRFTest(t, ".parthgarg.me", "https://ghost.parthgarg.me")
 
-	req := httptest.NewRequest(http.MethodDelete, "/projects/1", http.NoBody)
+	req := newCSRFRequest(http.MethodDelete, "/projects/1")
 	req.Header.Set("Origin", "https://evil-site.example")
 
 	rec := applyCSRF(req)
@@ -130,7 +135,7 @@ func TestCSRF_DeleteUnknownOrigin_Blocked(t *testing.T) {
 func TestCSRF_PatchUnknownOrigin_Blocked(t *testing.T) {
 	setupCSRFTest(t, ".parthgarg.me", "https://ghost.parthgarg.me")
 
-	req := httptest.NewRequest(http.MethodPatch, "/projects/1", http.NoBody)
+	req := newCSRFRequest(http.MethodPatch, "/projects/1")
 	req.Header.Set("Origin", "https://evil-site.example")
 
 	rec := applyCSRF(req)
@@ -146,7 +151,7 @@ func TestCSRF_PatchUnknownOrigin_Blocked(t *testing.T) {
 func TestCSRF_RefererFallback_AllowedPasses(t *testing.T) {
 	setupCSRFTest(t, ".parthgarg.me", "https://ghost.parthgarg.me")
 
-	req := httptest.NewRequest(http.MethodPost, "/projects", http.NoBody)
+	req := newCSRFRequest(http.MethodPost, "/projects")
 	req.Header.Set("Referer", "https://ghost.parthgarg.me/dashboard")
 
 	rec := applyCSRF(req)
@@ -158,7 +163,7 @@ func TestCSRF_RefererFallback_AllowedPasses(t *testing.T) {
 func TestCSRF_RefererFallback_UnknownBlocked(t *testing.T) {
 	setupCSRFTest(t, ".parthgarg.me", "https://ghost.parthgarg.me")
 
-	req := httptest.NewRequest(http.MethodPost, "/projects", http.NoBody)
+	req := newCSRFRequest(http.MethodPost, "/projects")
 	req.Header.Set("Referer", "https://evil-site.example/page")
 
 	rec := applyCSRF(req)
@@ -174,7 +179,7 @@ func TestCSRF_RefererFallback_UnknownBlocked(t *testing.T) {
 func TestCSRF_NoOriginNoReferer_PassThrough(t *testing.T) {
 	setupCSRFTest(t, ".parthgarg.me", "https://ghost.parthgarg.me")
 
-	req := httptest.NewRequest(http.MethodPost, "/projects", http.NoBody)
+	req := newCSRFRequest(http.MethodPost, "/projects")
 	// No Origin, no Referer headers set.
 
 	rec := applyCSRF(req)
