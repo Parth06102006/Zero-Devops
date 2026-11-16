@@ -4,7 +4,7 @@ import argparse, datetime, hashlib, json, os, pathlib, shutil, subprocess, time
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 OUT = REPO / 'docs/worker-build-fixes-2026-11-16'
-TEMP = pathlib.Path('/tmp/zd-fix-builds-services')
+TEMP = pathlib.Path('/tmp/zd-fix-builds-final-services')
 IMAGE = 'zero-devops-e2e-worker:local'
 LABEL = 'zero-devops-build-fixes=20261116'
 CONTAINERS = ['zdfix-worker', 'zdfix-mock', 'zdfix-db', 'zdfix-rabbit', 'zdfix-cold', 'zdfix-native-tests']
@@ -102,7 +102,7 @@ def recover_startup():
     if docker('inspect','zdfix-worker','--format','{{.State.Running}}')=='true':raise RuntimeError('worker is already running; inspect before replacing')
     # Docker Desktop retained the old inode for the initial single-file bind
     # after go build replaced it. Mount the directory and execute its copy.
-    docker('rm','zdfix-worker')
+    docker('rm','-v','zdfix-worker')
     shutil.copy2('/tmp/zd-fix-builds-worker',TEMP/'worker-engine')
     envargs=[item for k,v in env.items() for item in ['-e',k+'='+v]]
     docker('run','-d','--label',LABEL,'--network','zdfix-network','--name','zdfix-worker',
@@ -154,11 +154,14 @@ def fix_upload_endpoint():
 
 def stop():
     removed=[]
+    anonymous=[]
     for name in CONTAINERS:
         result=subprocess.run(['docker','inspect','--format','{{index .Config.Labels "zero-devops-build-fixes"}}',name],text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         if result.returncode:continue
         if result.stdout.strip()!='20261116':raise RuntimeError('refusing unrelated resource '+name)
-        docker('rm','-f',name);removed.append(name)
+        mounts=json.loads(docker('inspect',name,'--format','{{json .Mounts}}'))
+        anonymous.extend(m['Name'] for m in mounts if m['Type']=='volume' and m['Name'] not in VOLUMES)
+        docker('rm','-f','-v',name);removed.append(name)
     for name in VOLUMES:
         result=subprocess.run(['docker','volume','inspect','--format','{{index .Labels "zero-devops-build-fixes"}}',name],text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         if result.returncode:continue
@@ -166,7 +169,7 @@ def stop():
         docker('volume','rm',name)
     result=subprocess.run(['docker','network','inspect','--format','{{index .Labels "zero-devops-build-fixes"}}','zdfix-network'],text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     if result.returncode==0 and result.stdout.strip()=='20261116':docker('network','rm','zdfix-network')
-    (OUT/'cleanup.json').write_text(json.dumps({'containers_removed':removed,'at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'no_global_prune':True},indent=2))
+    (OUT/'cleanup.json').write_text(json.dumps({'containers_removed':removed,'named_volumes_removed':VOLUMES,'anonymous_volumes_removed':anonymous,'at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'no_global_prune':True},indent=2))
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser();parser.add_argument('action',choices=['setup','recover-startup','fix-upload-endpoint','cold-pulls','stop']);args=parser.parse_args()

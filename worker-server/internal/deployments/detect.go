@@ -250,6 +250,7 @@ var pythonPackageManagers = []struct {
 }
 
 type packageJSON struct {
+	Engines         map[string]string `json:"engines"`
 	Dependencies    map[string]string `json:"dependencies"`
 	DevDependencies map[string]string `json:"devDependencies"`
 	Scripts         map[string]string `json:"scripts"`

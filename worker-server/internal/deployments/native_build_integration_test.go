@@ -17,12 +17,17 @@ func TestNativeBuildIntegration(t *testing.T) {
 	if os.Getenv("RUN_NATIVE_BUILD_TESTS") != "true" {
 		t.Skip("set RUN_NATIVE_BUILD_TESTS=true in an isolated Buildah environment")
 	}
-	for _, name := range []string{"go-explicit-target", "rust-standalone", "rust-workspace"} {
+	for _, name := range []string{"node-engine", "go-explicit-target", "rust-standalone", "rust-workspace"} {
 		t.Run(name, func(t *testing.T) {
 			root := t.TempDir()
 			app := root
 			var builder *Builder
 			switch name {
+			case "node-engine":
+				writeFile(t, app, "package.json", `{"name":"fixture","version":"1.0.0","engines":{"node":">=22.23.4"},"scripts":{"build":"node build.cjs","start":"node dist/main.js"}}`)
+				writeFile(t, app, "package-lock.json", `{"name":"fixture","version":"1.0.0","lockfileVersion":3,"requires":true,"packages":{"":{"name":"fixture","version":"1.0.0"}}}`)
+				writeFile(t, app, "build.cjs", `require('fs').mkdirSync('dist');require('fs').writeFileSync('dist/main.js','console.log("chosen-node-engine");');`)
+				builder = &Builder{Name: langNode, Template: "dynamic/Dockerfile.node.tmpl"}
 			case "go-explicit-target":
 				app = filepath.Join(root, "server")
 				writeFile(t, app, "go.mod", "module example.com/fixture\ngo 1.26.0\n")
@@ -66,11 +71,15 @@ func TestNativeBuildIntegration(t *testing.T) {
 				_ = exec.Command("buildah", "rmi", tag).Run()
 			}()
 			binary := "/app/server"
-			want := map[string]string{"go-explicit-target": "chosen-go-server", "rust-standalone": "chosen-rust-admin", "rust-workspace": "chosen-workspace-server"}[name]
+			want := map[string]string{"node-engine": "chosen-node-engine", "go-explicit-target": "chosen-go-server", "rust-standalone": "chosen-rust-admin", "rust-workspace": "chosen-workspace-server"}[name]
 			if name == "go-explicit-target" {
 				binary = "/app/app"
 			}
-			output, err := exec.CommandContext(ctx, "buildah", "run", container, "--", binary).CombinedOutput()
+			args := []string{"run", container, "--", binary}
+			if name == "node-engine" {
+				args = []string{"run", container, "--", "node", "/app/dist/main.js"}
+			}
+			output, err := exec.CommandContext(ctx, "buildah", args...).CombinedOutput()
 			if err != nil || strings.TrimSpace(string(output)) != want {
 				t.Fatalf("runtime: %v, got %q want %q", err, output, want)
 			}

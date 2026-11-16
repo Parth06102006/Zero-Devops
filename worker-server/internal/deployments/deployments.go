@@ -311,8 +311,8 @@ func renderNodePackageManagerTemplate(content, pm string) string {
 		// Only swap the builder stage and unnamed runtime stages — a stage named
 		// "AS runtime" serves static files via npm's bundled `serve` and must
 		// remain Node regardless of the package manager that built the project.
-		content = strings.ReplaceAll(content, "FROM docker.io/library/node:20-alpine AS builder", "FROM docker.io/oven/bun:1-alpine AS builder")
-		content = strings.ReplaceAll(content, "FROM docker.io/library/node:20-alpine\n", "FROM docker.io/oven/bun:1-alpine\n")
+		content = nodeBuilderBase.ReplaceAllString(content, "FROM docker.io/oven/bun:1-alpine AS builder")
+		content = nodeUnnamedBase.ReplaceAllString(content, "FROM docker.io/oven/bun:1-alpine")
 	}
 	return content
 }
@@ -378,6 +378,10 @@ func writeDockerfile(repoPath string, builder *Builder, pm string) error {
 		content = renderPythonPackageManagerTemplate(content, pm)
 	} else {
 		content = renderNodePackageManagerTemplate(content, pm)
+	}
+	content, err = renderNodeToolchain(repoPath, content)
+	if err != nil {
+		return err
 	}
 	content, err = renderInstallPolicy(repoPath, content, pm)
 	if err != nil {

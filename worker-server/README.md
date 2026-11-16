@@ -91,8 +91,12 @@ Example body (abbreviated):
 Application builds use Buildah. Generated templates use fully qualified image
 references. Go builder versions come from the greater of the `go` and released
 `toolchain` versions in the application's `go.mod`; `GOTOOLCHAIN=local` prevents
-an implicit toolchain download. Other templates retain their existing version
-policy. Image tags are not immutable digests.
+an implicit toolchain download. Node templates default to Node 24 and select a compatible 20/22/24 image
+family from `engines.node`, with numeric `.node-version` / `.nvmrc` overrides.
+The actual pulled Node version is checked before dependency installation when
+an engine range is present; narrow ranges may need an exact numeric pin.
+Other language templates retain their existing version policy. Image tags are
+not immutable digests.
 
 Supported JavaScript lockfiles keep frozen installs, including npm shrinkwrap.
 Without a lockfile, npm builds fail early with an actionable diagnostic. An

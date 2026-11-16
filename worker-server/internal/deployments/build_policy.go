@@ -99,8 +99,8 @@ func renderInstallPolicy(appDir, content, pm string) (string, error) {
 	if os.Getenv("ALLOW_UNLOCKED_NPM_INSTALL") != "true" {
 		return "", errors.New("npm lockfile missing: commit package-lock.json or npm-shrinkwrap.json; an operator may opt in with ALLOW_UNLOCKED_NPM_INSTALL=true (non-reproducible dependency resolution; install scripts stay disabled)")
 	}
-	// A generated lock is confined to the image. Never write one into the
-	// checkout or claim that fresh resolution reproduces a previous build.
+	// Fresh resolution is confined to the image. Never write a lock into the
+	// checkout or claim that this reproduces a previous dependency tree.
 	content = strings.ReplaceAll(content, "npm ci --ignore-scripts", "npm install --ignore-scripts --package-lock=false")
 	return content, nil
 }
