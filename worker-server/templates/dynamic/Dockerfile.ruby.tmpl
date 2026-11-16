@@ -1,7 +1,7 @@
 # Assumes a Rack-based app (config.ru) — the common ground across Rails,
 # Sinatra, and Hanami, run via rackup rather than a framework-specific
 # server command that would need to be guessed.
-FROM ruby:3.3-alpine AS builder
+FROM docker.io/library/ruby:3.3-alpine AS builder
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ RUN bundle install --deployment --without development test
 
 COPY . .
 
-FROM ruby:3.3-alpine
+FROM docker.io/library/ruby:3.3-alpine
 
 WORKDIR /app
 

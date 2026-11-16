@@ -86,6 +86,58 @@ Example body (abbreviated):
 
 ## Configuration
 
+### Build dependency policy and native targets
+
+Application builds use Buildah. Generated templates use fully qualified image
+references. Go builder versions come from the greater of the `go` and released
+`toolchain` versions in the application's `go.mod`; `GOTOOLCHAIN=local` prevents
+an implicit toolchain download. Other templates retain their existing version
+policy. Image tags are not immutable digests.
+
+Supported JavaScript lockfiles keep frozen installs, including npm shrinkwrap.
+Without a lockfile, npm builds fail early with an actionable diagnostic. An
+operator can explicitly set `ALLOW_UNLOCKED_NPM_INSTALL=true` in the worker's
+process environment to permit `npm install --ignore-scripts --package-lock=false`.
+The worker logs a reproducibility warning. Resolution can change between builds
+and between build/runtime installation stages; no lockfile is written to the
+checkout. Lifecycle install scripts remain disabled in both stages. This option
+applies to all jobs handled by that worker; use a separate worker when policies
+must differ. It is intentionally not an application-provided switch.
+
+For native targets, put `zero-devops.build.json` in the selected app directory:
+
+```json
+{
+  "build_context": ".",
+  "go_package": "./cmd/server"
+}
+```
+
+`build_context` is relative to the cloned repository root, while `go_package`
+is relative to the app directory. Go defaults to the app context and package
+`.`. One explicit local package is supported; wildcard targets are rejected.
+Use a larger context for repository-local Go replacements or a Go workspace.
+
+Rust defaults to the repository context, preserving workspace manifests and
+sibling path dependencies. It builds the selected manifest's package and one
+binary, using `--locked` when its workspace/app lockfile exists. For multiple
+binaries or a virtual workspace, select targets explicitly:
+
+```json
+{
+  "cargo_package": "web-server",
+  "cargo_binary": "web-server"
+}
+```
+
+`default-run` or a single discovered binary can supply the binary selection.
+The template copies that exact binary rather than searching for an arbitrary
+executable. Paths and symlinks must remain within the checkout; Cargo path
+dependencies must fit inside the chosen context. Native options are repository
+data, not shell commands. Queue command propagation remains a separate concern.
+These changes do not implement image publication, application routing, or
+external health checks. A build or local HTTP smoke pass is not a deployment.
+
 Copy `.env.example` → `.env` in `worker-server/`.
 
 ```env

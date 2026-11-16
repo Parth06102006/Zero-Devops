@@ -5,11 +5,11 @@ import (
 	"testing"
 )
 
-const nodeTemplateFixture = `FROM node:20-alpine AS builder
+const nodeTemplateFixture = `FROM docker.io/library/node:20-alpine AS builder
 COPY package*.json ./
 RUN npm ci --ignore-scripts
 RUN npm run build
-FROM node:20-alpine
+FROM docker.io/library/node:20-alpine
 COPY package*.json ./
 RUN npm ci --ignore-scripts --omit=dev
 CMD ["npm", "start"]

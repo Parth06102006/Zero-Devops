@@ -1,17 +1,16 @@
-# Assumes a single binary crate: copies whichever executable Cargo produces
-# directly under target/release (not its deps/ subdirectory) to a fixed
-# name, since the actual binary name depends on Cargo.toml's [package] name.
-FROM rust:1-alpine AS builder
+FROM docker.io/library/rust:1-alpine AS builder
 
 WORKDIR /app
+
+ENV CARGO_BUILD_JOBS=1
 
 RUN apk add --no-cache musl-dev
 
 COPY . .
-RUN cargo build --release
-RUN find target/release -maxdepth 1 -type f -executable -exec cp {} /app/server \;
+__CARGO_BUILD__
+RUN cp /app/.zerodevops-target/release/__CARGO_BINARY__ /app/server
 
-FROM alpine:3.20
+FROM docker.io/library/alpine:3.20
 
 WORKDIR /app
 

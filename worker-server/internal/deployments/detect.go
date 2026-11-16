@@ -234,6 +234,7 @@ var packageManagers = []struct {
 	{"bun.lock", pkgManagerBun},  // text lockfile (Bun >= 1.1)
 	{"bun.lockb", pkgManagerBun}, // binary lockfile (Bun < 1.1)
 	{"package-lock.json", pkgManagerNPM},
+	{"npm-shrinkwrap.json", pkgManagerNPM},
 }
 
 // pythonPackageManagers defines Python package managers in priority order.

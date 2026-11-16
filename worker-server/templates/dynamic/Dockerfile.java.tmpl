@@ -3,7 +3,7 @@
 # build/libs/), so the build step branches on which marker file is present.
 # Gradle projects are built via their own wrapper when present (the
 # recommended, version-pinned way); falls back to a system Gradle otherwise.
-FROM eclipse-temurin:21-jdk-alpine AS builder
+FROM docker.io/library/eclipse-temurin:21-jdk-alpine AS builder
 
 WORKDIR /app
 
@@ -22,7 +22,7 @@ RUN if [ -f pom.xml ]; then \
       find build/libs -maxdepth 1 -name '*.jar' ! -name '*-plain.jar' -exec cp {} /app/app.jar \; ; \
     fi
 
-FROM eclipse-temurin:21-jre-alpine
+FROM docker.io/library/eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 

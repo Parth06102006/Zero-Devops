@@ -22,16 +22,16 @@ func TestDockerBuild_WithDockerfile(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping docker build integration test in short mode")
 	}
-	if _, err := exec.LookPath("docker"); err != nil {
-		t.Skip("docker not available, skipping")
+	if _, err := exec.LookPath("buildah"); err != nil {
+		t.Skip("buildah not available, skipping live Buildah integration")
 	}
-	if out, err := exec.CommandContext(context.Background(), "docker", "info").CombinedOutput(); err != nil {
-		t.Skipf("docker daemon unreachable, skipping: %v (%s)", err, out)
+	if out, err := exec.CommandContext(context.Background(), "buildah", "info").CombinedOutput(); err != nil {
+		t.Skipf("buildah storage unavailable, skipping: %v (%s)", err, out)
 	}
 
 	tmpDir := t.TempDir()
 
-	if err := os.WriteFile(filepath.Join(tmpDir, "Dockerfile"), []byte("FROM alpine:latest\nCMD [\"echo\", \"hello\"]\n"), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(tmpDir, "Dockerfile"), []byte("FROM docker.io/library/alpine:3.20\nCMD [\"echo\", \"hello\"]\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -42,7 +42,7 @@ func TestDockerBuild_WithDockerfile(t *testing.T) {
 	}
 
 	t.Cleanup(func() {
-		_ = exec.CommandContext(context.Background(), "docker", "rmi", "-f", imageTag).Run()
+		_ = exec.CommandContext(context.Background(), "buildah", "rmi", imageTag).Run()
 	})
 }
 

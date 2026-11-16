@@ -311,8 +311,8 @@ func renderNodePackageManagerTemplate(content, pm string) string {
 		// Only swap the builder stage and unnamed runtime stages — a stage named
 		// "AS runtime" serves static files via npm's bundled `serve` and must
 		// remain Node regardless of the package manager that built the project.
-		content = strings.ReplaceAll(content, "FROM node:20-alpine AS builder", "FROM docker.io/oven/bun:1-alpine AS builder")
-		content = strings.ReplaceAll(content, "FROM node:20-alpine\n", "FROM docker.io/oven/bun:1-alpine\n")
+		content = strings.ReplaceAll(content, "FROM docker.io/library/node:20-alpine AS builder", "FROM docker.io/oven/bun:1-alpine AS builder")
+		content = strings.ReplaceAll(content, "FROM docker.io/library/node:20-alpine\n", "FROM docker.io/oven/bun:1-alpine\n")
 	}
 	return content
 }
@@ -379,6 +379,16 @@ func writeDockerfile(repoPath string, builder *Builder, pm string) error {
 	} else {
 		content = renderNodePackageManagerTemplate(content, pm)
 	}
+	content, err = renderInstallPolicy(repoPath, content, pm)
+	if err != nil {
+		return err
+	}
+	if builder.Name == langGo {
+		content, err = renderGoBuild(repoPath, content)
+		if err != nil {
+			return err
+		}
+	}
 
 	if outDir := resolveOutputDir(repoPath, builder); outDir != "" {
 		content = strings.ReplaceAll(content, outputDirPlaceholder, outDir)
@@ -391,11 +401,15 @@ func writeDockerfile(repoPath string, builder *Builder, pm string) error {
 // buildImage runs buildah, streaming output live while also capturing it so a
 // failure can be classified afterward (build error vs SSR mismatch).
 func buildImage(ctx context.Context, repoPath, imageTag string) (string, error) {
+	return buildImageWithContext(ctx, repoPath, repoPath, imageTag)
+}
+
+func buildImageWithContext(ctx context.Context, appDir, contextDir, imageTag string) (string, error) {
 	//nolint:gosec // repoPath is from cloneRepo which validates the URL
 	cmd := exec.CommandContext(ctx, "buildah", "bud",
 		"-t", imageTag,
-		"-f", filepath.Join(repoPath, templateDockerfile),
-		repoPath,
+		"-f", filepath.Join(appDir, templateDockerfile),
+		contextDir,
 	)
 	var captured bytes.Buffer
 	cmd.Stdout = io.MultiWriter(os.Stdout, &captured)
@@ -467,9 +481,9 @@ func cloneAndPrepare(appDir string, job domain.DeployJob, logger *zap.Logger, us
 
 // buildAndSaveImage builds the image and saves it to a tar, returning the captured
 // build output alongside any error so the caller can classify the failure.
-func buildAndSaveImage(ctx context.Context, job domain.DeployJob, appDir, imageTag string, logger *zap.Logger) (tarPath, buildOutput string, err error) {
+func buildAndSaveImage(ctx context.Context, job domain.DeployJob, appDir, contextDir, imageTag string, logger *zap.Logger) (tarPath, buildOutput string, err error) {
 	logger.Info("building image with buildah", zap.String("deployment_id", job.DeploymentID), zap.String("image_tag", imageTag))
-	buildOutput, err = buildImage(ctx, appDir, imageTag)
+	buildOutput, err = buildImageWithContext(ctx, appDir, contextDir, imageTag)
 	if err != nil {
 		return "", buildOutput, err
 	}
@@ -584,18 +598,31 @@ func ProcessDeployment(
 	if err != nil {
 		return markFailed(ctx, repo, job, "resolve application directory failed: "+err.Error())
 	}
+	if err := requireContainedPath(repoPath, appDir); err != nil {
+		return markFailed(ctx, repo, job, "application path rejected: "+err.Error())
+	}
+	if err := validateContextPaths(repoPath, appDir); err != nil {
+		return markFailed(ctx, repo, job, "application context rejected: "+err.Error())
+	}
 
 	builder, _, err := cloneAndPrepare(appDir, job, logger, false)
 	if err != nil {
 		return markFailed(ctx, repo, job, "clone/prepare failed: "+err.Error())
 	}
 	isStatic := builder.DefaultOutputDir != ""
+	contextDir, err := prepareBuildContext(repoPath, appDir, builder)
+	if err != nil {
+		return markFailed(ctx, repo, job, "build context rejected: "+err.Error())
+	}
+	if pm := detectPackageManager(appDir); pm == pkgManagerNPM && hasConfigFile(appDir, "package.json") && unlockedNPM(appDir) && os.Getenv("ALLOW_UNLOCKED_NPM_INSTALL") == "true" {
+		logger.Warn("unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled", zap.String("deployment_id", job.DeploymentID))
+	}
 
 	const dockerBuildTimeout = 15 * time.Minute
 	buildCtx, cancel := context.WithTimeout(context.Background(), dockerBuildTimeout)
 	defer cancel()
 
-	tarPath, buildOutput, err := buildAndSaveImage(buildCtx, job, appDir, imageTag, logger)
+	tarPath, buildOutput, err := buildAndSaveImage(buildCtx, job, appDir, contextDir, imageTag, logger)
 	if err != nil {
 		if !strings.Contains(buildOutput, ssrMismatchSentinel) {
 			return markFailed(ctx, repo, job, "build failed: "+err.Error())
