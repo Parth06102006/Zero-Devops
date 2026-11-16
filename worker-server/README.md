@@ -1,6 +1,6 @@
 # Zero DevOps Worker Server
 
-Go build worker that consumes V1 `deploy.jobs` from RabbitMQ, checks out an exact commit SHA, builds with Docker, uploads an image tar to Cloudflare R2, and publishes status updates.
+Go build worker that consumes V1 `deploy.jobs` from RabbitMQ, checks out an exact commit SHA, builds images with Buildah, and publishes status updates. The static path uploads an image tar to Cloudflare R2; dynamic publication remains a stub.
 
 It does not expose an HTTP API. Jobs are produced only by the outbox dispatcher in `server/`. Shared contract: [`schemas/deploy-jobs-v1.schema.json`](../schemas/deploy-jobs-v1.schema.json). System overview: [`docs/architecture.md`](../docs/architecture.md). Target Buildah design notes: [`docs/buildah-webhook-worker-architecture.md`](../docs/buildah-webhook-worker-architecture.md).
 
@@ -9,7 +9,7 @@ It does not expose an HTTP API. Jobs are produced only by the outbox dispatcher 
 | Package | Responsibility |
 | --- | --- |
 | `internal/worker` | RabbitMQ consumer loop (manual ack, prefetch 1), retry / DLQ policy |
-| `internal/deployments` | Clone exact SHA, framework/package-manager detection, Dockerfile templating, Docker build + `docker save` |
+| `internal/deployments` | Clone exact SHA, framework/package-manager detection, Dockerfile templating, Buildah build + archive export |
 | `internal/deployments/contract` | V1 `deploy.jobs` Go types + validation (mirrors server) |
 | `internal/queue` | Queue setup, job / status publishing |
 | `internal/upload` | Image-tar upload to Cloudflare R2 (S3-compatible) |
@@ -21,7 +21,7 @@ It does not expose an HTTP API. Jobs are produced only by the outbox dispatcher 
 flowchart LR
     MQ[(RabbitMQ\ndeploy.jobs)] --> Worker[worker-server]
     Worker --> PG[(Worker PostgreSQL)]
-    Worker --> Docker[Docker build]
+    Worker --> Builder[Buildah build]
     Worker --> R2[(Cloudflare R2)]
     Worker -->|deploy.status| MQ
 ```
@@ -33,11 +33,11 @@ flowchart LR
 3. Insert/reset the worker’s own `deployments` row; publish `building` on `deploy.status`.
 4. Shallow-fetch and check out the exact `commit_sha` (never the moving branch tip).
 5. Detect framework / package manager; write a Dockerfile from `templates/` (or keep an existing one).
-6. `docker build` → `docker save` to a local tar → upload tar to R2.
-7. Update worker DB; publish terminal status (`failed` / `canceled`).
+6. `buildah bud` → `buildah push docker-archive:...` to a local tar. Static builds upload the tar; dynamic builds use the existing finalization stub.
+7. Update worker DB; publish `success` on completed builds or `canceled` after retry exhaustion. Local attempt failures remain eligible for retry.
 8. Ack on success path; on failure, re-publish the same V1 body with incremented `retry_count`, or mark canceled + DLQ when `MAX_RETRIES_COUNT` is exceeded.
 
-> Builds still use **Docker** (not Buildah) and produce a **node-local image tar** on R2 — not a digest-addressed OCI registry push.
+> Image creation and worker `success` do not establish deployment. Static finalization uploads a container-image tar, and dynamic finalization has no registry/runner publication yet.
 
 ### Supported templates
 
@@ -158,7 +158,7 @@ APP_ENV=development
 # MAX_RETRIES_COUNT=3
 ```
 
-The worker needs a local Docker daemon reachable by the Docker client used in `internal/deployments`.
+The worker needs Buildah with usable container storage and the isolation privileges required by its runtime environment.
 
 ## Local development
 
@@ -198,11 +198,11 @@ go test ./internal/deployments/contract/... -v
 
 Aligned with [`docs/architecture.md`](../docs/architecture.md) §3:
 
-- **No `success` on `deploy.status`** — finalize path updates the worker DB but does not publish terminal success; the API server can leave successful builds stuck in `building`. Top priority fix.
+- **Publication is incomplete** — static output is an image tar rather than published web assets; dynamic finalization marks success without a registry/runner or runtime health check.
 - **`Insert` resets terminal rows** — `ON CONFLICT … status='pending'` can resurrect finished builds on redelivery.
 - **Retry path** re-publishes then acks; a crash between those steps can duplicate concurrent builds.
-- **`Configuration` from V1** is not applied to the build (approved executable/args/working-dir unused).
-- **Buildah isolation** not started — plain Docker, no CPU/mem/network limits or workspace sandbox.
+- **V1 command propagation** — the approved executable/args are not applied. Working directory selects the app; repository-native target options are documented above.
+- **Production build limits** — Buildah has a build timeout, but per-job CPU/memory/network isolation is not implemented by these fixes. The campaign applies limits through its separate test containers.
 - **No OCI registry** — tar on R2 only; no digest reported on status.
 
-Planned direction (Buildah executor, isolation, registry publish) is sketched in [`docs/buildah-webhook-worker-architecture.md`](../docs/buildah-webhook-worker-architecture.md); that is not the current runtime path.
+Further isolation and registry publication work is sketched in [`docs/buildah-webhook-worker-architecture.md`](../docs/buildah-webhook-worker-architecture.md).

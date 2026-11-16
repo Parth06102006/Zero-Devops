@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Provision/stop ONLY zdfix-* services. No production services or publication."""
-import argparse, datetime, hashlib, json, os, pathlib, subprocess, time
+import argparse, datetime, hashlib, json, os, pathlib, shutil, subprocess, time
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 OUT = REPO / 'docs/worker-build-fixes-2026-11-16'
 TEMP = pathlib.Path('/tmp/zd-fix-builds-services')
 IMAGE = 'zero-devops-e2e-worker:local'
 LABEL = 'zero-devops-build-fixes=20261116'
-CONTAINERS = ['zdfix-worker', 'zdfix-mock', 'zdfix-db', 'zdfix-rabbit', 'zdfix-cold']
-VOLUMES = ['zdfix-worker-storage', 'zdfix-db-data', 'zdfix-rabbit-data', 'zdfix-cold-storage']
+CONTAINERS = ['zdfix-worker', 'zdfix-mock', 'zdfix-db', 'zdfix-rabbit', 'zdfix-cold', 'zdfix-native-tests']
+VOLUMES = ['zdfix-worker-storage', 'zdfix-db-data', 'zdfix-rabbit-data', 'zdfix-cold-storage', 'zdfix-native-storage']
 
 def run(args, **kwargs):
     result = subprocess.run(args, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, **kwargs)
@@ -42,7 +42,7 @@ def setup():
     run(['openssl', 'req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-days', '2',
          '-keyout', str(TEMP/'mock.key'), '-out', str(TEMP/'mock.crt'),
          '-subj', '/CN=e2e.r2.cloudflarestorage.com',
-         '-addext', 'subjectAltName=DNS:e2e.r2.cloudflarestorage.com'])
+         '-addext', 'subjectAltName=DNS:e2e.r2.cloudflarestorage.com,DNS:testbucket.e2e.r2.cloudflarestorage.com'])
     os.chmod(TEMP/'mock.key', 0o600)
     docker('network', 'create', '--label', LABEL, 'zdfix-network')
     for volume in VOLUMES:
@@ -56,11 +56,13 @@ def setup():
            '-e', 'RABBITMQ_DEFAULT_USER=e2e', '-e', 'RABBITMQ_DEFAULT_PASS=e2e',
            '-e', 'RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=+S 1:1', 'rabbitmq:3-management-alpine')
     docker(*common, '--name', 'zdfix-mock', '--network-alias', 'mock', '--network-alias', 'e2e.r2.cloudflarestorage.com',
+           '--network-alias','testbucket.e2e.r2.cloudflarestorage.com',
            '--cpus', '0.5', '--memory', '128m', '--pids-limit', '64',
            '-v', str(TEMP)+':/e2e:ro', '-v', str(REPO/'scripts/worker-build-campaign')+':/harness:ro',
            '--entrypoint', 'python3', IMAGE, '/harness/mock_services.py')
     wait_for(['docker','exec','zdfix-db','pg_isready','-U','e2e','-d','e2e'])
-    wait_for(['docker','exec','zdfix-rabbit','rabbitmq-diagnostics','-q','check_port_connectivity'])
+    wait_for(['docker','exec','zdfix-mock','python3','-c','import socket; socket.create_connection(("rabbit",5672),2).close()'])
+    wait_for(['docker','exec','zdfix-mock','curl','--fail','-sS','-u','e2e:e2e','http://rabbit:15672/api/overview'])
     migration=(REPO/'worker-server/migrations/20260701203442_create_worker_deployments_table.sql').read_text().split('-- +goose Down')[0]
     run(['docker','exec','-i','zdfix-db','psql','-v','ON_ERROR_STOP=1','-U','e2e','-d','e2e'], input=migration)
     env = {
@@ -72,9 +74,10 @@ def setup():
         'ALLOW_UNLOCKED_NPM_INSTALL':'true',
     }
     envargs=[item for k,v in env.items() for item in ['-e',k+'='+v]]
+    shutil.copy2('/tmp/zd-fix-builds-worker', TEMP/'worker-engine')
     docker(*common, '--name','zdfix-worker','--privileged','--cpus','1.5','--memory','2g','--pids-limit','512',
            '-v','zdfix-worker-storage:/var/lib/containers','-v',str(TEMP)+':/e2e:ro',
-           '-v','/tmp/zd-fix-builds-worker:/app/worker-engine:ro',
+           '--entrypoint','/e2e/worker-engine',
            '-v',str(REPO/'worker-server/templates')+':/app/templates:ro', *envargs, IMAGE)
     write_metadata(env)
     print('isolated services ready',flush=True)
@@ -94,9 +97,18 @@ def recover_startup():
     if (OUT/'environment.json').exists():raise RuntimeError('environment already initialized')
     label=docker('inspect','zdfix-worker','--format','{{index .Config.Labels "zero-devops-build-fixes"}}')
     if label!='20261116':raise RuntimeError('worker is not owned by this run')
-    wait_for(['docker','exec','zdfix-rabbit','rabbitmq-diagnostics','-q','check_port_connectivity'])
-    docker('start','zdfix-worker')
+    wait_for(['docker','exec','zdfix-mock','python3','-c','import socket; socket.create_connection(("rabbit",5672),2).close()'])
     env=dict(item.split('=',1) for item in json.loads(docker('inspect','zdfix-worker','--format','{{json .Config.Env}}')))
+    if docker('inspect','zdfix-worker','--format','{{.State.Running}}')=='true':raise RuntimeError('worker is already running; inspect before replacing')
+    # Docker Desktop retained the old inode for the initial single-file bind
+    # after go build replaced it. Mount the directory and execute its copy.
+    docker('rm','zdfix-worker')
+    shutil.copy2('/tmp/zd-fix-builds-worker',TEMP/'worker-engine')
+    envargs=[item for k,v in env.items() for item in ['-e',k+'='+v]]
+    docker('run','-d','--label',LABEL,'--network','zdfix-network','--name','zdfix-worker',
+           '--privileged','--cpus','1.5','--memory','2g','--pids-limit','512',
+           '-v','zdfix-worker-storage:/var/lib/containers','-v',str(TEMP)+':/e2e:ro',
+           '--entrypoint','/e2e/worker-engine','-v',str(REPO/'worker-server/templates')+':/app/templates:ro',*envargs,IMAGE)
     write_metadata(env)
     print('startup recovered after RabbitMQ listener readiness',flush=True)
 
@@ -127,6 +139,19 @@ def cold_pulls():
         (OUT/'cold-pulls.json').write_text(json.dumps({'initial_images':initial,'isolated_storage':'zdfix-cold-storage','pulls':records},indent=2))
     print('cold pulls complete',flush=True)
 
+def fix_upload_endpoint():
+    if (OUT/'results').exists() and any((OUT/'results').glob('*.json')):raise RuntimeError('application evidence already exists; inspect before service changes')
+    for name in ['zdfix-mock','zdfix-worker']:
+        if docker('inspect',name,'--format','{{index .Config.Labels "zero-devops-build-fixes"}}')!='20261116':raise RuntimeError('unowned service')
+    run(['openssl','req','-x509','-newkey','rsa:2048','-nodes','-days','2',
+         '-keyout',str(TEMP/'mock.key'),'-out',str(TEMP/'mock.crt'),'-subj','/CN=e2e.r2.cloudflarestorage.com',
+         '-addext','subjectAltName=DNS:e2e.r2.cloudflarestorage.com,DNS:testbucket.e2e.r2.cloudflarestorage.com'])
+    os.chmod(TEMP/'mock.key',0o600)
+    docker('network','disconnect','zdfix-network','zdfix-mock')
+    docker('network','connect','--alias','mock','--alias','e2e.r2.cloudflarestorage.com','--alias','testbucket.e2e.r2.cloudflarestorage.com','zdfix-network','zdfix-mock')
+    docker('restart','zdfix-mock');docker('restart','zdfix-worker')
+    print('fake upload endpoint aliases and certificate repaired before application jobs',flush=True)
+
 def stop():
     removed=[]
     for name in CONTAINERS:
@@ -144,5 +169,5 @@ def stop():
     (OUT/'cleanup.json').write_text(json.dumps({'containers_removed':removed,'at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'no_global_prune':True},indent=2))
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['setup','recover-startup','cold-pulls','stop']);args=parser.parse_args()
-    {'setup':setup,'recover-startup':recover_startup,'cold-pulls':cold_pulls,'stop':stop}[args.action]()
+    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['setup','recover-startup','fix-upload-endpoint','cold-pulls','stop']);args=parser.parse_args()
+    {'setup':setup,'recover-startup':recover_startup,'fix-upload-endpoint':fix_upload_endpoint,'cold-pulls':cold_pulls,'stop':stop}[args.action]()

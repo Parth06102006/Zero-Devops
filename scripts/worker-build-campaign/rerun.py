@@ -15,7 +15,7 @@ def cmd(argv,timeout=30,check=False):
  return p.returncode,p.stdout.strip()
 def dex(container,args,timeout=30,check=False):return cmd(['docker','exec',container]+args,timeout,check)
 def guard():
- if shutil.disk_usage(ROOT).free<10*1024**3:raise RuntimeError('disk guard: less than 10 GiB free')
+ if shutil.disk_usage(ROOT).free<20*1024**3:raise RuntimeError('disk guard: less than 20 GiB free')
  for c in [WORKER]:
   _,v=dex(c,['du','-sb','/var/lib/containers/storage'],60)
   try:n=int(v.split()[0])
@@ -66,7 +66,7 @@ def probe_runtime(container,name,start_command,c,label):
   samples=[];ready=False;last='';http=[]
   for i in range(45):
    request_opts=c.get('probe_args',[])
-   rc,last=dex(container,['curl','--max-time','2','-sS','-o','/tmp/zd50-probe-body','-w','%{http_code}|%{time_total}|%{content_type}']+request_opts+['http://127.0.0.1:'+str(c['port'])+c['probe']],8)
+   rc,last=dex(container,['curl','--max-time','2','-sS','-o','/tmp/zdfix-probe-body','-w','%{http_code}|%{time_total}|%{content_type}']+request_opts+['http://127.0.0.1:'+str(c['port'])+c['probe']],8)
    fields=last.split('|')
    accepted=c.get('expected_status',list(range(200,400)))
    if rc==0 and fields and fields[0].isdigit() and int(fields[0]) in accepted:
@@ -75,14 +75,14 @@ def probe_runtime(container,name,start_command,c,label):
    time.sleep(1)
   startup=time.monotonic()-began
   if ready:
-   _,body=dex(container,['head','-c','250','/tmp/zd50-probe-body']);
+   _,body=dex(container,['head','-c','250','/tmp/zdfix-probe-body']);
    for _ in range(8):
     rc,v=dex(container,['curl','--max-time','3','-sS','-o','/dev/null','-w','%{http_code}|%{time_total}']+request_opts+['http://127.0.0.1:'+str(c['port'])+c['probe']],8)
     try:http.append({'status':int(v.split('|')[0]),'seconds':float(v.split('|')[1])})
     except:pass
   else:body=''
   if not ready:
-   _,body=dex(container,['head','-c','250','/tmp/zd50-probe-body']);
+   _,body=dex(container,['head','-c','250','/tmp/zdfix-probe-body']);
   else:body=body
   # stop only the explicit per-case timeout/runtime process, via buildah container host pid list
   killer="import os,signal; target="+repr('timeout --signal=TERM --kill-after=5s 95s buildah run '+name)+";\nfor item in os.listdir('/proc'):\n if not item.isdigit(): continue\n try:\n  data=open('/proc/'+item+'/cmdline','rb').read().replace(b'\\0',b' ').decode()\n  if data.startswith(target+' '): os.kill(int(item),signal.SIGTERM)\n except (OSError,UnicodeError): pass"
@@ -92,7 +92,7 @@ def probe_runtime(container,name,start_command,c,label):
  return {'ready':ready,'startup_seconds':round(startup,3),'probe_url':'http://127.0.0.1:'+str(c['port'])+c['probe'],'first_response':last,'response_sample':body,'warm_http':http,'note':'Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded'}
 def worker(c,record):
  ident=str(uuid.uuid4());event=str(uuid.uuid4());corr='zdfix-'+ident
- req={'version':1,'event_id':event,'deployment_id':ident,'project_id':'isolated-zd50','installation_id':1,'repository_id':1,'clone_url':'https://github.com/'+c['repo']+'.git','commit_sha':c['sha'],'requested_ref':'HEAD','trigger':'manual','generation':1,'retry_count':0,'correlation_id':corr,'configuration':{'executable':{'go':'go','rust':'cargo','python':'python','java':'mvn','php':'composer','ruby':'bundle','dotnet':'dotnet'}.get(c['kind'],'npm'),'args':['run','build'] if c['kind']=='node' else [],'working_dir':c['path'],'scanner_policy_version':'v1'}}
+ req={'version':1,'event_id':event,'deployment_id':ident,'project_id':'isolated-zdfix','installation_id':1,'repository_id':1,'clone_url':'https://github.com/'+c['repo']+'.git','commit_sha':c['sha'],'requested_ref':'HEAD','trigger':'manual','generation':1,'retry_count':0,'correlation_id':corr,'configuration':{'executable':{'go':'go','rust':'cargo','python':'python','java':'mvn','php':'composer','ruby':'bundle','dotnet':'dotnet'}.get(c['kind'],'npm'),'args':['run','build'] if c['kind']=='node' else [],'working_dir':c['path'],'scanner_policy_version':'v1'}}
  began=time.time();since=str(int(began)-1)
  body={'properties':{'content_type':'application/json','message_id':event,'correlation_id':corr},'routing_key':'deploy.jobs','payload':json.dumps(req),'payload_encoding':'string'}
  if not api('/api/exchanges/%2F/amq.default/publish',body).get('routed'):raise RuntimeError('job not routed')
@@ -120,9 +120,9 @@ def worker(c,record):
  try:wr['status_messages']=api('/api/queues/%2F/deploy.status/get',{'count':100,'ackmode':'ack_requeue_false','encoding':'auto','truncate':50000})
  except Exception as e:wr['status_queue_error']=str(e)
  record['worker']=wr
- if state=='success':
-  tag='localhost/deploy-'+ident+':latest';rc,info=dex(WORKER,['buildah','inspect','--type','image',tag],60)
-  if rc:wr['runtime_error']='image not found';return
+ tag='localhost/deploy-'+ident+':latest';rc,info=dex(WORKER,['buildah','inspect','--type','image',tag],60)
+ wr['image_built']=rc==0
+ if wr['image_built']:
   info=json.loads(info)
   manifest=json.loads(info.get('Manifest','{}'))
   wr['image_layer_bytes']=sum(layer.get('size',0) for layer in manifest.get('layers',[]))
@@ -147,7 +147,7 @@ def worker(c,record):
 def classify(record):
  if not record.get('reference_qualified'):return 'reference-inconclusive'
  wr=record['worker']
- if wr['state']=='success':
+ if wr.get('image_built'):
   if not wr.get('runtime',{}).get('ready'):return 'image-build-pass/runtime-fail'
   return 'build-and-runtime-pass'
  log=(RESULTS/(record['case']['name']+'.worker.log')).read_text()
@@ -162,6 +162,7 @@ def classify(record):
  return 'other-build-failure'
 
 def replay(baseline, names):
+ if cmd(['docker','inspect','--format','{{index .Config.Labels "zero-devops-build-fixes"}}',WORKER],check=True)[1]!='20261116':raise RuntimeError('refusing unowned worker storage')
  RESULTS.mkdir(parents=True,exist_ok=True)
  cases=json.load(open(baseline/'manifest.json'))
  qualified=[]
@@ -190,7 +191,7 @@ def replay(baseline, names):
   print('RESULT',name,record['classification'],flush=True)
   records=[json.load(open(p)) for p in RESULTS.glob('*.json') if not p.name.endswith('.worker-image.json')]
   finished=[r for r in records if r.get('complete')]
-  (ROOT/'progress.json').write_text(json.dumps({'completed':len(finished),'denominator':57,'image_builds':sum(r['worker']['state']=='success' for r in finished),'runtime_passes':sum(r['worker'].get('runtime',{}).get('ready',False) for r in finished),'outcomes':{k:sum(r['classification']==k for r in finished) for k in sorted({r['classification'] for r in finished})}},indent=2))
+  (ROOT/'progress.json').write_text(json.dumps({'completed':len(finished),'denominator':57,'image_builds':sum(r['worker'].get('image_built',False) for r in finished),'runtime_passes':sum(r['worker'].get('runtime',{}).get('ready',False) for r in finished),'outcomes':{k:sum(r['classification']==k for r in finished) for k in sorted({r['classification'] for r in finished})}},indent=2))
 
 if __name__=='__main__':
  parser=argparse.ArgumentParser()
