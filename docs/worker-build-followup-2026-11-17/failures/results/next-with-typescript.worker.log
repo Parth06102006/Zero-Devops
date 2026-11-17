@@ -1,0 +1,159 @@
+2026-11-17T19:45:46.176Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdround2-e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1", "delivery_tag": 12}
+2026-11-17T19:45:46.320Z	INFO	deployments/deployments.go:475	inserting worker deployment row	{"request_id": "zdround2-e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1", "deployment_id": "e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1"}
+2026-11-17T19:45:46.327Z	INFO	deployments/deployments.go:482	marking as building	{"request_id": "zdround2-e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1", "deployment_id": "e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1"}
+2026-11-17T19:45:46.329Z	INFO	deployments/deployments.go:487	publishing building status	{"request_id": "zdround2-e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1", "deployment_id": "e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1"}
+ZERODEVOPS_GIT phase=fetch attempt=1 seconds=60.004 success=true
+ZERODEVOPS_GIT phase=checkout seconds=4.534 verified_sha=59db850442194327ef46acb3e65dfeeb52984f7a
+2026-11-17T19:46:50.899Z	INFO	deployments/deployments.go:492	detecting framework	{"request_id": "zdround2-e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1", "deployment_id": "e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1"}
+2026-11-17T19:46:50.901Z	INFO	deployments/deployments.go:498	framework detected	{"request_id": "zdround2-e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1", "deployment_id": "e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1", "framework": "nextjs", "package_manager": "npm"}
+2026-11-17T19:46:50.901Z	INFO	deployments/deployments.go:506	writing Dockerfile from template	{"request_id": "zdround2-e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1", "deployment_id": "e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1", "template": "dynamic/Dockerfile.nextjs.tmpl"}
+2026-11-17T19:46:50.911Z	WARN	deployments/deployments.go:650	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdround2-e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1", "deployment_id": "e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:650
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-17T19:46:50.913Z	INFO	deployments/deployments.go:517	building image with buildah	{"request_id": "zdround2-e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1", "deployment_id": "e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1", "image_tag": "deploy-e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN npm install --ignore-scripts --package-lock=false
+
+added 31 packages, and audited 32 packages in 2m
+
+6 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN npm run build
+
+> build
+> next build
+
+▲ Next.js 16.4.6 (Turbopack)
+⚠ React 18 support is deprecated in Next.js 16 and will be removed in Next.js 17. Please upgrade to React 19. Learn more: https://nextjs.org/docs/messages/react-version
+✓ Running next.config took 436ms
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+
+  Running TypeScript ...
+⚠ Minimum recommended TypeScript version is v5.1.0, older versions can potentially be incompatible with Next.js. Detected: 4.9.5
+
+  We detected TypeScript in your project and reconfigured your tsconfig.json file for you. Strict-mode is set to false by default.
+  The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:
+
+  	- incremental was set to true
+
+  Finished TypeScript in 6.2s ...
+  Creating an optimized production build ...
+✓ Compiled successfully in 10.0s
+  Collecting page data using 9 workers ...
+  Generating static pages using 9 workers (0/9) ...
+  Generating static pages using 9 workers (2/9) 
+  Generating static pages using 9 workers (4/9) 
+  Generating static pages using 9 workers (6/9) 
+✓ Generating static pages using 9 workers (9/9) in 932ms
+  Finalizing page optimization ...
+
+Route (pages)
+┌ ○ /
+├ ○ /404
+├ ○ /about
+├ ƒ /api/users
+├ ● /users
+└   /users/[id] (412 ms)
+  ├ ● /users/101
+  ├ ● /users/102
+  ├ ● /users/103
+  └ ● /users/104
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses getStaticProps)
+ƒ  (Dynamic)  server-rendered on demand
+
+[1/2] STEP 7/7: RUN test -d .next && mkdir -p /app/public
+[2/2] STEP 1/10: FROM docker.io/library/node:24-alpine
+[2/2] STEP 2/10: WORKDIR /app
+[2/2] STEP 3/10: ENV NODE_ENV=production
+[2/2] STEP 4/10: COPY package*.json ./
+[2/2] STEP 5/10: RUN npm install --ignore-scripts --package-lock=false --omit=dev
+
+added 24 packages, and audited 25 packages in 47s
+
+6 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 6/10: COPY --from=builder /app/.next ./.next
+[2/2] STEP 7/10: COPY --from=builder /app/public ./public
+[2/2] STEP 8/10: COPY --from=builder /app/package.json ./package.json
+[2/2] STEP 9/10: EXPOSE 3000
+[2/2] STEP 10/10: CMD ["npm", "start"]
+[2/2] COMMIT deploy-e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:0f0851695c3b9b2d2261045f913a73cc010bdfce5b45750c2fba40a3ccb32900
+Copying config sha256:1a597e4db4b1f7cccdc423e6b0125b0685e61b93fac442e58b7e5e5c2a2e67c2
+Writing manifest to image destination
+--> 1a597e4db4b1
+Successfully tagged localhost/deploy-e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1:latest
+1a597e4db4b1f7cccdc423e6b0125b0685e61b93fac442e58b7e5e5c2a2e67c2
+2026-11-17T19:50:42.129Z	INFO	deployments/deployments.go:524	saving image tar	{"request_id": "zdround2-e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1", "deployment_id": "e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1", "tar_path": "/tmp/zerodevops-build/e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1/examples/with-typescript/e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:0f0851695c3b9b2d2261045f913a73cc010bdfce5b45750c2fba40a3ccb32900
+Copying config sha256:1a597e4db4b1f7cccdc423e6b0125b0685e61b93fac442e58b7e5e5c2a2e67c2
+Writing manifest to image destination
+2026-11-17T19:51:16.188Z	INFO	deployments/deployments.go:600	dynamic build finished (stub finalize, no upload yet)	{"request_id": "zdround2-e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1", "deployment_id": "e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1"}
+2026-11-17T19:51:36.989Z	ERROR	worker/worker.go:109	deployment job failed	{"request_id": "zdround2-e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1", "deployment_id": "e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1", "error": "Exception (504) Reason: \"channel/connection is not open\""}
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:109
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-17T19:51:36.992Z	ERROR	worker/worker.go:122	failed to publish canceled status	{"request_id": "zdround2-e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1", "error": "Exception (504) Reason: \"channel/connection is not open\""}
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:122
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-17T19:51:36.992Z	ERROR	worker/worker.go:125	failed to nack message	{"request_id": "zdround2-e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1", "error": "Exception (504) Reason: \"channel/connection is not open\""}
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:125
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-17T19:51:36.992Z	INFO	worker/worker.go:149	Worker consumer delivery channel closed
+2026-11-17T19:51:36.992Z	ERROR	worker-server/main.go:86	failed to close rabbitmq connection	{"error": "Exception (504) Reason: \"channel/connection is not open\""}
+main.main.func4
+	Zero_Devops/worker_server/cmd/worker-server/main.go:86
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:123
+runtime.main
+	runtime/proc.go:290

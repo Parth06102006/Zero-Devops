@@ -1,0 +1,35 @@
+STEP 1/6: FROM docker.io/library/golang:1.27.0-alpine
+STEP 2/6: WORKDIR /app
+STEP 3/6: COPY . .
+STEP 4/6: WORKDIR /app/.
+STEP 5/6: RUN GOTOOLCHAIN=local go build -o /tmp/reference-server .
+go: downloading github.com/gofiber/fiber/v3 v3.7.0
+go: downloading github.com/gofiber/schema v1.9.4
+go: downloading github.com/gofiber/utils/v2 v2.6.5
+go: downloading github.com/google/uuid v1.6.0
+go: downloading github.com/mattn/go-colorable v0.1.16
+go: downloading github.com/mattn/go-isatty v0.0.24
+go: downloading github.com/tinylib/msgp v1.6.5
+go: downloading github.com/valyala/bytebufferpool v1.0.0
+go: downloading github.com/valyala/fasthttp v1.79.0
+go: downloading golang.org/x/crypto v0.59.0
+go: downloading golang.org/x/net v0.62.0
+go: downloading golang.org/x/sys v0.50.0
+go: downloading github.com/philhofer/fwd v1.2.1
+go: downloading github.com/klauspost/compress v1.20.4
+go: downloading github.com/molecule-man/go-brrr v1.3.1
+go: downloading golang.org/x/text v0.44.0
+STEP 6/6: CMD ["sh", "-c", "/tmp/reference-server"]
+COMMIT localhost/zdround2-reference-fresh-fiber-404-handler:test
+Getting image source signatures
+Copying blob sha256:34884abbe92863fce933ed7c39c0e045631af0ed86d5cc0dfbdf9fdca426ce3c
+Copying blob sha256:9a1fe699f99c8083f2657bff9b56492a5da2a667b112cf6f31f7ae15b900a5b0
+Copying blob sha256:62720cf00e7e374a99ef3c0e40790af43e0cec8135b9b079105a64d24a1e51e5
+Copying blob sha256:e66f18eea1791e2e29d86eba42598a9411df30d7090a0674674c591ebbb6cec3
+Copying blob sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef
+Copying blob sha256:ccbb361bbe54b3a63cac5705d96c00ab4ca984acb320c6035e621bdde700037d
+Copying config sha256:ac86ee29303fbbf8f08dce7361aef32045eb1cc94bdbb33a9d6703946b5b18c5
+Writing manifest to image destination
+--> ac86ee29303f
+Successfully tagged localhost/zdround2-reference-fresh-fiber-404-handler:test
+ac86ee29303fbbf8f08dce7361aef32045eb1cc94bdbb33a9d6703946b5b18c5

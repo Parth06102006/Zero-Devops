@@ -1,0 +1,294 @@
+{
+  "case": {
+    "name": "fresh-axum-hello-world",
+    "repo": "tokio-rs/axum",
+    "sha": "36d38c4cf2766cd7313dd53d808f30546ee36b1e",
+    "path": "examples/hello-world",
+    "kind": "rust",
+    "port": 3000,
+    "probe": "/",
+    "reference_build": "apk add --no-cache musl-dev && CARGO_BUILD_JOBS=1 cargo build --locked --release --manifest-path examples/hello-world/Cargo.toml --package example-hello-world --bin example-hello-world --target-dir /tmp/reference-target",
+    "reference_start": "/tmp/reference-target/release/example-hello-world",
+    "context": "examples/hello-world",
+    "env": {},
+    "source_dir": "/tmp/zd-round2-fresh-sources/tokio-rs--axum",
+    "base_image": "docker.io/library/rust:1-alpine",
+    "reference_workdir": ".",
+    "stack": "Axum/hello-world"
+  },
+  "started_at": "2026-11-17T19:08:44.829825+00:00",
+  "complete": true,
+  "batch": "fresh",
+  "reference_qualified": true,
+  "qualification": "fresh reference trial recorded separately",
+  "reference": {
+    "build": {
+      "seconds": 171.077,
+      "exit_code": 0,
+      "timed_out": false,
+      "resource_samples": [
+        {
+          "seconds": 0.11,
+          "stats": "126.06%|243.8MiB / 2GiB|91",
+          "cgroup": "cpu.stat\nusage_usec 922996405\nuser_usec 510054344\nsystem_usec 412942060\nnice_usec 0\nnr_periods 11910\nnr_throttled 2998\nthrottled_usec 368072792\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n284352512"
+        },
+        {
+          "seconds": 20.57,
+          "stats": "103.18%|597.8MiB / 2GiB|114",
+          "cgroup": "cpu.stat\nusage_usec 929269683\nuser_usec 513037790\nsystem_usec 416231892\nnice_usec 0\nnr_periods 12065\nnr_throttled 2998\nthrottled_usec 368072792\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n951873536"
+        },
+        {
+          "seconds": 41.14,
+          "stats": "98.96%|873.2MiB / 2GiB|117",
+          "cgroup": "cpu.stat\nusage_usec 951102352\nuser_usec 528371382\nsystem_usec 422730970\nnice_usec 0\nnr_periods 12285\nnr_throttled 3014\nthrottled_usec 368758570\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1136730112"
+        },
+        {
+          "seconds": 61.14,
+          "stats": "97.14%|1.041GiB / 2GiB|117",
+          "cgroup": "cpu.stat\nusage_usec 970032914\nuser_usec 543453716\nsystem_usec 426579197\nnice_usec 0\nnr_periods 12473\nnr_throttled 3020\nthrottled_usec 368952697\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1281425408"
+        },
+        {
+          "seconds": 81.99,
+          "stats": "98.55%|916.8MiB / 2GiB|119",
+          "cgroup": "cpu.stat\nusage_usec 991065284\nuser_usec 562940095\nsystem_usec 428125188\nnice_usec 0\nnr_periods 12682\nnr_throttled 3027\nthrottled_usec 369229162\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1051725824"
+        },
+        {
+          "seconds": 102.9,
+          "stats": "97.75%|827.6MiB / 2GiB|119",
+          "cgroup": "cpu.stat\nusage_usec 1011515991\nuser_usec 579718122\nsystem_usec 431797868\nnice_usec 0\nnr_periods 12889\nnr_throttled 3033\nthrottled_usec 369410450\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1041485824"
+        },
+        {
+          "seconds": 123.59,
+          "stats": "96.97%|859.1MiB / 2GiB|118",
+          "cgroup": "cpu.stat\nusage_usec 1033525514\nuser_usec 598163463\nsystem_usec 435362050\nnice_usec 0\nnr_periods 13104\nnr_throttled 3040\nthrottled_usec 369680126\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1000865792"
+        },
+        {
+          "seconds": 144.08,
+          "stats": "99.52%|869.6MiB / 2GiB|120",
+          "cgroup": "cpu.stat\nusage_usec 1053493095\nuser_usec 616019097\nsystem_usec 437473997\nnice_usec 0\nnr_periods 13304\nnr_throttled 3046\nthrottled_usec 369907738\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1012953088"
+        },
+        {
+          "seconds": 164.13,
+          "stats": "93.50%|846.3MiB / 2GiB|91",
+          "cgroup": "cpu.stat\nusage_usec 1071115326\nuser_usec 623069806\nsystem_usec 448045519\nnice_usec 0\nnr_periods 13496\nnr_throttled 3052\nthrottled_usec 370119646\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1232859136"
+        }
+      ],
+      "cgroup_before": "1806557184\nusage_usec 921219872\nuser_usec 509418749\nsystem_usec 411801122\nnice_usec 0\nnr_periods 11896\nnr_throttled 2993\nthrottled_usec 367984837\nnr_bursts 0\nburst_usec 0",
+      "cgroup_after": "1806557184\nusage_usec 1074220181\nuser_usec 624062566\nsystem_usec 450157615\nnice_usec 0\nnr_periods 13522\nnr_throttled 3065\nthrottled_usec 370301499\nnr_bursts 0\nburst_usec 0\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0"
+    },
+    "base_image": "docker.io/library/rust:1-alpine",
+    "source_dir": "/tmp/zd-round2-fresh-sources/tokio-rs--axum",
+    "source_sha_verified": true,
+    "source_evidence": "fresh-source-evidence/tokio-rs--axum.json",
+    "source_files_verified": 508,
+    "recipe": "FROM docker.io/library/rust:1-alpine\nWORKDIR /app\nCOPY . .\nWORKDIR /app/.\nRUN apk add --no-cache musl-dev && CARGO_BUILD_JOBS=1 cargo build --locked --release --manifest-path examples/hello-world/Cargo.toml --package example-hello-world --bin example-hello-world --target-dir /tmp/reference-target\nCMD [\"sh\", \"-c\", \"/tmp/reference-target/release/example-hello-world\"]\n",
+    "image_built": true,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 1.587,
+      "probe_url": "http://127.0.0.1:3000/",
+      "first_response": "200|0.001524|text/html; charset=utf-8",
+      "response_sample": "<h1>Hello, World!</h1>",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.000688
+        },
+        {
+          "status": 200,
+          "seconds": 0.000959
+        },
+        {
+          "status": 200,
+          "seconds": 0.000635
+        },
+        {
+          "status": 200,
+          "seconds": 0.000588
+        },
+        {
+          "status": 200,
+          "seconds": 0.000622
+        },
+        {
+          "status": 200,
+          "seconds": 0.000531
+        },
+        {
+          "status": 200,
+          "seconds": 0.000783
+        },
+        {
+          "status": 200,
+          "seconds": 0.001235
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    },
+    "external_container_http": [
+      {
+        "from_container": "zdround2-2-mock",
+        "target_worker_ip": "172.26.0.5",
+        "url": "http://172.26.0.5:3000/",
+        "exit_code": 7,
+        "response": "curl: (7) Failed to connect to 172.26.0.5 port 3000 after 1 ms: Could not connect to server\n000|0.001373|",
+        "reachable_expected_class": false
+      }
+    ],
+    "seconds": 176.862
+  },
+  "worker": {
+    "lane": 2,
+    "worker_container": "zdround2-2-worker",
+    "broker_vhost": "zdround2-2",
+    "commit_sha": "36d38c4cf2766cd7313dd53d808f30546ee36b1e",
+    "deployment_id": "a1ea7d85-1661-450c-8f71-8f3e3a8b358e",
+    "state": "success",
+    "database_row": "success||",
+    "end_to_end_seconds": 167.404,
+    "resource_samples": [
+      {
+        "seconds": 1.04,
+        "stats": "2.18%|279.6MiB / 2GiB|90",
+        "cgroup": "cpu.stat\nusage_usec 1076857267\nuser_usec 624855370\nsystem_usec 452001897\nnice_usec 0\nnr_periods 13594\nnr_throttled 3065\nthrottled_usec 370301499\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n389181440"
+      },
+      {
+        "seconds": 24.34,
+        "stats": "94.90%|922.6MiB / 2GiB|122",
+        "cgroup": "cpu.stat\nusage_usec 1093488456\nuser_usec 632059925\nsystem_usec 461428531\nnice_usec 0\nnr_periods 13824\nnr_throttled 3075\nthrottled_usec 370662615\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1210732544"
+      },
+      {
+        "seconds": 48.01,
+        "stats": "92.19%|949.8MiB / 2GiB|125",
+        "cgroup": "cpu.stat\nusage_usec 1116974613\nuser_usec 648775231\nsystem_usec 468199382\nnice_usec 0\nnr_periods 14063\nnr_throttled 3089\nthrottled_usec 370989197\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1165115392"
+      },
+      {
+        "seconds": 70.11,
+        "stats": "97.74%|1.178GiB / 2GiB|124",
+        "cgroup": "cpu.stat\nusage_usec 1138906304\nuser_usec 665485271\nsystem_usec 473421032\nnice_usec 0\nnr_periods 14281\nnr_throttled 3094\nthrottled_usec 371185017\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1458933760"
+      },
+      {
+        "seconds": 92.31,
+        "stats": "92.62%|941.2MiB / 2GiB|125",
+        "cgroup": "cpu.stat\nusage_usec 1161994226\nuser_usec 685989928\nsystem_usec 476004297\nnice_usec 0\nnr_periods 14513\nnr_throttled 3103\nthrottled_usec 371498562\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1205673984"
+      },
+      {
+        "seconds": 115.19,
+        "stats": "99.35%|1.007GiB / 2GiB|122",
+        "cgroup": "cpu.stat\nusage_usec 1178008262\nuser_usec 699546435\nsystem_usec 478461826\nnice_usec 0\nnr_periods 14680\nnr_throttled 3107\nthrottled_usec 371659318\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1280356352"
+      },
+      {
+        "seconds": 139.31,
+        "stats": "98.44%|1.035GiB / 2GiB|123",
+        "cgroup": "cpu.stat\nusage_usec 1202438429\nuser_usec 720877628\nsystem_usec 481560800\nnice_usec 0\nnr_periods 14920\nnr_throttled 3112\nthrottled_usec 371863647\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1276325888"
+      },
+      {
+        "seconds": 163.34,
+        "stats": "22.15%|312.4MiB / 2GiB|89",
+        "cgroup": "cpu.stat\nusage_usec 1225886869\nuser_usec 740131674\nsystem_usec 485755194\nnice_usec 0\nnr_periods 15156\nnr_throttled 3119\nthrottled_usec 372108974\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n350625792"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "cargo",
+      "args": [],
+      "working_dir": "examples/hello-world",
+      "scanner_policy_version": "v1"
+    },
+    "deployment": "not attempted",
+    "framework": "rust",
+    "git_phase_diagnostics": [
+      "ZERODEVOPS_GIT phase=fetch attempt=1 seconds=1.870 success=true",
+      "ZERODEVOPS_GIT phase=checkout seconds=0.048 verified_sha=36d38c4cf2766cd7313dd53d808f30546ee36b1e"
+    ],
+    "mock_upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"a1ea7d85-1661-450c-8f71-8f3e3a8b358e\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 75,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"a1ea7d85-1661-450c-8f71-8f3e3a8b358e\",\"status\":\"success\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": true,
+    "image_layer_bytes": 10000384,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 1.834,
+      "probe_url": "http://127.0.0.1:3000/",
+      "first_response": "200|0.004675|text/html; charset=utf-8",
+      "response_sample": "<h1>Hello, World!</h1>",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.000617
+        },
+        {
+          "status": 200,
+          "seconds": 0.000559
+        },
+        {
+          "status": 200,
+          "seconds": 0.000632
+        },
+        {
+          "status": 200,
+          "seconds": 0.000858
+        },
+        {
+          "status": 200,
+          "seconds": 0.000505
+        },
+        {
+          "status": 200,
+          "seconds": 0.000592
+        },
+        {
+          "status": 200,
+          "seconds": 0.000594
+        },
+        {
+          "status": 200,
+          "seconds": 0.00067
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    },
+    "external_container_http": [
+      {
+        "from_container": "zdround2-2-mock",
+        "target_worker_ip": "172.26.0.5",
+        "url": "http://172.26.0.5:3000/",
+        "exit_code": 7,
+        "response": "curl: (7) Failed to connect to 172.26.0.5 port 3000 after 0 ms: Could not connect to server\n000|0.000550|",
+        "reachable_expected_class": false
+      }
+    ]
+  },
+  "worker_classification": "build-and-runtime-pass",
+  "classification": "build-and-runtime-pass",
+  "finished_at": "2026-11-17T19:14:34.730370+00:00"
+}

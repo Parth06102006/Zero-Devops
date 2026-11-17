@@ -1,0 +1,228 @@
+{
+  "started_at": "2026-11-17T18:38:51.510050+00:00",
+  "finished_at": "2026-11-17T20:08:37.090449+00:00",
+  "workers": 2,
+  "scheduling": "alternate failure/fresh cohorts; reference before worker for fresh; no same-lane concurrent jobs; after telemetry failures, retained images measured without rebuild and remaining unsubmitted cases run serially on lane 1",
+  "harness_sha256": {
+    "scripts/worker-build-campaign/round2_environment.py": "777d99509e75f99e0843103e4eb5f0cd997bbba76c33fd89cefdb2517e59e366",
+    "scripts/worker-build-campaign/round2_run.py": "aee318e3a01bc42be4161081b5d05de51b38f0d6bba84d8e28023b14b0aaea00",
+    "scripts/worker-build-campaign/round2_parallel.py": "1d1becfbfd6b028da06682c81eb7f47ff550ab5b1b26aaa42dc40583aa59efe3",
+    "scripts/worker-build-campaign/round2_validate.py": "6bceebfcfe2064941d4298bf47d082ef8e2f455aac02e2f0cb7c252f973577f1",
+    "scripts/worker-build-campaign/rerun.py": "48783499add664975af28a003c35f5abc47fb07c1a007f4a56358be312d7beb8",
+    "scripts/worker-build-campaign/mock_services.py": "18049000f76d1f6be870df30e01f4682ce4b73996a9ded0d01dd6346f00a039c"
+  },
+  "in_flight": {},
+  "completed": [
+    {
+      "lane": 2,
+      "batch": "fresh",
+      "case": "fresh-astro-framework-preact",
+      "at": "2026-11-17T18:44:57.494399+00:00"
+    },
+    {
+      "lane": 2,
+      "batch": "failures",
+      "case": "astro-framework-svelte",
+      "at": "2026-11-17T18:47:10.905944+00:00"
+    },
+    {
+      "lane": 1,
+      "batch": "failures",
+      "case": "actix-static-files",
+      "at": "2026-11-17T18:51:01.304367+00:00"
+    },
+    {
+      "lane": 2,
+      "batch": "fresh",
+      "case": "fresh-astro-framework-solid",
+      "at": "2026-11-17T18:51:40.628558+00:00"
+    },
+    {
+      "lane": 1,
+      "batch": "failures",
+      "case": "dotnet-insights-web",
+      "at": "2026-11-17T18:52:01.107887+00:00"
+    },
+    {
+      "lane": 1,
+      "batch": "failures",
+      "case": "fastapi-first-steps",
+      "at": "2026-11-17T18:52:21.021638+00:00"
+    },
+    {
+      "lane": 1,
+      "batch": "fresh",
+      "case": "fresh-astro-with-markdoc",
+      "at": "2026-11-17T18:56:54.489817+00:00"
+    },
+    {
+      "lane": 1,
+      "batch": "failures",
+      "case": "fastapi-path-params",
+      "at": "2026-11-17T18:57:05.530975+00:00"
+    },
+    {
+      "lane": 1,
+      "batch": "fresh",
+      "case": "fresh-fiber-hello-world",
+      "at": "2026-11-17T19:01:17.755266+00:00"
+    },
+    {
+      "lane": 1,
+      "batch": "failures",
+      "case": "fastapi-query-params",
+      "at": "2026-11-17T19:01:31.439251+00:00"
+    },
+    {
+      "lane": 2,
+      "batch": "fresh",
+      "case": "fresh-astro-with-mdx",
+      "at": "2026-11-17T19:02:47.317677+00:00"
+    },
+    {
+      "lane": 2,
+      "batch": "failures",
+      "case": "flask-tutorial",
+      "at": "2026-11-17T19:03:08.582036+00:00"
+    },
+    {
+      "lane": 1,
+      "batch": "fresh",
+      "case": "fresh-fiber-404-handler",
+      "at": "2026-11-17T19:05:56.724248+00:00"
+    },
+    {
+      "lane": 2,
+      "batch": "fresh",
+      "case": "fresh-fiber-advanced-caching",
+      "at": "2026-11-17T19:08:42.743884+00:00"
+    },
+    {
+      "lane": 1,
+      "batch": "failures",
+      "case": "gatsby-starter",
+      "at": "2026-11-17T19:12:47.650463+00:00"
+    },
+    {
+      "lane": 2,
+      "batch": "fresh",
+      "case": "fresh-axum-hello-world",
+      "at": "2026-11-17T19:14:35.068669+00:00"
+    },
+    {
+      "lane": 1,
+      "batch": "failures",
+      "case": "laravel-skeleton",
+      "at": "2026-11-17T19:16:55.374556+00:00"
+    },
+    {
+      "lane": 1,
+      "batch": "failures",
+      "case": "nestjs-starter",
+      "at": "2026-11-17T19:18:10.747611+00:00"
+    },
+    {
+      "lane": 2,
+      "batch": "fresh",
+      "case": "fresh-axum-cors",
+      "at": "2026-11-17T19:20:07.414839+00:00"
+    },
+    {
+      "lane": 2,
+      "batch": "failures",
+      "case": "next-api-routes-rest",
+      "at": "2026-11-17T19:26:07.196482+00:00"
+    },
+    {
+      "lane": 1,
+      "batch": "fresh",
+      "case": "fresh-gs-rest-service-cors",
+      "at": "2026-11-17T19:26:21.890834+00:00"
+    },
+    {
+      "lane": 2,
+      "batch": "fresh",
+      "case": "fresh-gs-handling-form-submission",
+      "at": "2026-11-17T19:31:27.854400+00:00"
+    },
+    {
+      "lane": 1,
+      "batch": "failures",
+      "case": "next-basic-css",
+      "at": "2026-11-17T19:32:51.463051+00:00"
+    },
+    {
+      "lane": 1,
+      "batch": "failures",
+      "case": "next-hello-world",
+      "at": "2026-11-17T19:40:03.789781+00:00"
+    },
+    {
+      "lane": 2,
+      "batch": "fresh",
+      "case": "fresh-next-with-sass",
+      "at": "2026-11-17T19:45:44.470508+00:00"
+    },
+    {
+      "lane": 1,
+      "batch": "failures",
+      "case": "next-with-absolute-imports",
+      "at": "2026-11-17T19:57:45.670745+00:00",
+      "measurement_recovered_without_rebuild": true
+    },
+    {
+      "lane": 2,
+      "batch": "failures",
+      "case": "next-with-typescript",
+      "at": "2026-11-17T19:58:04.105388+00:00",
+      "measurement_recovered_without_rebuild": true
+    },
+    {
+      "lane": 1,
+      "batch": "failures",
+      "case": "node-prisma-realworld",
+      "at": "2026-11-17T20:02:54.816577+00:00"
+    },
+    {
+      "lane": 1,
+      "batch": "failures",
+      "case": "sinatra-simple",
+      "at": "2026-11-17T20:03:09.467948+00:00"
+    },
+    {
+      "lane": 1,
+      "batch": "failures",
+      "case": "vite-svelte",
+      "at": "2026-11-17T20:04:56.330503+00:00"
+    },
+    {
+      "lane": 1,
+      "batch": "failures",
+      "case": "vite-svelte-ts",
+      "at": "2026-11-17T20:06:28.423048+00:00"
+    },
+    {
+      "lane": 1,
+      "batch": "failures",
+      "case": "vue-docs",
+      "at": "2026-11-17T20:08:29.224870+00:00"
+    }
+  ],
+  "errors": [],
+  "recovered_controller_errors": [
+    {
+      "lane": 1,
+      "batch": "failures",
+      "case": "next-with-absolute-imports",
+      "exit_code": 1
+    },
+    {
+      "lane": 2,
+      "batch": "failures",
+      "case": "next-with-typescript",
+      "exit_code": 1
+    }
+  ],
+  "resume_started_at": "2026-11-17T19:59:51.641728+00:00",
+  "recovery_archive": "recovery-20261117"
+}

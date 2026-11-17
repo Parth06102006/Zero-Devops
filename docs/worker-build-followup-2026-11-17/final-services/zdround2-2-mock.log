@@ -1,0 +1,21 @@
+test mock services ready
+17/Nov/2026 18:42:44 "POST /internal/deployments/f9d62ad3-e828-49f5-965f-6b60d40429c6/clone-credential HTTP/1.1" 200 -
+TEST_UPLOAD path=/images/f9d62ad3-e828-49f5-965f-6b60d40429c6.tar?x-id=PutObject bytes=188092463
+17/Nov/2026 18:44:47 "PUT /images/f9d62ad3-e828-49f5-965f-6b60d40429c6.tar?x-id=PutObject HTTP/1.1" 200 -
+17/Nov/2026 18:44:58 "POST /internal/deployments/ae7c52f0-c44d-457d-bb3f-3da0e90894a8/clone-credential HTTP/1.1" 200 -
+TEST_UPLOAD path=/images/ae7c52f0-c44d-457d-bb3f-3da0e90894a8.tar?x-id=PutObject bytes=188089903
+17/Nov/2026 18:47:02 "PUT /images/ae7c52f0-c44d-457d-bb3f-3da0e90894a8.tar?x-id=PutObject HTTP/1.1" 200 -
+17/Nov/2026 18:49:16 "POST /internal/deployments/93031b23-2abe-4554-ac41-189de459fac6/clone-credential HTTP/1.1" 200 -
+TEST_UPLOAD path=/images/93031b23-2abe-4554-ac41-189de459fac6.tar?x-id=PutObject bytes=188079663
+17/Nov/2026 18:51:31 "PUT /images/93031b23-2abe-4554-ac41-189de459fac6.tar?x-id=PutObject HTTP/1.1" 200 -
+17/Nov/2026 18:54:26 "POST /internal/deployments/8419ce37-6fea-4e7e-afca-228fe2a20058/clone-credential HTTP/1.1" 200 -
+TEST_UPLOAD path=/images/8419ce37-6fea-4e7e-afca-228fe2a20058.tar?x-id=PutObject bytes=188086319
+17/Nov/2026 19:02:37 "PUT /images/8419ce37-6fea-4e7e-afca-228fe2a20058.tar?x-id=PutObject HTTP/1.1" 200 -
+17/Nov/2026 19:02:48 "POST /internal/deployments/3ed134e4-174c-4a1a-afa1-06fba0b03c72/clone-credential HTTP/1.1" 200 -
+17/Nov/2026 19:06:02 "POST /internal/deployments/871e92bb-410c-4cc7-ae5c-db23d6c13eaf/clone-credential HTTP/1.1" 200 -
+17/Nov/2026 19:11:42 "POST /internal/deployments/a1ea7d85-1661-450c-8f71-8f3e3a8b358e/clone-credential HTTP/1.1" 200 -
+17/Nov/2026 19:17:20 "POST /internal/deployments/acc8d404-0b1a-4ac3-9664-219e87e858d2/clone-credential HTTP/1.1" 200 -
+17/Nov/2026 19:20:08 "POST /internal/deployments/44a14362-8068-4eb7-b297-f289e9445ece/clone-credential HTTP/1.1" 200 -
+17/Nov/2026 19:27:40 "POST /internal/deployments/583b1965-b1b1-4bbc-831c-403cb19b8447/clone-credential HTTP/1.1" 200 -
+17/Nov/2026 19:35:09 "POST /internal/deployments/645538f3-9f1e-4395-a8aa-08377436702a/clone-credential HTTP/1.1" 200 -
+17/Nov/2026 19:45:46 "POST /internal/deployments/e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1/clone-credential HTTP/1.1" 200 -

@@ -1,0 +1,24 @@
+STEP 1/6: FROM docker.io/library/maven:3-eclipse-temurin-21
+STEP 2/6: WORKDIR /app
+STEP 3/6: COPY . .
+STEP 4/6: WORKDIR /app/.
+STEP 5/6: RUN mvn -q -DskipTests package
+STEP 6/6: CMD ["sh", "-c", "java -jar target/handling-form-submission-complete-0.0.1-SNAPSHOT.jar"]
+COMMIT localhost/zdround2-reference-fresh-gs-handling-form-submission:test
+Getting image source signatures
+Copying blob sha256:2a89eb4dbc78f8fe790775a4e807e1355ba2f6b145c8dd7a267a782df1605124
+Copying blob sha256:758b22fe15be2c330dcead0c1b50476c074e113ec507627c6430337ffc9daa5e
+Copying blob sha256:6c915fae765e5bb70237ec3911a650f8c542016fa217c4e6f3bba9e6c2e3964a
+Copying blob sha256:5c4960c333b3988cb65f486ba0b06c21debeef7450cc3b7e033e7ae8bd91714a
+Copying blob sha256:52ba676c9b75d6d72bd58137defcdddd9e9c655a07c3b6274fe37e9c1ed1df28
+Copying blob sha256:5cf79090d938d3cf770b15fe16d985c7aabfb32837aeef2cbdda0e6973c1adac
+Copying blob sha256:19511e6c44aabc2156227cbf6ed354739d860c2fa24e5cec12ea2477d6c452ef
+Copying blob sha256:f89f0098f48666b302fdb0ff13a7a5fafb5065cda15762bc920bb0bf39edd264
+Copying blob sha256:e319e6e06134970516dbf39bff974942ec6d7f3ea67ffe16501a129fa1f9fe9d
+Copying blob sha256:1a1f85e990000c54f385b6da475a2a3fc1e350bca0ec5e55add1fbd90e1cddd1
+Copying blob sha256:2cb2781c2b2fed3350425570b30644b401d1f312b0912580f0cdc4c80cfe0559
+Copying config sha256:e016db78a09105f785ffb49436f4e6431dafcfce305660d76556009c36dec483
+Writing manifest to image destination
+--> e016db78a091
+Successfully tagged localhost/zdround2-reference-fresh-gs-handling-form-submission:test
+e016db78a09105f785ffb49436f4e6431dafcfce305660d76556009c36dec483

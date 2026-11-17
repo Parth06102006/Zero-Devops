@@ -1,0 +1,19 @@
+{
+  "recorded_at": "2026-11-17T18:25:44.799720+00:00",
+  "commands": {
+    "go version": "go version go1.26.8 linux/amd64",
+    "git rev-parse HEAD": "942664f3ccd5b8b6a4c3ff347d1c27552eb741fb",
+    "git status --short worker-server": ""
+  },
+  "binaries_sha256": {
+    "/tmp/zd-round2-worker": "c835433787112caa7117c95c79ffca60167eae7dea73e63ea157ea5bf5d17b69",
+    "/tmp/zd-round2-deployment-tests": "e471c690beea9d45fb3ad27494d53cb4e8356eedd2d4819060477305fe97a036"
+  },
+  "build_commands": [
+    "GOCACHE=/tmp/zd-fix-builds-gocache go test -count=1 ./...",
+    "CGO_ENABLED=0 GOCACHE=/tmp/zd-fix-builds-gocache go test -c -o /tmp/zd-round2-deployment-tests ./internal/deployments",
+    "CGO_ENABLED=0 GOCACHE=/tmp/zd-fix-builds-gocache go build -buildvcs=false -trimpath -o /tmp/zd-round2-worker ./cmd/worker-server"
+  ],
+  "worker_dockerfile_rebuilt": false,
+  "runtime_image": "retained zero-devops-e2e-worker:local; binary and templates mounted read-only"
+}

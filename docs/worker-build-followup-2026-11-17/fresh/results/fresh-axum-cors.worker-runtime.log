@@ -1,0 +1,4 @@
+/bin/sh: set: line 0: can't access tty; job control turned off
+subprocess exited on killed
+subprocess exited with status 1
+Error: exit status 1

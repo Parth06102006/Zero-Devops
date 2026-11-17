@@ -1,0 +1,223 @@
+{
+  "case": {
+    "name": "next-with-typescript",
+    "repo": "vercel/next.js",
+    "sha": "59db850442194327ef46acb3e65dfeeb52984f7a",
+    "path": "examples/with-typescript",
+    "stack": "Next.js",
+    "kind": "node",
+    "reference_build": "npm install && npm run build",
+    "reference_start": "npm start -- --hostname 0.0.0.0",
+    "port": 3000,
+    "probe": "/",
+    "static_output": null,
+    "context": "examples/with-typescript",
+    "env": {}
+  },
+  "started_at": "2026-11-17T19:45:46.087544+00:00",
+  "complete": true,
+  "batch": "failures",
+  "reference_qualified": true,
+  "qualification": "historical qualification from primary57",
+  "prior_worker": {
+    "lane": 1,
+    "worker_container": "zdfix-worker",
+    "broker_vhost": "/",
+    "commit_sha": "59db850442194327ef46acb3e65dfeeb52984f7a",
+    "deployment_id": "ebe3f99c-5c8b-4637-bc6f-94fab9180693",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: git checkout failed: git fetch failed: context deadline exceeded|",
+    "end_to_end_seconds": 60.98,
+    "resource_samples": [
+      {
+        "seconds": 0.54,
+        "stats": "0.98%|398.3MiB / 2GiB|49",
+        "cgroup": "cpu.stat\nusage_usec 2307152177\nuser_usec 1611081854\nsystem_usec 696070322\nnice_usec 0\nnr_periods 25944\nnr_throttled 3665\nthrottled_usec 365833359\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n709525504"
+      },
+      {
+        "seconds": 22.49,
+        "stats": "0.25%|403.4MiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 2307977391\nuser_usec 1611634832\nsystem_usec 696342559\nnice_usec 0\nnr_periods 26090\nnr_throttled 3665\nthrottled_usec 365833359\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n721383424"
+      },
+      {
+        "seconds": 44.13,
+        "stats": "0.22%|402.6MiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 2308088454\nuser_usec 1611696130\nsystem_usec 696392323\nnice_usec 0\nnr_periods 26182\nnr_throttled 3665\nthrottled_usec 365833359\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n719794176"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "examples/with-typescript",
+      "scanner_policy_version": "v1"
+    },
+    "framework": null,
+    "phase_events": [
+      {
+        "at": "2026-11-17T14:00:27.678Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-17T14:00:27.679Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-17T14:00:27.682Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-17T14:00:27.685Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-17T14:01:27.692Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"ebe3f99c-5c8b-4637-bc6f-94fab9180693\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 185,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"ebe3f99c-5c8b-4637-bc6f-94fab9180693\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: git checkout failed: git fetch failed: context deadline exceeded\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": false
+  },
+  "prior_classification": "other-build-failure",
+  "worker": {
+    "lane": 2,
+    "worker_container": "zdround2-2-worker",
+    "runtime_probe_container": "zdround2-recovery-2",
+    "broker_vhost": "zdround2-2",
+    "commit_sha": "59db850442194327ef46acb3e65dfeeb52984f7a",
+    "deployment_id": "e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: Exception (504) Reason: \"channel/connection is not open\"|",
+    "end_to_end_seconds": 350.901,
+    "duration_method": "original dispatch timestamp to original worker terminal log; host polling failed",
+    "resource_samples": [],
+    "resource_sample_note": "host telemetry failed; no isolated trial samples recovered",
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "examples/with-typescript",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "nextjs",
+    "git_phase_diagnostics": [
+      "ZERODEVOPS_GIT phase=fetch attempt=1 seconds=60.004 success=true",
+      "ZERODEVOPS_GIT phase=checkout seconds=4.534 verified_sha=59db850442194327ef46acb3e65dfeeb52984f7a"
+    ],
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": true,
+    "image_layer_bytes": 768479744,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 4.078,
+      "probe_url": "http://127.0.0.1:3000/",
+      "first_response": "200|0.113992|text/html; charset=utf-8",
+      "response_sample": "<!DOCTYPE html><html><head><title data-next-head=\"\">Home | Next.js + TypeScript Example</title><meta charSet=\"utf-8\" data-next-head=\"\"/><meta name=\"viewport\" content=\"initial-scale=1.0, width=device-width\" data-next-head=\"\"/><noscript data-n-css=\"\"><",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.004352
+        },
+        {
+          "status": 200,
+          "seconds": 0.003913
+        },
+        {
+          "status": 200,
+          "seconds": 0.003299
+        },
+        {
+          "status": 200,
+          "seconds": 0.004066
+        },
+        {
+          "status": 200,
+          "seconds": 0.0044
+        },
+        {
+          "status": 200,
+          "seconds": 0.004133
+        },
+        {
+          "status": 200,
+          "seconds": 0.00457
+        },
+        {
+          "status": 200,
+          "seconds": 0.005521
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    },
+    "external_container_http": [
+      {
+        "from_container": "zdround2-2-mock",
+        "target_worker_ip": "172.26.0.5",
+        "url": "http://172.26.0.5:3000/",
+        "exit_code": 0,
+        "response": "200|0.011042|text/html; charset=utf-8",
+        "reachable_expected_class": true
+      }
+    ],
+    "deployment": "not attempted",
+    "mock_upload_bytes": 0
+  },
+  "measurement_recovery": {
+    "archive": "recovery-20261117/next-with-typescript.json",
+    "initial_harness_error": "TimeoutExpired(['docker', 'exec', 'zdfix-db', 'psql', '-U', 'e2e', '-d', 'e2e', '-A', '-t', '-F', '|', '-c', \"SELECT status, COALESCE(error_message,''), COALESCE(output_url,'') FROM deployments WHERE id='e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1';\"], 20)",
+    "image_rebuilt": false,
+    "original_deployment_id": "e9ca21a2-8a1c-4cfa-af0e-b3d8b44ddbe1",
+    "note": "Retained original final image probed later in a helper sharing the original store/network; original database state retained."
+  },
+  "worker_classification": "build-and-runtime-pass",
+  "classification": "build-and-runtime-pass",
+  "finished_at": "2026-11-17T19:58:04.105388+00:00"
+}

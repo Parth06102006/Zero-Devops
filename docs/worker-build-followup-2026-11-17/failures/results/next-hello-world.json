@@ -1,0 +1,292 @@
+{
+  "case": {
+    "name": "next-hello-world",
+    "repo": "vercel/next.js",
+    "sha": "59db850442194327ef46acb3e65dfeeb52984f7a",
+    "path": "examples/hello-world",
+    "stack": "Next.js",
+    "kind": "node",
+    "reference_build": "npm install && npm run build",
+    "reference_start": "npm start -- --hostname 0.0.0.0",
+    "port": 3000,
+    "probe": "/",
+    "static_output": null,
+    "context": "examples/hello-world",
+    "env": {}
+  },
+  "started_at": "2026-11-17T19:32:52.580942+00:00",
+  "complete": true,
+  "batch": "failures",
+  "reference_qualified": true,
+  "qualification": "historical qualification from primary57",
+  "prior_worker": {
+    "lane": 1,
+    "worker_container": "zdfix-worker",
+    "broker_vhost": "/",
+    "commit_sha": "59db850442194327ef46acb3e65dfeeb52984f7a",
+    "deployment_id": "490d2f89-c60a-4ff2-bc32-ee22f86b92a6",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: git checkout failed: git fetch failed: context deadline exceeded|",
+    "end_to_end_seconds": 62.209,
+    "resource_samples": [
+      {
+        "seconds": 0.69,
+        "stats": "0.08%|384.3MiB / 2GiB|59",
+        "cgroup": "cpu.stat\nusage_usec 2423344751\nuser_usec 1693018531\nsystem_usec 730326219\nnice_usec 0\nnr_periods 27472\nnr_throttled 4251\nthrottled_usec 450737081\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n448405504"
+      },
+      {
+        "seconds": 24.21,
+        "stats": "0.12%|386.4MiB / 2GiB|59",
+        "cgroup": "cpu.stat\nusage_usec 2423470108\nuser_usec 1693073065\nsystem_usec 730397043\nnice_usec 0\nnr_periods 27553\nnr_throttled 4251\nthrottled_usec 450737081\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n450527232"
+      },
+      {
+        "seconds": 47.6,
+        "stats": "1.38%|394.9MiB / 2GiB|61",
+        "cgroup": "cpu.stat\nusage_usec 2425111845\nuser_usec 1694057970\nsystem_usec 731053875\nnice_usec 0\nnr_periods 27746\nnr_throttled 4251\nthrottled_usec 450737081\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n482873344"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "examples/hello-world",
+      "scanner_policy_version": "v1"
+    },
+    "framework": null,
+    "phase_events": [
+      {
+        "at": "2026-11-17T14:03:37.704Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-17T14:03:37.709Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-17T14:03:37.712Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-17T14:03:37.714Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-17T14:04:37.717Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"490d2f89-c60a-4ff2-bc32-ee22f86b92a6\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 185,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"490d2f89-c60a-4ff2-bc32-ee22f86b92a6\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: git checkout failed: git fetch failed: context deadline exceeded\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": false
+  },
+  "prior_classification": "other-build-failure",
+  "worker": {
+    "lane": 1,
+    "worker_container": "zdround2-1-worker",
+    "broker_vhost": "zdround2-1",
+    "commit_sha": "59db850442194327ef46acb3e65dfeeb52984f7a",
+    "deployment_id": "b515b23d-c780-4c6b-887e-74241f3f279f",
+    "state": "success",
+    "database_row": "success||",
+    "end_to_end_seconds": 400.805,
+    "resource_samples": [
+      {
+        "seconds": 0.54,
+        "stats": "3.96%|317.8MiB / 2GiB|94",
+        "cgroup": "cpu.stat\nusage_usec 2300732068\nuser_usec 1526673523\nsystem_usec 774058545\nnice_usec 0\nnr_periods 27847\nnr_throttled 5884\nthrottled_usec 716233055\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n347566080"
+      },
+      {
+        "seconds": 24.56,
+        "stats": "118.99%|672.8MiB / 2GiB|129",
+        "cgroup": "cpu.stat\nusage_usec 2313462815\nuser_usec 1532317472\nsystem_usec 781145342\nnice_usec 0\nnr_periods 28073\nnr_throttled 5895\nthrottled_usec 717322100\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n1003790336"
+      },
+      {
+        "seconds": 47.94,
+        "stats": "143.79%|729.9MiB / 2GiB|129",
+        "cgroup": "cpu.stat\nusage_usec 2336042063\nuser_usec 1544711614\nsystem_usec 791330449\nnice_usec 0\nnr_periods 28292\nnr_throttled 5979\nthrottled_usec 722374553\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n1108676608"
+      },
+      {
+        "seconds": 115.42,
+        "stats": "70.33%|280MiB / 2GiB|99",
+        "cgroup": "cpu.stat\nusage_usec 2390508341\nuser_usec 1571039940\nsystem_usec 819468401\nnice_usec 0\nnr_periods 28852\nnr_throttled 6155\nthrottled_usec 738559579\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n366989312"
+      },
+      {
+        "seconds": 139.34,
+        "stats": "93.48%|743.1MiB / 2GiB|140",
+        "cgroup": "cpu.stat\nusage_usec 2405428181\nuser_usec 1582069628\nsystem_usec 823358552\nnice_usec 0\nnr_periods 29090\nnr_throttled 6170\nthrottled_usec 739003728\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n1062420480"
+      },
+      {
+        "seconds": 164.05,
+        "stats": "67.63%|662.6MiB / 2GiB|135",
+        "cgroup": "cpu.stat\nusage_usec 2430832000\nuser_usec 1598961966\nsystem_usec 831870033\nnice_usec 0\nnr_periods 29331\nnr_throttled 6252\nthrottled_usec 749502369\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n1209106432"
+      },
+      {
+        "seconds": 188.12,
+        "stats": "9.18%|673.9MiB / 2GiB|135",
+        "cgroup": "cpu.stat\nusage_usec 2438286333\nuser_usec 1603200516\nsystem_usec 835085817\nnice_usec 0\nnr_periods 29492\nnr_throttled 6258\nthrottled_usec 749648790\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n1241509888"
+      },
+      {
+        "seconds": 211.91,
+        "stats": "76.22%|745.7MiB / 2GiB|135",
+        "cgroup": "cpu.stat\nusage_usec 2463128180\nuser_usec 1615392735\nsystem_usec 847735445\nnice_usec 0\nnr_periods 29725\nnr_throttled 6320\nthrottled_usec 752656928\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n1452974080"
+      },
+      {
+        "seconds": 236.08,
+        "stats": "0.00%|764.1MiB / 2GiB|135",
+        "cgroup": "cpu.stat\nusage_usec 2478585360\nuser_usec 1622094881\nsystem_usec 856490479\nnice_usec 0\nnr_periods 29856\nnr_throttled 6345\nthrottled_usec 754052546\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n1195929600"
+      },
+      {
+        "seconds": 262.27,
+        "stats": "83.58%|918.2MiB / 2GiB|102",
+        "cgroup": "cpu.stat\nusage_usec 2494940978\nuser_usec 1626225140\nsystem_usec 868715837\nnice_usec 0\nnr_periods 30018\nnr_throttled 6367\nthrottled_usec 754727909\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n1269379072"
+      },
+      {
+        "seconds": 328.36,
+        "stats": "0.06%|215.5MiB / 2GiB|100",
+        "cgroup": "cpu.stat\nusage_usec 2524629610\nuser_usec 1638031320\nsystem_usec 886598289\nnice_usec 0\nnr_periods 30426\nnr_throttled 6447\nthrottled_usec 762867110\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n874205184"
+      },
+      {
+        "seconds": 351.81,
+        "stats": "43.99%|534.7MiB / 2GiB|100",
+        "cgroup": "cpu.stat\nusage_usec 2528523221\nuser_usec 1639383075\nsystem_usec 889140145\nnice_usec 0\nnr_periods 30545\nnr_throttled 6447\nthrottled_usec 762867110\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n1068748800"
+      },
+      {
+        "seconds": 380.37,
+        "stats": "16.08%|808.4MiB / 2GiB|100",
+        "cgroup": "cpu.stat\nusage_usec 2531292595\nuser_usec 1640390945\nsystem_usec 890901649\nnice_usec 0\nnr_periods 30721\nnr_throttled 6447\nthrottled_usec 762867110\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n1087541248"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "examples/hello-world",
+      "scanner_policy_version": "v1"
+    },
+    "deployment": "not attempted",
+    "framework": "nextjs",
+    "git_phase_diagnostics": [
+      "ZERODEVOPS_GIT phase=fetch attempt=1 seconds=17.463 success=true",
+      "ZERODEVOPS_GIT phase=checkout seconds=4.134 verified_sha=59db850442194327ef46acb3e65dfeeb52984f7a"
+    ],
+    "mock_upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"b515b23d-c780-4c6b-887e-74241f3f279f\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 75,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"b515b23d-c780-4c6b-887e-74241f3f279f\",\"status\":\"success\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": true,
+    "image_layer_bytes": 778185728,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 4.088,
+      "probe_url": "http://127.0.0.1:3000/",
+      "first_response": "200|0.619648|text/html; charset=utf-8",
+      "response_sample": "<!DOCTYPE html><html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/0j1we3cwg31qe.js\"/><script src=\"/_next/sta",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.005549
+        },
+        {
+          "status": 200,
+          "seconds": 0.108375
+        },
+        {
+          "status": 200,
+          "seconds": 0.004303
+        },
+        {
+          "status": 200,
+          "seconds": 0.005102
+        },
+        {
+          "status": 200,
+          "seconds": 0.005342
+        },
+        {
+          "status": 200,
+          "seconds": 0.003674
+        },
+        {
+          "status": 200,
+          "seconds": 0.006234
+        },
+        {
+          "status": 200,
+          "seconds": 0.003613
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    },
+    "external_container_http": [
+      {
+        "from_container": "zdround2-1-mock",
+        "target_worker_ip": "172.25.0.5",
+        "url": "http://172.25.0.5:3000/",
+        "exit_code": 0,
+        "response": "200|0.306511|text/html; charset=utf-8",
+        "reachable_expected_class": true
+      }
+    ]
+  },
+  "worker_classification": "build-and-runtime-pass",
+  "classification": "build-and-runtime-pass",
+  "finished_at": "2026-11-17T19:40:02.613498+00:00"
+}

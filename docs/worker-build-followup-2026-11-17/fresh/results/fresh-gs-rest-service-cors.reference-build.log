@@ -1,0 +1,38 @@
+STEP 1/6: FROM docker.io/library/maven:3-eclipse-temurin-21
+Trying to pull docker.io/library/maven:3-eclipse-temurin-21...
+Getting image source signatures
+Copying blob sha256:1a4d3ce8dc865f660b6d5fddfd7a71eeac21d4e16be9f2880e022dc9b83eb0d3
+Copying blob sha256:517b871c26eac1b24d47992388bcc20e2afba3643a89e8c4a3921bfa5e1d1d28
+Copying blob sha256:96aae9022e0e1b310a415e7c2ff1b435d853e8eabb2711cc70f4ad4010cc81b7
+Copying blob sha256:a252cd0b56603e67d824736bff2f014f15182b108ab86f7ed3958cef2eeb28bc
+Copying blob sha256:68397b0ee36ada913324abbd10f763c03cb2998a271a57afe28662e07138ae07
+Copying blob sha256:56b30dcd928e09edc41b3d531da0f889509adc9b3c49672b1e9a56457e99f59c
+Copying blob sha256:971316c348709d9c8b46bdb0e11d5f1a600cefc8ee375c1197d8969702a8e15b
+Copying blob sha256:52f9c7d1ecd115c054ddae911cd7eb26630d64415aa4c0849271a7357b1efe70
+Copying blob sha256:b0cd6c688125d95e547b0939504ea5a31b3ace83f5161005c325349d2b17b568
+Copying blob sha256:28432df1e02fcd4468b6441514bad40d39f4e29dcb075f236a915e380b1e0e80
+Copying config sha256:77a0b2813954c27eb999118604531984e4efbedd6233fe29503ccf18e9104f2f
+Writing manifest to image destination
+STEP 2/6: WORKDIR /app
+STEP 3/6: COPY . .
+STEP 4/6: WORKDIR /app/.
+STEP 5/6: RUN mvn -q -DskipTests package
+STEP 6/6: CMD ["sh", "-c", "java -jar target/rest-service-cors-complete-0.0.1-SNAPSHOT.jar"]
+COMMIT localhost/zdround2-reference-fresh-gs-rest-service-cors:test
+Getting image source signatures
+Copying blob sha256:2a89eb4dbc78f8fe790775a4e807e1355ba2f6b145c8dd7a267a782df1605124
+Copying blob sha256:758b22fe15be2c330dcead0c1b50476c074e113ec507627c6430337ffc9daa5e
+Copying blob sha256:6c915fae765e5bb70237ec3911a650f8c542016fa217c4e6f3bba9e6c2e3964a
+Copying blob sha256:5c4960c333b3988cb65f486ba0b06c21debeef7450cc3b7e033e7ae8bd91714a
+Copying blob sha256:52ba676c9b75d6d72bd58137defcdddd9e9c655a07c3b6274fe37e9c1ed1df28
+Copying blob sha256:5cf79090d938d3cf770b15fe16d985c7aabfb32837aeef2cbdda0e6973c1adac
+Copying blob sha256:19511e6c44aabc2156227cbf6ed354739d860c2fa24e5cec12ea2477d6c452ef
+Copying blob sha256:f89f0098f48666b302fdb0ff13a7a5fafb5065cda15762bc920bb0bf39edd264
+Copying blob sha256:e319e6e06134970516dbf39bff974942ec6d7f3ea67ffe16501a129fa1f9fe9d
+Copying blob sha256:1a1f85e990000c54f385b6da475a2a3fc1e350bca0ec5e55add1fbd90e1cddd1
+Copying blob sha256:74fd5f2bca2b3ece6d257e89cd9f409531d7ab03f784ea5168ae63bca34708b7
+Copying config sha256:390cbeefe5b73c6cf8a248f74f53582bc3522f3c9f10b33bfde96f9447b3b6e3
+Writing manifest to image destination
+--> 390cbeefe5b7
+Successfully tagged localhost/zdround2-reference-fresh-gs-rest-service-cors:test
+390cbeefe5b73c6cf8a248f74f53582bc3522f3c9f10b33bfde96f9447b3b6e3

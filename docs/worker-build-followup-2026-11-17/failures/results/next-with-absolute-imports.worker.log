@@ -1,0 +1,130 @@
+2026-11-17T19:40:06.274Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdround2-fdfb714d-defc-4663-894c-766f00a43afa", "delivery_tag": 15}
+2026-11-17T19:40:06.662Z	INFO	deployments/deployments.go:475	inserting worker deployment row	{"request_id": "zdround2-fdfb714d-defc-4663-894c-766f00a43afa", "deployment_id": "fdfb714d-defc-4663-894c-766f00a43afa"}
+2026-11-17T19:40:06.672Z	INFO	deployments/deployments.go:482	marking as building	{"request_id": "zdround2-fdfb714d-defc-4663-894c-766f00a43afa", "deployment_id": "fdfb714d-defc-4663-894c-766f00a43afa"}
+2026-11-17T19:40:06.676Z	INFO	deployments/deployments.go:487	publishing building status	{"request_id": "zdround2-fdfb714d-defc-4663-894c-766f00a43afa", "deployment_id": "fdfb714d-defc-4663-894c-766f00a43afa"}
+ZERODEVOPS_GIT phase=fetch attempt=1 seconds=49.085 success=true
+ZERODEVOPS_GIT phase=checkout seconds=9.856 verified_sha=59db850442194327ef46acb3e65dfeeb52984f7a
+2026-11-17T19:41:05.655Z	INFO	deployments/deployments.go:492	detecting framework	{"request_id": "zdround2-fdfb714d-defc-4663-894c-766f00a43afa", "deployment_id": "fdfb714d-defc-4663-894c-766f00a43afa"}
+2026-11-17T19:41:05.657Z	INFO	deployments/deployments.go:498	framework detected	{"request_id": "zdround2-fdfb714d-defc-4663-894c-766f00a43afa", "deployment_id": "fdfb714d-defc-4663-894c-766f00a43afa", "framework": "nextjs", "package_manager": "npm"}
+2026-11-17T19:41:05.657Z	INFO	deployments/deployments.go:506	writing Dockerfile from template	{"request_id": "zdround2-fdfb714d-defc-4663-894c-766f00a43afa", "deployment_id": "fdfb714d-defc-4663-894c-766f00a43afa", "template": "dynamic/Dockerfile.nextjs.tmpl"}
+2026-11-17T19:41:05.668Z	WARN	deployments/deployments.go:650	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdround2-fdfb714d-defc-4663-894c-766f00a43afa", "deployment_id": "fdfb714d-defc-4663-894c-766f00a43afa"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:650
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-17T19:41:05.669Z	INFO	deployments/deployments.go:517	building image with buildah	{"request_id": "zdround2-fdfb714d-defc-4663-894c-766f00a43afa", "deployment_id": "fdfb714d-defc-4663-894c-766f00a43afa", "image_tag": "deploy-fdfb714d-defc-4663-894c-766f00a43afa:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN npm install --ignore-scripts --package-lock=false
+
+added 31 packages, and audited 32 packages in 1m
+
+6 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN npm run build
+
+> build
+> next build
+
+▲ Next.js 16.4.6 (Turbopack)
+⚠ React 18 support is deprecated in Next.js 16 and will be removed in Next.js 17. Please upgrade to React 19. Learn more: https://nextjs.org/docs/messages/react-version
+✓ Running next.config took 1088ms
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 76s
+  Running TypeScript ...
+
+  We detected TypeScript in your project and reconfigured your tsconfig.json file for you. Strict-mode is set to false by default.
+  The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:
+
+  	- include was updated to add '.next/dev/types/**/*.ts'
+
+  The following mandatory changes were made to your tsconfig.json:
+
+  	- moduleResolution was set to bundler (to match modern bundler resolution)
+
+  Finished TypeScript in 11.5s ...
+  Collecting page data using 4 workers ...
+  Generating static pages using 4 workers (0/3) ...
+✓ Generating static pages using 4 workers (3/3) in 1287ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+└ ○ /_not-found
+
+
+○  (Static)  prerendered as static content
+
+[1/2] STEP 7/7: RUN test -d .next && mkdir -p /app/public
+[2/2] STEP 1/10: FROM docker.io/library/node:24-alpine
+[2/2] STEP 2/10: WORKDIR /app
+[2/2] STEP 3/10: ENV NODE_ENV=production
+[2/2] STEP 4/10: COPY package*.json ./
+[2/2] STEP 5/10: RUN npm install --ignore-scripts --package-lock=false --omit=dev
+
+added 24 packages, and audited 25 packages in 1m
+
+6 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 6/10: COPY --from=builder /app/.next ./.next
+[2/2] STEP 7/10: COPY --from=builder /app/public ./public
+[2/2] STEP 8/10: COPY --from=builder /app/package.json ./package.json
+[2/2] STEP 9/10: EXPOSE 3000
+[2/2] STEP 10/10: CMD ["npm", "start"]
+[2/2] COMMIT deploy-fdfb714d-defc-4663-894c-766f00a43afa:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:e20cbc785c2cdb425d0bb29fa092ceef712ce31956002ced3f426a9ab4f4763d
+Copying config sha256:ec82b13e03a3d8cdd9a6103ab40e540912505c00355437c91b35e161ceff1ecf
+Writing manifest to image destination
+--> ec82b13e03a3
+Successfully tagged localhost/deploy-fdfb714d-defc-4663-894c-766f00a43afa:latest
+ec82b13e03a3d8cdd9a6103ab40e540912505c00355437c91b35e161ceff1ecf
+2026-11-17T19:48:24.167Z	INFO	deployments/deployments.go:524	saving image tar	{"request_id": "zdround2-fdfb714d-defc-4663-894c-766f00a43afa", "deployment_id": "fdfb714d-defc-4663-894c-766f00a43afa", "tar_path": "/tmp/zerodevops-build/fdfb714d-defc-4663-894c-766f00a43afa/examples/with-absolute-imports/fdfb714d-defc-4663-894c-766f00a43afa.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:e20cbc785c2cdb425d0bb29fa092ceef712ce31956002ced3f426a9ab4f4763d
+Copying config sha256:ec82b13e03a3d8cdd9a6103ab40e540912505c00355437c91b35e161ceff1ecf
+Writing manifest to image destination
+2026-11-17T19:49:06.257Z	INFO	deployments/deployments.go:600	dynamic build finished (stub finalize, no upload yet)	{"request_id": "zdround2-fdfb714d-defc-4663-894c-766f00a43afa", "deployment_id": "fdfb714d-defc-4663-894c-766f00a43afa"}
+2026-11-17T19:49:18.391Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdround2-fdfb714d-defc-4663-894c-766f00a43afa", "deployment_id": "fdfb714d-defc-4663-894c-766f00a43afa"}
+2026-11-17T19:51:08.117Z	INFO	worker/worker.go:149	Worker consumer delivery channel closed
+2026-11-17T19:51:08.272Z	ERROR	worker-server/main.go:86	failed to close rabbitmq connection	{"error": "Exception (504) Reason: \"channel/connection is not open\""}
+main.main.func4
+	Zero_Devops/worker_server/cmd/worker-server/main.go:86
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:123
+runtime.main
+	runtime/proc.go:290

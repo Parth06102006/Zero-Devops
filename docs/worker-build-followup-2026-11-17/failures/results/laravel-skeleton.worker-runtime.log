@@ -1,0 +1,35 @@
+/bin/sh: set: line 0: can't access tty; job control turned off
+[Tue Nov 17 19:16:51 2026] PHP 8.3.36 Development Server (http://0.0.0.0:8080) started
+[Tue Nov 17 19:16:52 2026] 127.0.0.1:45364 Accepted
+[Tue Nov 17 19:16:52 2026] 127.0.0.1:45364 [200]: GET /up
+[Tue Nov 17 19:16:52 2026] 127.0.0.1:45364 Closing
+[Tue Nov 17 19:16:53 2026] 172.25.0.4:49726 Accepted
+[Tue Nov 17 19:16:53 2026] 172.25.0.4:49726 [200]: GET /up
+[Tue Nov 17 19:16:53 2026] 172.25.0.4:49726 Closing
+[Tue Nov 17 19:16:53 2026] 127.0.0.1:45380 Accepted
+[Tue Nov 17 19:16:53 2026] 127.0.0.1:45380 [200]: GET /up
+[Tue Nov 17 19:16:53 2026] 127.0.0.1:45380 Closing
+[Tue Nov 17 19:16:53 2026] 127.0.0.1:45392 Accepted
+[Tue Nov 17 19:16:53 2026] 127.0.0.1:45392 [200]: GET /up
+[Tue Nov 17 19:16:53 2026] 127.0.0.1:45392 Closing
+[Tue Nov 17 19:16:53 2026] 127.0.0.1:45402 Accepted
+[Tue Nov 17 19:16:53 2026] 127.0.0.1:45402 [200]: GET /up
+[Tue Nov 17 19:16:53 2026] 127.0.0.1:45402 Closing
+[Tue Nov 17 19:16:53 2026] 127.0.0.1:45412 Accepted
+[Tue Nov 17 19:16:53 2026] 127.0.0.1:45412 [200]: GET /up
+[Tue Nov 17 19:16:53 2026] 127.0.0.1:45412 Closing
+[Tue Nov 17 19:16:53 2026] 127.0.0.1:45428 Accepted
+[Tue Nov 17 19:16:53 2026] 127.0.0.1:45428 [200]: GET /up
+[Tue Nov 17 19:16:53 2026] 127.0.0.1:45428 Closing
+[Tue Nov 17 19:16:53 2026] 127.0.0.1:45430 Accepted
+[Tue Nov 17 19:16:53 2026] 127.0.0.1:45430 [200]: GET /up
+[Tue Nov 17 19:16:53 2026] 127.0.0.1:45430 Closing
+[Tue Nov 17 19:16:53 2026] 127.0.0.1:45436 Accepted
+[Tue Nov 17 19:16:54 2026] 127.0.0.1:45436 [200]: GET /up
+[Tue Nov 17 19:16:54 2026] 127.0.0.1:45436 Closing
+[Tue Nov 17 19:16:54 2026] 127.0.0.1:45450 Accepted
+[Tue Nov 17 19:16:54 2026] 127.0.0.1:45450 [200]: GET /up
+[Tue Nov 17 19:16:54 2026] 127.0.0.1:45450 Closing
+subprocess exited on killed
+subprocess exited with status 1
+Error: exit status 1

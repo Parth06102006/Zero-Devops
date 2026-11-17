@@ -1,0 +1,126 @@
+2026-11-17T19:35:09.650Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdround2-645538f3-9f1e-4395-a8aa-08377436702a", "delivery_tag": 11}
+2026-11-17T19:35:09.711Z	INFO	deployments/deployments.go:475	inserting worker deployment row	{"request_id": "zdround2-645538f3-9f1e-4395-a8aa-08377436702a", "deployment_id": "645538f3-9f1e-4395-a8aa-08377436702a"}
+2026-11-17T19:35:09.723Z	INFO	deployments/deployments.go:482	marking as building	{"request_id": "zdround2-645538f3-9f1e-4395-a8aa-08377436702a", "deployment_id": "645538f3-9f1e-4395-a8aa-08377436702a"}
+2026-11-17T19:35:09.726Z	INFO	deployments/deployments.go:487	publishing building status	{"request_id": "zdround2-645538f3-9f1e-4395-a8aa-08377436702a", "deployment_id": "645538f3-9f1e-4395-a8aa-08377436702a"}
+ZERODEVOPS_GIT phase=fetch attempt=1 seconds=103.369 success=true
+ZERODEVOPS_GIT phase=checkout seconds=3.712 verified_sha=d958b3ac19a7859838a2a08e8d7c0014baf56146
+2026-11-17T19:36:56.818Z	INFO	deployments/deployments.go:492	detecting framework	{"request_id": "zdround2-645538f3-9f1e-4395-a8aa-08377436702a", "deployment_id": "645538f3-9f1e-4395-a8aa-08377436702a"}
+2026-11-17T19:36:56.819Z	INFO	deployments/deployments.go:498	framework detected	{"request_id": "zdround2-645538f3-9f1e-4395-a8aa-08377436702a", "deployment_id": "645538f3-9f1e-4395-a8aa-08377436702a", "framework": "nextjs", "package_manager": "npm"}
+2026-11-17T19:36:56.819Z	INFO	deployments/deployments.go:506	writing Dockerfile from template	{"request_id": "zdround2-645538f3-9f1e-4395-a8aa-08377436702a", "deployment_id": "645538f3-9f1e-4395-a8aa-08377436702a", "template": "dynamic/Dockerfile.nextjs.tmpl"}
+2026-11-17T19:36:56.828Z	WARN	deployments/deployments.go:650	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdround2-645538f3-9f1e-4395-a8aa-08377436702a", "deployment_id": "645538f3-9f1e-4395-a8aa-08377436702a"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:650
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-17T19:36:56.828Z	INFO	deployments/deployments.go:517	building image with buildah	{"request_id": "zdround2-645538f3-9f1e-4395-a8aa-08377436702a", "deployment_id": "645538f3-9f1e-4395-a8aa-08377436702a", "image_tag": "deploy-645538f3-9f1e-4395-a8aa-08377436702a:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN npm install --ignore-scripts --package-lock=false
+
+added 37 packages, and audited 38 packages in 2m
+
+11 packages are looking for funding
+  run `npm fund` for details
+
+2 high severity vulnerabilities
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN npm run build
+
+> build
+> next build
+
+▲ Next.js 16.4.6 (Turbopack)
+✓ Running next.config took 65ms
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 64s
+  Running TypeScript ...
+
+  We detected TypeScript in your project and reconfigured your tsconfig.json file for you.
+  The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:
+
+  	- include was updated to add '.next/dev/types/**/*.ts'
+
+  Finished TypeScript in 9.6s ...
+  Collecting page data using 4 workers ...
+  Generating static pages using 4 workers (0/3) ...
+✓ Generating static pages using 4 workers (3/3) in 1501ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+└ ○ /_not-found
+
+
+○  (Static)  prerendered as static content
+
+[1/2] STEP 7/7: RUN test -d .next && mkdir -p /app/public
+[2/2] STEP 1/10: FROM docker.io/library/node:24-alpine
+[2/2] STEP 2/10: WORKDIR /app
+[2/2] STEP 3/10: ENV NODE_ENV=production
+[2/2] STEP 4/10: COPY package*.json ./
+[2/2] STEP 5/10: RUN npm install --ignore-scripts --package-lock=false --omit=dev
+
+added 32 packages, and audited 33 packages in 2m
+
+11 packages are looking for funding
+  run `npm fund` for details
+
+2 high severity vulnerabilities
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 6/10: COPY --from=builder /app/.next ./.next
+[2/2] STEP 7/10: COPY --from=builder /app/public ./public
+[2/2] STEP 8/10: COPY --from=builder /app/package.json ./package.json
+[2/2] STEP 9/10: EXPOSE 3000
+[2/2] STEP 10/10: CMD ["npm", "start"]
+[2/2] COMMIT deploy-645538f3-9f1e-4395-a8aa-08377436702a:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:a54df41d1ad2fbfd495951ffc64e91b7279173ee46b9bd8fc7f060f9172c69df
+Copying config sha256:97c028477f96f4e08bb258b81fd758a1bffa3e8b79c201611e7dd78bc3173758
+Writing manifest to image destination
+--> 97c028477f96
+Successfully tagged localhost/deploy-645538f3-9f1e-4395-a8aa-08377436702a:latest
+97c028477f96f4e08bb258b81fd758a1bffa3e8b79c201611e7dd78bc3173758
+2026-11-17T19:44:31.412Z	INFO	deployments/deployments.go:524	saving image tar	{"request_id": "zdround2-645538f3-9f1e-4395-a8aa-08377436702a", "deployment_id": "645538f3-9f1e-4395-a8aa-08377436702a", "tar_path": "/tmp/zerodevops-build/645538f3-9f1e-4395-a8aa-08377436702a/examples/with-sass/645538f3-9f1e-4395-a8aa-08377436702a.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:a54df41d1ad2fbfd495951ffc64e91b7279173ee46b9bd8fc7f060f9172c69df
+Copying config sha256:97c028477f96f4e08bb258b81fd758a1bffa3e8b79c201611e7dd78bc3173758
+Writing manifest to image destination
+2026-11-17T19:45:27.200Z	INFO	deployments/deployments.go:600	dynamic build finished (stub finalize, no upload yet)	{"request_id": "zdround2-645538f3-9f1e-4395-a8aa-08377436702a", "deployment_id": "645538f3-9f1e-4395-a8aa-08377436702a"}

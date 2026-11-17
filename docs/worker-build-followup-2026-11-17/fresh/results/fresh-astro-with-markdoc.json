@@ -1,0 +1,277 @@
+{
+  "case": {
+    "name": "fresh-astro-with-markdoc",
+    "repo": "withastro/astro",
+    "sha": "387105be28cb3a3c062c3390b551cc9e51a2bfb1",
+    "path": "examples/with-markdoc",
+    "kind": "node",
+    "port": 4321,
+    "probe": "/",
+    "reference_build": "npm install --ignore-scripts --package-lock=false && npm run build",
+    "reference_start": "npm run preview -- --host 0.0.0.0 --port 4321",
+    "context": "examples/with-markdoc",
+    "env": {},
+    "source_dir": "/tmp/zd-round2-fresh-sources/withastro--astro",
+    "base_image": "docker.io/library/node:24-alpine",
+    "static_output": "dist",
+    "stack": "Astro/with-markdoc"
+  },
+  "started_at": "2026-11-17T18:52:22.685735+00:00",
+  "complete": true,
+  "batch": "fresh",
+  "reference_qualified": true,
+  "qualification": "fresh reference trial recorded separately",
+  "reference": {
+    "build": {
+      "seconds": 149.77,
+      "exit_code": 0,
+      "timed_out": false,
+      "resource_samples": [
+        {
+          "seconds": 0.11,
+          "stats": "10.86%|96.01MiB / 2GiB|18",
+          "cgroup": "cpu.stat\nusage_usec 611448925\nuser_usec 486356668\nsystem_usec 125092256\nnice_usec 0\nnr_periods 7796\nnr_throttled 230\nthrottled_usec 12435946\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1365475328\nmemory.current\n106582016"
+        },
+        {
+          "seconds": 20.4,
+          "stats": "28.96%|117.8MiB / 2GiB|22",
+          "cgroup": "cpu.stat\nusage_usec 617091132\nuser_usec 490020898\nsystem_usec 127070233\nnice_usec 0\nnr_periods 7988\nnr_throttled 230\nthrottled_usec 12435946\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1365475328\nmemory.current\n203784192"
+        },
+        {
+          "seconds": 40.7,
+          "stats": "30.82%|323.6MiB / 2GiB|52",
+          "cgroup": "cpu.stat\nusage_usec 629106043\nuser_usec 497257989\nsystem_usec 131848053\nnice_usec 0\nnr_periods 8158\nnr_throttled 239\nthrottled_usec 12657151\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1365475328\nmemory.current\n788926464"
+        },
+        {
+          "seconds": 61.26,
+          "stats": "55.42%|347.5MiB / 2GiB|52",
+          "cgroup": "cpu.stat\nusage_usec 634944955\nuser_usec 500771935\nsystem_usec 134173019\nnice_usec 0\nnr_periods 8295\nnr_throttled 242\nthrottled_usec 12697519\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1365475328\nmemory.current\n836378624"
+        },
+        {
+          "seconds": 81.79,
+          "stats": "17.38%|391.1MiB / 2GiB|52",
+          "cgroup": "cpu.stat\nusage_usec 640749634\nuser_usec 504407298\nsystem_usec 136342336\nnice_usec 0\nnr_periods 8448\nnr_throttled 246\nthrottled_usec 13042329\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1365475328\nmemory.current\n905195520"
+        },
+        {
+          "seconds": 102.31,
+          "stats": "102.56%|468.5MiB / 2GiB|52",
+          "cgroup": "cpu.stat\nusage_usec 662770828\nuser_usec 515618542\nsystem_usec 147152286\nnice_usec 0\nnr_periods 8656\nnr_throttled 351\nthrottled_usec 20772988\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1365475328\nmemory.current\n635301888"
+        },
+        {
+          "seconds": 123.18,
+          "stats": "88.29%|467.7MiB / 2GiB|22",
+          "cgroup": "cpu.stat\nusage_usec 677848985\nuser_usec 521690151\nsystem_usec 156158834\nnice_usec 0\nnr_periods 8800\nnr_throttled 364\nthrottled_usec 21475928\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1365475328\nmemory.current\n730128384"
+        },
+        {
+          "seconds": 143.63,
+          "stats": "40.64%|1.037GiB / 2GiB|23",
+          "cgroup": "cpu.stat\nusage_usec 693121652\nuser_usec 527083796\nsystem_usec 166037856\nnice_usec 0\nnr_periods 8951\nnr_throttled 405\nthrottled_usec 25674273\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1745145856\nmemory.current\n1442226176"
+        }
+      ],
+      "cgroup_before": "1365475328\nusage_usec 611265603\nuser_usec 486257301\nsystem_usec 125008301\nnice_usec 0\nnr_periods 7786\nnr_throttled 230\nthrottled_usec 12435946\nnr_bursts 0\nburst_usec 0",
+      "cgroup_after": "1745145856\nusage_usec 693490012\nuser_usec 527107079\nsystem_usec 166382933\nnice_usec 0\nnr_periods 8960\nnr_throttled 405\nthrottled_usec 25674273\nnr_bursts 0\nburst_usec 0\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0"
+    },
+    "base_image": "docker.io/library/node:24-alpine",
+    "source_dir": "/tmp/zd-round2-fresh-sources/withastro--astro",
+    "source_sha_verified": true,
+    "source_evidence": "fresh-source-evidence/withastro--astro.json",
+    "source_files_verified": 57,
+    "recipe": "FROM docker.io/library/node:24-alpine\nWORKDIR /app\nCOPY . .\nWORKDIR /app/.\nRUN npm install --ignore-scripts --package-lock=false && npm run build\nCMD [\"sh\", \"-c\", \"npm run preview -- --host 0.0.0.0 --port 4321\"]\n",
+    "image_built": true,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 3.931,
+      "probe_url": "http://127.0.0.1:4321/",
+      "first_response": "200|0.027044|text/html",
+      "response_sample": "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width\"><link rel=\"icon\" type=\"image/svg+xml\" href=\"/favicon.svg\"><link rel=\"icon\" href=\"/favicon.ico\"><meta name=\"generator\" content=\"Astro v7.4.12",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.002537
+        },
+        {
+          "status": 200,
+          "seconds": 0.002103
+        },
+        {
+          "status": 200,
+          "seconds": 0.002332
+        },
+        {
+          "status": 200,
+          "seconds": 0.003087
+        },
+        {
+          "status": 200,
+          "seconds": 0.002199
+        },
+        {
+          "status": 200,
+          "seconds": 0.002197
+        },
+        {
+          "status": 200,
+          "seconds": 0.002158
+        },
+        {
+          "status": 200,
+          "seconds": 0.002675
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    },
+    "external_container_http": [
+      {
+        "from_container": "zdround2-1-mock",
+        "target_worker_ip": "172.25.0.5",
+        "url": "http://172.25.0.5:4321/",
+        "exit_code": 0,
+        "response": "200|0.013179|text/html",
+        "reachable_expected_class": true
+      }
+    ],
+    "seconds": 162.627
+  },
+  "worker": {
+    "lane": 1,
+    "worker_container": "zdround2-1-worker",
+    "broker_vhost": "zdround2-1",
+    "commit_sha": "387105be28cb3a3c062c3390b551cc9e51a2bfb1",
+    "deployment_id": "6880d628-7c47-4475-a18b-b83a6b8231fd",
+    "state": "success",
+    "database_row": "success||s3://testbucket/images/6880d628-7c47-4475-a18b-b83a6b8231fd.tar",
+    "end_to_end_seconds": 102.255,
+    "resource_samples": [
+      {
+        "seconds": 0.34,
+        "stats": "1.56%|174.6MiB / 2GiB|20",
+        "cgroup": "cpu.stat\nusage_usec 700320524\nuser_usec 530581758\nsystem_usec 169738766\nnice_usec 0\nnr_periods 9077\nnr_throttled 408\nthrottled_usec 25700699\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1745145856\nmemory.current\n215064576"
+      },
+      {
+        "seconds": 24.03,
+        "stats": "30.64%|411.7MiB / 2GiB|55",
+        "cgroup": "cpu.stat\nusage_usec 710679578\nuser_usec 536282240\nsystem_usec 174397337\nnice_usec 0\nnr_periods 9290\nnr_throttled 410\nthrottled_usec 25765756\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1745145856\nmemory.current\n725782528"
+      },
+      {
+        "seconds": 47.8,
+        "stats": "0.01%|485.1MiB / 2GiB|55",
+        "cgroup": "cpu.stat\nusage_usec 723951915\nuser_usec 544740484\nsystem_usec 179211431\nnice_usec 0\nnr_periods 9491\nnr_throttled 425\nthrottled_usec 26027328\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1745145856\nmemory.current\n1011507200"
+      },
+      {
+        "seconds": 74.88,
+        "stats": "145.24%|582.8MiB / 2GiB|55",
+        "cgroup": "cpu.stat\nusage_usec 746219689\nuser_usec 557335875\nsystem_usec 188883813\nnice_usec 0\nnr_periods 9701\nnr_throttled 532\nthrottled_usec 38799001\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1745145856\nmemory.current\n1044152320"
+      },
+      {
+        "seconds": 98.68,
+        "stats": "54.27%|238.9MiB / 2GiB|26",
+        "cgroup": "cpu.stat\nusage_usec 768128257\nuser_usec 568234676\nsystem_usec 199893581\nnice_usec 0\nnr_periods 9927\nnr_throttled 578\nthrottled_usec 42185352\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1745145856\nmemory.current\n482246656"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "examples/with-markdoc",
+      "scanner_policy_version": "v1"
+    },
+    "deployment": "not attempted",
+    "framework": "astro",
+    "git_phase_diagnostics": [
+      "ZERODEVOPS_GIT phase=fetch attempt=1 seconds=12.145 success=true",
+      "ZERODEVOPS_GIT phase=checkout seconds=0.886 verified_sha=387105be28cb3a3c062c3390b551cc9e51a2bfb1"
+    ],
+    "mock_upload_bytes": 188053551,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"6880d628-7c47-4475-a18b-b83a6b8231fd\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 154,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"6880d628-7c47-4475-a18b-b83a6b8231fd\",\"status\":\"success\",\"output_url\":\"s3://testbucket/images/6880d628-7c47-4475-a18b-b83a6b8231fd.tar\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": true,
+    "image_layer_bytes": 188025856,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 1.46,
+      "probe_url": "http://127.0.0.1:4321/",
+      "first_response": "200|0.033264|text/html; charset=utf-8",
+      "response_sample": "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width\"><link rel=\"icon\" type=\"image/svg+xml\" href=\"/favicon.svg\"><link rel=\"icon\" href=\"/favicon.ico\"><meta name=\"generator\" content=\"Astro v7.4.12",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.003907
+        },
+        {
+          "status": 200,
+          "seconds": 0.003566
+        },
+        {
+          "status": 200,
+          "seconds": 0.003588
+        },
+        {
+          "status": 200,
+          "seconds": 0.002927
+        },
+        {
+          "status": 200,
+          "seconds": 0.005261
+        },
+        {
+          "status": 200,
+          "seconds": 0.004705
+        },
+        {
+          "status": 200,
+          "seconds": 0.004819
+        },
+        {
+          "status": 200,
+          "seconds": 0.00397
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    },
+    "external_container_http": [
+      {
+        "from_container": "zdround2-1-mock",
+        "target_worker_ip": "172.25.0.5",
+        "url": "http://172.25.0.5:4321/",
+        "exit_code": 0,
+        "response": "200|0.004296|text/html; charset=utf-8",
+        "reachable_expected_class": true
+      }
+    ]
+  },
+  "worker_classification": "build-and-runtime-pass",
+  "classification": "build-and-runtime-pass",
+  "finished_at": "2026-11-17T18:56:54.384491+00:00"
+}

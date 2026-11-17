@@ -1,0 +1,12 @@
+/bin/sh: set: line 0: can't access tty; job control turned off
+[32m[Nest] 30085  - [39m11/17/2026, 7:18:07 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 30085  - [39m11/17/2026, 7:18:07 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +39ms[39m
+[32m[Nest] 30085  - [39m11/17/2026, 7:18:07 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 30085  - [39m11/17/2026, 7:18:07 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mObserveModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 30085  - [39m11/17/2026, 7:18:07 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAppController {/}:[39m[38;5;3m +11ms[39m
+[32m[Nest] 30085  - [39m11/17/2026, 7:18:07 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/, GET} route[39m[38;5;3m +6ms[39m
+[32m[Nest] 30085  - [39m11/17/2026, 7:18:07 PM [32m    LOG[39m [38;5;3m[ObserveAgentWorker] [39m[32mObserve agent worker initialized.[39m
+[32m[Nest] 30085  - [39m11/17/2026, 7:18:07 PM [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +5ms[39m
+subprocess exited on killed
+subprocess exited with status 1
+Error: exit status 1

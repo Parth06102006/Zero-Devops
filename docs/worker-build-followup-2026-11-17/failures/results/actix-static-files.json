@@ -1,0 +1,541 @@
+{
+  "case": {
+    "name": "actix-static-files",
+    "repo": "actix/examples",
+    "sha": "9206b40d50b04ab44f9a51f6b0282d9103323700",
+    "path": "basics/static-files",
+    "stack": "Rust/Actix",
+    "kind": "rust",
+    "reference_build": "CARGO_BUILD_JOBS=1 cargo build --release --locked -p static-files",
+    "reference_start": "/app/campaign-server",
+    "port": 8080,
+    "probe": "/",
+    "static_output": null,
+    "context": ".",
+    "env": {}
+  },
+  "started_at": "2026-11-17T18:38:52.391708+00:00",
+  "complete": true,
+  "batch": "failures",
+  "reference_qualified": true,
+  "qualification": "historical qualification from primary57",
+  "prior_worker": {
+    "lane": 1,
+    "worker_container": "zdfix-worker",
+    "broker_vhost": "/",
+    "commit_sha": "9206b40d50b04ab44f9a51f6b0282d9103323700",
+    "deployment_id": "78901a8d-f907-4a47-9933-d88803e57c9f",
+    "state": "success",
+    "database_row": "success||",
+    "end_to_end_seconds": 640.255,
+    "resource_samples": [
+      {
+        "seconds": 0.52,
+        "stats": "1.07%|86.37MiB / 2GiB|15",
+        "cgroup": "cpu.stat\nusage_usec 591906693\nuser_usec 478565953\nsystem_usec 113340740\nnice_usec 0\nnr_periods 6407\nnr_throttled 126\nthrottled_usec 4320234\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1629077504\nmemory.current\n149463040"
+      },
+      {
+        "seconds": 23.04,
+        "stats": "64.23%|448.4MiB / 2GiB|40",
+        "cgroup": "cpu.stat\nusage_usec 602430134\nuser_usec 483819754\nsystem_usec 118610380\nnice_usec 0\nnr_periods 6617\nnr_throttled 131\nthrottled_usec 4389978\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1629077504\nmemory.current\n765120512"
+      },
+      {
+        "seconds": 45.67,
+        "stats": "0.01%|641.4MiB / 2GiB|40",
+        "cgroup": "cpu.stat\nusage_usec 608915823\nuser_usec 487959091\nsystem_usec 120956732\nnice_usec 0\nnr_periods 6772\nnr_throttled 132\nthrottled_usec 4390301\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1629077504\nmemory.current\n1030168576"
+      },
+      {
+        "seconds": 69.74,
+        "stats": "96.32%|936.2MiB / 2GiB|49",
+        "cgroup": "cpu.stat\nusage_usec 624727296\nuser_usec 492785241\nsystem_usec 131942055\nnice_usec 0\nnr_periods 6951\nnr_throttled 135\nthrottled_usec 4416883\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1629077504\nmemory.current\n1604968448"
+      },
+      {
+        "seconds": 91.81,
+        "stats": "96.00%|998.2MiB / 2GiB|47",
+        "cgroup": "cpu.stat\nusage_usec 646527765\nuser_usec 509374351\nsystem_usec 137153414\nnice_usec 0\nnr_periods 7172\nnr_throttled 136\nthrottled_usec 4438318\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1631821824\nmemory.current\n1482883072"
+      },
+      {
+        "seconds": 113.83,
+        "stats": "99.06%|1.138GiB / 2GiB|46",
+        "cgroup": "cpu.stat\nusage_usec 667818591\nuser_usec 523927243\nsystem_usec 143891348\nnice_usec 0\nnr_periods 7392\nnr_throttled 140\nthrottled_usec 4613786\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1644326912\nmemory.current\n1644281856"
+      },
+      {
+        "seconds": 135.78,
+        "stats": "85.45%|1.03GiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 689591694\nuser_usec 541094831\nsystem_usec 148496863\nnice_usec 0\nnr_periods 7611\nnr_throttled 144\nthrottled_usec 4761849\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1651802112\nmemory.current\n1462059008"
+      },
+      {
+        "seconds": 157.82,
+        "stats": "98.55%|1.212GiB / 2GiB|50",
+        "cgroup": "cpu.stat\nusage_usec 711627662\nuser_usec 559467090\nsystem_usec 152160572\nnice_usec 0\nnr_periods 7832\nnr_throttled 149\nthrottled_usec 4972413\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1651802112\nmemory.current\n1583869952"
+      },
+      {
+        "seconds": 179.76,
+        "stats": "97.71%|1.021GiB / 2GiB|48",
+        "cgroup": "cpu.stat\nusage_usec 733347871\nuser_usec 576831523\nsystem_usec 156516347\nnice_usec 0\nnr_periods 8051\nnr_throttled 155\nthrottled_usec 5129264\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1651802112\nmemory.current\n1400676352"
+      },
+      {
+        "seconds": 201.64,
+        "stats": "99.30%|1.101GiB / 2GiB|48",
+        "cgroup": "cpu.stat\nusage_usec 752817944\nuser_usec 592103910\nsystem_usec 160714034\nnice_usec 0\nnr_periods 8266\nnr_throttled 158\nthrottled_usec 5250840\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1651802112\nmemory.current\n1512554496"
+      },
+      {
+        "seconds": 223.65,
+        "stats": "99.50%|1.091GiB / 2GiB|48",
+        "cgroup": "cpu.stat\nusage_usec 773793926\nuser_usec 610111029\nsystem_usec 163682896\nnice_usec 0\nnr_periods 8479\nnr_throttled 161\nthrottled_usec 5366058\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1651802112\nmemory.current\n1418600448"
+      },
+      {
+        "seconds": 247.64,
+        "stats": "42.74%|1.053GiB / 2GiB|48",
+        "cgroup": "cpu.stat\nusage_usec 795275097\nuser_usec 627244930\nsystem_usec 168030167\nnice_usec 0\nnr_periods 8714\nnr_throttled 166\nthrottled_usec 5536586\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1651802112\nmemory.current\n1383976960"
+      },
+      {
+        "seconds": 270.43,
+        "stats": "98.74%|1.144GiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 815004475\nuser_usec 643556991\nsystem_usec 171447484\nnice_usec 0\nnr_periods 8920\nnr_throttled 169\nthrottled_usec 5659783\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1651802112\nmemory.current\n1483665408"
+      },
+      {
+        "seconds": 293.35,
+        "stats": "98.22%|1.056GiB / 2GiB|47",
+        "cgroup": "cpu.stat\nusage_usec 837199361\nuser_usec 663677427\nsystem_usec 173521934\nnice_usec 0\nnr_periods 9141\nnr_throttled 173\nthrottled_usec 5803983\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1651802112\nmemory.current\n1418129408"
+      },
+      {
+        "seconds": 315.29,
+        "stats": "99.09%|1.103GiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 859368403\nuser_usec 684208941\nsystem_usec 175159461\nnice_usec 0\nnr_periods 9360\nnr_throttled 177\nthrottled_usec 5961116\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1651802112\nmemory.current\n1442721792"
+      },
+      {
+        "seconds": 337.23,
+        "stats": "98.85%|1.143GiB / 2GiB|49",
+        "cgroup": "cpu.stat\nusage_usec 881287458\nuser_usec 702386924\nsystem_usec 178900533\nnice_usec 0\nnr_periods 9579\nnr_throttled 182\nthrottled_usec 6103571\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1651802112\nmemory.current\n1543843840"
+      },
+      {
+        "seconds": 361.12,
+        "stats": "97.36%|1.096GiB / 2GiB|50",
+        "cgroup": "cpu.stat\nusage_usec 904909582\nuser_usec 721325889\nsystem_usec 183583692\nnice_usec 0\nnr_periods 9818\nnr_throttled 186\nthrottled_usec 6271134\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1651802112\nmemory.current\n1518575616"
+      },
+      {
+        "seconds": 383.03,
+        "stats": "98.58%|1.14GiB / 2GiB|49",
+        "cgroup": "cpu.stat\nusage_usec 926355092\nuser_usec 736874838\nsystem_usec 189480253\nnice_usec 0\nnr_periods 10037\nnr_throttled 190\nthrottled_usec 6328732\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1651802112\nmemory.current\n1559359488"
+      },
+      {
+        "seconds": 406.99,
+        "stats": "100.31%|1.125GiB / 2GiB|49",
+        "cgroup": "cpu.stat\nusage_usec 950054002\nuser_usec 756552106\nsystem_usec 193501895\nnice_usec 0\nnr_periods 10276\nnr_throttled 194\nthrottled_usec 6441722\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1651802112\nmemory.current\n1548058624"
+      },
+      {
+        "seconds": 428.8,
+        "stats": "99.05%|1.166GiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 971882661\nuser_usec 775043620\nsystem_usec 196839041\nnice_usec 0\nnr_periods 10495\nnr_throttled 199\nthrottled_usec 6593865\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1677258752\nmemory.current\n1533276160"
+      },
+      {
+        "seconds": 452.98,
+        "stats": "99.74%|1.321GiB / 2GiB|49",
+        "cgroup": "cpu.stat\nusage_usec 996912428\nuser_usec 796765198\nsystem_usec 200147230\nnice_usec 0\nnr_periods 10745\nnr_throttled 206\nthrottled_usec 6856212\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1725423616\nmemory.current\n1676099584"
+      },
+      {
+        "seconds": 475.58,
+        "stats": "102.03%|1.171GiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 1018866160\nuser_usec 816674796\nsystem_usec 202191363\nnice_usec 0\nnr_periods 10963\nnr_throttled 212\nthrottled_usec 7061562\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1725423616\nmemory.current\n1511038976"
+      },
+      {
+        "seconds": 497.32,
+        "stats": "99.25%|1.349GiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 1040759993\nuser_usec 836293316\nsystem_usec 204466676\nnice_usec 0\nnr_periods 11180\nnr_throttled 216\nthrottled_usec 7193520\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1725423616\nmemory.current\n1705984000"
+      },
+      {
+        "seconds": 519.08,
+        "stats": "98.20%|1.25GiB / 2GiB|52",
+        "cgroup": "cpu.stat\nusage_usec 1062593657\nuser_usec 856559452\nsystem_usec 206034205\nnice_usec 0\nnr_periods 11398\nnr_throttled 221\nthrottled_usec 7388990\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1725423616\nmemory.current\n1585934336"
+      },
+      {
+        "seconds": 541.39,
+        "stats": "97.93%|1.222GiB / 2GiB|52",
+        "cgroup": "cpu.stat\nusage_usec 1085110789\nuser_usec 877229850\nsystem_usec 207880938\nnice_usec 0\nnr_periods 11621\nnr_throttled 225\nthrottled_usec 7540010\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1725423616\nmemory.current\n1551101952"
+      },
+      {
+        "seconds": 563.48,
+        "stats": "99.17%|1.368GiB / 2GiB|52",
+        "cgroup": "cpu.stat\nusage_usec 1106928289\nuser_usec 894527855\nsystem_usec 212400433\nnice_usec 0\nnr_periods 11842\nnr_throttled 229\nthrottled_usec 7703002\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1735667712\nmemory.current\n1735606272"
+      },
+      {
+        "seconds": 585.41,
+        "stats": "99.90%|1.393GiB / 2GiB|52",
+        "cgroup": "cpu.stat\nusage_usec 1128962224\nuser_usec 914518208\nsystem_usec 214444016\nnice_usec 0\nnr_periods 12061\nnr_throttled 236\nthrottled_usec 7877409\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1771548672\nmemory.current\n1723281408"
+      },
+      {
+        "seconds": 609.51,
+        "stats": "98.66%|1.218GiB / 2GiB|52",
+        "cgroup": "cpu.stat\nusage_usec 1153422671\nuser_usec 936995651\nsystem_usec 216427019\nnice_usec 0\nnr_periods 12302\nnr_throttled 243\nthrottled_usec 8103851\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1771548672\nmemory.current\n1513844736"
+      },
+      {
+        "seconds": 633.38,
+        "stats": "87.02%|1.337GiB / 2GiB|49",
+        "cgroup": "cpu.stat\nusage_usec 1178005034\nuser_usec 958185333\nsystem_usec 219819701\nnice_usec 0\nnr_periods 12551\nnr_throttled 247\nthrottled_usec 8228169\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1771548672\nmemory.current\n1587019776"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "cargo",
+      "args": [],
+      "working_dir": "basics/static-files",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "rust",
+    "phase_events": [
+      {
+        "at": "2026-11-17T13:22:57.226Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-17T13:22:57.240Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-17T13:22:57.242Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-17T13:22:57.245Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-17T13:23:02.199Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-17T13:23:02.200Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-17T13:23:02.200Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-17T13:23:02.341Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-17T13:33:36.548Z",
+        "event": "saving image tar"
+      },
+      {
+        "at": "2026-11-17T13:33:36.703Z",
+        "event": "dynamic build finished (stub finalize, no upload yet)"
+      },
+      {
+        "at": "2026-11-17T13:33:36.775Z",
+        "event": "deployment job completed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"78901a8d-f907-4a47-9933-d88803e57c9f\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 75,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"78901a8d-f907-4a47-9933-d88803e57c9f\",\"status\":\"success\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": true,
+    "image_layer_bytes": 14889984,
+    "image_config_bytes": 1578,
+    "runtime": {
+      "ready": false,
+      "startup_seconds": 53.017,
+      "probe_url": "http://127.0.0.1:8080/",
+      "first_response": "404|0.000837|",
+      "response_sample": "",
+      "warm_http": [],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    }
+  },
+  "prior_classification": "image-build-pass/runtime-fail",
+  "worker": {
+    "lane": 1,
+    "worker_container": "zdround2-1-worker",
+    "broker_vhost": "zdround2-1",
+    "commit_sha": "9206b40d50b04ab44f9a51f6b0282d9103323700",
+    "deployment_id": "40c03b06-9be4-4884-8039-e14da76e9ea6",
+    "state": "success",
+    "database_row": "success||",
+    "end_to_end_seconds": 724.717,
+    "resource_samples": [
+      {
+        "seconds": 0.45,
+        "stats": "0.76%|10.05MiB / 2GiB|7",
+        "cgroup": "cpu.stat\nusage_usec 253203\nuser_usec 106181\nsystem_usec 147021\nnice_usec 0\nnr_periods 40\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\nmemory.peak\n26132480\nmemory.current\n26804224"
+      },
+      {
+        "seconds": 23.96,
+        "stats": "39.53%|48.34MiB / 2GiB|10",
+        "cgroup": "cpu.stat\nusage_usec 6678327\nuser_usec 4090817\nsystem_usec 2587510\nnice_usec 0\nnr_periods 263\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\nmemory.peak\n140509184\nmemory.current\n141074432"
+      },
+      {
+        "seconds": 45.3,
+        "stats": "40.21%|50.04MiB / 2GiB|10",
+        "cgroup": "cpu.stat\nusage_usec 13458674\nuser_usec 8569210\nsystem_usec 4889463\nnice_usec 0\nnr_periods 476\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\nmemory.peak\n206749696\nmemory.current\n207097856"
+      },
+      {
+        "seconds": 66.68,
+        "stats": "33.70%|62.52MiB / 2GiB|11",
+        "cgroup": "cpu.stat\nusage_usec 21941611\nuser_usec 14315591\nsystem_usec 7626020\nnice_usec 0\nnr_periods 690\nnr_throttled 1\nthrottled_usec 1692\nnr_bursts 0\nburst_usec 0\nmemory.peak\n373309440\nmemory.current\n273645568"
+      },
+      {
+        "seconds": 90.12,
+        "stats": "22.90%|63.04MiB / 2GiB|11",
+        "cgroup": "cpu.stat\nusage_usec 28566401\nuser_usec 18544212\nsystem_usec 10022189\nnice_usec 0\nnr_periods 924\nnr_throttled 1\nthrottled_usec 1692\nnr_bursts 0\nburst_usec 0\nmemory.peak\n373309440\nmemory.current\n299823104"
+      },
+      {
+        "seconds": 113.55,
+        "stats": "113.64%|182.6MiB / 2GiB|15",
+        "cgroup": "cpu.stat\nusage_usec 37960648\nuser_usec 24852032\nsystem_usec 13108616\nnice_usec 0\nnr_periods 1159\nnr_throttled 1\nthrottled_usec 1692\nnr_bursts 0\nburst_usec 0\nmemory.peak\n574099456\nmemory.current\n573632512"
+      },
+      {
+        "seconds": 135.26,
+        "stats": "59.38%|505.3MiB / 2GiB|36",
+        "cgroup": "cpu.stat\nusage_usec 50827131\nuser_usec 32435532\nsystem_usec 18391599\nnice_usec 0\nnr_periods 1360\nnr_throttled 4\nthrottled_usec 41256\nnr_bursts 0\nburst_usec 0\nmemory.peak\n819970048\nmemory.current\n788570112"
+      },
+      {
+        "seconds": 160.33,
+        "stats": "95.37%|1005MiB / 2GiB|43",
+        "cgroup": "cpu.stat\nusage_usec 67732412\nuser_usec 38765255\nsystem_usec 28967156\nnice_usec 0\nnr_periods 1587\nnr_throttled 17\nthrottled_usec 460207\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1247899648\nmemory.current\n1190809600"
+      },
+      {
+        "seconds": 184.82,
+        "stats": "87.55%|1.037GiB / 2GiB|45",
+        "cgroup": "cpu.stat\nusage_usec 91635052\nuser_usec 56378407\nsystem_usec 35256644\nnice_usec 0\nnr_periods 1832\nnr_throttled 25\nthrottled_usec 601340\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1307672576\nmemory.current\n1234755584"
+      },
+      {
+        "seconds": 208.84,
+        "stats": "90.18%|906.1MiB / 2GiB|44",
+        "cgroup": "cpu.stat\nusage_usec 115904305\nuser_usec 74857590\nsystem_usec 41046715\nnice_usec 0\nnr_periods 2073\nnr_throttled 34\nthrottled_usec 971787\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1337655296\nmemory.current\n993730560"
+      },
+      {
+        "seconds": 233.14,
+        "stats": "87.03%|998.8MiB / 2GiB|42",
+        "cgroup": "cpu.stat\nusage_usec 138553543\nuser_usec 92153023\nsystem_usec 46400519\nnice_usec 0\nnr_periods 2321\nnr_throttled 48\nthrottled_usec 1397862\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1337655296\nmemory.current\n1144049664"
+      },
+      {
+        "seconds": 257.87,
+        "stats": "95.97%|954.7MiB / 2GiB|42",
+        "cgroup": "cpu.stat\nusage_usec 162668595\nuser_usec 112319289\nsystem_usec 50349305\nnice_usec 0\nnr_periods 2566\nnr_throttled 55\nthrottled_usec 1592973\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1337655296\nmemory.current\n1124229120"
+      },
+      {
+        "seconds": 282.3,
+        "stats": "91.84%|968MiB / 2GiB|42",
+        "cgroup": "cpu.stat\nusage_usec 182851753\nuser_usec 128185891\nsystem_usec 54665861\nnice_usec 0\nnr_periods 2792\nnr_throttled 55\nthrottled_usec 1592973\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1337655296\nmemory.current\n1142210560"
+      },
+      {
+        "seconds": 306.18,
+        "stats": "53.41%|926MiB / 2GiB|42",
+        "cgroup": "cpu.stat\nusage_usec 205459959\nuser_usec 147369439\nsystem_usec 58090519\nnice_usec 0\nnr_periods 3025\nnr_throttled 60\nthrottled_usec 1797881\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1337655296\nmemory.current\n1077825536"
+      },
+      {
+        "seconds": 329.92,
+        "stats": "62.78%|889.5MiB / 2GiB|41",
+        "cgroup": "cpu.stat\nusage_usec 225155441\nuser_usec 162863027\nsystem_usec 62292413\nnice_usec 0\nnr_periods 3242\nnr_throttled 65\nthrottled_usec 1975766\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1337655296\nmemory.current\n1007710208"
+      },
+      {
+        "seconds": 353.43,
+        "stats": "97.56%|1.002GiB / 2GiB|42",
+        "cgroup": "cpu.stat\nusage_usec 247073943\nuser_usec 181449753\nsystem_usec 65624190\nnice_usec 0\nnr_periods 3473\nnr_throttled 69\nthrottled_usec 2136819\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1337655296\nmemory.current\n1157476352"
+      },
+      {
+        "seconds": 377.16,
+        "stats": "98.51%|1.065GiB / 2GiB|44",
+        "cgroup": "cpu.stat\nusage_usec 270948224\nuser_usec 203210141\nsystem_usec 67738083\nnice_usec 0\nnr_periods 3710\nnr_throttled 74\nthrottled_usec 2302776\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1337655296\nmemory.current\n1252548608"
+      },
+      {
+        "seconds": 400.77,
+        "stats": "93.16%|970MiB / 2GiB|42",
+        "cgroup": "cpu.stat\nusage_usec 294803871\nuser_usec 223745951\nsystem_usec 71057919\nnice_usec 0\nnr_periods 3946\nnr_throttled 80\nthrottled_usec 2481825\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1337655296\nmemory.current\n1141391360"
+      },
+      {
+        "seconds": 424.48,
+        "stats": "98.46%|981.4MiB / 2GiB|42",
+        "cgroup": "cpu.stat\nusage_usec 318659956\nuser_usec 244121673\nsystem_usec 74538282\nnice_usec 0\nnr_periods 4183\nnr_throttled 86\nthrottled_usec 2591246\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1337655296\nmemory.current\n1118986240"
+      },
+      {
+        "seconds": 447.45,
+        "stats": "82.70%|992.2MiB / 2GiB|45",
+        "cgroup": "cpu.stat\nusage_usec 337476513\nuser_usec 257506939\nsystem_usec 79969574\nnice_usec 0\nnr_periods 4412\nnr_throttled 103\nthrottled_usec 4097736\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1337655296\nmemory.current\n1148727296"
+      },
+      {
+        "seconds": 471.17,
+        "stats": "97.36%|939.4MiB / 2GiB|42",
+        "cgroup": "cpu.stat\nusage_usec 361289046\nuser_usec 276948614\nsystem_usec 84340431\nnice_usec 0\nnr_periods 4649\nnr_throttled 108\nthrottled_usec 4264492\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1337655296\nmemory.current\n1070141440"
+      },
+      {
+        "seconds": 494.81,
+        "stats": "100.34%|928.7MiB / 2GiB|44",
+        "cgroup": "cpu.stat\nusage_usec 385273409\nuser_usec 296996220\nsystem_usec 88277188\nnice_usec 0\nnr_periods 4885\nnr_throttled 114\nthrottled_usec 4511466\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1337655296\nmemory.current\n1130094592"
+      },
+      {
+        "seconds": 519.0,
+        "stats": "96.68%|984.2MiB / 2GiB|42",
+        "cgroup": "cpu.stat\nusage_usec 409991412\nuser_usec 317703370\nsystem_usec 92288042\nnice_usec 0\nnr_periods 5128\nnr_throttled 123\nthrottled_usec 4878072\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1365475328\nmemory.current\n1153761280"
+      },
+      {
+        "seconds": 542.91,
+        "stats": "99.17%|891.7MiB / 2GiB|42",
+        "cgroup": "cpu.stat\nusage_usec 435083849\nuser_usec 340083194\nsystem_usec 95000655\nnice_usec 0\nnr_periods 5374\nnr_throttled 130\nthrottled_usec 5174533\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1365475328\nmemory.current\n1045606400"
+      },
+      {
+        "seconds": 567.71,
+        "stats": "78.66%|933.4MiB / 2GiB|44",
+        "cgroup": "cpu.stat\nusage_usec 459206741\nuser_usec 362131599\nsystem_usec 97075141\nnice_usec 0\nnr_periods 5614\nnr_throttled 141\nthrottled_usec 5643783\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1365475328\nmemory.current\n1032245248"
+      },
+      {
+        "seconds": 591.63,
+        "stats": "98.21%|925.3MiB / 2GiB|42",
+        "cgroup": "cpu.stat\nusage_usec 479080295\nuser_usec 379293372\nsystem_usec 99786923\nnice_usec 0\nnr_periods 5799\nnr_throttled 189\nthrottled_usec 9735346\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1365475328\nmemory.current\n1043537920"
+      },
+      {
+        "seconds": 614.13,
+        "stats": "99.82%|745.7MiB / 2GiB|44",
+        "cgroup": "cpu.stat\nusage_usec 499050725\nuser_usec 397065208\nsystem_usec 101985517\nnice_usec 0\nnr_periods 6005\nnr_throttled 198\nthrottled_usec 9821413\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1365475328\nmemory.current\n872292352"
+      },
+      {
+        "seconds": 637.9,
+        "stats": "58.52%|964.5MiB / 2GiB|42",
+        "cgroup": "cpu.stat\nusage_usec 521864192\nuser_usec 414877692\nsystem_usec 106986500\nnice_usec 0\nnr_periods 6242\nnr_throttled 204\nthrottled_usec 10064586\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1365475328\nmemory.current\n1229733888"
+      },
+      {
+        "seconds": 660.76,
+        "stats": "99.02%|1023MiB / 2GiB|44",
+        "cgroup": "cpu.stat\nusage_usec 543494267\nuser_usec 434319449\nsystem_usec 109174817\nnice_usec 0\nnr_periods 6458\nnr_throttled 221\nthrottled_usec 11337379\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1365475328\nmemory.current\n1319567360"
+      },
+      {
+        "seconds": 684.21,
+        "stats": "96.36%|865MiB / 2GiB|44",
+        "cgroup": "cpu.stat\nusage_usec 567173605\nuser_usec 456287775\nsystem_usec 110885829\nnice_usec 0\nnr_periods 6693\nnr_throttled 224\nthrottled_usec 11428759\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1365475328\nmemory.current\n1050017792"
+      },
+      {
+        "seconds": 707.83,
+        "stats": "84.68%|862MiB / 2GiB|37",
+        "cgroup": "cpu.stat\nusage_usec 590361663\nuser_usec 475583748\nsystem_usec 114777914\nnice_usec 0\nnr_periods 6929\nnr_throttled 224\nthrottled_usec 11428759\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1365475328\nmemory.current\n1093349376"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "cargo",
+      "args": [],
+      "working_dir": "basics/static-files",
+      "scanner_policy_version": "v1"
+    },
+    "deployment": "not attempted",
+    "framework": "rust",
+    "git_phase_diagnostics": [
+      "ZERODEVOPS_GIT phase=fetch attempt=1 seconds=1.446 success=true",
+      "ZERODEVOPS_GIT phase=checkout seconds=0.066 verified_sha=9206b40d50b04ab44f9a51f6b0282d9103323700"
+    ],
+    "mock_upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"40c03b06-9be4-4884-8039-e14da76e9ea6\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 75,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"40c03b06-9be4-4884-8039-e14da76e9ea6\",\"status\":\"success\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": true,
+    "image_layer_bytes": 14907392,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 1.454,
+      "probe_url": "http://127.0.0.1:8080/",
+      "first_response": "200|0.001873|text/html; charset=utf-8",
+      "response_sample": "<!DOCTYPE html>\n<meta charset=\"utf-8\" />\n<html>\n<head>\n    <link rel=\"stylesheet\" href=\"css/example.css\" />\n    <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>\n    <script src=\"/js/example.js\"></script>\n</head",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.001316
+        },
+        {
+          "status": 200,
+          "seconds": 0.001206
+        },
+        {
+          "status": 200,
+          "seconds": 0.001087
+        },
+        {
+          "status": 200,
+          "seconds": 0.001311
+        },
+        {
+          "status": 200,
+          "seconds": 0.001305
+        },
+        {
+          "status": 200,
+          "seconds": 0.001119
+        },
+        {
+          "status": 200,
+          "seconds": 0.001092
+        },
+        {
+          "status": 200,
+          "seconds": 0.001236
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    },
+    "external_container_http": [
+      {
+        "from_container": "zdround2-1-mock",
+        "target_worker_ip": "172.25.0.5",
+        "url": "http://172.25.0.5:8080/",
+        "exit_code": 7,
+        "response": "000|0.000347|curl: (7) Failed to connect to 172.25.0.5 port 8080 after 0 ms: Could not connect to server",
+        "reachable_expected_class": false
+      }
+    ]
+  },
+  "worker_classification": "build-and-runtime-pass",
+  "classification": "build-and-runtime-pass",
+  "finished_at": "2026-11-17T18:51:01.192003+00:00"
+}

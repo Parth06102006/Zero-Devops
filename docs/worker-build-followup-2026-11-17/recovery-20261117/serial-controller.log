@@ -1,0 +1,10 @@
+START failures lane=1 node-prisma-realworld
+RESULT node-prisma-realworld missing-code-generation
+START failures lane=1 sinatra-simple
+RESULT sinatra-simple detection-unsupported
+START failures lane=1 vite-svelte
+RESULT vite-svelte build-and-runtime-pass
+START failures lane=1 vite-svelte-ts
+RESULT vite-svelte-ts build-and-runtime-pass
+START failures lane=1 vue-docs
+RESULT vue-docs build-and-runtime-pass

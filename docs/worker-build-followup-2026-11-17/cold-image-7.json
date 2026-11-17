@@ -1,0 +1,757 @@
+{
+    "Type": "buildah 0.0.1",
+    "FromImage": "docker.io/library/composer:2",
+    "FromImageID": "8f6b5d78c17af03a32c95e782da3ab352b70e8e4b24ac6b612166fd26efe3766",
+    "FromImageDigest": "sha256:c4a7ecd02a3469b6ff2b73930d3911831c5095ae760c3d15065df22cdf40e7f0",
+    "GroupAdd": null,
+    "Config": "{\"architecture\":\"amd64\",\"config\":{\"Env\":[\"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\",\"PHPIZE_DEPS=autoconf \\t\\tdpkg-dev dpkg \\t\\tfile \\t\\tg++ \\t\\tgcc \\t\\tlibc-dev \\t\\tmake \\t\\tpkgconf \\t\\tre2c\",\"PHP_INI_DIR=/usr/local/etc/php\",\"PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64\",\"PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64\",\"PHP_LDFLAGS=-Wl,-O1 -pie\",\"GPG_KEYS=1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5\",\"PHP_VERSION=8.5.12\",\"PHP_URL=https://www.php.net/distributions/php-8.5.12.tar.xz\",\"PHP_ASC_URL=https://www.php.net/distributions/php-8.5.12.tar.xz.asc\",\"PHP_SHA256=08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209\",\"COMPOSER_ALLOW_SUPERUSER=1\",\"COMPOSER_HOME=/tmp\",\"COMPOSER_VERSION=2.11.2\"],\"Entrypoint\":[\"/docker-entrypoint.sh\"],\"Cmd\":[\"composer\"],\"WorkingDir\":\"/app\"},\"created\":\"2026-11-10T19:17:32.683800436Z\",\"history\":[{\"created\":\"2026-11-05T18:00:28.583714131Z\",\"created_by\":\"ADD alpine-minirootfs-3.24.4-x86_64.tar.gz / # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-05T18:00:28.583714131Z\",\"created_by\":\"CMD [\\\"/bin/sh\\\"]\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-05T18:56:50.096677978Z\",\"created_by\":\"ENV PHPIZE_DEPS=autoconf \\t\\tdpkg-dev dpkg \\t\\tfile \\t\\tg++ \\t\\tgcc \\t\\tlibc-dev \\t\\tmake \\t\\tpkgconf \\t\\tre2c\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-05T18:56:50.096677978Z\",\"created_by\":\"RUN /bin/sh -c apk add --no-cache \\t\\tca-certificates \\t\\tcurl \\t\\topenssl \\t\\ttar \\t\\txz # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-05T18:56:50.196462135Z\",\"created_by\":\"RUN /bin/sh -c set -eux; \\tadduser -u 82 -D -S -G www-data www-data # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-05T18:56:50.196462135Z\",\"created_by\":\"ENV PHP_INI_DIR=/usr/local/etc/php\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-05T18:56:50.274021209Z\",\"created_by\":\"RUN /bin/sh -c set -eux; \\tmkdir -p \\\"$PHP_INI_DIR/conf.d\\\"; \\t[ ! -d /var/www/html ]; \\tmkdir -p /var/www/html; \\tchown www-data:www-data /var/www/html; \\tchmod 1777 /var/www/html # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-05T18:56:50.274021209Z\",\"created_by\":\"ENV PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-05T18:56:50.274021209Z\",\"created_by\":\"ENV PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-05T18:56:50.274021209Z\",\"created_by\":\"ENV PHP_LDFLAGS=-Wl,-O1 -pie\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-05T18:56:50.274021209Z\",\"created_by\":\"ENV GPG_KEYS=1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-05T18:56:50.274021209Z\",\"created_by\":\"ENV PHP_VERSION=8.5.12\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-05T18:56:50.274021209Z\",\"created_by\":\"ENV PHP_URL=https://www.php.net/distributions/php-8.5.12.tar.xz PHP_ASC_URL=https://www.php.net/distributions/php-8.5.12.tar.xz.asc\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-05T18:56:50.274021209Z\",\"created_by\":\"ENV PHP_SHA256=08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-05T18:56:52.645107204Z\",\"created_by\":\"RUN /bin/sh -c set -eux; \\t\\tapk add --no-cache --virtual .fetch-deps gnupg; \\t\\tmkdir -p /usr/src; \\tcd /usr/src; \\t\\tcurl -fsSL -o php.tar.xz \\\"$PHP_URL\\\"; \\t\\tif [ -n \\\"$PHP_SHA256\\\" ]; then \\t\\techo \\\"$PHP_SHA256 *php.tar.xz\\\" | sha256sum -c -; \\tfi; \\t\\tcurl -fsSL -o php.tar.xz.asc \\\"$PHP_ASC_URL\\\"; \\texport GNUPGHOME=\\\"$(mktemp -d)\\\"; \\tfor key in $GPG_KEYS; do \\t\\tgpg --batch --keyserver keyserver.ubuntu.com --recv-keys \\\"$key\\\"; \\tdone; \\tgpg --batch --verify php.tar.xz.asc php.tar.xz; \\tgpgconf --kill all; \\trm -rf \\\"$GNUPGHOME\\\"; \\t\\tapk del --no-network .fetch-deps # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-05T18:56:52.694121857Z\",\"created_by\":\"COPY docker-php-source /usr/local/bin/ # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-05T18:59:51.696148991Z\",\"created_by\":\"RUN /bin/sh -c set -eux; \\tapk add --no-cache --virtual .build-deps \\t\\t$PHPIZE_DEPS \\t\\targon2-dev \\t\\tcoreutils \\t\\tcurl-dev \\t\\tgnu-libiconv-dev \\t\\tlibsodium-dev \\t\\tlibxml2-dev \\t\\tlinux-headers \\t\\toniguruma-dev \\t\\topenssl-dev \\t\\treadline-dev \\t\\tsqlite-dev \\t; \\t\\trm -vf /usr/include/iconv.h; \\t\\texport \\t\\tCFLAGS=\\\"$PHP_CFLAGS\\\" \\t\\tCPPFLAGS=\\\"$PHP_CPPFLAGS\\\" \\t\\tLDFLAGS=\\\"$PHP_LDFLAGS\\\" \\t\\tPHP_BUILD_PROVIDER='https://github.com/docker-library/php' \\t\\tPHP_UNAME='Linux - Docker' \\t; \\tdocker-php-source extract; \\tcd /usr/src/php; \\tgnuArch=\\\"$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)\\\"; \\tcase \\\"$gnuArch\\\" in \\t\\t'i686-linux-'*) \\t\\t\\texport \\t\\t\\t\\tCFLAGS=\\\"$CFLAGS -msse2 -mfpmath=sse\\\" \\t\\t\\t\\tCPPFLAGS=\\\"$CPPFLAGS -msse2 -mfpmath=sse\\\" \\t\\t\\t; \\t\\t\\t;; \\tesac; \\ttest \\\"$PHP_INI_DIR\\\" != \\\"${PHP_INI_DIR%/php}\\\"; \\t./configure \\t\\t--build=\\\"$gnuArch\\\" \\t\\t--sysconfdir=\\\"${PHP_INI_DIR%/php}\\\" \\t\\t--with-config-file-path=\\\"$PHP_INI_DIR\\\" \\t\\t--with-config-file-scan-dir=\\\"$PHP_INI_DIR/conf.d\\\" \\t\\t\\t\\t--enable-option-checking=fatal \\t\\t\\t\\t--with-mhash \\t\\t\\t\\t--with-pic \\t\\t\\t\\t--enable-mbstring \\t\\t--enable-mysqlnd \\t\\t--with-password-argon2 \\t\\t--with-sodium=shared \\t\\t--with-pdo-sqlite=/usr \\t\\t--with-sqlite3=/usr \\t\\t\\t\\t--with-curl \\t\\t--with-iconv=/usr \\t\\t--with-openssl \\t\\t--with-readline \\t\\t--with-zlib \\t\\t\\t\\t--enable-phpdbg \\t\\t--enable-phpdbg-readline \\t\\t\\t\\t--with-pear \\t\\t\\t; \\tmake -j \\\"$(nproc)\\\"; \\tfind -type f -name '*.a' -delete; \\tmake install; \\tfind \\t\\t/usr/local \\t\\t-type f \\t\\t-perm '/0111' \\t\\t-exec sh -euxc ' \\t\\t\\tstrip --strip-all \\\"$@\\\" || : \\t\\t' -- '{}' + \\t; \\tmake clean; \\t\\tcp -v php.ini-* \\\"$PHP_INI_DIR/\\\"; \\t\\tcd /; \\tdocker-php-source delete; \\t\\trunDeps=\\\"$( \\t\\tscanelf --needed --nobanner --format '%n#p' --recursive /usr/local \\t\\t\\t| tr ',' '\\\\n' \\t\\t\\t| sort -u \\t\\t\\t| awk 'system(\\\"[ -e /usr/local/lib/\\\" $1 \\\" ]\\\") == 0 { next } { print \\\"so:\\\" $1 }' \\t)\\\"; \\tapk add --no-cache $runDeps; \\t\\tapk del --no-network .build-deps; \\t\\tpecl update-channels; \\trm -rf /tmp/pear ~/.pearrc; \\t\\tphp --version # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-05T18:59:51.72985312Z\",\"created_by\":\"COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/ # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-05T18:59:52.26086574Z\",\"created_by\":\"RUN /bin/sh -c docker-php-ext-enable sodium # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-05T18:59:52.26086574Z\",\"created_by\":\"ENTRYPOINT [\\\"docker-php-entrypoint\\\"]\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-05T18:59:52.26086574Z\",\"created_by\":\"CMD [\\\"php\\\" \\\"-a\\\"]\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-10T19:17:20.721990453Z\",\"created_by\":\"RUN /bin/sh -c set -eux ;   apk add --no-cache --virtual .composer-rundeps     7zip     bash     coreutils     git     make     mercurial     openssh-client     patch     subversion     tini     unzip     zip # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-10T19:17:20.826641147Z\",\"created_by\":\"RUN /bin/sh -c printf \\\"# composer php cli ini settings\\\\ndate.timezone=UTC\\\\nmemory_limit=-1\\\\n\\\" \\u003e $PHP_INI_DIR/php-cli.ini # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-10T19:17:32.61701235Z\",\"created_by\":\"ENV COMPOSER_ALLOW_SUPERUSER=1\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-10T19:17:32.61701235Z\",\"created_by\":\"ENV COMPOSER_HOME=/tmp\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-10T19:17:32.61701235Z\",\"created_by\":\"ENV COMPOSER_VERSION=2.11.2\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-10T19:17:32.61701235Z\",\"created_by\":\"RUN /bin/sh -c set -eux ;   apk add --no-cache --virtual .build-deps     $PHPIZE_DEPS     bzip2-dev     libzip-dev   ;   docker-php-ext-install -j \\\"$(nproc)\\\"     bz2     zip   ;   runDeps=\\\"$(     scanelf --needed --nobanner --format '%n#p' --recursive /usr/local/lib/php/extensions       | tr ',' '\\\\n'       | sort -u       | awk 'system(\\\"[ -e /usr/local/lib/\\\" $1 \\\" ]\\\") == 0 { next } { print \\\"so:\\\" $1 }'   )\\\" ;   apk add --no-cache --virtual .composer-phpext-rundeps $runDeps ;   apk del --no-network .build-deps ;   curl     --silent     --fail     --location     --retry 3     --output /tmp/keys.dev.pub     --url https://raw.githubusercontent.com/composer/composer.github.io/e7f28b7200249f8e5bc912b42837d4598c74153a/snapshots.pub   ;   echo 572b963c4b7512a7de3c71a788772440b1996d918b1d2b5354bf8ba2bb057fadec6f7ac4852f2f8a8c01ab94c18141ce0422aec3619354b057216e0597db5ac2 /tmp/keys.dev.pub | sha512sum --strict --check ;   curl     --silent     --fail     --location     --retry 3     --output /tmp/keys.tags.pub     --url https://raw.githubusercontent.com/composer/composer.github.io/e7f28b7200249f8e5bc912b42837d4598c74153a/releases.pub   ;   echo 47f374b8840dcb0aa7b2327f13d24ab5f6ae9e58aa630af0d62b3d0ea114f4a315c5d97b21dcad3c7ffe2f0a95db2edec267adaba3f4f5a262abebe39aed3a28 /tmp/keys.tags.pub | sha512sum --strict --check ;   curl     --silent     --fail     --location     --retry 3     --output /tmp/installer.php     --url https://raw.githubusercontent.com/composer/getcomposer.org/f24b8f860b95b52167f91bbd3e3a7bcafe043038/web/installer   ;   echo 3137ad86bd990524ba1dedc2038309dfa6b63790d3ca52c28afea65dcc2eaead16fb33e9a72fd2a7a8240afaf26e065939a2d472f3b0eeaa575d1e8648f9bf19 /tmp/installer.php | sha512sum --strict --check ;   php /tmp/installer.php     --no-ansi     --install-dir=/usr/bin     --filename=composer     --version=${COMPOSER_VERSION}   ;   composer --ansi --version --no-interaction ;   rm -f /tmp/installer.php ;   find /tmp -type d -exec chmod -v 1777 {} + # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-10T19:17:32.653951591Z\",\"created_by\":\"COPY docker-entrypoint.sh /docker-entrypoint.sh # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-10T19:17:32.683800436Z\",\"created_by\":\"WORKDIR /app\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-10T19:17:32.683800436Z\",\"created_by\":\"ENTRYPOINT [\\\"/docker-entrypoint.sh\\\"]\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-10T19:17:32.683800436Z\",\"created_by\":\"CMD [\\\"composer\\\"]\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true}],\"os\":\"linux\",\"rootfs\":{\"type\":\"layers\",\"diff_ids\":[\"sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064\",\"sha256:a4b5b0dc79425f28b9b2cb2e69297a69f851c37d74c6fedc0aec5af9455d4b9c\",\"sha256:add4d2bc632fe568942d9945ee8bc33a1e678f02e3cc236b4b352b2fb9a42e04\",\"sha256:5562775c2d1c1a9a287668e6c4d1f508479c5d59cf53b886ae3602dabe058652\",\"sha256:cd74c1257c8fbbfbf00f07fb75fbb986037aac6cb7e743f591bec3218a5351c4\",\"sha256:fb388c492006273849527c6d0612b96806a9462977be1a2f6b909c86da7c1776\",\"sha256:9c653e1a799ea38eec8f165f9821a6266b9e0c329756c6de5a03fd7dee79b231\",\"sha256:247fb359b10b2cb7e6e204ee6c364c3323c5dda15a234fda133e4479698ce12e\",\"sha256:b0dd177cbf3bde9afb5b7db2c007b5db98ae90afd204008cc6105f7e547783fe\",\"sha256:17b729dc574b8aecae9c286653d33474d15901e21ec92958d3cc04920d8dda9e\",\"sha256:02e578f28c2bc409450f90cc2c2aecd3de233b2aa4db640dc1d0068075690871\",\"sha256:c3b4dac01a5440910ac6322103c81fb46f80767070af402d0356a51e74dabf00\",\"sha256:b97eb66aab232061ffa0442986f36f6658aeb849d22632327b1d2a0b9bb571b4\",\"sha256:caec50b2aa698d4b6e7ca90113f68eacd95aea658ff71c81e246229d82f118c3\"]}}",
+    "Manifest": "{\n  \"schemaVersion\": 2,\n  \"mediaType\": \"application/vnd.oci.image.manifest.v1+json\",\n  \"config\": {\n    \"mediaType\": \"application/vnd.oci.image.config.v1+json\",\n    \"digest\": \"sha256:8f6b5d78c17af03a32c95e782da3ab352b70e8e4b24ac6b612166fd26efe3766\",\n    \"size\": 12105\n  },\n  \"layers\": [\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:881fc932939efef04ca120ad44bbd2c0917851eb247aa4995428afb1e80ede17\",\n      \"size\": 3853673\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:0312f92baaf41fc4fcc3fbf4e99d6ec3aa8bc14dbe729979f99ba79b4fc73766\",\n      \"size\": 3496427\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:2d90f12fda806a5ccbea87962d113619afca5c5da9a8ae46501c1e9a66eae751\",\n      \"size\": 931\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:578f772e4c9ec94d3d917436bccd347461430bdf06969165a5a0186f1cab6b0a\",\n      \"size\": 216\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:5ca884d01fa08f74fe61829358efb84221b2fa83dbc15c810dfd5b3aaaa6ac2f\",\n      \"size\": 14577831\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:bbbd210a7d127e32ee5066886f6534676693deca4ff6cecbf1c572041eecd465\",\n      \"size\": 483\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:53108bf4877b468f611087856ea4dcc0beba2c4624a7a643f767c1baabf37e3b\",\n      \"size\": 22905725\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:5841a415ab398a4c4c51b56058ef5c267809c5ee1a441563b0f771499406cf8d\",\n      \"size\": 2449\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:eced7a6ebbbef7c0242f3a5476b90907205d36b1dd4624f7b15a709abeaf77f6\",\n      \"size\": 22340\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:8b425aee88fb686a2a0d4fff590a5ab12fdc1e9c4140ef0c005cc54d63f2c83f\",\n      \"size\": 32030292\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:8703359c94acd8743af6cce9a4b47f5da7f9bdaf22d172d01952e21b6e5de2b4\",\n      \"size\": 260\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:4fb3fe7453e6f3d9df13ce19c0f4310395cdc32aa288b74e2fd78026de6bb755\",\n      \"size\": 1147748\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:66ae6140472171aeabc24ee8bbabd1d3cb0b5e19627fef680ea89c30409090c8\",\n      \"size\": 417\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:bd915139678a8114f626da2bd51640a400f742a050504417d39dc95197864718\",\n      \"size\": 93\n    }\n  ],\n  \"annotations\": {\n    \"com.docker.official-images.bashbrew.arch\": \"amd64\",\n    \"org.opencontainers.image.base.digest\": \"sha256:84378a65d97b18c8f4fd716b8837e1ca0a3c5ec1ea4d3731e2129049e8487c16\",\n    \"org.opencontainers.image.base.name\": \"php:8-alpine\",\n    \"org.opencontainers.image.created\": \"2026-11-10T19:16:53Z\",\n    \"org.opencontainers.image.revision\": \"2e9aa70f8d47ab650aa320061d7b3c1d0111827a\",\n    \"org.opencontainers.image.source\": \"https://github.com/composer/docker.git#2e9aa70f8d47ab650aa320061d7b3c1d0111827a:latest\",\n    \"org.opencontainers.image.url\": \"https://hub.docker.com/_/composer\",\n    \"org.opencontainers.image.version\": \"2.11.2\"\n  }\n}",
+    "Container": "",
+    "ContainerID": "",
+    "MountPoint": "",
+    "ProcessLabel": "",
+    "MountLabel": "",
+    "ImageAnnotations": {
+        "com.docker.official-images.bashbrew.arch": "amd64",
+        "org.opencontainers.image.base.digest": "sha256:84378a65d97b18c8f4fd716b8837e1ca0a3c5ec1ea4d3731e2129049e8487c16",
+        "org.opencontainers.image.base.name": "php:8-alpine",
+        "org.opencontainers.image.created": "2026-11-10T19:16:53Z",
+        "org.opencontainers.image.revision": "2e9aa70f8d47ab650aa320061d7b3c1d0111827a",
+        "org.opencontainers.image.source": "https://github.com/composer/docker.git#2e9aa70f8d47ab650aa320061d7b3c1d0111827a:latest",
+        "org.opencontainers.image.url": "https://hub.docker.com/_/composer",
+        "org.opencontainers.image.version": "2.11.2"
+    },
+    "ImageCreatedBy": "",
+    "OCIv1": {
+        "created": "2026-11-10T19:17:32.683800436Z",
+        "architecture": "amd64",
+        "os": "linux",
+        "config": {
+            "Env": [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "PHPIZE_DEPS=autoconf \t\tdpkg-dev dpkg \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkgconf \t\tre2c",
+                "PHP_INI_DIR=/usr/local/etc/php",
+                "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+                "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+                "PHP_LDFLAGS=-Wl,-O1 -pie",
+                "GPG_KEYS=1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5",
+                "PHP_VERSION=8.5.12",
+                "PHP_URL=https://www.php.net/distributions/php-8.5.12.tar.xz",
+                "PHP_ASC_URL=https://www.php.net/distributions/php-8.5.12.tar.xz.asc",
+                "PHP_SHA256=08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209",
+                "COMPOSER_ALLOW_SUPERUSER=1",
+                "COMPOSER_HOME=/tmp",
+                "COMPOSER_VERSION=2.11.2"
+            ],
+            "Entrypoint": [
+                "/docker-entrypoint.sh"
+            ],
+            "Cmd": [
+                "composer"
+            ],
+            "WorkingDir": "/app"
+        },
+        "rootfs": {
+            "type": "layers",
+            "diff_ids": [
+                "sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064",
+                "sha256:a4b5b0dc79425f28b9b2cb2e69297a69f851c37d74c6fedc0aec5af9455d4b9c",
+                "sha256:add4d2bc632fe568942d9945ee8bc33a1e678f02e3cc236b4b352b2fb9a42e04",
+                "sha256:5562775c2d1c1a9a287668e6c4d1f508479c5d59cf53b886ae3602dabe058652",
+                "sha256:cd74c1257c8fbbfbf00f07fb75fbb986037aac6cb7e743f591bec3218a5351c4",
+                "sha256:fb388c492006273849527c6d0612b96806a9462977be1a2f6b909c86da7c1776",
+                "sha256:9c653e1a799ea38eec8f165f9821a6266b9e0c329756c6de5a03fd7dee79b231",
+                "sha256:247fb359b10b2cb7e6e204ee6c364c3323c5dda15a234fda133e4479698ce12e",
+                "sha256:b0dd177cbf3bde9afb5b7db2c007b5db98ae90afd204008cc6105f7e547783fe",
+                "sha256:17b729dc574b8aecae9c286653d33474d15901e21ec92958d3cc04920d8dda9e",
+                "sha256:02e578f28c2bc409450f90cc2c2aecd3de233b2aa4db640dc1d0068075690871",
+                "sha256:c3b4dac01a5440910ac6322103c81fb46f80767070af402d0356a51e74dabf00",
+                "sha256:b97eb66aab232061ffa0442986f36f6658aeb849d22632327b1d2a0b9bb571b4",
+                "sha256:caec50b2aa698d4b6e7ca90113f68eacd95aea658ff71c81e246229d82f118c3"
+            ]
+        },
+        "history": [
+            {
+                "created": "2026-11-05T18:00:28.583714131Z",
+                "created_by": "ADD alpine-minirootfs-3.24.4-x86_64.tar.gz / # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-05T18:00:28.583714131Z",
+                "created_by": "CMD [\"/bin/sh\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:56:50.096677978Z",
+                "created_by": "ENV PHPIZE_DEPS=autoconf \t\tdpkg-dev dpkg \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkgconf \t\tre2c",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:56:50.096677978Z",
+                "created_by": "RUN /bin/sh -c apk add --no-cache \t\tca-certificates \t\tcurl \t\topenssl \t\ttar \t\txz # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-05T18:56:50.196462135Z",
+                "created_by": "RUN /bin/sh -c set -eux; \tadduser -u 82 -D -S -G www-data www-data # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-05T18:56:50.196462135Z",
+                "created_by": "ENV PHP_INI_DIR=/usr/local/etc/php",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:56:50.274021209Z",
+                "created_by": "RUN /bin/sh -c set -eux; \tmkdir -p \"$PHP_INI_DIR/conf.d\"; \t[ ! -d /var/www/html ]; \tmkdir -p /var/www/html; \tchown www-data:www-data /var/www/html; \tchmod 1777 /var/www/html # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-05T18:56:50.274021209Z",
+                "created_by": "ENV PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:56:50.274021209Z",
+                "created_by": "ENV PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:56:50.274021209Z",
+                "created_by": "ENV PHP_LDFLAGS=-Wl,-O1 -pie",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:56:50.274021209Z",
+                "created_by": "ENV GPG_KEYS=1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:56:50.274021209Z",
+                "created_by": "ENV PHP_VERSION=8.5.12",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:56:50.274021209Z",
+                "created_by": "ENV PHP_URL=https://www.php.net/distributions/php-8.5.12.tar.xz PHP_ASC_URL=https://www.php.net/distributions/php-8.5.12.tar.xz.asc",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:56:50.274021209Z",
+                "created_by": "ENV PHP_SHA256=08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:56:52.645107204Z",
+                "created_by": "RUN /bin/sh -c set -eux; \t\tapk add --no-cache --virtual .fetch-deps gnupg; \t\tmkdir -p /usr/src; \tcd /usr/src; \t\tcurl -fsSL -o php.tar.xz \"$PHP_URL\"; \t\tif [ -n \"$PHP_SHA256\" ]; then \t\techo \"$PHP_SHA256 *php.tar.xz\" | sha256sum -c -; \tfi; \t\tcurl -fsSL -o php.tar.xz.asc \"$PHP_ASC_URL\"; \texport GNUPGHOME=\"$(mktemp -d)\"; \tfor key in $GPG_KEYS; do \t\tgpg --batch --keyserver keyserver.ubuntu.com --recv-keys \"$key\"; \tdone; \tgpg --batch --verify php.tar.xz.asc php.tar.xz; \tgpgconf --kill all; \trm -rf \"$GNUPGHOME\"; \t\tapk del --no-network .fetch-deps # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-05T18:56:52.694121857Z",
+                "created_by": "COPY docker-php-source /usr/local/bin/ # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-05T18:59:51.696148991Z",
+                "created_by": "RUN /bin/sh -c set -eux; \tapk add --no-cache --virtual .build-deps \t\t$PHPIZE_DEPS \t\targon2-dev \t\tcoreutils \t\tcurl-dev \t\tgnu-libiconv-dev \t\tlibsodium-dev \t\tlibxml2-dev \t\tlinux-headers \t\toniguruma-dev \t\topenssl-dev \t\treadline-dev \t\tsqlite-dev \t; \t\trm -vf /usr/include/iconv.h; \t\texport \t\tCFLAGS=\"$PHP_CFLAGS\" \t\tCPPFLAGS=\"$PHP_CPPFLAGS\" \t\tLDFLAGS=\"$PHP_LDFLAGS\" \t\tPHP_BUILD_PROVIDER='https://github.com/docker-library/php' \t\tPHP_UNAME='Linux - Docker' \t; \tdocker-php-source extract; \tcd /usr/src/php; \tgnuArch=\"$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)\"; \tcase \"$gnuArch\" in \t\t'i686-linux-'*) \t\t\texport \t\t\t\tCFLAGS=\"$CFLAGS -msse2 -mfpmath=sse\" \t\t\t\tCPPFLAGS=\"$CPPFLAGS -msse2 -mfpmath=sse\" \t\t\t; \t\t\t;; \tesac; \ttest \"$PHP_INI_DIR\" != \"${PHP_INI_DIR%/php}\"; \t./configure \t\t--build=\"$gnuArch\" \t\t--sysconfdir=\"${PHP_INI_DIR%/php}\" \t\t--with-config-file-path=\"$PHP_INI_DIR\" \t\t--with-config-file-scan-dir=\"$PHP_INI_DIR/conf.d\" \t\t\t\t--enable-option-checking=fatal \t\t\t\t--with-mhash \t\t\t\t--with-pic \t\t\t\t--enable-mbstring \t\t--enable-mysqlnd \t\t--with-password-argon2 \t\t--with-sodium=shared \t\t--with-pdo-sqlite=/usr \t\t--with-sqlite3=/usr \t\t\t\t--with-curl \t\t--with-iconv=/usr \t\t--with-openssl \t\t--with-readline \t\t--with-zlib \t\t\t\t--enable-phpdbg \t\t--enable-phpdbg-readline \t\t\t\t--with-pear \t\t\t; \tmake -j \"$(nproc)\"; \tfind -type f -name '*.a' -delete; \tmake install; \tfind \t\t/usr/local \t\t-type f \t\t-perm '/0111' \t\t-exec sh -euxc ' \t\t\tstrip --strip-all \"$@\" || : \t\t' -- '{}' + \t; \tmake clean; \t\tcp -v php.ini-* \"$PHP_INI_DIR/\"; \t\tcd /; \tdocker-php-source delete; \t\trunDeps=\"$( \t\tscanelf --needed --nobanner --format '%n#p' --recursive /usr/local \t\t\t| tr ',' '\\n' \t\t\t| sort -u \t\t\t| awk 'system(\"[ -e /usr/local/lib/\" $1 \" ]\") == 0 { next } { print \"so:\" $1 }' \t)\"; \tapk add --no-cache $runDeps; \t\tapk del --no-network .build-deps; \t\tpecl update-channels; \trm -rf /tmp/pear ~/.pearrc; \t\tphp --version # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-05T18:59:51.72985312Z",
+                "created_by": "COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/ # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-05T18:59:52.26086574Z",
+                "created_by": "RUN /bin/sh -c docker-php-ext-enable sodium # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-05T18:59:52.26086574Z",
+                "created_by": "ENTRYPOINT [\"docker-php-entrypoint\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:59:52.26086574Z",
+                "created_by": "CMD [\"php\" \"-a\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-10T19:17:20.721990453Z",
+                "created_by": "RUN /bin/sh -c set -eux ;   apk add --no-cache --virtual .composer-rundeps     7zip     bash     coreutils     git     make     mercurial     openssh-client     patch     subversion     tini     unzip     zip # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-10T19:17:20.826641147Z",
+                "created_by": "RUN /bin/sh -c printf \"# composer php cli ini settings\\ndate.timezone=UTC\\nmemory_limit=-1\\n\" \u003e $PHP_INI_DIR/php-cli.ini # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-10T19:17:32.61701235Z",
+                "created_by": "ENV COMPOSER_ALLOW_SUPERUSER=1",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-10T19:17:32.61701235Z",
+                "created_by": "ENV COMPOSER_HOME=/tmp",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-10T19:17:32.61701235Z",
+                "created_by": "ENV COMPOSER_VERSION=2.11.2",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-10T19:17:32.61701235Z",
+                "created_by": "RUN /bin/sh -c set -eux ;   apk add --no-cache --virtual .build-deps     $PHPIZE_DEPS     bzip2-dev     libzip-dev   ;   docker-php-ext-install -j \"$(nproc)\"     bz2     zip   ;   runDeps=\"$(     scanelf --needed --nobanner --format '%n#p' --recursive /usr/local/lib/php/extensions       | tr ',' '\\n'       | sort -u       | awk 'system(\"[ -e /usr/local/lib/\" $1 \" ]\") == 0 { next } { print \"so:\" $1 }'   )\" ;   apk add --no-cache --virtual .composer-phpext-rundeps $runDeps ;   apk del --no-network .build-deps ;   curl     --silent     --fail     --location     --retry 3     --output /tmp/keys.dev.pub     --url https://raw.githubusercontent.com/composer/composer.github.io/e7f28b7200249f8e5bc912b42837d4598c74153a/snapshots.pub   ;   echo 572b963c4b7512a7de3c71a788772440b1996d918b1d2b5354bf8ba2bb057fadec6f7ac4852f2f8a8c01ab94c18141ce0422aec3619354b057216e0597db5ac2 /tmp/keys.dev.pub | sha512sum --strict --check ;   curl     --silent     --fail     --location     --retry 3     --output /tmp/keys.tags.pub     --url https://raw.githubusercontent.com/composer/composer.github.io/e7f28b7200249f8e5bc912b42837d4598c74153a/releases.pub   ;   echo 47f374b8840dcb0aa7b2327f13d24ab5f6ae9e58aa630af0d62b3d0ea114f4a315c5d97b21dcad3c7ffe2f0a95db2edec267adaba3f4f5a262abebe39aed3a28 /tmp/keys.tags.pub | sha512sum --strict --check ;   curl     --silent     --fail     --location     --retry 3     --output /tmp/installer.php     --url https://raw.githubusercontent.com/composer/getcomposer.org/f24b8f860b95b52167f91bbd3e3a7bcafe043038/web/installer   ;   echo 3137ad86bd990524ba1dedc2038309dfa6b63790d3ca52c28afea65dcc2eaead16fb33e9a72fd2a7a8240afaf26e065939a2d472f3b0eeaa575d1e8648f9bf19 /tmp/installer.php | sha512sum --strict --check ;   php /tmp/installer.php     --no-ansi     --install-dir=/usr/bin     --filename=composer     --version=${COMPOSER_VERSION}   ;   composer --ansi --version --no-interaction ;   rm -f /tmp/installer.php ;   find /tmp -type d -exec chmod -v 1777 {} + # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-10T19:17:32.653951591Z",
+                "created_by": "COPY docker-entrypoint.sh /docker-entrypoint.sh # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-10T19:17:32.683800436Z",
+                "created_by": "WORKDIR /app",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-10T19:17:32.683800436Z",
+                "created_by": "ENTRYPOINT [\"/docker-entrypoint.sh\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-10T19:17:32.683800436Z",
+                "created_by": "CMD [\"composer\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            }
+        ]
+    },
+    "Docker": {
+        "created": "2026-11-10T19:17:32.683800436Z",
+        "container_config": {
+            "Hostname": "",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "PHPIZE_DEPS=autoconf \t\tdpkg-dev dpkg \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkgconf \t\tre2c",
+                "PHP_INI_DIR=/usr/local/etc/php",
+                "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+                "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+                "PHP_LDFLAGS=-Wl,-O1 -pie",
+                "GPG_KEYS=1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5",
+                "PHP_VERSION=8.5.12",
+                "PHP_URL=https://www.php.net/distributions/php-8.5.12.tar.xz",
+                "PHP_ASC_URL=https://www.php.net/distributions/php-8.5.12.tar.xz.asc",
+                "PHP_SHA256=08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209",
+                "COMPOSER_ALLOW_SUPERUSER=1",
+                "COMPOSER_HOME=/tmp",
+                "COMPOSER_VERSION=2.11.2"
+            ],
+            "Cmd": [
+                "composer"
+            ],
+            "Image": "",
+            "Volumes": null,
+            "WorkingDir": "/app",
+            "Entrypoint": [
+                "/docker-entrypoint.sh"
+            ],
+            "OnBuild": null,
+            "Labels": null
+        },
+        "config": {
+            "Hostname": "",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "PHPIZE_DEPS=autoconf \t\tdpkg-dev dpkg \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkgconf \t\tre2c",
+                "PHP_INI_DIR=/usr/local/etc/php",
+                "PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+                "PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+                "PHP_LDFLAGS=-Wl,-O1 -pie",
+                "GPG_KEYS=1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5",
+                "PHP_VERSION=8.5.12",
+                "PHP_URL=https://www.php.net/distributions/php-8.5.12.tar.xz",
+                "PHP_ASC_URL=https://www.php.net/distributions/php-8.5.12.tar.xz.asc",
+                "PHP_SHA256=08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209",
+                "COMPOSER_ALLOW_SUPERUSER=1",
+                "COMPOSER_HOME=/tmp",
+                "COMPOSER_VERSION=2.11.2"
+            ],
+            "Cmd": [
+                "composer"
+            ],
+            "Image": "",
+            "Volumes": null,
+            "WorkingDir": "/app",
+            "Entrypoint": [
+                "/docker-entrypoint.sh"
+            ],
+            "OnBuild": null,
+            "Labels": null
+        },
+        "architecture": "amd64",
+        "os": "linux",
+        "rootfs": {
+            "type": "layers",
+            "diff_ids": [
+                "sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064",
+                "sha256:a4b5b0dc79425f28b9b2cb2e69297a69f851c37d74c6fedc0aec5af9455d4b9c",
+                "sha256:add4d2bc632fe568942d9945ee8bc33a1e678f02e3cc236b4b352b2fb9a42e04",
+                "sha256:5562775c2d1c1a9a287668e6c4d1f508479c5d59cf53b886ae3602dabe058652",
+                "sha256:cd74c1257c8fbbfbf00f07fb75fbb986037aac6cb7e743f591bec3218a5351c4",
+                "sha256:fb388c492006273849527c6d0612b96806a9462977be1a2f6b909c86da7c1776",
+                "sha256:9c653e1a799ea38eec8f165f9821a6266b9e0c329756c6de5a03fd7dee79b231",
+                "sha256:247fb359b10b2cb7e6e204ee6c364c3323c5dda15a234fda133e4479698ce12e",
+                "sha256:b0dd177cbf3bde9afb5b7db2c007b5db98ae90afd204008cc6105f7e547783fe",
+                "sha256:17b729dc574b8aecae9c286653d33474d15901e21ec92958d3cc04920d8dda9e",
+                "sha256:02e578f28c2bc409450f90cc2c2aecd3de233b2aa4db640dc1d0068075690871",
+                "sha256:c3b4dac01a5440910ac6322103c81fb46f80767070af402d0356a51e74dabf00",
+                "sha256:b97eb66aab232061ffa0442986f36f6658aeb849d22632327b1d2a0b9bb571b4",
+                "sha256:caec50b2aa698d4b6e7ca90113f68eacd95aea658ff71c81e246229d82f118c3"
+            ]
+        },
+        "history": [
+            {
+                "created": "2026-11-05T18:00:28.583714131Z",
+                "created_by": "ADD alpine-minirootfs-3.24.4-x86_64.tar.gz / # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-05T18:00:28.583714131Z",
+                "created_by": "CMD [\"/bin/sh\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:56:50.096677978Z",
+                "created_by": "ENV PHPIZE_DEPS=autoconf \t\tdpkg-dev dpkg \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkgconf \t\tre2c",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:56:50.096677978Z",
+                "created_by": "RUN /bin/sh -c apk add --no-cache \t\tca-certificates \t\tcurl \t\topenssl \t\ttar \t\txz # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-05T18:56:50.196462135Z",
+                "created_by": "RUN /bin/sh -c set -eux; \tadduser -u 82 -D -S -G www-data www-data # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-05T18:56:50.196462135Z",
+                "created_by": "ENV PHP_INI_DIR=/usr/local/etc/php",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:56:50.274021209Z",
+                "created_by": "RUN /bin/sh -c set -eux; \tmkdir -p \"$PHP_INI_DIR/conf.d\"; \t[ ! -d /var/www/html ]; \tmkdir -p /var/www/html; \tchown www-data:www-data /var/www/html; \tchmod 1777 /var/www/html # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-05T18:56:50.274021209Z",
+                "created_by": "ENV PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:56:50.274021209Z",
+                "created_by": "ENV PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:56:50.274021209Z",
+                "created_by": "ENV PHP_LDFLAGS=-Wl,-O1 -pie",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:56:50.274021209Z",
+                "created_by": "ENV GPG_KEYS=1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:56:50.274021209Z",
+                "created_by": "ENV PHP_VERSION=8.5.12",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:56:50.274021209Z",
+                "created_by": "ENV PHP_URL=https://www.php.net/distributions/php-8.5.12.tar.xz PHP_ASC_URL=https://www.php.net/distributions/php-8.5.12.tar.xz.asc",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:56:50.274021209Z",
+                "created_by": "ENV PHP_SHA256=08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:56:52.645107204Z",
+                "created_by": "RUN /bin/sh -c set -eux; \t\tapk add --no-cache --virtual .fetch-deps gnupg; \t\tmkdir -p /usr/src; \tcd /usr/src; \t\tcurl -fsSL -o php.tar.xz \"$PHP_URL\"; \t\tif [ -n \"$PHP_SHA256\" ]; then \t\techo \"$PHP_SHA256 *php.tar.xz\" | sha256sum -c -; \tfi; \t\tcurl -fsSL -o php.tar.xz.asc \"$PHP_ASC_URL\"; \texport GNUPGHOME=\"$(mktemp -d)\"; \tfor key in $GPG_KEYS; do \t\tgpg --batch --keyserver keyserver.ubuntu.com --recv-keys \"$key\"; \tdone; \tgpg --batch --verify php.tar.xz.asc php.tar.xz; \tgpgconf --kill all; \trm -rf \"$GNUPGHOME\"; \t\tapk del --no-network .fetch-deps # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-05T18:56:52.694121857Z",
+                "created_by": "COPY docker-php-source /usr/local/bin/ # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-05T18:59:51.696148991Z",
+                "created_by": "RUN /bin/sh -c set -eux; \tapk add --no-cache --virtual .build-deps \t\t$PHPIZE_DEPS \t\targon2-dev \t\tcoreutils \t\tcurl-dev \t\tgnu-libiconv-dev \t\tlibsodium-dev \t\tlibxml2-dev \t\tlinux-headers \t\toniguruma-dev \t\topenssl-dev \t\treadline-dev \t\tsqlite-dev \t; \t\trm -vf /usr/include/iconv.h; \t\texport \t\tCFLAGS=\"$PHP_CFLAGS\" \t\tCPPFLAGS=\"$PHP_CPPFLAGS\" \t\tLDFLAGS=\"$PHP_LDFLAGS\" \t\tPHP_BUILD_PROVIDER='https://github.com/docker-library/php' \t\tPHP_UNAME='Linux - Docker' \t; \tdocker-php-source extract; \tcd /usr/src/php; \tgnuArch=\"$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)\"; \tcase \"$gnuArch\" in \t\t'i686-linux-'*) \t\t\texport \t\t\t\tCFLAGS=\"$CFLAGS -msse2 -mfpmath=sse\" \t\t\t\tCPPFLAGS=\"$CPPFLAGS -msse2 -mfpmath=sse\" \t\t\t; \t\t\t;; \tesac; \ttest \"$PHP_INI_DIR\" != \"${PHP_INI_DIR%/php}\"; \t./configure \t\t--build=\"$gnuArch\" \t\t--sysconfdir=\"${PHP_INI_DIR%/php}\" \t\t--with-config-file-path=\"$PHP_INI_DIR\" \t\t--with-config-file-scan-dir=\"$PHP_INI_DIR/conf.d\" \t\t\t\t--enable-option-checking=fatal \t\t\t\t--with-mhash \t\t\t\t--with-pic \t\t\t\t--enable-mbstring \t\t--enable-mysqlnd \t\t--with-password-argon2 \t\t--with-sodium=shared \t\t--with-pdo-sqlite=/usr \t\t--with-sqlite3=/usr \t\t\t\t--with-curl \t\t--with-iconv=/usr \t\t--with-openssl \t\t--with-readline \t\t--with-zlib \t\t\t\t--enable-phpdbg \t\t--enable-phpdbg-readline \t\t\t\t--with-pear \t\t\t; \tmake -j \"$(nproc)\"; \tfind -type f -name '*.a' -delete; \tmake install; \tfind \t\t/usr/local \t\t-type f \t\t-perm '/0111' \t\t-exec sh -euxc ' \t\t\tstrip --strip-all \"$@\" || : \t\t' -- '{}' + \t; \tmake clean; \t\tcp -v php.ini-* \"$PHP_INI_DIR/\"; \t\tcd /; \tdocker-php-source delete; \t\trunDeps=\"$( \t\tscanelf --needed --nobanner --format '%n#p' --recursive /usr/local \t\t\t| tr ',' '\\n' \t\t\t| sort -u \t\t\t| awk 'system(\"[ -e /usr/local/lib/\" $1 \" ]\") == 0 { next } { print \"so:\" $1 }' \t)\"; \tapk add --no-cache $runDeps; \t\tapk del --no-network .build-deps; \t\tpecl update-channels; \trm -rf /tmp/pear ~/.pearrc; \t\tphp --version # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-05T18:59:51.72985312Z",
+                "created_by": "COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/ # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-05T18:59:52.26086574Z",
+                "created_by": "RUN /bin/sh -c docker-php-ext-enable sodium # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-05T18:59:52.26086574Z",
+                "created_by": "ENTRYPOINT [\"docker-php-entrypoint\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-05T18:59:52.26086574Z",
+                "created_by": "CMD [\"php\" \"-a\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-10T19:17:20.721990453Z",
+                "created_by": "RUN /bin/sh -c set -eux ;   apk add --no-cache --virtual .composer-rundeps     7zip     bash     coreutils     git     make     mercurial     openssh-client     patch     subversion     tini     unzip     zip # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-10T19:17:20.826641147Z",
+                "created_by": "RUN /bin/sh -c printf \"# composer php cli ini settings\\ndate.timezone=UTC\\nmemory_limit=-1\\n\" \u003e $PHP_INI_DIR/php-cli.ini # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-10T19:17:32.61701235Z",
+                "created_by": "ENV COMPOSER_ALLOW_SUPERUSER=1",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-10T19:17:32.61701235Z",
+                "created_by": "ENV COMPOSER_HOME=/tmp",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-10T19:17:32.61701235Z",
+                "created_by": "ENV COMPOSER_VERSION=2.11.2",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-10T19:17:32.61701235Z",
+                "created_by": "RUN /bin/sh -c set -eux ;   apk add --no-cache --virtual .build-deps     $PHPIZE_DEPS     bzip2-dev     libzip-dev   ;   docker-php-ext-install -j \"$(nproc)\"     bz2     zip   ;   runDeps=\"$(     scanelf --needed --nobanner --format '%n#p' --recursive /usr/local/lib/php/extensions       | tr ',' '\\n'       | sort -u       | awk 'system(\"[ -e /usr/local/lib/\" $1 \" ]\") == 0 { next } { print \"so:\" $1 }'   )\" ;   apk add --no-cache --virtual .composer-phpext-rundeps $runDeps ;   apk del --no-network .build-deps ;   curl     --silent     --fail     --location     --retry 3     --output /tmp/keys.dev.pub     --url https://raw.githubusercontent.com/composer/composer.github.io/e7f28b7200249f8e5bc912b42837d4598c74153a/snapshots.pub   ;   echo 572b963c4b7512a7de3c71a788772440b1996d918b1d2b5354bf8ba2bb057fadec6f7ac4852f2f8a8c01ab94c18141ce0422aec3619354b057216e0597db5ac2 /tmp/keys.dev.pub | sha512sum --strict --check ;   curl     --silent     --fail     --location     --retry 3     --output /tmp/keys.tags.pub     --url https://raw.githubusercontent.com/composer/composer.github.io/e7f28b7200249f8e5bc912b42837d4598c74153a/releases.pub   ;   echo 47f374b8840dcb0aa7b2327f13d24ab5f6ae9e58aa630af0d62b3d0ea114f4a315c5d97b21dcad3c7ffe2f0a95db2edec267adaba3f4f5a262abebe39aed3a28 /tmp/keys.tags.pub | sha512sum --strict --check ;   curl     --silent     --fail     --location     --retry 3     --output /tmp/installer.php     --url https://raw.githubusercontent.com/composer/getcomposer.org/f24b8f860b95b52167f91bbd3e3a7bcafe043038/web/installer   ;   echo 3137ad86bd990524ba1dedc2038309dfa6b63790d3ca52c28afea65dcc2eaead16fb33e9a72fd2a7a8240afaf26e065939a2d472f3b0eeaa575d1e8648f9bf19 /tmp/installer.php | sha512sum --strict --check ;   php /tmp/installer.php     --no-ansi     --install-dir=/usr/bin     --filename=composer     --version=${COMPOSER_VERSION}   ;   composer --ansi --version --no-interaction ;   rm -f /tmp/installer.php ;   find /tmp -type d -exec chmod -v 1777 {} + # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-10T19:17:32.653951591Z",
+                "created_by": "COPY docker-entrypoint.sh /docker-entrypoint.sh # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-10T19:17:32.683800436Z",
+                "created_by": "WORKDIR /app",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-10T19:17:32.683800436Z",
+                "created_by": "ENTRYPOINT [\"/docker-entrypoint.sh\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-10T19:17:32.683800436Z",
+                "created_by": "CMD [\"composer\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            }
+        ]
+    },
+    "DefaultMountsFilePath": "",
+    "Isolation": "oci",
+    "NamespaceOptions": [
+        {
+            "Name": "cgroup",
+            "Host": false,
+            "Path": ""
+        },
+        {
+            "Name": "ipc",
+            "Host": false,
+            "Path": ""
+        },
+        {
+            "Name": "mount",
+            "Host": false,
+            "Path": ""
+        },
+        {
+            "Name": "network",
+            "Host": false,
+            "Path": ""
+        },
+        {
+            "Name": "pid",
+            "Host": false,
+            "Path": ""
+        },
+        {
+            "Name": "user",
+            "Host": true,
+            "Path": ""
+        },
+        {
+            "Name": "uts",
+            "Host": false,
+            "Path": ""
+        }
+    ],
+    "Capabilities": null,
+    "ConfigureNetwork": "NetworkDefault",
+    "CNIPluginPath": "",
+    "CNIConfigDir": "",
+    "IDMappingOptions": {
+        "HostUIDMapping": true,
+        "HostGIDMapping": true,
+        "UIDMap": [],
+        "GIDMap": [],
+        "AutoUserNs": false,
+        "AutoUserNsOpts": {
+            "Size": 0,
+            "InitialSize": 0,
+            "PasswdFile": "",
+            "GroupFile": "",
+            "AdditionalUIDMappings": null,
+            "AdditionalGIDMappings": null
+        }
+    },
+    "History": [
+        {
+            "created": "2026-11-05T18:00:28.583714131Z",
+            "created_by": "ADD alpine-minirootfs-3.24.4-x86_64.tar.gz / # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-05T18:00:28.583714131Z",
+            "created_by": "CMD [\"/bin/sh\"]",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-05T18:56:50.096677978Z",
+            "created_by": "ENV PHPIZE_DEPS=autoconf \t\tdpkg-dev dpkg \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkgconf \t\tre2c",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-05T18:56:50.096677978Z",
+            "created_by": "RUN /bin/sh -c apk add --no-cache \t\tca-certificates \t\tcurl \t\topenssl \t\ttar \t\txz # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-05T18:56:50.196462135Z",
+            "created_by": "RUN /bin/sh -c set -eux; \tadduser -u 82 -D -S -G www-data www-data # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-05T18:56:50.196462135Z",
+            "created_by": "ENV PHP_INI_DIR=/usr/local/etc/php",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-05T18:56:50.274021209Z",
+            "created_by": "RUN /bin/sh -c set -eux; \tmkdir -p \"$PHP_INI_DIR/conf.d\"; \t[ ! -d /var/www/html ]; \tmkdir -p /var/www/html; \tchown www-data:www-data /var/www/html; \tchmod 1777 /var/www/html # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-05T18:56:50.274021209Z",
+            "created_by": "ENV PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-05T18:56:50.274021209Z",
+            "created_by": "ENV PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-05T18:56:50.274021209Z",
+            "created_by": "ENV PHP_LDFLAGS=-Wl,-O1 -pie",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-05T18:56:50.274021209Z",
+            "created_by": "ENV GPG_KEYS=1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-05T18:56:50.274021209Z",
+            "created_by": "ENV PHP_VERSION=8.5.12",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-05T18:56:50.274021209Z",
+            "created_by": "ENV PHP_URL=https://www.php.net/distributions/php-8.5.12.tar.xz PHP_ASC_URL=https://www.php.net/distributions/php-8.5.12.tar.xz.asc",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-05T18:56:50.274021209Z",
+            "created_by": "ENV PHP_SHA256=08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-05T18:56:52.645107204Z",
+            "created_by": "RUN /bin/sh -c set -eux; \t\tapk add --no-cache --virtual .fetch-deps gnupg; \t\tmkdir -p /usr/src; \tcd /usr/src; \t\tcurl -fsSL -o php.tar.xz \"$PHP_URL\"; \t\tif [ -n \"$PHP_SHA256\" ]; then \t\techo \"$PHP_SHA256 *php.tar.xz\" | sha256sum -c -; \tfi; \t\tcurl -fsSL -o php.tar.xz.asc \"$PHP_ASC_URL\"; \texport GNUPGHOME=\"$(mktemp -d)\"; \tfor key in $GPG_KEYS; do \t\tgpg --batch --keyserver keyserver.ubuntu.com --recv-keys \"$key\"; \tdone; \tgpg --batch --verify php.tar.xz.asc php.tar.xz; \tgpgconf --kill all; \trm -rf \"$GNUPGHOME\"; \t\tapk del --no-network .fetch-deps # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-05T18:56:52.694121857Z",
+            "created_by": "COPY docker-php-source /usr/local/bin/ # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-05T18:59:51.696148991Z",
+            "created_by": "RUN /bin/sh -c set -eux; \tapk add --no-cache --virtual .build-deps \t\t$PHPIZE_DEPS \t\targon2-dev \t\tcoreutils \t\tcurl-dev \t\tgnu-libiconv-dev \t\tlibsodium-dev \t\tlibxml2-dev \t\tlinux-headers \t\toniguruma-dev \t\topenssl-dev \t\treadline-dev \t\tsqlite-dev \t; \t\trm -vf /usr/include/iconv.h; \t\texport \t\tCFLAGS=\"$PHP_CFLAGS\" \t\tCPPFLAGS=\"$PHP_CPPFLAGS\" \t\tLDFLAGS=\"$PHP_LDFLAGS\" \t\tPHP_BUILD_PROVIDER='https://github.com/docker-library/php' \t\tPHP_UNAME='Linux - Docker' \t; \tdocker-php-source extract; \tcd /usr/src/php; \tgnuArch=\"$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)\"; \tcase \"$gnuArch\" in \t\t'i686-linux-'*) \t\t\texport \t\t\t\tCFLAGS=\"$CFLAGS -msse2 -mfpmath=sse\" \t\t\t\tCPPFLAGS=\"$CPPFLAGS -msse2 -mfpmath=sse\" \t\t\t; \t\t\t;; \tesac; \ttest \"$PHP_INI_DIR\" != \"${PHP_INI_DIR%/php}\"; \t./configure \t\t--build=\"$gnuArch\" \t\t--sysconfdir=\"${PHP_INI_DIR%/php}\" \t\t--with-config-file-path=\"$PHP_INI_DIR\" \t\t--with-config-file-scan-dir=\"$PHP_INI_DIR/conf.d\" \t\t\t\t--enable-option-checking=fatal \t\t\t\t--with-mhash \t\t\t\t--with-pic \t\t\t\t--enable-mbstring \t\t--enable-mysqlnd \t\t--with-password-argon2 \t\t--with-sodium=shared \t\t--with-pdo-sqlite=/usr \t\t--with-sqlite3=/usr \t\t\t\t--with-curl \t\t--with-iconv=/usr \t\t--with-openssl \t\t--with-readline \t\t--with-zlib \t\t\t\t--enable-phpdbg \t\t--enable-phpdbg-readline \t\t\t\t--with-pear \t\t\t; \tmake -j \"$(nproc)\"; \tfind -type f -name '*.a' -delete; \tmake install; \tfind \t\t/usr/local \t\t-type f \t\t-perm '/0111' \t\t-exec sh -euxc ' \t\t\tstrip --strip-all \"$@\" || : \t\t' -- '{}' + \t; \tmake clean; \t\tcp -v php.ini-* \"$PHP_INI_DIR/\"; \t\tcd /; \tdocker-php-source delete; \t\trunDeps=\"$( \t\tscanelf --needed --nobanner --format '%n#p' --recursive /usr/local \t\t\t| tr ',' '\\n' \t\t\t| sort -u \t\t\t| awk 'system(\"[ -e /usr/local/lib/\" $1 \" ]\") == 0 { next } { print \"so:\" $1 }' \t)\"; \tapk add --no-cache $runDeps; \t\tapk del --no-network .build-deps; \t\tpecl update-channels; \trm -rf /tmp/pear ~/.pearrc; \t\tphp --version # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-05T18:59:51.72985312Z",
+            "created_by": "COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/ # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-05T18:59:52.26086574Z",
+            "created_by": "RUN /bin/sh -c docker-php-ext-enable sodium # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-05T18:59:52.26086574Z",
+            "created_by": "ENTRYPOINT [\"docker-php-entrypoint\"]",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-05T18:59:52.26086574Z",
+            "created_by": "CMD [\"php\" \"-a\"]",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-10T19:17:20.721990453Z",
+            "created_by": "RUN /bin/sh -c set -eux ;   apk add --no-cache --virtual .composer-rundeps     7zip     bash     coreutils     git     make     mercurial     openssh-client     patch     subversion     tini     unzip     zip # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-10T19:17:20.826641147Z",
+            "created_by": "RUN /bin/sh -c printf \"# composer php cli ini settings\\ndate.timezone=UTC\\nmemory_limit=-1\\n\" \u003e $PHP_INI_DIR/php-cli.ini # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-10T19:17:32.61701235Z",
+            "created_by": "ENV COMPOSER_ALLOW_SUPERUSER=1",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-10T19:17:32.61701235Z",
+            "created_by": "ENV COMPOSER_HOME=/tmp",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-10T19:17:32.61701235Z",
+            "created_by": "ENV COMPOSER_VERSION=2.11.2",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-10T19:17:32.61701235Z",
+            "created_by": "RUN /bin/sh -c set -eux ;   apk add --no-cache --virtual .build-deps     $PHPIZE_DEPS     bzip2-dev     libzip-dev   ;   docker-php-ext-install -j \"$(nproc)\"     bz2     zip   ;   runDeps=\"$(     scanelf --needed --nobanner --format '%n#p' --recursive /usr/local/lib/php/extensions       | tr ',' '\\n'       | sort -u       | awk 'system(\"[ -e /usr/local/lib/\" $1 \" ]\") == 0 { next } { print \"so:\" $1 }'   )\" ;   apk add --no-cache --virtual .composer-phpext-rundeps $runDeps ;   apk del --no-network .build-deps ;   curl     --silent     --fail     --location     --retry 3     --output /tmp/keys.dev.pub     --url https://raw.githubusercontent.com/composer/composer.github.io/e7f28b7200249f8e5bc912b42837d4598c74153a/snapshots.pub   ;   echo 572b963c4b7512a7de3c71a788772440b1996d918b1d2b5354bf8ba2bb057fadec6f7ac4852f2f8a8c01ab94c18141ce0422aec3619354b057216e0597db5ac2 /tmp/keys.dev.pub | sha512sum --strict --check ;   curl     --silent     --fail     --location     --retry 3     --output /tmp/keys.tags.pub     --url https://raw.githubusercontent.com/composer/composer.github.io/e7f28b7200249f8e5bc912b42837d4598c74153a/releases.pub   ;   echo 47f374b8840dcb0aa7b2327f13d24ab5f6ae9e58aa630af0d62b3d0ea114f4a315c5d97b21dcad3c7ffe2f0a95db2edec267adaba3f4f5a262abebe39aed3a28 /tmp/keys.tags.pub | sha512sum --strict --check ;   curl     --silent     --fail     --location     --retry 3     --output /tmp/installer.php     --url https://raw.githubusercontent.com/composer/getcomposer.org/f24b8f860b95b52167f91bbd3e3a7bcafe043038/web/installer   ;   echo 3137ad86bd990524ba1dedc2038309dfa6b63790d3ca52c28afea65dcc2eaead16fb33e9a72fd2a7a8240afaf26e065939a2d472f3b0eeaa575d1e8648f9bf19 /tmp/installer.php | sha512sum --strict --check ;   php /tmp/installer.php     --no-ansi     --install-dir=/usr/bin     --filename=composer     --version=${COMPOSER_VERSION}   ;   composer --ansi --version --no-interaction ;   rm -f /tmp/installer.php ;   find /tmp -type d -exec chmod -v 1777 {} + # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-10T19:17:32.653951591Z",
+            "created_by": "COPY docker-entrypoint.sh /docker-entrypoint.sh # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-10T19:17:32.683800436Z",
+            "created_by": "WORKDIR /app",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-10T19:17:32.683800436Z",
+            "created_by": "ENTRYPOINT [\"/docker-entrypoint.sh\"]",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-10T19:17:32.683800436Z",
+            "created_by": "CMD [\"composer\"]",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        }
+    ],
+    "Devices": null,
+    "DeviceSpecs": null,
+    "CDIConfigDir": ""
+}

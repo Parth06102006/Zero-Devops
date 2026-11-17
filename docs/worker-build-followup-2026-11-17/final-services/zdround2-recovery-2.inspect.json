@@ -1,0 +1,241 @@
+[
+    {
+        "Id": "a3b8e06da6400744bba0c0d4b8012f01cb5d7012fe30298003866a0401226d35",
+        "Created": "2026-11-17T19:57:56.27612886Z",
+        "Path": "sleep",
+        "Args": [
+            "infinity"
+        ],
+        "State": {
+            "Status": "exited",
+            "Running": false,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 0,
+            "ExitCode": 137,
+            "Error": "",
+            "StartedAt": "2026-11-17T19:57:56.446707182Z",
+            "FinishedAt": "2026-11-17T19:58:14.210320017Z"
+        },
+        "Image": "sha256:8e8dd9c411899b3c8a4fb437213282885360a27dd11232c59f86f3051f4cba54",
+        "ResolvConfPath": "/var/lib/docker/containers/a3b8e06da6400744bba0c0d4b8012f01cb5d7012fe30298003866a0401226d35/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/a3b8e06da6400744bba0c0d4b8012f01cb5d7012fe30298003866a0401226d35/hostname",
+        "HostsPath": "/var/lib/docker/containers/a3b8e06da6400744bba0c0d4b8012f01cb5d7012fe30298003866a0401226d35/hosts",
+        "LogPath": "/var/lib/docker/containers/a3b8e06da6400744bba0c0d4b8012f01cb5d7012fe30298003866a0401226d35/a3b8e06da6400744bba0c0d4b8012f01cb5d7012fe30298003866a0401226d35-json.log",
+        "Name": "/zdround2-recovery-2",
+        "RestartCount": 0,
+        "Driver": "overlayfs",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": [
+                "zdround2-2-storage:/var/lib/containers",
+                "/run/desktop/mnt/host/wsl/docker-desktop-bind-mounts/Ubuntu/491a51c8d1785aea8bbf5ab7397bc0d5c0cab424f2f56efe95468bb129f13932:/e2e:ro"
+            ],
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {}
+            },
+            "NetworkMode": "zdround2-2-network",
+            "PortBindings": {},
+            "RestartPolicy": {
+                "Name": "no",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "CapAdd": null,
+            "CapDrop": null,
+            "CgroupnsMode": "private",
+            "Dns": null,
+            "DnsOptions": [],
+            "DnsSearch": [],
+            "ExtraHosts": null,
+            "GroupAdd": null,
+            "IpcMode": "private",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": true,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": [
+                "label=disable"
+            ],
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 2147483648,
+            "NanoCpus": 1500000000,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": [],
+            "BlkioDeviceReadBps": [],
+            "BlkioDeviceWriteBps": [],
+            "BlkioDeviceReadIOps": [],
+            "BlkioDeviceWriteIOps": [],
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": [],
+            "DeviceCgroupRules": null,
+            "DeviceRequests": null,
+            "MemoryReservation": 0,
+            "MemorySwap": 4294967296,
+            "MemorySwappiness": null,
+            "OomKillDisable": null,
+            "PidsLimit": 512,
+            "Ulimits": null,
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "MaskedPaths": null,
+            "ReadonlyPaths": null
+        },
+        "Storage": {
+            "RootFS": {
+                "Snapshot": {
+                    "Name": "overlayfs"
+                }
+            }
+        },
+        "Mounts": [
+            {
+                "Type": "bind",
+                "Source": "/run/desktop/mnt/host/wsl/docker-desktop-bind-mounts/Ubuntu/491a51c8d1785aea8bbf5ab7397bc0d5c0cab424f2f56efe95468bb129f13932",
+                "Destination": "/e2e",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "volume",
+                "Name": "zdround2-2-storage",
+                "Source": "/var/lib/docker/volumes/zdround2-2-storage/_data",
+                "Destination": "/var/lib/containers",
+                "Driver": "local",
+                "Mode": "z",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "volume",
+                "Name": "a1830c16242a9d87c76d229b847820c205e5be0ede9efabafc70c10c06e047da",
+                "Source": "/var/lib/docker/volumes/a1830c16242a9d87c76d229b847820c205e5be0ede9efabafc70c10c06e047da/_data",
+                "Destination": "/home/build/.local/share/containers",
+                "Driver": "local",
+                "Mode": "",
+                "RW": true,
+                "Propagation": ""
+            }
+        ],
+        "Config": {
+            "Hostname": "a3b8e06da640",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "BUILDAH_ISOLATION=chroot",
+                "PATH=/usr/local/bin:/usr/bin",
+                "container=oci"
+            ],
+            "Cmd": [
+                "infinity"
+            ],
+            "Image": "zero-devops-e2e-worker:local",
+            "Volumes": {
+                "/home/build/.local/share/containers": {},
+                "/var/lib/containers": {}
+            },
+            "WorkingDir": "/app",
+            "Entrypoint": [
+                "sleep"
+            ],
+            "Labels": {
+                "built.by.commit": "24ca4c190c70eeb8f35eaeccd7cffb9414b915ec",
+                "built.by.digest": "sha256:113ae526992d1e4d777ecfb152085119d47d9ee32c2b6ffe2e25e16dbd3e953d",
+                "built.by.exec": "containers_build_push.sh",
+                "built.by.logs": "https://cirrus-ci.com/task/6049421198098432",
+                "built.by.repo": "https://github.com/containers/image_build.git",
+                "desktop.docker.io/wsl-distro": "Ubuntu",
+                "io.buildah.version": "1.39.3",
+                "io.containers.capabilities": "CHOWN,DAC_OVERRIDE,FOWNER,FSETID,KILL,NET_BIND_SERVICE,SETFCAP,SETGID,SETPCAP,SETUID,CHOWN,DAC_OVERRIDE,FOWNER,FSETID,KILL,NET_BIND_SERVICE,SETFCAP,SETGID,SETPCAP,SETUID,SYS_CHROOT",
+                "license": "MIT",
+                "name": "fedora",
+                "org.opencontainers.image.authors": "podman@lists.podman.io",
+                "org.opencontainers.image.created": "2025-05-16T15:21:43+00:00",
+                "org.opencontainers.image.documentation": "https://github.com/containers/image_build/blob/24ca4c190c70eeb8f35eaeccd7cffb9414b915ec/buildah/README.md",
+                "org.opencontainers.image.license": "MIT",
+                "org.opencontainers.image.name": "fedora",
+                "org.opencontainers.image.revision": "24ca4c190c70eeb8f35eaeccd7cffb9414b915ec",
+                "org.opencontainers.image.source": "https://github.com/containers/image_build/blob/24ca4c190c70eeb8f35eaeccd7cffb9414b915ec/buildah/",
+                "org.opencontainers.image.url": "https://quay.io/buildah/stable",
+                "org.opencontainers.image.vendor": "Fedora Project",
+                "org.opencontainers.image.version": "1.39.3",
+                "vendor": "Fedora Project",
+                "version": "42",
+                "zero-devops-build-followup": "20261117"
+            }
+        },
+        "NetworkSettings": {
+            "SandboxID": "",
+            "SandboxKey": "",
+            "Ports": {},
+            "Networks": {
+                "zdround2-2-network": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "b592dfbaaf0e72355eddfcadefecb6b8d2a5a8b8b9445e1ae0f7b7ba8dbba029",
+                    "EndpointID": "",
+                    "Gateway": "",
+                    "IPAddress": "",
+                    "MacAddress": "",
+                    "IPPrefixLen": 0,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                        "zdround2-recovery-2",
+                        "a3b8e06da640"
+                    ]
+                }
+            }
+        },
+        "ImageManifestDescriptor": {
+            "mediaType": "application/vnd.oci.image.manifest.v1+json",
+            "digest": "sha256:226fe11da5bf74071ea05950547fd3f19ecdc9891a08594797a97a7cbb033903",
+            "size": 2757,
+            "platform": {
+                "architecture": "amd64",
+                "os": "linux"
+            }
+        }
+    }
+]

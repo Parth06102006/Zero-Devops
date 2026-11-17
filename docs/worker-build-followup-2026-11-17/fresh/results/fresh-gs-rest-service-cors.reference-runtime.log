@@ -1,0 +1,36 @@
+/usr/bin/sh: 1: set: can't access tty; job control turned off
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.9)
+
+2026-11-17T19:20:20.474Z  INFO 30806 --- [           main] c.e.r.RestServiceCorsApplication         : Starting RestServiceCorsApplication v0.0.1-SNAPSHOT using Java 21.0.13 with PID 30806 (/app/target/rest-service-cors-complete-0.0.1-SNAPSHOT.jar started by root in /app)
+2026-11-17T19:20:20.483Z  INFO 30806 --- [           main] c.e.r.RestServiceCorsApplication         : No active profile set, falling back to 1 default profile: "default"
+2026-11-17T19:20:23.534Z  INFO 30806 --- [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-11-17T19:20:23.613Z  INFO 30806 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-11-17T19:20:23.614Z  INFO 30806 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.27]
+2026-11-17T19:20:23.697Z  INFO 30806 --- [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 2925 ms
+2026-11-17T19:20:24.109Z  INFO 30806 --- [           main] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page: ServletContext resource [/index.html]
+2026-11-17T19:20:24.916Z  INFO 30806 --- [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
+2026-11-17T19:20:24.987Z  INFO 30806 --- [           main] c.e.r.RestServiceCorsApplication         : Started RestServiceCorsApplication in 5.8 seconds (process running for 6.986)
+2026-11-17T19:20:25.820Z  INFO 30806 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-11-17T19:20:25.821Z  INFO 30806 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-11-17T19:20:25.824Z  INFO 30806 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+==== get greeting ====
+==== get greeting ====
+==== get greeting ====
+==== get greeting ====
+==== get greeting ====
+==== get greeting ====
+==== get greeting ====
+==== get greeting ====
+==== get greeting ====
+==== get greeting ====
+subprocess exited on killed
+subprocess exited with status 1
+Error: exit status 1

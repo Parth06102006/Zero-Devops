@@ -1,0 +1,990 @@
+STEP 1/6: FROM docker.io/library/rust:1-alpine
+STEP 2/6: WORKDIR /app
+STEP 3/6: COPY . .
+STEP 4/6: WORKDIR /app/.
+STEP 5/6: RUN apk add --no-cache musl-dev && CARGO_BUILD_JOBS=1 cargo build --locked --release --manifest-path examples/cors/Cargo.toml --package example-cors --bin example-cors --target-dir /tmp/reference-target
+OK: 198.1 MiB in 31 packages
+warning: unused field `rust-version` in `workspace.package`
+ --> Cargo.toml:8:1
+  |
+8 | rust-version = "1.75"
+  | ^^^^^^^^^^^^
+  |
+  = note: `cargo::unused_workspace_package_fields` is set to `warn` by default
+help: consider removing the field `workspace.package.rust-version`
+warning: workspace (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> request-id/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+13 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+14 + [lints]
+15 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+13 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+14 + [lints]
+   |
+warning: `example-request-id` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> http-proxy/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+14 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+15 + [lints]
+16 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+14 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+15 + [lints]
+   |
+warning: `example-http-proxy` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> handle-head-request/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+14 ~ tower = { version = "0.5.2", features = ["util"] }
+15 + [lints]
+16 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+14 ~ tower = { version = "0.5.2", features = ["util"] }
+15 + [lints]
+   |
+warning: `example-handle-head-request` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> oauth/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+19 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+20 + [lints]
+21 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+19 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+20 + [lints]
+   |
+warning: `example-oauth` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> error-handling/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+13 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+14 + [lints]
+15 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+13 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+14 + [lints]
+   |
+warning: `example-error-handling` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> sqlx-postgres/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+13 ~ sqlx = { version = "0.9", features = ["runtime-tokio", "any", "postgres"] }
+14 + [lints]
+15 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+13 ~ sqlx = { version = "0.9", features = ["runtime-tokio", "any", "postgres"] }
+14 + [lints]
+   |
+warning: `example-sqlx-postgres` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> cors/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+10 ~ tower-http = { version = "0.6.1", features = ["cors"] }
+11 + [lints]
+12 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+10 ~ tower-http = { version = "0.6.1", features = ["cors"] }
+11 + [lints]
+   |
+warning: `example-cors` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> diesel-postgres/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+15 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+16 + [lints]
+17 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+15 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+16 + [lints]
+   |
+warning: `example-diesel-postgres` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> reqwest-response/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+14 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+15 + [lints]
+16 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+14 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+15 + [lints]
+   |
+warning: `example-reqwest-response` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> routes-and-handlers-close-together/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+ 9 ~ tokio = { version = "1.0", features = ["full"] }
+10 + [lints]
+11 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+ 9 ~ tokio = { version = "1.0", features = ["full"] }
+10 + [lints]
+   |
+warning: `example-routes-and-handlers-close-together` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> print-request-response/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+12 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+13 + [lints]
+14 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+12 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+13 + [lints]
+   |
+warning: `example-print-request-response` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> anyhow-error-response/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+14 ~ tower = { version = "0.5.2", features = ["util"] }
+15 + [lints]
+16 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+14 ~ tower = { version = "0.5.2", features = ["util"] }
+15 + [lints]
+   |
+warning: `example-anyhow-error-response` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> parse-body-based-on-content-type/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+12 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+13 + [lints]
+14 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+12 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+13 + [lints]
+   |
+warning: `example-parse-body-based-on-content-type` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> consume-body-in-extractor-or-middleware/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+12 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+13 + [lints]
+14 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+12 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+13 + [lints]
+   |
+warning: `example-consume-body-in-extractor-or-middleware` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+  --> /app/axum-extra/Cargo.toml:6:12
+   |
+ 6 | homepage = "https://github.com/tokio-rs/axum"
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+11 | repository = "https://github.com/tokio-rs/axum"
+   |              ----------------------------------
+   |
+   = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `axum-extra` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> sse/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+20 ~ reqwest = { version = "0.12", default-features = false, features = ["stream"] }
+21 + [lints]
+22 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+20 ~ reqwest = { version = "0.12", default-features = false, features = ["stream"] }
+21 + [lints]
+   |
+warning: `example-sse` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> templates/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+16 ~ tower = { version = "0.5.2", features = ["util"] }
+17 + [lints]
+18 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+16 ~ tower = { version = "0.5.2", features = ["util"] }
+17 + [lints]
+   |
+warning: `example-templates` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> todos/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+15 ~ uuid = { version = "1.0", features = ["serde", "v4"] }
+16 + [lints]
+17 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+15 ~ uuid = { version = "1.0", features = ["serde", "v4"] }
+16 + [lints]
+   |
+warning: `example-todos` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> unix-domain-socket/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+13 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+14 + [lints]
+15 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+13 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+14 + [lints]
+   |
+warning: `example-unix-domain-socket` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> tokio-redis/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+13 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+14 + [lints]
+15 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+13 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+14 + [lints]
+   |
+warning: `example-tokio-redis` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> key-value-store/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+19 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+20 + [lints]
+21 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+19 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+20 + [lints]
+   |
+warning: `example-key-value-store` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> global-404-handler/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+11 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+12 + [lints]
+13 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+11 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+12 + [lints]
+   |
+warning: `example-global-404-handler` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> tls-graceful-shutdown/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+12 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+13 + [lints]
+14 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+12 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+13 + [lints]
+   |
+warning: `example-tls-graceful-shutdown` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> readme/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+12 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+13 + [lints]
+14 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+12 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+13 + [lints]
+   |
+warning: `example-readme` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> validator/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+18 ~ tower = { version = "0.5.2", features = ["util"] }
+19 + [lints]
+20 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+18 ~ tower = { version = "0.5.2", features = ["util"] }
+19 + [lints]
+   |
+warning: `example-validator` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> stream-to-file/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+13 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+14 + [lints]
+15 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+13 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+14 + [lints]
+   |
+warning: `example-stream-to-file` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> testing-websockets/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+12 ~ tokio-tungstenite = "0.29"
+13 + [lints]
+14 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+12 ~ tokio-tungstenite = "0.29"
+13 + [lints]
+   |
+warning: `example-testing-websockets` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> hello-world/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+ 9 ~ tokio = { version = "1.0", features = ["full"] }
+10 + [lints]
+11 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+ 9 ~ tokio = { version = "1.0", features = ["full"] }
+10 + [lints]
+   |
+warning: `example-hello-world` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> prometheus-metrics/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+13 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+14 + [lints]
+15 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+13 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+14 + [lints]
+   |
+warning: `example-prometheus-metrics` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> websockets-http2/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+13 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+14 + [lints]
+15 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+13 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+14 + [lints]
+   |
+warning: `example-websockets-http2` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> compression/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+21 ~ zstd = "0.14"
+22 + [lints]
+23 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+21 ~ zstd = "0.14"
+22 + [lints]
+   |
+warning: `example-compression` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> auto-reload/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+10 ~ tokio = { version = "1.0", features = ["full"] }
+11 + [lints]
+12 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+10 ~ tokio = { version = "1.0", features = ["full"] }
+11 + [lints]
+   |
+warning: `auto-reload` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> low-level-rustls/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+15 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+16 + [lints]
+17 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+15 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+16 + [lints]
+   |
+warning: `example-low-level-rustls` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> versioning/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+15 ~ tower = { version = "0.5.2", features = ["util"] }
+16 + [lints]
+17 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+15 ~ tower = { version = "0.5.2", features = ["util"] }
+16 + [lints]
+   |
+warning: `example-versioning` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> simple-router-wasm/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+19 ~ tower-service = "0.3.1"
+20 + [lints]
+21 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+19 ~ tower-service = "0.3.1"
+20 + [lints]
+   |
+warning: `example-simple-router-wasm` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> diesel-async-postgres/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+15 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+16 + [lints]
+17 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+15 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+16 + [lints]
+   |
+warning: `example-diesel-async-postgres` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> dependency-injection/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+13 ~ uuid = { version = "1.0", features = ["serde", "v4"] }
+14 + [lints]
+15 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+13 ~ uuid = { version = "1.0", features = ["serde", "v4"] }
+14 + [lints]
+   |
+warning: `example-dependency-injection` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> tracing-aka-logging/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+12 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+13 + [lints]
+14 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+12 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+13 + [lints]
+   |
+warning: `example-tracing-aka-logging` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> chat/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+12 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+13 + [lints]
+14 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+12 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+13 + [lints]
+   |
+warning: `example-chat` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+  --> /app/axum/Cargo.toml:8:12
+   |
+ 8 | homepage = "https://github.com/tokio-rs/axum"
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+12 | repository = "https://github.com/tokio-rs/axum"
+   |              ----------------------------------
+   |
+   = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `axum` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> websockets/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+24 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+25 + [lints]
+26 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+24 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+25 + [lints]
+   |
+warning: `example-websockets` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> templates-minijinja/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+10 ~ tokio = { version = "1.0", features = ["full"] }
+11 + [lints]
+12 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+10 ~ tokio = { version = "1.0", features = ["full"] }
+11 + [lints]
+   |
+warning: `example-templates-minijinja` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> form/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+17 ~ tower = "0.5.2"
+18 + [lints]
+19 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+17 ~ tower = "0.5.2"
+18 + [lints]
+   |
+warning: `example-form` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> mongodb/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+14 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+15 + [lints]
+16 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+14 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+15 + [lints]
+   |
+warning: `example-mongodb` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> customize-path-rejection/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+12 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+13 + [lints]
+14 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+12 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+13 + [lints]
+   |
+warning: `example-customize-path-rejection` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> reverse-proxy/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+11 ~ tokio = { version = "1", features = ["full"] }
+12 + [lints]
+13 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+11 ~ tokio = { version = "1", features = ["full"] }
+12 + [lints]
+   |
+warning: `example-reverse-proxy` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> serve-with-hyper/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+12 ~ tower = { version = "0.5.2", features = ["util"] }
+13 + [lints]
+14 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+12 ~ tower = { version = "0.5.2", features = ["util"] }
+13 + [lints]
+   |
+warning: `example-serve-with-hyper` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> multipart-form/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+12 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+13 + [lints]
+14 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+12 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+13 + [lints]
+   |
+warning: `example-multipart-form` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> customize-extractor-error/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+15 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+16 + [lints]
+17 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+15 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+16 + [lints]
+   |
+warning: `example-customize-extractor-error` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> static-file-server/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+16 ~ http-body-util = "0.1.0"
+17 + [lints]
+18 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+16 ~ http-body-util = "0.1.0"
+17 + [lints]
+   |
+warning: `example-static-file-server` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> jwt/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+15 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+16 + [lints]
+17 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+15 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+16 + [lints]
+   |
+warning: `example-jwt` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> testing/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+19 ~ tower = { version = "0.5.2", features = ["util"] }
+20 + [lints]
+21 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+19 ~ tower = { version = "0.5.2", features = ["util"] }
+20 + [lints]
+   |
+warning: `example-testing` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> tls-rustls/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+12 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+13 + [lints]
+14 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+12 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+13 + [lints]
+   |
+warning: `example-tls-rustls` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> low-level-native-tls/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+15 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+16 + [lints]
+17 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+15 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+16 + [lints]
+   |
+warning: `example-low-level-native-tls` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> low-level-openssl/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+16 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+17 + [lints]
+18 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+16 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+17 + [lints]
+   |
+warning: `example-low-level-openssl` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> graceful-shutdown/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+11 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+12 + [lints]
+13 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+11 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+12 + [lints]
+   |
+warning: `example-graceful-shutdown` (manifest) generated 1 warning
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> tokio-postgres/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+14 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+15 + [lints]
+16 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+14 ~ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+15 + [lints]
+   |
+warning: `example-tokio-postgres` (manifest) generated 1 warning
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded atomic-waker v1.1.2
+  Downloaded cfg-if v1.0.4
+  Downloaded equivalent v1.0.2
+  Downloaded futures-core v0.3.32
+  Downloaded form_urlencoded v1.2.2
+  Downloaded futures-task v0.3.32
+  Downloaded errno v0.3.14
+  Downloaded httpdate v1.0.3
+  Downloaded http-body v1.0.1
+  Downloaded mime v0.3.17
+  Downloaded percent-encoding v2.3.2
+  Downloaded itoa v1.0.18
+  Downloaded scopeguard v1.2.0
+  Downloaded tower-layer v0.3.3
+  Downloaded sync_wrapper v1.0.2
+  Downloaded tokio-macros v2.7.0
+  Downloaded tower-service v0.3.3
+  Downloaded lock_api v0.4.14
+  Downloaded quote v1.0.46
+  Downloaded http-body-util v0.1.3
+  Downloaded pin-project-lite v0.2.17
+  Downloaded serde_html_form v0.4.1
+  Downloaded slab v0.4.12
+  Downloaded serde_path_to_error v0.1.20
+  Downloaded futures-channel v0.3.32
+  Downloaded bytes v1.12.0
+  Downloaded httparse v1.10.1
+  Downloaded parking_lot v0.12.5
+  Downloaded parking_lot_core v0.9.12
+  Downloaded signal-hook-registry v1.4.8
+  Downloaded zmij v1.0.21
+  Downloaded bitflags v2.13.0
+  Downloaded matchit v0.9.2
+  Downloaded serde_core v1.0.228
+  Downloaded smallvec v1.15.2
+  Downloaded socket2 v0.6.4
+  Downloaded tracing-core v0.1.36
+  Downloaded unicode-ident v1.0.24
+  Downloaded proc-macro2 v1.0.106
+  Downloaded memchr v2.8.2
+  Downloaded tower v0.5.3
+  Downloaded hyper-util v0.1.20
+  Downloaded indexmap v2.14.0
+  Downloaded mio v1.2.1
+  Downloaded http v1.5.0
+  Downloaded hashbrown v0.17.1
+  Downloaded hyper v1.10.1
+  Downloaded futures-util v0.3.32
+  Downloaded serde_json v1.0.150
+  Downloaded tower-http v0.6.11
+  Downloaded syn v2.0.118
+  Downloaded tracing v0.1.44
+  Downloaded libc v0.2.186
+  Downloaded tokio v1.53.3
+   Compiling libc v0.2.186
+   Compiling itoa v1.0.18
+   Compiling pin-project-lite v0.2.17
+   Compiling proc-macro2 v1.0.106
+   Compiling bytes v1.12.0
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.46
+   Compiling futures-core v0.3.32
+   Compiling parking_lot_core v0.9.12
+   Compiling http v1.5.0
+   Compiling cfg-if v1.0.4
+   Compiling smallvec v1.15.2
+   Compiling scopeguard v1.2.0
+   Compiling lock_api v0.4.14
+   Compiling syn v2.0.118
+   Compiling errno v0.3.14
+   Compiling serde_core v1.0.228
+   Compiling signal-hook-registry v1.4.8
+   Compiling tokio-macros v2.7.0
+   Compiling parking_lot v0.12.5
+   Compiling http-body v1.0.1
+   Compiling mio v1.2.1
+   Compiling socket2 v0.6.4
+   Compiling httparse v1.10.1
+   Compiling tower-service v0.3.3
+   Compiling zmij v1.0.21
+   Compiling tokio v1.53.3
+   Compiling tower-layer v0.3.3
+   Compiling futures-channel v0.3.32
+   Compiling serde_json v1.0.150
+   Compiling slab v0.4.12
+   Compiling equivalent v1.0.2
+   Compiling httpdate v1.0.3
+   Compiling tracing-core v0.1.36
+   Compiling hashbrown v0.17.1
+   Compiling futures-task v0.3.32
+   Compiling sync_wrapper v1.0.2
+   Compiling percent-encoding v2.3.2
+   Compiling atomic-waker v1.1.2
+   Compiling hyper v1.10.1
+   Compiling form_urlencoded v1.2.2
+   Compiling futures-util v0.3.32
+   Compiling indexmap v2.14.0
+   Compiling tracing v0.1.44
+   Compiling http-body-util v0.1.3
+   Compiling mime v0.3.17
+   Compiling memchr v2.8.2
+   Compiling axum-core v0.5.6 (/app/axum-core)
+   Compiling serde_html_form v0.4.1
+   Compiling tower v0.5.3
+   Compiling hyper-util v0.1.20
+   Compiling serde_path_to_error v0.1.20
+   Compiling bitflags v2.13.0
+   Compiling matchit v0.9.2
+   Compiling axum v0.8.9 (/app/axum)
+   Compiling tower-http v0.6.11
+   Compiling example-cors v0.1.0 (/app/examples/cors)
+    Finished `release` profile [optimized] target(s) in 2m 20s
+STEP 6/6: CMD ["sh", "-c", "/tmp/reference-target/release/example-cors"]
+COMMIT localhost/zdround2-reference-fresh-axum-cors:test
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:93dfde099cbff2228318a1a7bddcbbbe5fea602e89dd1c38e50802290d4bcbca
+Copying blob sha256:1bd5948cfb9aaffea734bc8e11e4e487ad95906215848c39a907ccb15313d0a6
+Copying blob sha256:fb81ad49e58cd341453dfac2d481eb3387c41b086ff4413658ca3b8ff9fc8f59
+Copying config sha256:9a8f65b66caf47ce6f604c821f2b8e969f6ffc5a619269365aca5c49cd3f87d0
+Writing manifest to image destination
+--> 9a8f65b66caf
+Successfully tagged localhost/zdround2-reference-fresh-axum-cors:test
+9a8f65b66caf47ce6f604c821f2b8e969f6ffc5a619269365aca5c49cd3f87d0

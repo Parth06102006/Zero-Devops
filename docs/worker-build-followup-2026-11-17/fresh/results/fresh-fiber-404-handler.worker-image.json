@@ -1,0 +1,311 @@
+{
+  "Type": "buildah 0.0.1",
+  "FromImage": "localhost/deploy-bc5ba026-011c-4bc3-ae02-3d66b0a73a99:latest",
+  "FromImageID": "bb065d1ef016cdaf0e18eea6fec911d8d2a1762fe58604d3bf73f54faf6cee5a",
+  "FromImageDigest": "sha256:92945d858d56e453e650ea3fab43ca2bd6e764709d526d9da19e0e41252bd27f",
+  "GroupAdd": null,
+  "Config": "{\"created\":\"2026-11-17T19:05:49.105832246Z\",\"architecture\":\"amd64\",\"os\":\"linux\",\"config\":{\"User\":\"app\",\"ExposedPorts\":{\"8080/tcp\":{}},\"Env\":[\"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"],\"Cmd\":[\"/app/app\"],\"WorkingDir\":\"/app\",\"Labels\":{\"io.buildah.version\":\"1.39.3\"}},\"rootfs\":{\"type\":\"layers\",\"diff_ids\":[\"sha256:08bc4e534116aa76b16015484b82eac51f9a593416feae9296c8a2d4bb7aa4a2\",\"sha256:2cfc384a1c7f52304f7003f27650e99608dddbcf4bde8b9133e883dfb337bc4d\"]},\"history\":[{\"created\":\"2026-04-16T23:53:26.803599608Z\",\"created_by\":\"ADD alpine-minirootfs-3.20.10-x86_64.tar.gz / # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-04-16T23:53:26.803599608Z\",\"created_by\":\"CMD [\\\"/bin/sh\\\"]\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-17T19:05:44.845821776Z\",\"created_by\":\"/bin/sh -c #(nop) WORKDIR /app\",\"comment\":\"FROM docker.io/library/alpine:3.20\",\"empty_layer\":true},{\"created\":\"2026-11-17T19:05:45.433696594Z\",\"created_by\":\"/bin/sh -c addgroup -S app \\u0026\\u0026 adduser -S app -G app\",\"empty_layer\":true},{\"created\":\"2026-11-17T19:05:48.739558399Z\",\"created_by\":\"/bin/sh -c #(nop) COPY file:1904d9672123c7fa521568b639dc6aa062116dd7640d322ec1d97689b3335a56 in /app/app \",\"empty_layer\":true},{\"created\":\"2026-11-17T19:05:48.85114164Z\",\"created_by\":\"/bin/sh -c #(nop) USER app\",\"empty_layer\":true},{\"created\":\"2026-11-17T19:05:48.977223326Z\",\"created_by\":\"/bin/sh -c #(nop) EXPOSE 8080\",\"empty_layer\":true},{\"created\":\"2026-11-17T19:05:50.001195215Z\",\"created_by\":\"/bin/sh -c #(nop) CMD [\\\"/app/app\\\"]\"}]}",
+  "Manifest": "{\"schemaVersion\":2,\"mediaType\":\"application/vnd.oci.image.manifest.v1+json\",\"config\":{\"mediaType\":\"application/vnd.oci.image.config.v1+json\",\"digest\":\"sha256:bb065d1ef016cdaf0e18eea6fec911d8d2a1762fe58604d3bf73f54faf6cee5a\",\"size\":1569},\"layers\":[{\"mediaType\":\"application/vnd.oci.image.layer.v1.tar\",\"digest\":\"sha256:08bc4e534116aa76b16015484b82eac51f9a593416feae9296c8a2d4bb7aa4a2\",\"size\":8092160},{\"mediaType\":\"application/vnd.oci.image.layer.v1.tar\",\"digest\":\"sha256:2cfc384a1c7f52304f7003f27650e99608dddbcf4bde8b9133e883dfb337bc4d\",\"size\":14685696}],\"annotations\":{\"com.docker.official-images.bashbrew.arch\":\"amd64\",\"org.opencontainers.image.base.digest\":\"sha256:c64c687cbea9300178b30c95835354e34c4e4febc4badfe27102879de0483b5e\",\"org.opencontainers.image.base.name\":\"docker.io/library/alpine:3.20\",\"org.opencontainers.image.created\":\"2026-04-16T23:53:23Z\",\"org.opencontainers.image.revision\":\"0db70ae354ee747109ce0b9a0cfbcd3c907bc822\",\"org.opencontainers.image.source\":\"https://github.com/alpinelinux/docker-alpine.git#0db70ae354ee747109ce0b9a0cfbcd3c907bc822:x86_64\",\"org.opencontainers.image.url\":\"https://hub.docker.com/_/alpine\",\"org.opencontainers.image.version\":\"3.20.10\"}}",
+  "Container": "",
+  "ContainerID": "",
+  "MountPoint": "",
+  "ProcessLabel": "",
+  "MountLabel": "",
+  "ImageAnnotations": {
+    "com.docker.official-images.bashbrew.arch": "amd64",
+    "org.opencontainers.image.base.digest": "sha256:c64c687cbea9300178b30c95835354e34c4e4febc4badfe27102879de0483b5e",
+    "org.opencontainers.image.base.name": "docker.io/library/alpine:3.20",
+    "org.opencontainers.image.created": "2026-04-16T23:53:23Z",
+    "org.opencontainers.image.revision": "0db70ae354ee747109ce0b9a0cfbcd3c907bc822",
+    "org.opencontainers.image.source": "https://github.com/alpinelinux/docker-alpine.git#0db70ae354ee747109ce0b9a0cfbcd3c907bc822:x86_64",
+    "org.opencontainers.image.url": "https://hub.docker.com/_/alpine",
+    "org.opencontainers.image.version": "3.20.10"
+  },
+  "ImageCreatedBy": "",
+  "OCIv1": {
+    "created": "2026-11-17T19:05:49.105832246Z",
+    "architecture": "amd64",
+    "os": "linux",
+    "config": {
+      "User": "app",
+      "ExposedPorts": {
+        "8080/tcp": {}
+      },
+      "Env": [
+        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      ],
+      "Cmd": [
+        "/app/app"
+      ],
+      "WorkingDir": "/app",
+      "Labels": {
+        "io.buildah.version": "1.39.3"
+      }
+    },
+    "rootfs": {
+      "type": "layers",
+      "diff_ids": [
+        "sha256:08bc4e534116aa76b16015484b82eac51f9a593416feae9296c8a2d4bb7aa4a2",
+        "sha256:2cfc384a1c7f52304f7003f27650e99608dddbcf4bde8b9133e883dfb337bc4d"
+      ]
+    },
+    "history": [
+      {
+        "created": "2026-04-16T23:53:26.803599608Z",
+        "created_by": "ADD alpine-minirootfs-3.20.10-x86_64.tar.gz / # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2026-04-16T23:53:26.803599608Z",
+        "created_by": "CMD [\"/bin/sh\"]",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      },
+      {
+        "created": "2026-11-17T19:05:44.845821776Z",
+        "created_by": "/bin/sh -c #(nop) WORKDIR /app",
+        "comment": "FROM docker.io/library/alpine:3.20",
+        "empty_layer": true
+      },
+      {
+        "created": "2026-11-17T19:05:45.433696594Z",
+        "created_by": "/bin/sh -c addgroup -S app && adduser -S app -G app",
+        "empty_layer": true
+      },
+      {
+        "created": "2026-11-17T19:05:48.739558399Z",
+        "created_by": "/bin/sh -c #(nop) COPY file:1904d9672123c7fa521568b639dc6aa062116dd7640d322ec1d97689b3335a56 in /app/app ",
+        "empty_layer": true
+      },
+      {
+        "created": "2026-11-17T19:05:48.85114164Z",
+        "created_by": "/bin/sh -c #(nop) USER app",
+        "empty_layer": true
+      },
+      {
+        "created": "2026-11-17T19:05:48.977223326Z",
+        "created_by": "/bin/sh -c #(nop) EXPOSE 8080",
+        "empty_layer": true
+      },
+      {
+        "created": "2026-11-17T19:05:50.001195215Z",
+        "created_by": "/bin/sh -c #(nop) CMD [\"/app/app\"]"
+      }
+    ]
+  },
+  "Docker": {
+    "created": "2026-11-17T19:05:49.105832246Z",
+    "container_config": {
+      "Hostname": "",
+      "Domainname": "",
+      "User": "app",
+      "AttachStdin": false,
+      "AttachStdout": false,
+      "AttachStderr": false,
+      "ExposedPorts": {
+        "8080/tcp": {}
+      },
+      "Tty": false,
+      "OpenStdin": false,
+      "StdinOnce": false,
+      "Env": [
+        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      ],
+      "Cmd": [
+        "/app/app"
+      ],
+      "Image": "",
+      "Volumes": null,
+      "WorkingDir": "/app",
+      "Entrypoint": null,
+      "OnBuild": null,
+      "Labels": {
+        "io.buildah.version": "1.39.3"
+      }
+    },
+    "config": {
+      "Hostname": "",
+      "Domainname": "",
+      "User": "app",
+      "AttachStdin": false,
+      "AttachStdout": false,
+      "AttachStderr": false,
+      "ExposedPorts": {
+        "8080/tcp": {}
+      },
+      "Tty": false,
+      "OpenStdin": false,
+      "StdinOnce": false,
+      "Env": [
+        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      ],
+      "Cmd": [
+        "/app/app"
+      ],
+      "Image": "",
+      "Volumes": null,
+      "WorkingDir": "/app",
+      "Entrypoint": null,
+      "OnBuild": null,
+      "Labels": {
+        "io.buildah.version": "1.39.3"
+      }
+    },
+    "architecture": "amd64",
+    "os": "linux",
+    "rootfs": {
+      "type": "layers",
+      "diff_ids": [
+        "sha256:08bc4e534116aa76b16015484b82eac51f9a593416feae9296c8a2d4bb7aa4a2",
+        "sha256:2cfc384a1c7f52304f7003f27650e99608dddbcf4bde8b9133e883dfb337bc4d"
+      ]
+    },
+    "history": [
+      {
+        "created": "2026-04-16T23:53:26.803599608Z",
+        "created_by": "ADD alpine-minirootfs-3.20.10-x86_64.tar.gz / # buildkit",
+        "comment": "buildkit.dockerfile.v0"
+      },
+      {
+        "created": "2026-04-16T23:53:26.803599608Z",
+        "created_by": "CMD [\"/bin/sh\"]",
+        "comment": "buildkit.dockerfile.v0",
+        "empty_layer": true
+      },
+      {
+        "created": "2026-11-17T19:05:44.845821776Z",
+        "created_by": "/bin/sh -c #(nop) WORKDIR /app",
+        "comment": "FROM docker.io/library/alpine:3.20",
+        "empty_layer": true
+      },
+      {
+        "created": "2026-11-17T19:05:45.433696594Z",
+        "created_by": "/bin/sh -c addgroup -S app && adduser -S app -G app",
+        "empty_layer": true
+      },
+      {
+        "created": "2026-11-17T19:05:48.739558399Z",
+        "created_by": "/bin/sh -c #(nop) COPY file:1904d9672123c7fa521568b639dc6aa062116dd7640d322ec1d97689b3335a56 in /app/app ",
+        "empty_layer": true
+      },
+      {
+        "created": "2026-11-17T19:05:48.85114164Z",
+        "created_by": "/bin/sh -c #(nop) USER app",
+        "empty_layer": true
+      },
+      {
+        "created": "2026-11-17T19:05:48.977223326Z",
+        "created_by": "/bin/sh -c #(nop) EXPOSE 8080",
+        "empty_layer": true
+      },
+      {
+        "created": "2026-11-17T19:05:50.001195215Z",
+        "created_by": "/bin/sh -c #(nop) CMD [\"/app/app\"]"
+      }
+    ]
+  },
+  "DefaultMountsFilePath": "",
+  "Isolation": "oci",
+  "NamespaceOptions": [
+    {
+      "Name": "cgroup",
+      "Host": false,
+      "Path": ""
+    },
+    {
+      "Name": "ipc",
+      "Host": false,
+      "Path": ""
+    },
+    {
+      "Name": "mount",
+      "Host": false,
+      "Path": ""
+    },
+    {
+      "Name": "network",
+      "Host": false,
+      "Path": ""
+    },
+    {
+      "Name": "pid",
+      "Host": false,
+      "Path": ""
+    },
+    {
+      "Name": "user",
+      "Host": true,
+      "Path": ""
+    },
+    {
+      "Name": "uts",
+      "Host": false,
+      "Path": ""
+    }
+  ],
+  "Capabilities": null,
+  "ConfigureNetwork": "NetworkDefault",
+  "CNIPluginPath": "",
+  "CNIConfigDir": "",
+  "IDMappingOptions": {
+    "HostUIDMapping": true,
+    "HostGIDMapping": true,
+    "UIDMap": [],
+    "GIDMap": [],
+    "AutoUserNs": false,
+    "AutoUserNsOpts": {
+      "Size": 0,
+      "InitialSize": 0,
+      "PasswdFile": "",
+      "GroupFile": "",
+      "AdditionalUIDMappings": null,
+      "AdditionalGIDMappings": null
+    }
+  },
+  "History": [
+    {
+      "created": "2026-04-16T23:53:26.803599608Z",
+      "created_by": "ADD alpine-minirootfs-3.20.10-x86_64.tar.gz / # buildkit",
+      "comment": "buildkit.dockerfile.v0"
+    },
+    {
+      "created": "2026-04-16T23:53:26.803599608Z",
+      "created_by": "CMD [\"/bin/sh\"]",
+      "comment": "buildkit.dockerfile.v0",
+      "empty_layer": true
+    },
+    {
+      "created": "2026-11-17T19:05:44.845821776Z",
+      "created_by": "/bin/sh -c #(nop) WORKDIR /app",
+      "comment": "FROM docker.io/library/alpine:3.20",
+      "empty_layer": true
+    },
+    {
+      "created": "2026-11-17T19:05:45.433696594Z",
+      "created_by": "/bin/sh -c addgroup -S app && adduser -S app -G app",
+      "empty_layer": true
+    },
+    {
+      "created": "2026-11-17T19:05:48.739558399Z",
+      "created_by": "/bin/sh -c #(nop) COPY file:1904d9672123c7fa521568b639dc6aa062116dd7640d322ec1d97689b3335a56 in /app/app ",
+      "empty_layer": true
+    },
+    {
+      "created": "2026-11-17T19:05:48.85114164Z",
+      "created_by": "/bin/sh -c #(nop) USER app",
+      "empty_layer": true
+    },
+    {
+      "created": "2026-11-17T19:05:48.977223326Z",
+      "created_by": "/bin/sh -c #(nop) EXPOSE 8080",
+      "empty_layer": true
+    },
+    {
+      "created": "2026-11-17T19:05:50.001195215Z",
+      "created_by": "/bin/sh -c #(nop) CMD [\"/app/app\"]"
+    }
+  ],
+  "Devices": null,
+  "DeviceSpecs": null,
+  "CDIConfigDir": ""
+}

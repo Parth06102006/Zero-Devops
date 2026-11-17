@@ -1,0 +1,41 @@
+2026-11-17T18:59:28.705Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdround2-9908653b-fe63-49c3-85d9-2ff184830408", "delivery_tag": 6}
+2026-11-17T18:59:28.709Z	INFO	deployments/deployments.go:475	inserting worker deployment row	{"request_id": "zdround2-9908653b-fe63-49c3-85d9-2ff184830408", "deployment_id": "9908653b-fe63-49c3-85d9-2ff184830408"}
+2026-11-17T18:59:28.711Z	INFO	deployments/deployments.go:482	marking as building	{"request_id": "zdround2-9908653b-fe63-49c3-85d9-2ff184830408", "deployment_id": "9908653b-fe63-49c3-85d9-2ff184830408"}
+2026-11-17T18:59:28.715Z	INFO	deployments/deployments.go:487	publishing building status	{"request_id": "zdround2-9908653b-fe63-49c3-85d9-2ff184830408", "deployment_id": "9908653b-fe63-49c3-85d9-2ff184830408"}
+ZERODEVOPS_GIT phase=fetch attempt=1 seconds=1.831 success=true
+ZERODEVOPS_GIT phase=checkout seconds=0.099 verified_sha=e1f44175db9420bb612134d9bb84d51dcca661ed
+2026-11-17T18:59:30.666Z	INFO	deployments/deployments.go:492	detecting framework	{"request_id": "zdround2-9908653b-fe63-49c3-85d9-2ff184830408", "deployment_id": "9908653b-fe63-49c3-85d9-2ff184830408"}
+2026-11-17T18:59:30.666Z	INFO	deployments/deployments.go:498	framework detected	{"request_id": "zdround2-9908653b-fe63-49c3-85d9-2ff184830408", "deployment_id": "9908653b-fe63-49c3-85d9-2ff184830408", "framework": "go", "package_manager": "npm"}
+2026-11-17T18:59:30.666Z	INFO	deployments/deployments.go:506	writing Dockerfile from template	{"request_id": "zdround2-9908653b-fe63-49c3-85d9-2ff184830408", "deployment_id": "9908653b-fe63-49c3-85d9-2ff184830408", "template": "dynamic/Dockerfile.go.tmpl"}
+2026-11-17T18:59:30.675Z	INFO	deployments/deployments.go:517	building image with buildah	{"request_id": "zdround2-9908653b-fe63-49c3-85d9-2ff184830408", "deployment_id": "9908653b-fe63-49c3-85d9-2ff184830408", "image_tag": "deploy-9908653b-fe63-49c3-85d9-2ff184830408:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/golang:1.27.0-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: ENV CGO_ENABLED=0 GOOS=linux GOTOOLCHAIN=local
+[1/2] STEP 4/7: COPY go.mod go.sum* ./
+[1/2] STEP 5/7: RUN go mod download
+[1/2] STEP 6/7: COPY . .
+[1/2] STEP 7/7: RUN ["go","build","-o","/app/app","."]
+[2/2] STEP 1/7: FROM docker.io/library/alpine:3.20
+[2/2] STEP 2/7: WORKDIR /app
+[2/2] STEP 3/7: RUN addgroup -S app && adduser -S app -G app
+[2/2] STEP 4/7: COPY --from=builder /app/app /app/app
+[2/2] STEP 5/7: USER app
+[2/2] STEP 6/7: EXPOSE 8080
+[2/2] STEP 7/7: CMD ["/app/app"]
+[2/2] COMMIT deploy-9908653b-fe63-49c3-85d9-2ff184830408:latest
+Getting image source signatures
+Copying blob sha256:08bc4e534116aa76b16015484b82eac51f9a593416feae9296c8a2d4bb7aa4a2
+Copying blob sha256:eb155483aa46f312deaae30bc6d508c0be2f7f38bbcdbf7f9791109cd4dc0093
+Copying config sha256:8cc81a1fa36c57cd2cdd540ba15323340a3998236be616fd667aaf37779bc3a7
+Writing manifest to image destination
+--> 8cc81a1fa36c
+Successfully tagged localhost/deploy-9908653b-fe63-49c3-85d9-2ff184830408:latest
+8cc81a1fa36c57cd2cdd540ba15323340a3998236be616fd667aaf37779bc3a7
+2026-11-17T19:01:11.452Z	INFO	deployments/deployments.go:524	saving image tar	{"request_id": "zdround2-9908653b-fe63-49c3-85d9-2ff184830408", "deployment_id": "9908653b-fe63-49c3-85d9-2ff184830408", "tar_path": "/tmp/zerodevops-build/9908653b-fe63-49c3-85d9-2ff184830408/hello-world/9908653b-fe63-49c3-85d9-2ff184830408.tar"}
+Getting image source signatures
+Copying blob sha256:08bc4e534116aa76b16015484b82eac51f9a593416feae9296c8a2d4bb7aa4a2
+Copying blob sha256:eb155483aa46f312deaae30bc6d508c0be2f7f38bbcdbf7f9791109cd4dc0093
+Copying config sha256:8cc81a1fa36c57cd2cdd540ba15323340a3998236be616fd667aaf37779bc3a7
+Writing manifest to image destination
+2026-11-17T19:01:11.664Z	INFO	deployments/deployments.go:600	dynamic build finished (stub finalize, no upload yet)	{"request_id": "zdround2-9908653b-fe63-49c3-85d9-2ff184830408", "deployment_id": "9908653b-fe63-49c3-85d9-2ff184830408"}
+2026-11-17T19:01:11.703Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdround2-9908653b-fe63-49c3-85d9-2ff184830408", "deployment_id": "9908653b-fe63-49c3-85d9-2ff184830408"}

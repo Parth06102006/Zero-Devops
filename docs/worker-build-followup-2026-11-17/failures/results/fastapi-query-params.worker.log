@@ -1,0 +1,14 @@
+2026-11-17T19:01:20.004Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdround2-77ee4733-d3b2-4be7-b8ed-8398378b64b2", "delivery_tag": 7}
+2026-11-17T19:01:20.008Z	INFO	deployments/deployments.go:475	inserting worker deployment row	{"request_id": "zdround2-77ee4733-d3b2-4be7-b8ed-8398378b64b2", "deployment_id": "77ee4733-d3b2-4be7-b8ed-8398378b64b2"}
+2026-11-17T19:01:20.014Z	INFO	deployments/deployments.go:482	marking as building	{"request_id": "zdround2-77ee4733-d3b2-4be7-b8ed-8398378b64b2", "deployment_id": "77ee4733-d3b2-4be7-b8ed-8398378b64b2"}
+2026-11-17T19:01:20.017Z	INFO	deployments/deployments.go:487	publishing building status	{"request_id": "zdround2-77ee4733-d3b2-4be7-b8ed-8398378b64b2", "deployment_id": "77ee4733-d3b2-4be7-b8ed-8398378b64b2"}
+ZERODEVOPS_GIT phase=fetch attempt=1 seconds=7.894 success=true
+ZERODEVOPS_GIT phase=checkout seconds=0.307 verified_sha=a1b3be01aadc61c67edc09eed4f6cc1fcc3d3b8f
+2026-11-17T19:01:28.233Z	INFO	deployments/deployments.go:492	detecting framework	{"request_id": "zdround2-77ee4733-d3b2-4be7-b8ed-8398378b64b2", "deployment_id": "77ee4733-d3b2-4be7-b8ed-8398378b64b2"}
+2026-11-17T19:01:28.302Z	ERROR	worker/worker.go:109	deployment job failed	{"request_id": "zdround2-77ee4733-d3b2-4be7-b8ed-8398378b64b2", "deployment_id": "77ee4733-d3b2-4be7-b8ed-8398378b64b2", "error": "clone/prepare failed: no framework detected"}
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:109
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290

@@ -1,0 +1,8 @@
+{
+  "exit_code": 0,
+  "seconds": 42.011,
+  "completed_at": "2026-11-17T18:38:12.869071+00:00",
+  "log": "native-integration.log",
+  "app_jobs_dispatched": false,
+  "prior_failed_verification": "pre-campaign-verification-942664f"
+}

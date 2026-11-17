@@ -1,0 +1,264 @@
+{
+  "case": {
+    "name": "vite-svelte-ts",
+    "repo": "vitejs/vite",
+    "sha": "9a8d1a98922c5e445e8a618b8c27f84c63b9fbff",
+    "path": "packages/create-vite/template-svelte-ts",
+    "stack": "Vite/svelte-ts",
+    "kind": "node",
+    "reference_build": "npm install --ignore-scripts && npm run build",
+    "reference_start": "npm run preview -- --host 0.0.0.0 --port 4173",
+    "port": 4173,
+    "probe": "/",
+    "static_output": "dist",
+    "context": "packages/create-vite/template-svelte-ts",
+    "env": {}
+  },
+  "started_at": "2026-11-17T20:05:06.348265+00:00",
+  "complete": true,
+  "batch": "failures",
+  "reference_qualified": true,
+  "qualification": "historical qualification from primary57",
+  "prior_worker": {
+    "commit_sha": "9a8d1a98922c5e445e8a618b8c27f84c63b9fbff",
+    "deployment_id": "12c4c700-c201-42da-9667-b84c34359f8e",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: build failed: exit status 125|",
+    "end_to_end_seconds": 63.92,
+    "resource_samples": [
+      {
+        "seconds": 0.32,
+        "stats": "2.06%|201.2MiB / 2GiB|48",
+        "cgroup": "cpu.stat\nusage_usec 328644495\nuser_usec 159764025\nsystem_usec 168880469\nnice_usec 0\nnr_periods 4456\nnr_throttled 596\nthrottled_usec 47990769\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1182457856\nmemory.current\n249585664"
+      },
+      {
+        "seconds": 22.15,
+        "stats": "67.27%|459.7MiB / 2GiB|81",
+        "cgroup": "cpu.stat\nusage_usec 342606972\nuser_usec 167519225\nsystem_usec 175087746\nnice_usec 0\nnr_periods 4659\nnr_throttled 608\nthrottled_usec 48383446\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1182457856\nmemory.current\n861339648"
+      },
+      {
+        "seconds": 44.18,
+        "stats": "101.96%|443.1MiB / 2GiB|84",
+        "cgroup": "cpu.stat\nusage_usec 358336095\nuser_usec 175121274\nsystem_usec 183214820\nnice_usec 0\nnr_periods 4804\nnr_throttled 655\nthrottled_usec 51450582\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1182457856\nmemory.current\n1048182784"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "packages/create-vite/template-svelte-ts",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "sveltekit",
+    "phase_events": [
+      {
+        "at": "2026-11-16T20:48:16.037Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-16T20:48:16.038Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-16T20:48:16.042Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-16T20:48:16.044Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-16T20:48:21.725Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-16T20:48:21.726Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-16T20:48:21.726Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-16T20:48:21.731Z",
+        "event": "unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled"
+      },
+      {
+        "at": "2026-11-16T20:48:21.731Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-16T20:49:19.665Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"12c4c700-c201-42da-9667-b84c34359f8e\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 150,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"12c4c700-c201-42da-9667-b84c34359f8e\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: build failed: exit status 125\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": false
+  },
+  "prior_classification": "other-build-failure",
+  "worker": {
+    "lane": 1,
+    "worker_container": "zdround2-1-worker",
+    "broker_vhost": "zdround2-1",
+    "commit_sha": "9a8d1a98922c5e445e8a618b8c27f84c63b9fbff",
+    "deployment_id": "0ba163c9-cc09-46e8-856c-fc027d696276",
+    "state": "success",
+    "database_row": "success||s3://testbucket/images/0ba163c9-cc09-46e8-856c-fc027d696276.tar",
+    "end_to_end_seconds": 73.128,
+    "resource_samples": [
+      {
+        "seconds": 0.49,
+        "stats": "1.10%|328.4MiB / 2GiB|35",
+        "cgroup": "cpu.stat\nusage_usec 241659471\nuser_usec 132138505\nsystem_usec 109520966\nnice_usec 0\nnr_periods 2389\nnr_throttled 910\nthrottled_usec 93894026\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1266683904\nmemory.current\n461594624"
+      },
+      {
+        "seconds": 24.43,
+        "stats": "29.85%|602.2MiB / 2GiB|70",
+        "cgroup": "cpu.stat\nusage_usec 254830878\nuser_usec 139604980\nsystem_usec 115225897\nnice_usec 0\nnr_periods 2594\nnr_throttled 921\nthrottled_usec 94315313\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1266683904\nmemory.current\n1223536640"
+      },
+      {
+        "seconds": 50.17,
+        "stats": "60.64%|384.6MiB / 2GiB|40",
+        "cgroup": "cpu.stat\nusage_usec 281376157\nuser_usec 152388909\nsystem_usec 128987247\nnice_usec 0\nnr_periods 2836\nnr_throttled 1042\nthrottled_usec 101886275\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1277370368\nmemory.current\n1005248512"
+      },
+      {
+        "seconds": 71.77,
+        "stats": "0.00%|412.9MiB / 2GiB|36",
+        "cgroup": "cpu.stat\nusage_usec 298529192\nuser_usec 160101159\nsystem_usec 138428033\nnice_usec 0\nnr_periods 3033\nnr_throttled 1061\nthrottled_usec 103252930\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1328496640\nmemory.current\n454889472"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "packages/create-vite/template-svelte-ts",
+      "scanner_policy_version": "v1"
+    },
+    "deployment": "not attempted",
+    "framework": "vite",
+    "git_phase_diagnostics": [
+      "ZERODEVOPS_GIT phase=fetch attempt=1 seconds=6.899 success=true",
+      "ZERODEVOPS_GIT phase=checkout seconds=0.360 verified_sha=9a8d1a98922c5e445e8a618b8c27f84c63b9fbff"
+    ],
+    "mock_upload_bytes": 188123695,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"0ba163c9-cc09-46e8-856c-fc027d696276\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 154,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"0ba163c9-cc09-46e8-856c-fc027d696276\",\"status\":\"success\",\"output_url\":\"s3://testbucket/images/0ba163c9-cc09-46e8-856c-fc027d696276.tar\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": true,
+    "image_layer_bytes": 188096000,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 2.777,
+      "probe_url": "http://127.0.0.1:4173/",
+      "first_response": "200|0.034013|text/html; charset=utf-8",
+      "response_sample": "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <link rel=\"icon\" type=\"image/svg+xml\" href=\"/favicon.svg\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>Vite + Svelte + TS</title>",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.005279
+        },
+        {
+          "status": 200,
+          "seconds": 0.003629
+        },
+        {
+          "status": 200,
+          "seconds": 0.004479
+        },
+        {
+          "status": 200,
+          "seconds": 0.003241
+        },
+        {
+          "status": 200,
+          "seconds": 0.006105
+        },
+        {
+          "status": 200,
+          "seconds": 0.005148
+        },
+        {
+          "status": 200,
+          "seconds": 0.006769
+        },
+        {
+          "status": 200,
+          "seconds": 0.005106
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    },
+    "external_container_http": [
+      {
+        "from_container": "zdround2-1-mock",
+        "target_worker_ip": "172.25.0.5",
+        "url": "http://172.25.0.5:4173/",
+        "exit_code": 0,
+        "response": "200|0.007647|text/html; charset=utf-8",
+        "reachable_expected_class": true
+      }
+    ]
+  },
+  "worker_classification": "build-and-runtime-pass",
+  "classification": "build-and-runtime-pass",
+  "finished_at": "2026-11-17T20:06:28.174067+00:00"
+}

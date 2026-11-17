@@ -1,0 +1,357 @@
+{
+  "case": {
+    "name": "fresh-astro-with-mdx",
+    "repo": "withastro/astro",
+    "sha": "387105be28cb3a3c062c3390b551cc9e51a2bfb1",
+    "path": "examples/with-mdx",
+    "kind": "node",
+    "port": 4321,
+    "probe": "/",
+    "reference_build": "npm install --ignore-scripts --package-lock=false && npm run build",
+    "reference_start": "npm run preview -- --host 0.0.0.0 --port 4321",
+    "context": "examples/with-mdx",
+    "env": {},
+    "source_dir": "/tmp/zd-round2-fresh-sources/withastro--astro",
+    "base_image": "docker.io/library/node:24-alpine",
+    "static_output": "dist",
+    "stack": "Astro/with-mdx"
+  },
+  "started_at": "2026-11-17T18:51:41.714636+00:00",
+  "complete": true,
+  "batch": "fresh",
+  "reference_qualified": true,
+  "qualification": "fresh reference trial recorded separately",
+  "reference": {
+    "build": {
+      "seconds": 155.313,
+      "exit_code": 0,
+      "timed_out": false,
+      "resource_samples": [
+        {
+          "seconds": 0.14,
+          "stats": "104.82%|461.4MiB / 2GiB|95",
+          "cgroup": "cpu.stat\nusage_usec 439578034\nuser_usec 221619130\nsystem_usec 217958903\nnice_usec 0\nnr_periods 6002\nnr_throttled 967\nthrottled_usec 73874282\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n609431552"
+        },
+        {
+          "seconds": 20.6,
+          "stats": "25.08%|567.9MiB / 2GiB|95",
+          "cgroup": "cpu.stat\nusage_usec 446325039\nuser_usec 225675527\nsystem_usec 220649511\nnice_usec 0\nnr_periods 6143\nnr_throttled 969\nthrottled_usec 73993269\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n751034368"
+        },
+        {
+          "seconds": 41.25,
+          "stats": "71.86%|608.1MiB / 2GiB|95",
+          "cgroup": "cpu.stat\nusage_usec 453310011\nuser_usec 230057007\nsystem_usec 223253004\nnice_usec 0\nnr_periods 6281\nnr_throttled 974\nthrottled_usec 74160288\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n924655616"
+        },
+        {
+          "seconds": 61.37,
+          "stats": "30.39%|621.7MiB / 2GiB|95",
+          "cgroup": "cpu.stat\nusage_usec 458796340\nuser_usec 233609033\nsystem_usec 225187307\nnice_usec 0\nnr_periods 6411\nnr_throttled 977\nthrottled_usec 74300363\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1064722432"
+        },
+        {
+          "seconds": 81.71,
+          "stats": "23.66%|632.8MiB / 2GiB|95",
+          "cgroup": "cpu.stat\nusage_usec 465721940\nuser_usec 238048676\nsystem_usec 227673263\nnice_usec 0\nnr_periods 6566\nnr_throttled 985\nthrottled_usec 74826931\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1161940992"
+        },
+        {
+          "seconds": 102.28,
+          "stats": "150.28%|735.3MiB / 2GiB|95",
+          "cgroup": "cpu.stat\nusage_usec 495307525\nuser_usec 253170644\nsystem_usec 242136881\nnice_usec 0\nnr_periods 6781\nnr_throttled 1142\nthrottled_usec 88382872\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1412149248"
+        },
+        {
+          "seconds": 122.85,
+          "stats": "94.37%|552.9MiB / 2GiB|66",
+          "cgroup": "cpu.stat\nusage_usec 508416537\nuser_usec 258544408\nsystem_usec 249872128\nnice_usec 0\nnr_periods 6906\nnr_throttled 1163\nthrottled_usec 89782895\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1158066176"
+        },
+        {
+          "seconds": 143.28,
+          "stats": "0.00%|334.9MiB / 2GiB|58",
+          "cgroup": "cpu.stat\nusage_usec 523833769\nuser_usec 263938708\nsystem_usec 259895061\nnice_usec 0\nnr_periods 7064\nnr_throttled 1186\nthrottled_usec 90600877\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n856641536"
+        }
+      ],
+      "cgroup_before": "1806557184\nusage_usec 438057758\nuser_usec 221030631\nsystem_usec 217027126\nnice_usec 0\nnr_periods 5988\nnr_throttled 965\nthrottled_usec 73852057\nnr_bursts 0\nburst_usec 0",
+      "cgroup_after": "1806557184\nusage_usec 523851697\nuser_usec 263949756\nsystem_usec 259901940\nnice_usec 0\nnr_periods 7066\nnr_throttled 1186\nthrottled_usec 90600877\nnr_bursts 0\nburst_usec 0\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0"
+    },
+    "base_image": "docker.io/library/node:24-alpine",
+    "source_dir": "/tmp/zd-round2-fresh-sources/withastro--astro",
+    "source_sha_verified": true,
+    "source_evidence": "fresh-source-evidence/withastro--astro.json",
+    "source_files_verified": 57,
+    "recipe": "FROM docker.io/library/node:24-alpine\nWORKDIR /app\nCOPY . .\nWORKDIR /app/.\nRUN npm install --ignore-scripts --package-lock=false && npm run build\nCMD [\"sh\", \"-c\", \"npm run preview -- --host 0.0.0.0 --port 4321\"]\n",
+    "image_built": true,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 3.629,
+      "probe_url": "http://127.0.0.1:4321/",
+      "first_response": "200|0.016097|text/html",
+      "response_sample": "<!DOCTYPE html><style>h1[data-astro-cid-2ynwtmkb]{color:red}\n</style><meta charset=\"utf-8\"/><h1 data-astro-cid-2ynwtmkb>Hello world!</h1>\n<p>Written by: Jane and John.</p>\n<p>Published on: February 1, 2022.</p>\n<style>astro-island,astro-slot,astro-st",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.002352
+        },
+        {
+          "status": 200,
+          "seconds": 0.002505
+        },
+        {
+          "status": 200,
+          "seconds": 0.002526
+        },
+        {
+          "status": 200,
+          "seconds": 0.002048
+        },
+        {
+          "status": 200,
+          "seconds": 0.002069
+        },
+        {
+          "status": 200,
+          "seconds": 0.002334
+        },
+        {
+          "status": 200,
+          "seconds": 0.002356
+        },
+        {
+          "status": 200,
+          "seconds": 0.00226
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    },
+    "external_container_http": [
+      {
+        "from_container": "zdround2-2-mock",
+        "target_worker_ip": "172.26.0.5",
+        "url": "http://172.26.0.5:4321/",
+        "exit_code": 0,
+        "response": "200|0.004025|text/html",
+        "reachable_expected_class": true
+      }
+    ],
+    "seconds": 163.856
+  },
+  "worker": {
+    "lane": 2,
+    "worker_container": "zdround2-2-worker",
+    "broker_vhost": "zdround2-2",
+    "commit_sha": "387105be28cb3a3c062c3390b551cc9e51a2bfb1",
+    "deployment_id": "8419ce37-6fea-4e7e-afca-228fe2a20058",
+    "state": "success",
+    "database_row": "success||s3://testbucket/images/8419ce37-6fea-4e7e-afca-228fe2a20058.tar",
+    "end_to_end_seconds": 493.72,
+    "resource_samples": [
+      {
+        "seconds": 0.5,
+        "stats": "2.75%|352.2MiB / 2GiB|64",
+        "cgroup": "cpu.stat\nusage_usec 530957602\nuser_usec 267395697\nsystem_usec 263561904\nnice_usec 0\nnr_periods 7165\nnr_throttled 1190\nthrottled_usec 90706091\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n376930304"
+      },
+      {
+        "seconds": 24.7,
+        "stats": "11.68%|597.8MiB / 2GiB|102",
+        "cgroup": "cpu.stat\nusage_usec 539615082\nuser_usec 271808101\nsystem_usec 267806980\nnice_usec 0\nnr_periods 7396\nnr_throttled 1200\nthrottled_usec 91182310\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n717545472"
+      },
+      {
+        "seconds": 49.24,
+        "stats": "39.46%|684.8MiB / 2GiB|102",
+        "cgroup": "cpu.stat\nusage_usec 547769794\nuser_usec 276753222\nsystem_usec 271016571\nnice_usec 0\nnr_periods 7574\nnr_throttled 1204\nthrottled_usec 91244968\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n951554048"
+      },
+      {
+        "seconds": 73.03,
+        "stats": "2.67%|699.9MiB / 2GiB|102",
+        "cgroup": "cpu.stat\nusage_usec 556699166\nuser_usec 282502823\nsystem_usec 274196342\nnice_usec 0\nnr_periods 7733\nnr_throttled 1211\nthrottled_usec 91847849\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1046712320"
+      },
+      {
+        "seconds": 100.69,
+        "stats": "141.28%|802.6MiB / 2GiB|102",
+        "cgroup": "cpu.stat\nusage_usec 584488223\nuser_usec 297619298\nsystem_usec 286868924\nnice_usec 0\nnr_periods 7988\nnr_throttled 1350\nthrottled_usec 104424735\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1187282944"
+      },
+      {
+        "seconds": 124.57,
+        "stats": "0.00%|783.2MiB / 2GiB|102",
+        "cgroup": "cpu.stat\nusage_usec 589870701\nuser_usec 300054504\nsystem_usec 289816196\nnice_usec 0\nnr_periods 8046\nnr_throttled 1371\nthrottled_usec 105762001\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1034158080"
+      },
+      {
+        "seconds": 148.39,
+        "stats": "0.00%|785.6MiB / 2GiB|102",
+        "cgroup": "cpu.stat\nusage_usec 590423048\nuser_usec 300161758\nsystem_usec 290261289\nnice_usec 0\nnr_periods 8080\nnr_throttled 1371\nthrottled_usec 105762001\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1028833280"
+      },
+      {
+        "seconds": 172.12,
+        "stats": "0.05%|785.2MiB / 2GiB|102",
+        "cgroup": "cpu.stat\nusage_usec 590937076\nuser_usec 300301342\nsystem_usec 290635733\nnice_usec 0\nnr_periods 8100\nnr_throttled 1371\nthrottled_usec 105762001\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1027772416"
+      },
+      {
+        "seconds": 196.02,
+        "stats": "0.03%|784.7MiB / 2GiB|102",
+        "cgroup": "cpu.stat\nusage_usec 591411841\nuser_usec 300390444\nsystem_usec 291021397\nnice_usec 0\nnr_periods 8124\nnr_throttled 1371\nthrottled_usec 105762001\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1027444736"
+      },
+      {
+        "seconds": 219.22,
+        "stats": "0.01%|684.4MiB / 2GiB|102",
+        "cgroup": "cpu.stat\nusage_usec 592265953\nuser_usec 300854689\nsystem_usec 291411263\nnice_usec 0\nnr_periods 8157\nnr_throttled 1373\nthrottled_usec 106002722\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n852504576"
+      },
+      {
+        "seconds": 241.25,
+        "stats": "0.02%|674.4MiB / 2GiB|102",
+        "cgroup": "cpu.stat\nusage_usec 592744082\nuser_usec 300986695\nsystem_usec 291757386\nnice_usec 0\nnr_periods 8179\nnr_throttled 1373\nthrottled_usec 106002722\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n812908544"
+      },
+      {
+        "seconds": 263.09,
+        "stats": "1.74%|661.9MiB / 2GiB|103",
+        "cgroup": "cpu.stat\nusage_usec 593260456\nuser_usec 301092475\nsystem_usec 292167981\nnice_usec 0\nnr_periods 8213\nnr_throttled 1373\nthrottled_usec 106002722\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n786718720"
+      },
+      {
+        "seconds": 294.26,
+        "stats": "0.03%|656.9MiB / 2GiB|103",
+        "cgroup": "cpu.stat\nusage_usec 593686458\nuser_usec 301181849\nsystem_usec 292504608\nnice_usec 0\nnr_periods 8242\nnr_throttled 1373\nthrottled_usec 106002722\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n743432192"
+      },
+      {
+        "seconds": 316.5,
+        "stats": "0.10%|652.5MiB / 2GiB|103",
+        "cgroup": "cpu.stat\nusage_usec 594441878\nuser_usec 301415564\nsystem_usec 293026313\nnice_usec 0\nnr_periods 8268\nnr_throttled 1374\nthrottled_usec 106014868\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n720744448"
+      },
+      {
+        "seconds": 338.49,
+        "stats": "0.00%|651.5MiB / 2GiB|103",
+        "cgroup": "cpu.stat\nusage_usec 594965778\nuser_usec 301496302\nsystem_usec 293469476\nnice_usec 0\nnr_periods 8293\nnr_throttled 1374\nthrottled_usec 106014868\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n719908864"
+      },
+      {
+        "seconds": 362.59,
+        "stats": "0.00%|646.5MiB / 2GiB|103",
+        "cgroup": "cpu.stat\nusage_usec 595479686\nuser_usec 301596854\nsystem_usec 293882831\nnice_usec 0\nnr_periods 8311\nnr_throttled 1374\nthrottled_usec 106014868\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n714952704"
+      },
+      {
+        "seconds": 386.45,
+        "stats": "0.09%|633MiB / 2GiB|103",
+        "cgroup": "cpu.stat\nusage_usec 595960151\nuser_usec 301682497\nsystem_usec 294277653\nnice_usec 0\nnr_periods 8336\nnr_throttled 1374\nthrottled_usec 106014868\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n706904064"
+      },
+      {
+        "seconds": 408.33,
+        "stats": "0.01%|642.8MiB / 2GiB|103",
+        "cgroup": "cpu.stat\nusage_usec 596542864\nuser_usec 301784337\nsystem_usec 294758526\nnice_usec 0\nnr_periods 8355\nnr_throttled 1374\nthrottled_usec 106014868\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n700772352"
+      },
+      {
+        "seconds": 430.42,
+        "stats": "0.02%|643.2MiB / 2GiB|103",
+        "cgroup": "cpu.stat\nusage_usec 597098495\nuser_usec 301885977\nsystem_usec 295212518\nnice_usec 0\nnr_periods 8380\nnr_throttled 1374\nthrottled_usec 106014868\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n700260352"
+      },
+      {
+        "seconds": 454.6,
+        "stats": "0.00%|642.5MiB / 2GiB|103",
+        "cgroup": "cpu.stat\nusage_usec 597671968\nuser_usec 302019145\nsystem_usec 295652823\nnice_usec 0\nnr_periods 8403\nnr_throttled 1374\nthrottled_usec 106014868\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n701177856"
+      },
+      {
+        "seconds": 479.08,
+        "stats": "56.22%|716.5MiB / 2GiB|100",
+        "cgroup": "cpu.stat\nusage_usec 612944735\nuser_usec 310081463\nsystem_usec 302863272\nnice_usec 0\nnr_periods 8585\nnr_throttled 1388\nthrottled_usec 107295996\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n972185600"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "examples/with-mdx",
+      "scanner_policy_version": "v1"
+    },
+    "deployment": "not attempted",
+    "framework": "astro",
+    "git_phase_diagnostics": [
+      "ZERODEVOPS_GIT phase=fetch attempt=1 seconds=8.193 success=true",
+      "ZERODEVOPS_GIT phase=checkout seconds=0.750 verified_sha=387105be28cb3a3c062c3390b551cc9e51a2bfb1"
+    ],
+    "mock_upload_bytes": 188086319,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"8419ce37-6fea-4e7e-afca-228fe2a20058\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 154,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"8419ce37-6fea-4e7e-afca-228fe2a20058\",\"status\":\"success\",\"output_url\":\"s3://testbucket/images/8419ce37-6fea-4e7e-afca-228fe2a20058.tar\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": true,
+    "image_layer_bytes": 188058624,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 1.538,
+      "probe_url": "http://127.0.0.1:4321/",
+      "first_response": "200|0.075764|text/html; charset=utf-8",
+      "response_sample": "<!DOCTYPE html><style>h1[data-astro-cid-2ynwtmkb]{color:red}\n</style><meta charset=\"utf-8\"/><h1 data-astro-cid-2ynwtmkb>Hello world!</h1>\n<p>Written by: Jane and John.</p>\n<p>Published on: February 1, 2022.</p>\n<style>astro-island,astro-slot,astro-st",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.00729
+        },
+        {
+          "status": 200,
+          "seconds": 0.004096
+        },
+        {
+          "status": 200,
+          "seconds": 0.003602
+        },
+        {
+          "status": 200,
+          "seconds": 0.005293
+        },
+        {
+          "status": 200,
+          "seconds": 0.002839
+        },
+        {
+          "status": 200,
+          "seconds": 0.005388
+        },
+        {
+          "status": 200,
+          "seconds": 0.005204
+        },
+        {
+          "status": 200,
+          "seconds": 0.003138
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    },
+    "external_container_http": [
+      {
+        "from_container": "zdround2-2-mock",
+        "target_worker_ip": "172.26.0.5",
+        "url": "http://172.26.0.5:4321/",
+        "exit_code": 0,
+        "response": "200|0.006178|text/html; charset=utf-8",
+        "reachable_expected_class": true
+      }
+    ]
+  },
+  "worker_classification": "build-and-runtime-pass",
+  "classification": "build-and-runtime-pass",
+  "finished_at": "2026-11-17T19:02:47.027815+00:00"
+}

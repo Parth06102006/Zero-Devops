@@ -1,0 +1,6 @@
+/bin/sh: set: line 0: can't access tty; job control turned off
+listening on 127.0.0.1:3000
+Terminated
+subprocess exited with status 143
+subprocess exited with status 143
+Error: exit status 143

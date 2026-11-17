@@ -1,0 +1,85 @@
+2026-11-17T19:16:56.845Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdround2-a7364c5a-dbf2-482b-a88a-634403f9e8e7", "delivery_tag": 11}
+2026-11-17T19:16:56.861Z	INFO	deployments/deployments.go:475	inserting worker deployment row	{"request_id": "zdround2-a7364c5a-dbf2-482b-a88a-634403f9e8e7", "deployment_id": "a7364c5a-dbf2-482b-a88a-634403f9e8e7"}
+2026-11-17T19:16:56.867Z	INFO	deployments/deployments.go:482	marking as building	{"request_id": "zdround2-a7364c5a-dbf2-482b-a88a-634403f9e8e7", "deployment_id": "a7364c5a-dbf2-482b-a88a-634403f9e8e7"}
+2026-11-17T19:16:56.870Z	INFO	deployments/deployments.go:487	publishing building status	{"request_id": "zdround2-a7364c5a-dbf2-482b-a88a-634403f9e8e7", "deployment_id": "a7364c5a-dbf2-482b-a88a-634403f9e8e7"}
+ZERODEVOPS_GIT phase=fetch attempt=1 seconds=1.636 success=true
+ZERODEVOPS_GIT phase=checkout seconds=0.009 verified_sha=a191537e0c93c3912189797499239e5ad8519f8c
+2026-11-17T19:16:58.534Z	INFO	deployments/deployments.go:492	detecting framework	{"request_id": "zdround2-a7364c5a-dbf2-482b-a88a-634403f9e8e7", "deployment_id": "a7364c5a-dbf2-482b-a88a-634403f9e8e7"}
+2026-11-17T19:16:58.535Z	INFO	deployments/deployments.go:498	framework detected	{"request_id": "zdround2-a7364c5a-dbf2-482b-a88a-634403f9e8e7", "deployment_id": "a7364c5a-dbf2-482b-a88a-634403f9e8e7", "framework": "nestjs", "package_manager": "npm"}
+2026-11-17T19:16:58.535Z	INFO	deployments/deployments.go:506	writing Dockerfile from template	{"request_id": "zdround2-a7364c5a-dbf2-482b-a88a-634403f9e8e7", "deployment_id": "a7364c5a-dbf2-482b-a88a-634403f9e8e7", "template": "dynamic/Dockerfile.node.tmpl"}
+2026-11-17T19:16:58.547Z	INFO	deployments/deployments.go:517	building image with buildah	{"request_id": "zdround2-a7364c5a-dbf2-482b-a88a-634403f9e8e7", "deployment_id": "a7364c5a-dbf2-482b-a88a-634403f9e8e7", "image_tag": "deploy-a7364c5a-dbf2-482b-a88a-634403f9e8e7:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN npm ci --ignore-scripts
+npm warn deprecated tsconfck@3.1.6: unmaintained
+
+added 340 packages, and audited 341 packages in 33s
+
+108 packages are looking for funding
+  run `npm fund` for details
+
+21 vulnerabilities (2 low, 4 moderate, 15 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN npm run build
+
+> nest-typescript-starter@1.0.0 build
+> nest build
+
+[1/2] STEP 7/7: RUN test -f dist/main.js
+[2/2] STEP 1/8: FROM docker.io/library/node:24-alpine
+[2/2] STEP 2/8: WORKDIR /app
+[2/2] STEP 3/8: ENV NODE_ENV=production
+[2/2] STEP 4/8: COPY package*.json ./
+[2/2] STEP 5/8: RUN npm ci --ignore-scripts --omit=dev
+
+added 99 packages, and audited 100 packages in 6s
+
+43 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 6/8: COPY --from=builder /app/dist ./dist
+[2/2] STEP 7/8: EXPOSE 3000
+[2/2] STEP 8/8: CMD ["node","dist/main.js"]
+[2/2] COMMIT deploy-a7364c5a-dbf2-482b-a88a-634403f9e8e7:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:41de3d953d3aa3bd3aaeb3d0fb11fcb77bd4e019169730a955fc873d858c0fb8
+Copying config sha256:08c386f4603ce5ccd12e74ed1c4ab7fea44b8196db31275cf546952943b10314
+Writing manifest to image destination
+--> 08c386f4603c
+Successfully tagged localhost/deploy-a7364c5a-dbf2-482b-a88a-634403f9e8e7:latest
+08c386f4603ce5ccd12e74ed1c4ab7fea44b8196db31275cf546952943b10314
+2026-11-17T19:18:00.809Z	INFO	deployments/deployments.go:524	saving image tar	{"request_id": "zdround2-a7364c5a-dbf2-482b-a88a-634403f9e8e7", "deployment_id": "a7364c5a-dbf2-482b-a88a-634403f9e8e7", "tar_path": "/tmp/zerodevops-build/a7364c5a-dbf2-482b-a88a-634403f9e8e7/a7364c5a-dbf2-482b-a88a-634403f9e8e7.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:41de3d953d3aa3bd3aaeb3d0fb11fcb77bd4e019169730a955fc873d858c0fb8
+Copying config sha256:08c386f4603ce5ccd12e74ed1c4ab7fea44b8196db31275cf546952943b10314
+Writing manifest to image destination
+2026-11-17T19:18:02.522Z	INFO	deployments/deployments.go:600	dynamic build finished (stub finalize, no upload yet)	{"request_id": "zdround2-a7364c5a-dbf2-482b-a88a-634403f9e8e7", "deployment_id": "a7364c5a-dbf2-482b-a88a-634403f9e8e7"}
+2026-11-17T19:18:02.547Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdround2-a7364c5a-dbf2-482b-a88a-634403f9e8e7", "deployment_id": "a7364c5a-dbf2-482b-a88a-634403f9e8e7"}

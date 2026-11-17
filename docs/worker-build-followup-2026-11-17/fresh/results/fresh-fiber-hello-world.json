@@ -1,0 +1,268 @@
+{
+  "case": {
+    "name": "fresh-fiber-hello-world",
+    "repo": "gofiber/recipes",
+    "sha": "e1f44175db9420bb612134d9bb84d51dcca661ed",
+    "path": "hello-world",
+    "kind": "go",
+    "port": 3000,
+    "probe": "/",
+    "reference_build": "GOTOOLCHAIN=local go build -o /tmp/reference-server .",
+    "reference_start": "/tmp/reference-server",
+    "context": "hello-world",
+    "env": {},
+    "source_dir": "/tmp/zd-round2-fresh-sources/gofiber--recipes",
+    "base_image": "docker.io/library/golang:1.27.0-alpine",
+    "stack": "Fiber v3/hello-world"
+  },
+  "started_at": "2026-11-17T18:57:07.647796+00:00",
+  "complete": true,
+  "batch": "fresh",
+  "reference_qualified": true,
+  "qualification": "fresh reference trial recorded separately",
+  "reference": {
+    "build": {
+      "seconds": 135.889,
+      "exit_code": 0,
+      "timed_out": false,
+      "resource_samples": [
+        {
+          "seconds": 0.1,
+          "stats": "5.94%|203.8MiB / 2GiB|30",
+          "cgroup": "cpu.stat\nusage_usec 775727773\nuser_usec 572257651\nsystem_usec 203470121\nnice_usec 0\nnr_periods 10100\nnr_throttled 579\nthrottled_usec 42185352\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1745145856\nmemory.current\n281407488"
+        },
+        {
+          "seconds": 20.4,
+          "stats": "41.41%|223.6MiB / 2GiB|32",
+          "cgroup": "cpu.stat\nusage_usec 781944567\nuser_usec 576404120\nsystem_usec 205540446\nnice_usec 0\nnr_periods 10293\nnr_throttled 579\nthrottled_usec 42185352\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1745145856\nmemory.current\n375738368"
+        },
+        {
+          "seconds": 40.74,
+          "stats": "25.45%|420MiB / 2GiB|58",
+          "cgroup": "cpu.stat\nusage_usec 795235914\nuser_usec 582262475\nsystem_usec 212973438\nnice_usec 0\nnr_periods 10506\nnr_throttled 587\nthrottled_usec 42246427\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1745145856\nmemory.current\n1006948352"
+        },
+        {
+          "seconds": 61.36,
+          "stats": "147.63%|650.3MiB / 2GiB|67",
+          "cgroup": "cpu.stat\nusage_usec 818938377\nuser_usec 598484549\nsystem_usec 220453828\nnice_usec 0\nnr_periods 10732\nnr_throttled 710\nthrottled_usec 59889767\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1745145856\nmemory.current\n1235304448"
+        },
+        {
+          "seconds": 82.15,
+          "stats": "148.18%|803.1MiB / 2GiB|69",
+          "cgroup": "cpu.stat\nusage_usec 848982726\nuser_usec 622504459\nsystem_usec 226478266\nnice_usec 0\nnr_periods 10932\nnr_throttled 910\nthrottled_usec 94602183\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1745145856\nmemory.current\n1352040448"
+        },
+        {
+          "seconds": 102.24,
+          "stats": "153.06%|780.8MiB / 2GiB|66",
+          "cgroup": "cpu.stat\nusage_usec 879370498\nuser_usec 647683427\nsystem_usec 231687071\nnice_usec 0\nnr_periods 11136\nnr_throttled 1111\nthrottled_usec 130215144\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1745145856\nmemory.current\n1361891328"
+        },
+        {
+          "seconds": 122.56,
+          "stats": "57.57%|712.3MiB / 2GiB|35",
+          "cgroup": "cpu.stat\nusage_usec 899499246\nuser_usec 658252008\nsystem_usec 241247238\nnice_usec 0\nnr_periods 11341\nnr_throttled 1159\nthrottled_usec 134818388\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1745145856\nmemory.current\n1453678592"
+        }
+      ],
+      "cgroup_before": "1745145856\nusage_usec 775590913\nuser_usec 572176795\nsystem_usec 203414118\nnice_usec 0\nnr_periods 10092\nnr_throttled 579\nthrottled_usec 42185352\nnr_bursts 0\nburst_usec 0",
+      "cgroup_after": "1745145856\nusage_usec 901520224\nuser_usec 659129885\nsystem_usec 242390338\nnice_usec 0\nnr_periods 11362\nnr_throttled 1168\nthrottled_usec 134867349\nnr_bursts 0\nburst_usec 0\nlow 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0"
+    },
+    "base_image": "docker.io/library/golang:1.27.0-alpine",
+    "source_dir": "/tmp/zd-round2-fresh-sources/gofiber--recipes",
+    "source_sha_verified": true,
+    "source_evidence": "fresh-source-evidence/gofiber--recipes.json",
+    "source_files_verified": 15,
+    "recipe": "FROM docker.io/library/golang:1.27.0-alpine\nWORKDIR /app\nCOPY . .\nWORKDIR /app/.\nRUN GOTOOLCHAIN=local go build -o /tmp/reference-server .\nCMD [\"sh\", \"-c\", \"/tmp/reference-server\"]\n",
+    "image_built": true,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 1.4,
+      "probe_url": "http://127.0.0.1:3000/",
+      "first_response": "200|0.001007|text/plain; charset=utf-8",
+      "response_sample": "Hello, World \ud83d\udc4b!",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.000435
+        },
+        {
+          "status": 200,
+          "seconds": 0.000425
+        },
+        {
+          "status": 200,
+          "seconds": 0.000903
+        },
+        {
+          "status": 200,
+          "seconds": 0.000478
+        },
+        {
+          "status": 200,
+          "seconds": 0.000412
+        },
+        {
+          "status": 200,
+          "seconds": 0.000405
+        },
+        {
+          "status": 200,
+          "seconds": 0.000519
+        },
+        {
+          "status": 200,
+          "seconds": 0.000448
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    },
+    "external_container_http": [
+      {
+        "from_container": "zdround2-1-mock",
+        "target_worker_ip": "172.25.0.5",
+        "url": "http://172.25.0.5:3000/",
+        "exit_code": 0,
+        "response": "200|0.000706|text/plain; charset=utf-8",
+        "reachable_expected_class": true
+      }
+    ],
+    "seconds": 140.65
+  },
+  "worker": {
+    "lane": 1,
+    "worker_container": "zdround2-1-worker",
+    "broker_vhost": "zdround2-1",
+    "commit_sha": "e1f44175db9420bb612134d9bb84d51dcca661ed",
+    "deployment_id": "9908653b-fe63-49c3-85d9-2ff184830408",
+    "state": "success",
+    "database_row": "success||",
+    "end_to_end_seconds": 104.695,
+    "resource_samples": [
+      {
+        "seconds": 0.37,
+        "stats": "0.39%|246.3MiB / 2GiB|34",
+        "cgroup": "cpu.stat\nusage_usec 903203815\nuser_usec 659740553\nsystem_usec 243463261\nnice_usec 0\nnr_periods 11418\nnr_throttled 1168\nthrottled_usec 134867349\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1745145856\nmemory.current\n265441280"
+      },
+      {
+        "seconds": 23.58,
+        "stats": "26.84%|412.7MiB / 2GiB|64",
+        "cgroup": "cpu.stat\nusage_usec 911582039\nuser_usec 662635791\nsystem_usec 248946248\nnice_usec 0\nnr_periods 11597\nnr_throttled 1175\nthrottled_usec 135075895\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1745145856\nmemory.current\n638013440"
+      },
+      {
+        "seconds": 52.62,
+        "stats": "148.50%|645.8MiB / 2GiB|72",
+        "cgroup": "cpu.stat\nusage_usec 947229889\nuser_usec 687164392\nsystem_usec 260065496\nnice_usec 0\nnr_periods 11888\nnr_throttled 1372\nthrottled_usec 163858028\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1745145856\nmemory.current\n1203007488"
+      },
+      {
+        "seconds": 76.22,
+        "stats": "148.71%|766.2MiB / 2GiB|78",
+        "cgroup": "cpu.stat\nusage_usec 982621408\nuser_usec 715911709\nsystem_usec 266709699\nnice_usec 0\nnr_periods 12124\nnr_throttled 1608\nthrottled_usec 205480429\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1745145856\nmemory.current\n1341792256"
+      },
+      {
+        "seconds": 98.86,
+        "stats": "117.59%|727.7MiB / 2GiB|64",
+        "cgroup": "cpu.stat\nusage_usec 1015751139\nuser_usec 743098788\nsystem_usec 272652351\nnice_usec 0\nnr_periods 12350\nnr_throttled 1815\nthrottled_usec 238182908\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1745145856\nmemory.current\n1293668352"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "go",
+      "args": [],
+      "working_dir": "hello-world",
+      "scanner_policy_version": "v1"
+    },
+    "deployment": "not attempted",
+    "framework": "go",
+    "git_phase_diagnostics": [
+      "ZERODEVOPS_GIT phase=fetch attempt=1 seconds=1.831 success=true",
+      "ZERODEVOPS_GIT phase=checkout seconds=0.099 verified_sha=e1f44175db9420bb612134d9bb84d51dcca661ed"
+    ],
+    "mock_upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"9908653b-fe63-49c3-85d9-2ff184830408\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 75,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"9908653b-fe63-49c3-85d9-2ff184830408\",\"status\":\"success\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": true,
+    "image_layer_bytes": 22766592,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 1.431,
+      "probe_url": "http://127.0.0.1:3000/",
+      "first_response": "200|0.002339|text/plain; charset=utf-8",
+      "response_sample": "Hello, World \ud83d\udc4b!",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.000507
+        },
+        {
+          "status": 200,
+          "seconds": 0.000482
+        },
+        {
+          "status": 200,
+          "seconds": 0.000506
+        },
+        {
+          "status": 200,
+          "seconds": 0.00044
+        },
+        {
+          "status": 200,
+          "seconds": 0.000436
+        },
+        {
+          "status": 200,
+          "seconds": 0.000439
+        },
+        {
+          "status": 200,
+          "seconds": 0.000863
+        },
+        {
+          "status": 200,
+          "seconds": 0.00047
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    },
+    "external_container_http": [
+      {
+        "from_container": "zdround2-1-mock",
+        "target_worker_ip": "172.25.0.5",
+        "url": "http://172.25.0.5:3000/",
+        "exit_code": 0,
+        "response": "200|0.000617|text/plain; charset=utf-8",
+        "reachable_expected_class": true
+      }
+    ]
+  },
+  "worker_classification": "build-and-runtime-pass",
+  "classification": "build-and-runtime-pass",
+  "finished_at": "2026-11-17T19:01:17.455382+00:00"
+}

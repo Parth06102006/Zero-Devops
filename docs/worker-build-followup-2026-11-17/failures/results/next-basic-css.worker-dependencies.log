@@ -1,0 +1,10 @@
+v24.22.3
+11.19.1
+/usr/local/lib
++-- corepack@0.36.0
+`-- npm@11.19.1
+
+app@ /app
++-- next@16.4.6
++-- react-dom@18.3.1
+`-- react@18.3.1

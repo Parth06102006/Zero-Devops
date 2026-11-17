@@ -1,0 +1,120 @@
+{
+  "repo": "spring-guides/gs-handling-form-submission",
+  "sha": "9fd7eb0e8ea1853bdca92ffc91054131832bcace",
+  "source_dir": "/tmp/zd-round2-fresh-sources/spring-guides--gs-handling-form-submission",
+  "method": "immutable GitHub raw blobs, verified using Git blob SHA-1 against pinned recursive tree",
+  "files": [
+    {
+      "path": "complete/.mvn/wrapper/maven-wrapper.properties",
+      "mode": "100755",
+      "git_blob_sha": "216df0589791badf4288a0cc70d685ff5da06408",
+      "sha256": "488e1b3f2e641779d4636abf9390845f901e64607261bc3c0b0bfe4fe96e6706",
+      "bytes": 168
+    },
+    {
+      "path": "complete/build.gradle",
+      "mode": "100644",
+      "git_blob_sha": "6411c0e90b55490703027de1e9c36cff67e62d3d",
+      "sha256": "be9455530b40cf57709a694912529c13c2c0d8f80ce063a4810252b245071b42",
+      "bytes": 646
+    },
+    {
+      "path": "complete/gradle/wrapper/gradle-wrapper.jar",
+      "mode": "100644",
+      "git_blob_sha": "eddabd2eef8d94a5437d6168ff9c87a78ff725b3",
+      "sha256": "7a9ce74cff467ca1bf60a4fcd9f05185acceda4d0f382434d393e17864262c5d",
+      "bytes": 47505
+    },
+    {
+      "path": "complete/gradle/wrapper/gradle-wrapper.properties",
+      "mode": "100644",
+      "git_blob_sha": "ad7845be3062ed90f3a53dd7dc4a279d74a239ef",
+      "sha256": "d01b41913834fb3cb14e71f69a08898e6a47e663b08f5c9b8c7e0772c38889d2",
+      "bytes": 281
+    },
+    {
+      "path": "complete/gradlew",
+      "mode": "100755",
+      "git_blob_sha": "249efbb032ce46a80c687c0723eb172e85f6a136",
+      "sha256": "a5a5c199ba02189ae8c46a334223371a20599d9c298ef65e7540ede4a3f72d59",
+      "bytes": 8656
+    },
+    {
+      "path": "complete/gradlew.bat",
+      "mode": "100644",
+      "git_blob_sha": "8508ef684d4e1f8473dcbbfdacf52a131beaee0e",
+      "sha256": "d539676c48b596afda64c963ec8f7ee56c7b3fe7e3b81d1dbe2d1a1e3dd9e9f8",
+      "bytes": 2848
+    },
+    {
+      "path": "complete/mvnw",
+      "mode": "100755",
+      "git_blob_sha": "bd8896bf2217b46faa0291585e01ac1a3441a958",
+      "sha256": "cae96cef89ebea3531221f4ae17c23cf8edf67d00eae8306d4186ae1bbed4d02",
+      "bytes": 11790
+    },
+    {
+      "path": "complete/mvnw.cmd",
+      "mode": "100644",
+      "git_blob_sha": "5761d948924c19571d27b465c519b2e2f9e30351",
+      "sha256": "46eedb8419bd14fe70d5bb2916d7b6f51806e51b39d5b76a42610384ca929c1c",
+      "bytes": 8481
+    },
+    {
+      "path": "complete/pom.xml",
+      "mode": "100644",
+      "git_blob_sha": "97d746e31c7cdc69e0feea5a092e3e6c445686fe",
+      "sha256": "b611bac9cafd71e6890ec32e69e824d7ca6e5f66103291162fd59e17735a19a1",
+      "bytes": 1576
+    },
+    {
+      "path": "complete/settings.gradle",
+      "mode": "100644",
+      "git_blob_sha": "1397059f8046a6d0cb73f79016f2928d88540ca1",
+      "sha256": "7b7dcea138359d4a6c192de148c02696fe6b7628e4f905911d2b380a5ce381e1",
+      "bytes": 55
+    },
+    {
+      "path": "complete/src/main/java/com/example/handlingformsubmission/Greeting.java",
+      "mode": "100644",
+      "git_blob_sha": "5f5414caaf463cc3be2407b51c83107612de6fd4",
+      "sha256": "e0e58ed6b142c7bb9091a34d7acb21f5542f686746ce6b3f910a5a72361373d7",
+      "bytes": 330
+    },
+    {
+      "path": "complete/src/main/java/com/example/handlingformsubmission/GreetingController.java",
+      "mode": "100644",
+      "git_blob_sha": "e65ac17149a20046cefc7f1c71d80550f5760989",
+      "sha256": "b3f08705b9629d127fc16dc3c8d6e0d31bb42833ba759efe90cd8bf4704bad38",
+      "bytes": 682
+    },
+    {
+      "path": "complete/src/main/java/com/example/handlingformsubmission/HandlingFormSubmissionApplication.java",
+      "mode": "100644",
+      "git_blob_sha": "8d1f9c58937d9a137ebe17b19b3958c6bbf2c4b2",
+      "sha256": "e7d7802d3687c6f0c8bf142c8a463472ad43a2defe6fbfd8340ccc1b954fb182",
+      "bytes": 359
+    },
+    {
+      "path": "complete/src/main/resources/templates/greeting.html",
+      "mode": "100644",
+      "git_blob_sha": "d1fbbda583b4bb330ab78d90748e3368a351609a",
+      "sha256": "c6a970fb913741c340aea296884d53fd49ae873de931bd531563ca3896e522ef",
+      "bytes": 560
+    },
+    {
+      "path": "complete/src/main/resources/templates/result.html",
+      "mode": "100644",
+      "git_blob_sha": "4c415b4bd079f3453cd555f90405fc530148e3c3",
+      "sha256": "ff18e5e58b9040ebbf44e280ac9ef28213d756e4cfc837e1d9dfe261323ab1ec",
+      "bytes": 400
+    },
+    {
+      "path": "complete/src/test/java/com/example/handlingformsubmission/HandlingFormSubmissionApplicationTest.java",
+      "mode": "100644",
+      "git_blob_sha": "1d5e38ebccf5a1e5f09279954c22261621cd4554",
+      "sha256": "0b8464aebb048d37941ed8787276bfdcb74811721052ef8cb8cbbaa588e581fd",
+      "bytes": 1895
+    }
+  ]
+}

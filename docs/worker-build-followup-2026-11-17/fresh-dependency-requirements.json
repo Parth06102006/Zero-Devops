@@ -1,0 +1,396 @@
+[
+  {
+    "name": "fresh-astro-framework-preact",
+    "repo": "withastro/astro",
+    "sha": "387105be28cb3a3c062c3390b551cc9e51a2bfb1",
+    "path": "examples/framework-preact",
+    "kind": "node",
+    "base_image": "docker.io/library/node:24-alpine",
+    "engines": {
+      "node": ">=22.23.4"
+    },
+    "dependencies": {
+      "@astrojs/preact": "^6.1.6",
+      "@preact/signals": "^2.11.4",
+      "astro": "^7.4.12",
+      "preact": "^11.2.0"
+    },
+    "devDependencies": {},
+    "scripts": {
+      "dev": "astro dev",
+      "build": "astro build",
+      "preview": "astro preview",
+      "astro": "astro"
+    },
+    "lockfiles": []
+  },
+  {
+    "name": "fresh-astro-framework-solid",
+    "repo": "withastro/astro",
+    "sha": "387105be28cb3a3c062c3390b551cc9e51a2bfb1",
+    "path": "examples/framework-solid",
+    "kind": "node",
+    "base_image": "docker.io/library/node:24-alpine",
+    "engines": {
+      "node": ">=22.23.4"
+    },
+    "dependencies": {
+      "@astrojs/solid-js": "^7.1.6",
+      "astro": "^7.4.12",
+      "solid-js": "^1.9.19"
+    },
+    "devDependencies": {},
+    "scripts": {
+      "dev": "astro dev",
+      "build": "astro build",
+      "preview": "astro preview",
+      "astro": "astro"
+    },
+    "lockfiles": []
+  },
+  {
+    "name": "fresh-astro-with-mdx",
+    "repo": "withastro/astro",
+    "sha": "387105be28cb3a3c062c3390b551cc9e51a2bfb1",
+    "path": "examples/with-mdx",
+    "kind": "node",
+    "base_image": "docker.io/library/node:24-alpine",
+    "engines": {
+      "node": ">=22.23.4"
+    },
+    "dependencies": {
+      "@astrojs/mdx": "^8.1.6",
+      "@astrojs/preact": "^6.1.6",
+      "astro": "^7.4.12",
+      "preact": "^11.2.0"
+    },
+    "devDependencies": {},
+    "scripts": {
+      "dev": "astro dev",
+      "build": "astro build",
+      "preview": "astro preview",
+      "astro": "astro"
+    },
+    "lockfiles": []
+  },
+  {
+    "name": "fresh-astro-with-markdoc",
+    "repo": "withastro/astro",
+    "sha": "387105be28cb3a3c062c3390b551cc9e51a2bfb1",
+    "path": "examples/with-markdoc",
+    "kind": "node",
+    "base_image": "docker.io/library/node:24-alpine",
+    "engines": {
+      "node": ">=22.23.4"
+    },
+    "dependencies": {
+      "@astrojs/markdoc": "^2.1.5",
+      "astro": "^7.4.12"
+    },
+    "devDependencies": {},
+    "scripts": {
+      "dev": "astro dev",
+      "build": "astro build",
+      "preview": "astro preview",
+      "astro": "astro"
+    },
+    "lockfiles": []
+  },
+  {
+    "name": "fresh-fiber-hello-world",
+    "repo": "gofiber/recipes",
+    "sha": "e1f44175db9420bb612134d9bb84d51dcca661ed",
+    "path": "hello-world",
+    "kind": "go",
+    "base_image": "docker.io/library/golang:1.27.0-alpine",
+    "go_mod": "module github.com/gofiber/recipes/hello-world\n\ngo 1.27.0\n\nrequire github.com/gofiber/fiber/v3 v3.7.0\n\nrequire (\n\tgithub.com/gofiber/schema v1.9.4 // indirect\n\tgithub.com/gofiber/utils/v2 v2.6.5 // indirect\n\tgithub.com/google/uuid v1.6.0 // indirect\n\tgithub.com/klauspost/compress v1.20.4 // indirect\n\tgithub.com/mattn/go-colorable v0.1.16 // indirect\n\tgithub.com/mattn/go-isatty v0.0.24 // indirect\n\tgithub.com/molecule-man/go-brrr v1.3.1 // indirect\n\tgithub.com/philhofer/fwd v1.2.1 // indirect\n\tgithub.com/tinylib/msgp v1.6.5 // indirect\n\tgithub.com/valyala/bytebufferpool v1.0.0 // indirect\n\tgithub.com/valyala/fasthttp v1.79.0 // indirect\n\tgolang.org/x/crypto v0.59.0 // indirect\n\tgolang.org/x/net v0.62.0 // indirect\n\tgolang.org/x/sys v0.50.0 // indirect\n\tgolang.org/x/text v0.44.0 // indirect\n)\n",
+    "go_requirement": "1.27.0",
+    "has_go_sum": true
+  },
+  {
+    "name": "fresh-fiber-404-handler",
+    "repo": "gofiber/recipes",
+    "sha": "e1f44175db9420bb612134d9bb84d51dcca661ed",
+    "path": "404-handler",
+    "kind": "go",
+    "base_image": "docker.io/library/golang:1.27.0-alpine",
+    "go_mod": "module main\n\ngo 1.27.0\n\nrequire github.com/gofiber/fiber/v3 v3.7.0\n\nrequire (\n\tgithub.com/gofiber/schema v1.9.4 // indirect\n\tgithub.com/gofiber/utils/v2 v2.6.5 // indirect\n\tgithub.com/google/uuid v1.6.0 // indirect\n\tgithub.com/klauspost/compress v1.20.4 // indirect\n\tgithub.com/mattn/go-colorable v0.1.16 // indirect\n\tgithub.com/mattn/go-isatty v0.0.24 // indirect\n\tgithub.com/molecule-man/go-brrr v1.3.1 // indirect\n\tgithub.com/philhofer/fwd v1.2.1 // indirect\n\tgithub.com/tinylib/msgp v1.6.5 // indirect\n\tgithub.com/valyala/bytebufferpool v1.0.0 // indirect\n\tgithub.com/valyala/fasthttp v1.79.0 // indirect\n\tgolang.org/x/crypto v0.59.0 // indirect\n\tgolang.org/x/net v0.62.0 // indirect\n\tgolang.org/x/sys v0.50.0 // indirect\n\tgolang.org/x/text v0.44.0 // indirect\n)\n",
+    "go_requirement": "1.27.0",
+    "has_go_sum": true
+  },
+  {
+    "name": "fresh-fiber-advanced-caching",
+    "repo": "gofiber/recipes",
+    "sha": "e1f44175db9420bb612134d9bb84d51dcca661ed",
+    "path": "advanced-caching",
+    "kind": "go",
+    "base_image": "docker.io/library/golang:1.27.0-alpine",
+    "go_mod": "module github.com/gofiber/recipes/advanced-caching\n\ngo 1.27.0\n\nrequire (\n\tgithub.com/gofiber/fiber/v3 v3.7.0\n\tgithub.com/stretchr/testify v1.12.1\n)\n\nrequire (\n\tgithub.com/gofiber/schema v1.9.4 // indirect\n\tgithub.com/gofiber/utils/v2 v2.6.5 // indirect\n\tgithub.com/google/uuid v1.6.0 // indirect\n\tgithub.com/klauspost/compress v1.20.4 // indirect\n\tgithub.com/mattn/go-colorable v0.1.16 // indirect\n\tgithub.com/mattn/go-isatty v0.0.24 // indirect\n\tgithub.com/molecule-man/go-brrr v1.3.1 // indirect\n\tgithub.com/philhofer/fwd v1.2.1 // indirect\n\tgithub.com/tinylib/msgp v1.6.5 // indirect\n\tgithub.com/valyala/bytebufferpool v1.0.0 // indirect\n\tgithub.com/valyala/fasthttp v1.79.0 // indirect\n\tgo.yaml.in/yaml/v3 v3.0.6 // indirect\n\tgolang.org/x/crypto v0.59.0 // indirect\n\tgolang.org/x/net v0.62.0 // indirect\n\tgolang.org/x/sys v0.50.0 // indirect\n\tgolang.org/x/text v0.44.0 // indirect\n)\n",
+    "go_requirement": "1.27.0",
+    "has_go_sum": true
+  },
+  {
+    "name": "fresh-axum-hello-world",
+    "repo": "tokio-rs/axum",
+    "sha": "36d38c4cf2766cd7313dd53d808f30546ee36b1e",
+    "path": "examples/hello-world",
+    "kind": "rust",
+    "base_image": "docker.io/library/rust:1-alpine",
+    "cargo_manifest": {
+      "package": {
+        "name": "example-hello-world",
+        "version": "0.1.0",
+        "edition": "2021",
+        "publish": false
+      },
+      "dependencies": {
+        "axum": {
+          "path": "../../axum"
+        },
+        "tokio": {
+          "version": "1.0",
+          "features": [
+            "full"
+          ]
+        }
+      }
+    },
+    "workspace_manifest": {
+      "workspace": {
+        "members": [
+          "*"
+        ],
+        "exclude": [
+          "async-graphql",
+          "target"
+        ],
+        "resolver": "2",
+        "package": {
+          "rust-version": "1.75"
+        },
+        "lints": {
+          "rust": {
+            "unsafe_code": "forbid",
+            "rust_2018_idioms": {
+              "level": "warn",
+              "priority": -1
+            },
+            "missing_debug_implementations": "warn",
+            "missing_docs": "warn",
+            "unreachable_pub": "warn"
+          },
+          "clippy": {
+            "type_complexity": "allow",
+            "await_holding_lock": "warn",
+            "dbg_macro": "warn",
+            "empty_enum": "warn",
+            "enum_glob_use": "warn",
+            "exit": "warn",
+            "filter_map_next": "warn",
+            "fn_params_excessive_bools": "warn",
+            "if_let_mutex": "warn",
+            "imprecise_flops": "warn",
+            "inefficient_to_string": "warn",
+            "linkedlist": "warn",
+            "lossy_float_literal": "warn",
+            "macro_use_imports": "warn",
+            "match_wildcard_for_single_variants": "warn",
+            "mem_forget": "warn",
+            "needless_borrow": "warn",
+            "needless_continue": "warn",
+            "option_option": "warn",
+            "rest_pat_in_fully_bound_structs": "warn",
+            "str_to_string": "warn",
+            "suboptimal_flops": "warn",
+            "todo": "warn",
+            "uninlined_format_args": "warn",
+            "unnested_or_patterns": "warn",
+            "unused_self": "warn",
+            "verbose_file_reads": "warn"
+          }
+        }
+      }
+    },
+    "workspace_lock_sha256": "fa5af67a3025c96364ae5a7ef96700b0b8db649d6199fea2975bab7f065e6322"
+  },
+  {
+    "name": "fresh-axum-cors",
+    "repo": "tokio-rs/axum",
+    "sha": "36d38c4cf2766cd7313dd53d808f30546ee36b1e",
+    "path": "examples/cors",
+    "kind": "rust",
+    "base_image": "docker.io/library/rust:1-alpine",
+    "cargo_manifest": {
+      "package": {
+        "name": "example-cors",
+        "version": "0.1.0",
+        "edition": "2021",
+        "publish": false
+      },
+      "dependencies": {
+        "axum": {
+          "path": "../../axum"
+        },
+        "tokio": {
+          "version": "1.0",
+          "features": [
+            "full"
+          ]
+        },
+        "tower-http": {
+          "version": "0.6.1",
+          "features": [
+            "cors"
+          ]
+        }
+      }
+    },
+    "workspace_manifest": {
+      "workspace": {
+        "members": [
+          "*"
+        ],
+        "exclude": [
+          "async-graphql",
+          "target"
+        ],
+        "resolver": "2",
+        "package": {
+          "rust-version": "1.75"
+        },
+        "lints": {
+          "rust": {
+            "unsafe_code": "forbid",
+            "rust_2018_idioms": {
+              "level": "warn",
+              "priority": -1
+            },
+            "missing_debug_implementations": "warn",
+            "missing_docs": "warn",
+            "unreachable_pub": "warn"
+          },
+          "clippy": {
+            "type_complexity": "allow",
+            "await_holding_lock": "warn",
+            "dbg_macro": "warn",
+            "empty_enum": "warn",
+            "enum_glob_use": "warn",
+            "exit": "warn",
+            "filter_map_next": "warn",
+            "fn_params_excessive_bools": "warn",
+            "if_let_mutex": "warn",
+            "imprecise_flops": "warn",
+            "inefficient_to_string": "warn",
+            "linkedlist": "warn",
+            "lossy_float_literal": "warn",
+            "macro_use_imports": "warn",
+            "match_wildcard_for_single_variants": "warn",
+            "mem_forget": "warn",
+            "needless_borrow": "warn",
+            "needless_continue": "warn",
+            "option_option": "warn",
+            "rest_pat_in_fully_bound_structs": "warn",
+            "str_to_string": "warn",
+            "suboptimal_flops": "warn",
+            "todo": "warn",
+            "uninlined_format_args": "warn",
+            "unnested_or_patterns": "warn",
+            "unused_self": "warn",
+            "verbose_file_reads": "warn"
+          }
+        }
+      }
+    },
+    "workspace_lock_sha256": "fa5af67a3025c96364ae5a7ef96700b0b8db649d6199fea2975bab7f065e6322"
+  },
+  {
+    "name": "fresh-gs-rest-service-cors",
+    "repo": "spring-guides/gs-rest-service-cors",
+    "sha": "404d6abe86fd54800e092d712e339ba9c0c67217",
+    "path": "complete",
+    "kind": "java",
+    "base_image": "docker.io/library/maven:3-eclipse-temurin-21",
+    "java_requirement": "17",
+    "spring_boot_parent": "4.0.9",
+    "dependencies": [
+      {
+        "group": "org.springframework.boot",
+        "artifact": "spring-boot-starter-web",
+        "scope": "compile"
+      },
+      {
+        "group": "org.apache.httpcomponents.client5",
+        "artifact": "httpclient5",
+        "scope": "test"
+      },
+      {
+        "group": "org.springframework.boot",
+        "artifact": "spring-boot-starter-test",
+        "scope": "test"
+      },
+      {
+        "group": "org.springframework.boot",
+        "artifact": "spring-boot-starter-webmvc-test",
+        "scope": "test"
+      }
+    ]
+  },
+  {
+    "name": "fresh-gs-handling-form-submission",
+    "repo": "spring-guides/gs-handling-form-submission",
+    "sha": "9fd7eb0e8ea1853bdca92ffc91054131832bcace",
+    "path": "complete",
+    "kind": "java",
+    "base_image": "docker.io/library/maven:3-eclipse-temurin-21",
+    "java_requirement": "17",
+    "spring_boot_parent": "4.1.2",
+    "dependencies": [
+      {
+        "group": "org.springframework.boot",
+        "artifact": "spring-boot-starter-thymeleaf",
+        "scope": "compile"
+      },
+      {
+        "group": "org.springframework.boot",
+        "artifact": "spring-boot-starter-webmvc",
+        "scope": "compile"
+      },
+      {
+        "group": "org.springframework.boot",
+        "artifact": "spring-boot-starter-thymeleaf-test",
+        "scope": "test"
+      },
+      {
+        "group": "org.springframework.boot",
+        "artifact": "spring-boot-starter-webmvc-test",
+        "scope": "test"
+      }
+    ]
+  },
+  {
+    "name": "fresh-next-with-sass",
+    "repo": "vercel/next.js",
+    "sha": "d958b3ac19a7859838a2a08e8d7c0014baf56146",
+    "path": "examples/with-sass",
+    "kind": "node",
+    "base_image": "docker.io/library/node:24-alpine",
+    "engines": {},
+    "dependencies": {
+      "next": "latest",
+      "react": "^19.0.0",
+      "react-dom": "^19.0.0",
+      "sass": "^1.82.0"
+    },
+    "devDependencies": {
+      "@types/node": "^22.10.1",
+      "@types/react": "^19.0.1",
+      "typescript": "^5.7.2"
+    },
+    "scripts": {
+      "dev": "next dev",
+      "build": "next build",
+      "start": "next start"
+    },
+    "lockfiles": []
+  }
+]

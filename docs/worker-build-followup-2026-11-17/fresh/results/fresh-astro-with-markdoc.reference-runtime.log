@@ -1,0 +1,11 @@
+/bin/sh: set: line 0: can't access tty; job control turned off
+
+> @example/with-markdoc@0.0.1 preview
+> astro preview --host 0.0.0.0 --port 4321
+
+ astro  v7.4.12 ready in 51 ms
+┃ Local    http://localhost:4321/
+┃ Network  http://172.25.0.5:4321/
+subprocess exited on killed
+subprocess exited with status 1
+Error: exit status 1

@@ -1,0 +1,170 @@
+{
+  "case": {
+    "name": "fastapi-first-steps",
+    "repo": "fastapi/fastapi",
+    "sha": "a1b3be01aadc61c67edc09eed4f6cc1fcc3d3b8f",
+    "path": "docs_src/first_steps",
+    "stack": "Python/FastAPI",
+    "kind": "python",
+    "reference_build": "pip install fastapi uvicorn",
+    "reference_start": "uvicorn tutorial001:app --host 0.0.0.0 --port 8000",
+    "port": 8000,
+    "probe": "/",
+    "static_output": null,
+    "context": "docs_src/first_steps",
+    "env": {}
+  },
+  "started_at": "2026-11-17T18:52:02.618361+00:00",
+  "complete": true,
+  "batch": "failures",
+  "reference_qualified": true,
+  "qualification": "historical qualification from primary57",
+  "prior_worker": {
+    "lane": 2,
+    "worker_container": "zdfix2-worker",
+    "broker_vhost": "lane2",
+    "commit_sha": "a1b3be01aadc61c67edc09eed4f6cc1fcc3d3b8f",
+    "deployment_id": "67296bba-c297-4aab-89f2-31393f8821d2",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: clone/prepare failed: no framework detected|",
+    "end_to_end_seconds": 26.096,
+    "resource_samples": [
+      {
+        "seconds": 0.42,
+        "stats": "0.47%|452.5MiB / 2GiB|94",
+        "cgroup": "cpu.stat\nusage_usec 3106048293\nuser_usec 2307915539\nsystem_usec 798132754\nnice_usec 0\nnr_periods 35532\nnr_throttled 5184\nthrottled_usec 644277044\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n680443904"
+      },
+      {
+        "seconds": 22.48,
+        "stats": "25.72%|353.1MiB / 2GiB|94",
+        "cgroup": "cpu.stat\nusage_usec 3108089567\nuser_usec 2309094389\nsystem_usec 798995177\nnice_usec 0\nnr_periods 35722\nnr_throttled 5184\nthrottled_usec 644277044\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n543076352"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "python",
+      "args": [],
+      "working_dir": "docs_src/first_steps",
+      "scanner_policy_version": "v1"
+    },
+    "framework": null,
+    "phase_events": [
+      {
+        "at": "2026-11-17T14:17:30.800Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-17T14:17:30.800Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-17T14:17:30.803Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-17T14:17:30.806Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-17T14:17:54.803Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-17T14:17:54.882Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"67296bba-c297-4aab-89f2-31393f8821d2\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 164,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"67296bba-c297-4aab-89f2-31393f8821d2\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: clone/prepare failed: no framework detected\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": false
+  },
+  "prior_classification": "detection-unsupported",
+  "worker": {
+    "lane": 1,
+    "worker_container": "zdround2-1-worker",
+    "broker_vhost": "zdround2-1",
+    "commit_sha": "a1b3be01aadc61c67edc09eed4f6cc1fcc3d3b8f",
+    "deployment_id": "7cfe7ce3-2c13-4a15-99f0-1a92f7d36238",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: clone/prepare failed: no framework detected|",
+    "end_to_end_seconds": 17.73,
+    "resource_samples": [
+      {
+        "seconds": 0.35,
+        "stats": "0.56%|82.13MiB / 2GiB|14",
+        "cgroup": "cpu.stat\nusage_usec 609078796\nuser_usec 484985048\nsystem_usec 124093748\nnice_usec 0\nnr_periods 7666\nnr_throttled 229\nthrottled_usec 12417653\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1365475328\nmemory.current\n92336128"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "python",
+      "args": [],
+      "working_dir": "docs_src/first_steps",
+      "scanner_policy_version": "v1"
+    },
+    "deployment": "not attempted",
+    "framework": null,
+    "git_phase_diagnostics": [
+      "ZERODEVOPS_GIT phase=fetch attempt=1 seconds=15.227 success=true",
+      "ZERODEVOPS_GIT phase=checkout seconds=0.287 verified_sha=a1b3be01aadc61c67edc09eed4f6cc1fcc3d3b8f"
+    ],
+    "mock_upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"7cfe7ce3-2c13-4a15-99f0-1a92f7d36238\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 164,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"7cfe7ce3-2c13-4a15-99f0-1a92f7d36238\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: clone/prepare failed: no framework detected\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": false
+  },
+  "worker_classification": "detection-unsupported",
+  "classification": "detection-unsupported",
+  "finished_at": "2026-11-17T18:52:20.904348+00:00"
+}

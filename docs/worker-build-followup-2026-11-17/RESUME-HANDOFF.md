@@ -1,0 +1,19 @@
+# Follow-up execution handoff
+
+The user authorized implementation of recommended points 1, 2, 3 and 5, then a failure batch plus a fresh rotating compatibility batch, explicitly excluding point 4. The user also explicitly authorized subagents. The earlier goal is active.
+
+Current branch is fix-builds. Product changes are uncommitted in worker-server: recipes.go, checkout_policy.go, build_policy.go, deployments.go, detect.go; Next/SvelteKit templates; new Laravel template; recipes_test.go and followup_review_test.go. Preserve all unrelated and earlier evidence changes. No follow-up campaign builds or services were started.
+
+Implemented so far: builder-only normalization of optional Next public; owning-framework dependency selection and explicit framework/output override; literal SvelteKit adapter selection; VitePress output selection; Laravel PHP plus frontend recipe; compiled Nest entrypoint validation/startup; validated runtime asset/command/workdir options, including conventional Rust static directory preservation; separate bounded fetch/checkout budgets, transient fetch retry, phase timings and exact HEAD verification. Generation, Python formats, native dependency script changes and expanded discovery remain excluded.
+
+The full worker suite passed before the last review corrections. The latest changes (direct JSON COPY asset staging and final Nest path validation) still need formatting and a new full suite. Independent review tests exist and passed before the final path-validation change. Do not describe the current tree as fully verified yet.
+
+Automatic approval review rejected the next format/test command because its usage limit was reached, saying to try again at 5:55 PM. The action was not executed; this was a review-service failure rather than an unsafe-action determination. All three subagents then stopped for the same usage limit. Do not bypass the approval check. Verification, build, Git commits and Docker campaign execution require the approval service to become available again.
+
+Prepared infrastructure: round2_environment.py provisions fresh zdround2-1/2 workers/stores/networks/mocks/vhosts; keeps old stopped workers/stores; starts only retained owned DB/broker. Parent must first compile /tmp/zd-round2-worker from a frozen commit. round2_run.py runs either cohort on either lane, with independent fresh reference builds and additional cross-container HTTP probes. No environment.json exists yet. Inspect scripts before use; source preparation was interrupted and must finish.
+
+Fresh preparation script round2_fresh_prepare.py and manifest freeze twelve candidates. Astro/Fiber source metadata exists; confirm Axum/Java/Next downloads and all source evidence before use. Sources live under /tmp/zd-round2-fresh-sources. Axum reference builds need whole-repository context; runner was corrected to use it when reference_workdir is dot. Verify all source Git blob/hash metadata. Cold-pull Go 1.27.0 and all selected references from fresh storage.
+
+Next: finish current code review/tests, add any missing artifact/version/path regressions, freeze and commit only scoped product changes, compile worker and test binary, snapshot baseline evidence hashes, prepare fresh services, run native integration checks, alternate all twenty failures and twelve new candidates across the two isolated lanes. Save all new evidence here. Produce separate failure/fresh reports with exclusions, exact actual errors and external reachability limits; do not claim a full-cohort improvement without a full retest. Commit scoped harness/report evidence and clean up only follow-up resources after evidence capture. No deployment or publication.
+
+Previous measured report is ../worker-build-fixes-2026-11-16/REPORT.md: 39/57 images, 37/57 local HTTP, eight cold pulls passed. It was generated against unchanged product source before this follow-up began. Its first-attempt and controlled-repeat evidence must not be overwritten.

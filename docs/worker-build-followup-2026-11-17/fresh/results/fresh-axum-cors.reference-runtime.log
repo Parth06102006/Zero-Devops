@@ -1,0 +1,5 @@
+/bin/sh: set: line 0: can't access tty; job control turned off
+Terminated
+subprocess exited with status 143
+subprocess exited with status 143
+Error: exit status 143

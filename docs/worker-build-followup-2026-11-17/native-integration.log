@@ -1,0 +1,144 @@
+=== RUN   TestDockerBuild_WithDockerfile
+STEP 1/2: FROM docker.io/library/alpine:3.20
+STEP 2/2: CMD ["echo", "hello"]
+COMMIT docker-test-alpine:latest
+Getting image source signatures
+Copying blob sha256:08bc4e534116aa76b16015484b82eac51f9a593416feae9296c8a2d4bb7aa4a2
+Copying blob sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef
+Copying config sha256:2bf24fb3489e02b0ff456eab204b446b04a67aee04ea8917746bfca3cbdbfca5
+Writing manifest to image destination
+--> 2bf24fb3489e
+Successfully tagged localhost/docker-test-alpine:latest
+2bf24fb3489e02b0ff456eab204b446b04a67aee04ea8917746bfca3cbdbfca5
+--- PASS: TestDockerBuild_WithDockerfile (1.25s)
+=== RUN   TestNativeBuildIntegration
+=== RUN   TestNativeBuildIntegration/node-engine
+[1/2] STEP 1/7: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN ["node","-e","const s=require('/usr/local/lib/node_modules/npm/node_modules/semver');const r=require('./package.json').engines.node;if(!s.satisfies(process.versions.node,r)){console.error('Selected Node '+process.versions.node+' does not satisfy engines.node '+r+'; set a compatible exact .node-version');process.exit(1)}"]
+[1/2] STEP 5/7: RUN npm ci --ignore-scripts
+
+up to date, audited 1 package in 1s
+
+found 0 vulnerabilities
+[1/2] STEP 6/7: COPY . .
+[1/2] STEP 7/7: RUN npm run build
+
+> fixture@1.0.0 build
+> node build.cjs
+
+[2/2] STEP 1/9: FROM docker.io/library/node:24-alpine
+[2/2] STEP 2/9: WORKDIR /app
+[2/2] STEP 3/9: ENV NODE_ENV=production
+[2/2] STEP 4/9: COPY package*.json ./
+[2/2] STEP 5/9: RUN ["node","-e","const s=require('/usr/local/lib/node_modules/npm/node_modules/semver');const r=require('./package.json').engines.node;if(!s.satisfies(process.versions.node,r)){console.error('Selected Node '+process.versions.node+' does not satisfy engines.node '+r+'; set a compatible exact .node-version');process.exit(1)}"]
+[2/2] STEP 6/9: RUN npm ci --ignore-scripts --omit=dev
+
+up to date, audited 1 package in 799ms
+
+found 0 vulnerabilities
+[2/2] STEP 7/9: COPY --from=builder /app/dist ./dist
+[2/2] STEP 8/9: EXPOSE 3000
+[2/2] STEP 9/9: CMD ["npm", "start"]
+[2/2] COMMIT localhost/zdfix-native-node-engine:test
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:2cd38d61529fd262aedd8c230ae815bf1b16b896faf33b81c6588d6912fbb869
+Copying config sha256:d0f66f08583d215fa16ee80887db5d819e9134b3e41c4466843961e351a303c3
+Writing manifest to image destination
+--> d0f66f08583d
+Successfully tagged localhost/zdfix-native-node-engine:test
+d0f66f08583d215fa16ee80887db5d819e9134b3e41c4466843961e351a303c3
+=== RUN   TestNativeBuildIntegration/go-explicit-target
+[1/2] STEP 1/7: FROM docker.io/library/golang:1.26.0-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: ENV CGO_ENABLED=0 GOOS=linux GOTOOLCHAIN=local
+[1/2] STEP 4/7: COPY . .
+[1/2] STEP 5/7: WORKDIR /app/server
+[1/2] STEP 6/7: RUN go mod download
+go: no module dependencies to download
+[1/2] STEP 7/7: RUN ["go","build","-o","/app/app","./cmd/server"]
+[2/2] STEP 1/7: FROM docker.io/library/alpine:3.20
+[2/2] STEP 2/7: WORKDIR /app
+[2/2] STEP 3/7: RUN addgroup -S app && adduser -S app -G app
+[2/2] STEP 4/7: COPY --from=builder /app/app /app/app
+[2/2] STEP 5/7: USER app
+[2/2] STEP 6/7: EXPOSE 8080
+[2/2] STEP 7/7: CMD ["/app/app"]
+[2/2] COMMIT localhost/zdfix-native-go-explicit-target:test
+Getting image source signatures
+Copying blob sha256:08bc4e534116aa76b16015484b82eac51f9a593416feae9296c8a2d4bb7aa4a2
+Copying blob sha256:8846ba16150b638780b8c084bd9bfd3b7468bfbb30daa2cad73f44b3969796e2
+Copying config sha256:fd4d90bbd152af4ec5845570290dd72c0459907773820e9aee2d146eee73d007
+Writing manifest to image destination
+--> fd4d90bbd152
+Successfully tagged localhost/zdfix-native-go-explicit-target:test
+fd4d90bbd152af4ec5845570290dd72c0459907773820e9aee2d146eee73d007
+=== RUN   TestNativeBuildIntegration/rust-standalone
+[1/2] STEP 1/7: FROM docker.io/library/rust:1-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: ENV CARGO_BUILD_JOBS=1
+[1/2] STEP 4/7: RUN apk add --no-cache musl-dev
+OK: 198.1 MiB in 31 packages
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN ["cargo","build","--release","--manifest-path","Cargo.toml","--package","server","--bin","admin","--target-dir","/app/.zerodevops-target"]
+   Compiling server v0.1.0 (/app)
+    Finished `release` profile [optimized] target(s) in 0.68s
+[1/2] STEP 7/7: RUN cp /app/.zerodevops-target/release/admin /app/server
+[2/2] STEP 1/7: FROM docker.io/library/alpine:3.20
+[2/2] STEP 2/7: WORKDIR /app
+[2/2] STEP 3/7: RUN addgroup -S app && adduser -S app -G app
+[2/2] STEP 4/7: COPY --from=builder /app/server /app/server
+[2/2] STEP 5/7: USER app
+[2/2] STEP 6/7: EXPOSE 8080
+[2/2] STEP 7/7: CMD ["/app/server"]
+[2/2] COMMIT localhost/zdfix-native-rust-standalone:test
+Getting image source signatures
+Copying blob sha256:08bc4e534116aa76b16015484b82eac51f9a593416feae9296c8a2d4bb7aa4a2
+Copying blob sha256:a04562aba0e0fd86d7e3536a191b0d1f9a095d58e875a9e8e1f760160c56c833
+Copying config sha256:37d42a3c3591b31de725316cf0a8d96c51b499073b578e4c5066f676aab61017
+Writing manifest to image destination
+--> 37d42a3c3591
+Successfully tagged localhost/zdfix-native-rust-standalone:test
+37d42a3c3591b31de725316cf0a8d96c51b499073b578e4c5066f676aab61017
+=== RUN   TestNativeBuildIntegration/rust-workspace
+[1/2] STEP 1/9: FROM docker.io/library/rust:1-alpine AS builder
+[1/2] STEP 2/9: WORKDIR /app
+[1/2] STEP 3/9: ENV CARGO_BUILD_JOBS=1
+[1/2] STEP 4/9: RUN apk add --no-cache musl-dev
+OK: 198.1 MiB in 31 packages
+[1/2] STEP 5/9: COPY . .
+[1/2] STEP 6/9: RUN ["cargo","build","--release","--manifest-path","apps/web/Cargo.toml","--package","web","--bin","web","--target-dir","/app/.zerodevops-target"]
+   Compiling shared v0.1.0 (/app/shared)
+   Compiling web v0.1.0 (/app/apps/web)
+    Finished `release` profile [optimized] target(s) in 1.06s
+[1/2] STEP 7/9: RUN cp /app/.zerodevops-target/release/web /app/server
+[1/2] STEP 8/9: RUN mkdir -p /zerodevops-runtime-assets
+[1/2] STEP 9/9: COPY ["apps/web/static","/zerodevops-runtime-assets/static/"]
+[2/2] STEP 1/8: FROM docker.io/library/alpine:3.20
+[2/2] STEP 2/8: WORKDIR /app
+[2/2] STEP 3/8: RUN addgroup -S app && adduser -S app -G app
+[2/2] STEP 4/8: COPY --from=builder /app/server /app/server
+[2/2] STEP 5/8: COPY --from=builder --chown=app /zerodevops-runtime-assets/ /app/
+[2/2] STEP 6/8: USER app
+[2/2] STEP 7/8: EXPOSE 8080
+[2/2] STEP 8/8: CMD ["/app/server"]
+[2/2] COMMIT localhost/zdfix-native-rust-workspace:test
+Getting image source signatures
+Copying blob sha256:08bc4e534116aa76b16015484b82eac51f9a593416feae9296c8a2d4bb7aa4a2
+Copying blob sha256:bc185896c4f2ac49c6bee48a9ebd9bcb908e741259ee77590420d17357e938f5
+Copying config sha256:f9e941fed2251a6b70062f770c80a63cc5e165bc04fb85d53c9c556a0d442b9f
+Writing manifest to image destination
+--> f9e941fed225
+Successfully tagged localhost/zdfix-native-rust-workspace:test
+f9e941fed2251a6b70062f770c80a63cc5e165bc04fb85d53c9c556a0d442b9f
+--- PASS: TestNativeBuildIntegration (40.60s)
+    --- PASS: TestNativeBuildIntegration/node-engine (9.50s)
+    --- PASS: TestNativeBuildIntegration/go-explicit-target (17.43s)
+    --- PASS: TestNativeBuildIntegration/rust-standalone (6.72s)
+    --- PASS: TestNativeBuildIntegration/rust-workspace (6.94s)
+PASS

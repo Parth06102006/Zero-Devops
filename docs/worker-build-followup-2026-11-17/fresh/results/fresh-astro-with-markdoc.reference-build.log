@@ -1,0 +1,72 @@
+STEP 1/6: FROM docker.io/library/node:24-alpine
+Trying to pull docker.io/library/node:24-alpine...
+Getting image source signatures
+Copying blob sha256:7bb632bc9bd793a348866a7dd7920cf89dfc87205c6d38cda182ea6d8065b8e5
+Copying blob sha256:881fc932939efef04ca120ad44bbd2c0917851eb247aa4995428afb1e80ede17
+Copying blob sha256:86781d25d3989ead8f09c45716da0159c1dd0be2c753a51f15b6c60f4b9a97db
+Copying blob sha256:7eb569707982863466c2b0bcfddda86fb4842fccfaec088d1354f6a29e2856bb
+Copying config sha256:b791832e17c3a8a5897bdb5087381ffbc07b77bc634d204bf603b5f63c1ffe57
+Writing manifest to image destination
+STEP 2/6: WORKDIR /app
+STEP 3/6: COPY . .
+STEP 4/6: WORKDIR /app/.
+STEP 5/6: RUN npm install --ignore-scripts --package-lock=false && npm run build
+
+added 195 packages, and audited 196 packages in 1m
+
+76 packages are looking for funding
+  run `npm fund` for details
+
+11 high severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> @example/with-markdoc@0.0.1 build
+> astro build
+
+▶ Astro collects anonymous usage data.
+  This information helps us improve Astro.
+  Run "astro telemetry disable" to opt-out.
+  https://astro.build/telemetry
+
+18:54:18 [content] Syncing content
+18:54:18 [content] Synced content
+18:54:18 [types] Generated 1.61s
+18:54:18 [build] output: "static"
+18:54:18 [build] mode: "static"
+18:54:18 [build] directory: /app/dist/
+18:54:18 [build] Collecting build info...
+18:54:18 [build] ✓ Completed in 1.84s.
+18:54:18 [build] Building static entrypoints...
+18:54:19 [vite] ✓ built in 594ms
+18:54:19 [vite] ✓ built in 45ms
+18:54:19 [build] Rearranging server assets...
+
+ generating static routes 
+18:54:19   ├─ /index.html (+65ms) 
+18:54:19 ✓ Completed in 90ms.
+
+18:54:19 [build] ✓ Completed in 846ms.
+18:54:19 [build] 1 page(s) built in 2.69s
+18:54:19 [build] Complete!
+STEP 6/6: CMD ["sh", "-c", "npm run preview -- --host 0.0.0.0 --port 4321"]
+COMMIT localhost/zdround2-reference-fresh-astro-with-markdoc:test
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:9826a2bd2d7b7c4ed7b3dfe229beccb6bdcfeedab36e17436fd7ded47581e7d8
+Copying config sha256:6ff2d41448b4d8a9c3ad88afd6dac6fd3ffb34e73180137343707ee221b8d821
+Writing manifest to image destination
+--> 6ff2d41448b4
+Successfully tagged localhost/zdround2-reference-fresh-astro-with-markdoc:test
+6ff2d41448b4d8a9c3ad88afd6dac6fd3ffb34e73180137343707ee221b8d821

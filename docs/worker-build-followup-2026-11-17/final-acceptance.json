@@ -1,0 +1,22 @@
+{
+  "at": "2026-11-17T20:22:18.932837+00:00",
+  "passed": true,
+  "checks": {
+    "product_source_sha256": 63,
+    "prior_evidence_sha256": 460,
+    "manifests_sha256": 2,
+    "controller_unique_completed": 32,
+    "csv_unique_cases": 32,
+    "local_report_links_verified": 50,
+    "retained_image_recoveries": 2,
+    "services_stopped": true
+  },
+  "report_sha256": {
+    "REPORT.md": "7f67511b018fd032f60df8a98f58af01d699dc03a734531cd0235281c3ce0e7a",
+    "EXECUTIVE-SUMMARY.md": "18ff3e7b2e6fed25cbefadd61d5d23ff3c6f74f6aa2b0b6f2f7e8e86aeecfcdb",
+    "FAILURES-REPORT.md": "eef4ad4d6d9d2f26f2626908cb37555a78de786f79ad86430c36219750f30e65",
+    "FRESH-REPORT.md": "93fcbef59db1d961b69ca28ff20658c574e99685ac37318b0540119f13d4b7fe",
+    "summary.json": "36397262d5d8621dfbda8d93ae78e3bea13591547ba3729b8d7f15be91155f48",
+    "metrics.csv": "211554de969d033d676056c665a196b8f782be47343d6d50fc31c9c2d53d0df6"
+  }
+}

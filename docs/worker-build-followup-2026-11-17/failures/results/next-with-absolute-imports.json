@@ -1,0 +1,306 @@
+{
+  "case": {
+    "name": "next-with-absolute-imports",
+    "repo": "vercel/next.js",
+    "sha": "59db850442194327ef46acb3e65dfeeb52984f7a",
+    "path": "examples/with-absolute-imports",
+    "stack": "Next.js",
+    "kind": "node",
+    "reference_build": "npm install && npm run build",
+    "reference_start": "npm start -- --hostname 0.0.0.0",
+    "port": 3000,
+    "probe": "/",
+    "static_output": null,
+    "context": "examples/with-absolute-imports",
+    "env": {}
+  },
+  "started_at": "2026-11-17T19:40:06.145718+00:00",
+  "complete": true,
+  "batch": "failures",
+  "reference_qualified": true,
+  "qualification": "historical qualification from primary57",
+  "prior_worker": {
+    "lane": 2,
+    "worker_container": "zdfix2-worker",
+    "broker_vhost": "lane2",
+    "commit_sha": "59db850442194327ef46acb3e65dfeeb52984f7a",
+    "deployment_id": "7b90de42-9223-4e6a-b3bc-533ead01aa6d",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: build failed: exit status 125|",
+    "end_to_end_seconds": 286.925,
+    "resource_samples": [
+      {
+        "seconds": 0.46,
+        "stats": "1.61%|314.5MiB / 2GiB|59",
+        "cgroup": "cpu.stat\nusage_usec 2545690493\nuser_usec 1970367807\nsystem_usec 575322685\nnice_usec 0\nnr_periods 26697\nnr_throttled 3569\nthrottled_usec 468031759\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n340451328"
+      },
+      {
+        "seconds": 22.79,
+        "stats": "19.08%|321.7MiB / 2GiB|61",
+        "cgroup": "cpu.stat\nusage_usec 2548298378\nuser_usec 1971958484\nsystem_usec 576339894\nnice_usec 0\nnr_periods 26897\nnr_throttled 3569\nthrottled_usec 468031759\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n371040256"
+      },
+      {
+        "seconds": 45.39,
+        "stats": "9.31%|324.4MiB / 2GiB|61",
+        "cgroup": "cpu.stat\nusage_usec 2550982114\nuser_usec 1973602683\nsystem_usec 577379431\nnice_usec 0\nnr_periods 27119\nnr_throttled 3569\nthrottled_usec 468031759\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n394584064"
+      },
+      {
+        "seconds": 67.89,
+        "stats": "58.86%|725.9MiB / 2GiB|95",
+        "cgroup": "cpu.stat\nusage_usec 2569721452\nuser_usec 1982590616\nsystem_usec 587130835\nnice_usec 0\nnr_periods 27346\nnr_throttled 3590\nthrottled_usec 470501902\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n1410777088"
+      },
+      {
+        "seconds": 92.2,
+        "stats": "140.17%|770.8MiB / 2GiB|95",
+        "cgroup": "cpu.stat\nusage_usec 2598225672\nuser_usec 1998040353\nsystem_usec 600185318\nnice_usec 0\nnr_periods 27576\nnr_throttled 3708\nthrottled_usec 479723551\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n1971052544"
+      },
+      {
+        "seconds": 113.99,
+        "stats": "0.00%|840.1MiB / 2GiB|95",
+        "cgroup": "cpu.stat\nusage_usec 2625256193\nuser_usec 2010707353\nsystem_usec 614548840\nnice_usec 0\nnr_periods 27783\nnr_throttled 3759\nthrottled_usec 484455665\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147704832\nmemory.current\n2147356672"
+      },
+      {
+        "seconds": 135.92,
+        "stats": "0.01%|841.5MiB / 2GiB|95",
+        "cgroup": "cpu.stat\nusage_usec 2625759151\nuser_usec 2010846896\nsystem_usec 614912255\nnice_usec 0\nnr_periods 27800\nnr_throttled 3759\nthrottled_usec 484455665\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147704832\nmemory.current\n2147368960"
+      },
+      {
+        "seconds": 159.29,
+        "stats": "0.00%|840.9MiB / 2GiB|95",
+        "cgroup": "cpu.stat\nusage_usec 2626426994\nuser_usec 2011040583\nsystem_usec 615386410\nnice_usec 0\nnr_periods 27816\nnr_throttled 3760\nthrottled_usec 484460282\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147704832\nmemory.current\n2117914624"
+      },
+      {
+        "seconds": 181.17,
+        "stats": "0.00%|830.8MiB / 2GiB|96",
+        "cgroup": "cpu.stat\nusage_usec 2626772676\nuser_usec 2011147626\nsystem_usec 615625049\nnice_usec 0\nnr_periods 27832\nnr_throttled 3760\nthrottled_usec 484460282\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147704832\nmemory.current\n1819992064"
+      },
+      {
+        "seconds": 204.72,
+        "stats": "0.01%|799.3MiB / 2GiB|96",
+        "cgroup": "cpu.stat\nusage_usec 2627065171\nuser_usec 2011215730\nsystem_usec 615849440\nnice_usec 0\nnr_periods 27844\nnr_throttled 3760\nthrottled_usec 484460282\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147704832\nmemory.current\n1418362880"
+      },
+      {
+        "seconds": 231.55,
+        "stats": "150.35%|1.293GiB / 2GiB|139",
+        "cgroup": "cpu.stat\nusage_usec 2653622512\nuser_usec 2030312946\nsystem_usec 623309566\nnice_usec 0\nnr_periods 28069\nnr_throttled 3857\nthrottled_usec 500880419\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147704832\nmemory.current\n1646080000"
+      },
+      {
+        "seconds": 254.1,
+        "stats": "72.42%|1.037GiB / 2GiB|97",
+        "cgroup": "cpu.stat\nusage_usec 2672392593\nuser_usec 2041432036\nsystem_usec 630960556\nnice_usec 0\nnr_periods 28283\nnr_throttled 3894\nthrottled_usec 502492622\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147704832\nmemory.current\n1856675840"
+      },
+      {
+        "seconds": 276.78,
+        "stats": "126.20%|1.102GiB / 2GiB|97",
+        "cgroup": "cpu.stat\nusage_usec 2694178756\nuser_usec 2052167737\nsystem_usec 642011019\nnice_usec 0\nnr_periods 28509\nnr_throttled 3933\nthrottled_usec 504922790\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n2147483648"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "examples/with-absolute-imports",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "nextjs",
+    "phase_events": [
+      {
+        "at": "2026-11-17T13:59:21.540Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-17T13:59:21.544Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-17T13:59:21.547Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-17T13:59:21.550Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-17T14:00:18.769Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-17T14:00:18.770Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-17T14:00:18.770Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-17T14:00:18.778Z",
+        "event": "unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled"
+      },
+      {
+        "at": "2026-11-17T14:00:18.778Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-17T14:04:06.494Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"7b90de42-9223-4e6a-b3bc-533ead01aa6d\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 150,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"7b90de42-9223-4e6a-b3bc-533ead01aa6d\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: build failed: exit status 125\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": false
+  },
+  "prior_classification": "other-build-failure",
+  "worker": {
+    "lane": 1,
+    "worker_container": "zdround2-1-worker",
+    "runtime_probe_container": "zdround2-recovery-1",
+    "broker_vhost": "zdround2-1",
+    "commit_sha": "59db850442194327ef46acb3e65dfeeb52984f7a",
+    "deployment_id": "fdfb714d-defc-4663-894c-766f00a43afa",
+    "state": "success",
+    "database_row": "success||",
+    "end_to_end_seconds": 552.245,
+    "duration_method": "original dispatch timestamp to original worker terminal log; host polling failed",
+    "resource_samples": [],
+    "resource_sample_note": "host telemetry failed; no isolated trial samples recovered",
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "examples/with-absolute-imports",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "nextjs",
+    "git_phase_diagnostics": [
+      "ZERODEVOPS_GIT phase=fetch attempt=1 seconds=49.085 success=true",
+      "ZERODEVOPS_GIT phase=checkout seconds=9.856 verified_sha=59db850442194327ef46acb3e65dfeeb52984f7a"
+    ],
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"fdfb714d-defc-4663-894c-766f00a43afa\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 75,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"fdfb714d-defc-4663-894c-766f00a43afa\",\"status\":\"success\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": true,
+    "image_layer_bytes": 778172416,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 4.091,
+      "probe_url": "http://127.0.0.1:3000/",
+      "first_response": "200|0.128071|text/html; charset=utf-8",
+      "response_sample": "<!DOCTYPE html><html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/0j1we3cwg31qe.js\"/><script src=\"/_next/sta",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.004453
+        },
+        {
+          "status": 200,
+          "seconds": 0.004742
+        },
+        {
+          "status": 200,
+          "seconds": 0.003785
+        },
+        {
+          "status": 200,
+          "seconds": 0.003558
+        },
+        {
+          "status": 200,
+          "seconds": 0.005692
+        },
+        {
+          "status": 200,
+          "seconds": 0.003338
+        },
+        {
+          "status": 200,
+          "seconds": 0.006225
+        },
+        {
+          "status": 200,
+          "seconds": 0.004307
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    },
+    "external_container_http": [
+      {
+        "from_container": "zdround2-1-mock",
+        "target_worker_ip": "172.25.0.5",
+        "url": "http://172.25.0.5:3000/",
+        "exit_code": 0,
+        "response": "200|0.078743|text/html; charset=utf-8",
+        "reachable_expected_class": true
+      }
+    ],
+    "deployment": "not attempted",
+    "mock_upload_bytes": 0
+  },
+  "measurement_recovery": {
+    "archive": "recovery-20261117/next-with-absolute-imports.json",
+    "initial_harness_error": "TimeoutExpired(['docker', 'exec', 'zdround2-1-worker', 'du', '-sb', '/var/lib/containers/storage'], 60)",
+    "image_rebuilt": false,
+    "original_deployment_id": "fdfb714d-defc-4663-894c-766f00a43afa",
+    "note": "Retained original final image probed later in a helper sharing the original store/network; original database state retained."
+  },
+  "worker_classification": "build-and-runtime-pass",
+  "classification": "build-and-runtime-pass",
+  "finished_at": "2026-11-17T19:57:45.670745+00:00"
+}

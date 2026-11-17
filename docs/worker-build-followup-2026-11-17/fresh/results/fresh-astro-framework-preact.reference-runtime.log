@@ -1,0 +1,12 @@
+/bin/sh: set: line 0: can't access tty; job control turned off
+
+> @example/framework-preact@0.0.1 preview
+> astro preview --host 0.0.0.0 --port 4321
+
+ astro  v7.4.12 ready in 113 ms
+┃ Local    http://localhost:4321/
+┃ Network  http://172.26.0.5:4321/
+Terminated
+subprocess exited on killed
+subprocess exited with status 1
+Error: exit status 1

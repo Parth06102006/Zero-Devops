@@ -1,0 +1,14 @@
+{
+  "completed_all_lanes": 20,
+  "denominator": 20,
+  "images": 12,
+  "local_http": 12,
+  "reference_qualified": 20,
+  "outcomes": {
+    "build-and-runtime-pass": 12,
+    "detection-unsupported": 5,
+    "other-build-failure": 1,
+    "native-dependency/install-scripts": 1,
+    "missing-code-generation": 1
+  }
+}

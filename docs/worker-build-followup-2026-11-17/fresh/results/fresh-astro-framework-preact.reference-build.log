@@ -1,0 +1,62 @@
+STEP 1/6: FROM docker.io/library/node:24-alpine
+STEP 2/6: WORKDIR /app
+STEP 3/6: COPY . .
+STEP 4/6: WORKDIR /app/.
+STEP 5/6: RUN npm install --ignore-scripts --package-lock=false && npm run build
+
+added 251 packages, and audited 252 packages in 3m
+
+79 packages are looking for funding
+  run `npm fund` for details
+
+15 high severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> @example/framework-preact@0.0.1 build
+> astro build
+
+▶ Astro collects anonymous usage data.
+  This information helps us improve Astro.
+  Run "astro telemetry disable" to opt-out.
+  https://astro.build/telemetry
+
+18:42:02 [types] Generated 637ms
+18:42:02 [build] output: "static"
+18:42:02 [build] mode: "static"
+18:42:02 [build] directory: /app/dist/
+18:42:02 [build] Collecting build info...
+18:42:02 [build] ✓ Completed in 724ms.
+18:42:02 [build] Building static entrypoints...
+18:42:03 [vite] ✓ built in 452ms
+18:42:03 [vite] ✓ built in 95ms
+18:42:03 [build] Rearranging server assets...
+
+ generating static routes 
+18:42:03   ├─ /index.html (+38ms) 
+18:42:03 ✓ Completed in 62ms.
+
+18:42:03 [build] ✓ Completed in 682ms.
+18:42:03 [build] 1 page(s) built in 1.41s
+18:42:03 [build] Complete!
+STEP 6/6: CMD ["sh", "-c", "npm run preview -- --host 0.0.0.0 --port 4321"]
+COMMIT localhost/zdround2-reference-fresh-astro-framework-preact:test
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:8d056af5a9fc52e2ef8c4d6737fb33e649c1fcb765970ca67893831186deb18b
+Copying config sha256:d7e2707ec941d9c5cad6f211a21a8118529f8ccd57d4c95b28c7882fca568d3a
+Writing manifest to image destination
+--> d7e2707ec941
+Successfully tagged localhost/zdround2-reference-fresh-astro-framework-preact:test
+d7e2707ec941d9c5cad6f211a21a8118529f8ccd57d4c95b28c7882fca568d3a

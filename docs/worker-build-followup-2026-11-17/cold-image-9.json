@@ -1,0 +1,743 @@
+{
+    "Type": "buildah 0.0.1",
+    "FromImage": "docker.io/library/maven:3-eclipse-temurin-21",
+    "FromImageID": "77a0b2813954c27eb999118604531984e4efbedd6233fe29503ccf18e9104f2f",
+    "FromImageDigest": "sha256:ad45f0df6e6282fc4085b9b8ce7bb75e77702d4372f73b7f61458956f27e8839",
+    "GroupAdd": null,
+    "Config": "{\"architecture\":\"amd64\",\"config\":{\"Env\":[\"PATH=/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\",\"JAVA_HOME=/opt/java/openjdk\",\"LANG=en_US.UTF-8\",\"LANGUAGE=en_US:en\",\"LC_ALL=en_US.UTF-8\",\"JAVA_VERSION=jdk-21.0.13+9\",\"MAVEN_HOME=/usr/share/maven\",\"MAVEN_CONFIG=/root/.m2\"],\"Entrypoint\":[\"/usr/local/bin/mvn-entrypoint.sh\"],\"Cmd\":[\"mvn\"],\"Labels\":{\"org.opencontainers.image.created\":\"2026-11-06T10:28:50.132595+00:00\",\"org.opencontainers.image.description\":\"Apache Maven is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information.\",\"org.opencontainers.image.source\":\"https://github.com/carlossg/docker-maven\",\"org.opencontainers.image.title\":\"Apache Maven\",\"org.opencontainers.image.url\":\"https://github.com/carlossg/docker-maven\",\"org.opencontainers.image.version\":\"26.04\"}},\"created\":\"2026-11-12T02:14:56.174053416Z\",\"history\":[{\"created\":\"2026-11-06T10:28:49.539971557Z\",\"created_by\":\"umoci raw add-layer --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:rockcraft-base /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/.temp_layer.8947.tar --tag 26.04\"},{\"created\":\"2026-11-06T10:28:50.066213635Z\",\"created_by\":\"umoci config --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 --clear=config.entrypoint --clear=config.cmd\",\"comment\":\"Set entrypoint\",\"empty_layer\":true},{\"created\":\"2026-11-06T10:28:50.09514263Z\",\"created_by\":\"umoci config --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 --clear=config.cmd --config.cmd /bin/bash\",\"comment\":\"Set default commands\",\"empty_layer\":true},{\"created\":\"2026-11-06T10:28:50.124897422Z\",\"created_by\":\"umoci config --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 --config.env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\",\"comment\":\"Set default PATH for bare-based rock\",\"empty_layer\":true},{\"created\":\"2026-11-06T10:28:50.148020867Z\",\"created_by\":\"umoci config --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 --clear=config.labels --config.label org.opencontainers.image.version=26.04 --config.label org.opencontainers.image.title=ubuntu --config.label org.opencontainers.image.created=2026-11-06T10:28:50.132595+00:00 --config.label org.opencontainers.image.description=The Ubuntu container image maintained by Canonical\\n\\nUbuntu is a Debian-based Linux operating system that runs from the desktop to the cloud, to all your internet connected things.\\nIt is the world's most popular operating system across public clouds and OpenStack clouds.\\nIt is the number one platform for containers; from Docker to Kubernetes to LXD, Ubuntu can run your containers at scale.\\nFast, secure and simple, Ubuntu powers millions of PCs worldwide.\\n\",\"comment\":\"Set labels\",\"empty_layer\":true},{\"created\":\"2026-11-06T10:28:50.179663443Z\",\"created_by\":\"umoci config --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 --clear=manifest.annotations --manifest.annotation org.opencontainers.image.version=26.04 --manifest.annotation org.opencontainers.image.title=ubuntu --manifest.annotation org.opencontainers.image.created=2026-11-06T10:28:50.132595+00:00 --manifest.annotation org.opencontainers.image.description=The Ubuntu container image maintained by Canonical\\n\\nUbuntu is a Debian-based Linux operating system that runs from the desktop to the cloud, to all your internet connected things.\\nIt is the world's most popular operating system across public clouds and OpenStack clouds.\\nIt is the number one platform for containers; from Docker to Kubernetes to LXD, Ubuntu can run your containers at scale.\\nFast, secure and simple, Ubuntu powers millions of PCs worldwide.\\n\",\"comment\":\"Set annotations\",\"empty_layer\":true},{\"created\":\"2026-11-06T10:28:50.193437721Z\",\"created_by\":\"umoci raw add-layer --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/.temp_layer.control_data.8947.tar\",\"comment\":\"Add rock control metadata\"},{\"created\":\"2026-11-11T23:17:49.055778975Z\",\"created_by\":\"ENV JAVA_HOME=/opt/java/openjdk\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-11T23:17:49.055778975Z\",\"created_by\":\"ENV PATH=/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-11T23:17:49.055778975Z\",\"created_by\":\"ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-11T23:17:49.055778975Z\",\"created_by\":\"RUN /bin/sh -c set -eux;     apt-get update;     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends         curl         wget         gnupg         fontconfig         ca-certificates p11-kit         binutils         tzdata         locales     ;     echo \\\"en_US.UTF-8 UTF-8\\\" \\u003e\\u003e /etc/locale.gen;     locale-gen en_US.UTF-8;     rm -rf /var/lib/apt/lists/* # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-11T23:17:49.055778975Z\",\"created_by\":\"ENV JAVA_VERSION=jdk-21.0.13+9\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-11T23:17:54.398496037Z\",\"created_by\":\"RUN /bin/sh -c set -eux;     ARCH=\\\"$(dpkg --print-architecture)\\\";     case \\\"${ARCH}\\\" in        amd64)          ESUM='d7f5d5cf865a2902b70ff549b97586a7d3f234e016f041ab447ea740c7d66d1c';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_x64_linux_hotspot_21.0.13_9.tar.gz';          ;;        arm64)          ESUM='e3522e707fc7dbe2a72c30746b1e7068301a0213ecd213d4491f35a14eb55578';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.13_9.tar.gz';          ;;        ppc64el)          ESUM='cfaedcc659213833ead9c2a50987d8dcbd0e7a2d82217abb43acb64c0dd3d8cc';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_ppc64le_linux_hotspot_21.0.13_9.tar.gz';          ;;        s390x)          ESUM='597271ef81f7e4d0e2b86aa6e4d484af194253bdf238908a8394b78970dff713';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_s390x_linux_hotspot_21.0.13_9.tar.gz';          ;;        *)          echo \\\"Unsupported arch: ${ARCH}\\\";          exit 1;          ;;     esac;     wget --progress=dot:giga -O /tmp/openjdk.tar.gz ${BINARY_URL};     wget --progress=dot:giga -O /tmp/openjdk.tar.gz.sig ${BINARY_URL}.sig;     export GNUPGHOME=\\\"$(mktemp -d)\\\";     gpg --batch --keyserver keyserver.ubuntu.com --recv-keys 3B04D753C9050D9A5D343F39843C48A565F8F04B;     gpg --batch --verify /tmp/openjdk.tar.gz.sig /tmp/openjdk.tar.gz;     rm -rf \\\"${GNUPGHOME}\\\" /tmp/openjdk.tar.gz.sig;     echo \\\"${ESUM} */tmp/openjdk.tar.gz\\\" | sha256sum -c -;     mkdir -p \\\"$JAVA_HOME\\\";     tar --extract         --file /tmp/openjdk.tar.gz         --directory \\\"$JAVA_HOME\\\"         --strip-components 1         --no-same-owner     ;     rm -f /tmp/openjdk.tar.gz ${JAVA_HOME}/lib/src.zip;     find \\\"$JAVA_HOME/lib\\\" -name '*.so' -exec dirname '{}' ';' | sort -u \\u003e /etc/ld.so.conf.d/docker-openjdk.conf;     ldconfig;     java -Xshare:dump; # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-11T23:17:55.472505465Z\",\"created_by\":\"RUN /bin/sh -c set -eux;     echo \\\"Verifying install ...\\\";     fileEncoding=\\\"$(echo 'System.out.println(System.getProperty(\\\"file.encoding\\\"))' | jshell -s -)\\\"; [ \\\"$fileEncoding\\\" = 'UTF-8' ]; rm -rf ~/.java;     echo \\\"javac --version\\\"; javac --version;     echo \\\"java --version\\\"; java --version;     echo \\\"Complete.\\\" # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-11T23:17:55.518791963Z\",\"created_by\":\"COPY --chmod=755 entrypoint.sh /__cacert_entrypoint.sh # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-11T23:17:55.518791963Z\",\"created_by\":\"ENTRYPOINT [\\\"/__cacert_entrypoint.sh\\\"]\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-11T23:17:55.518791963Z\",\"created_by\":\"CMD [\\\"jshell\\\"]\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-12T02:14:55.899243871Z\",\"created_by\":\"RUN /bin/sh -c apt-get update   \\u0026\\u0026 apt-get install -y ca-certificates curl git openssh-client --no-install-recommends   \\u0026\\u0026 rm -rf /var/lib/apt/lists/* # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-12T02:14:56.012787183Z\",\"created_by\":\"LABEL org.opencontainers.image.title=Apache Maven\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-12T02:14:56.012787183Z\",\"created_by\":\"LABEL org.opencontainers.image.source=https://github.com/carlossg/docker-maven\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-12T02:14:56.012787183Z\",\"created_by\":\"LABEL org.opencontainers.image.url=https://github.com/carlossg/docker-maven\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-12T02:14:56.012787183Z\",\"created_by\":\"LABEL org.opencontainers.image.description=Apache Maven is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information.\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-12T02:14:56.012787183Z\",\"created_by\":\"ENV MAVEN_HOME=/usr/share/maven\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-12T02:14:56.012787183Z\",\"created_by\":\"COPY /usr/share/maven /usr/share/maven # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-12T02:14:56.065691566Z\",\"created_by\":\"COPY /usr/local/bin/mvn-entrypoint.sh /usr/local/bin/mvn-entrypoint.sh # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-12T02:14:56.174053416Z\",\"created_by\":\"RUN /bin/sh -c ln -s ${MAVEN_HOME}/bin/mvn /usr/bin/mvn # buildkit\",\"comment\":\"buildkit.dockerfile.v0\"},{\"created\":\"2026-11-12T02:14:56.174053416Z\",\"created_by\":\"ARG USER_HOME_DIR=/root\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-12T02:14:56.174053416Z\",\"created_by\":\"ENV MAVEN_CONFIG=/root/.m2\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-12T02:14:56.174053416Z\",\"created_by\":\"ENTRYPOINT [\\\"/usr/local/bin/mvn-entrypoint.sh\\\"]\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true},{\"created\":\"2026-11-12T02:14:56.174053416Z\",\"created_by\":\"CMD [\\\"mvn\\\"]\",\"comment\":\"buildkit.dockerfile.v0\",\"empty_layer\":true}],\"os\":\"linux\",\"rootfs\":{\"type\":\"layers\",\"diff_ids\":[\"sha256:2a89eb4dbc78f8fe790775a4e807e1355ba2f6b145c8dd7a267a782df1605124\",\"sha256:758b22fe15be2c330dcead0c1b50476c074e113ec507627c6430337ffc9daa5e\",\"sha256:6c915fae765e5bb70237ec3911a650f8c542016fa217c4e6f3bba9e6c2e3964a\",\"sha256:5c4960c333b3988cb65f486ba0b06c21debeef7450cc3b7e033e7ae8bd91714a\",\"sha256:52ba676c9b75d6d72bd58137defcdddd9e9c655a07c3b6274fe37e9c1ed1df28\",\"sha256:5cf79090d938d3cf770b15fe16d985c7aabfb32837aeef2cbdda0e6973c1adac\",\"sha256:19511e6c44aabc2156227cbf6ed354739d860c2fa24e5cec12ea2477d6c452ef\",\"sha256:f89f0098f48666b302fdb0ff13a7a5fafb5065cda15762bc920bb0bf39edd264\",\"sha256:e319e6e06134970516dbf39bff974942ec6d7f3ea67ffe16501a129fa1f9fe9d\",\"sha256:1a1f85e990000c54f385b6da475a2a3fc1e350bca0ec5e55add1fbd90e1cddd1\"]}}",
+    "Manifest": "{\n  \"schemaVersion\": 2,\n  \"mediaType\": \"application/vnd.oci.image.manifest.v1+json\",\n  \"config\": {\n    \"mediaType\": \"application/vnd.oci.image.config.v1+json\",\n    \"digest\": \"sha256:77a0b2813954c27eb999118604531984e4efbedd6233fe29503ccf18e9104f2f\",\n    \"size\": 11794\n  },\n  \"layers\": [\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:517b871c26eac1b24d47992388bcc20e2afba3643a89e8c4a3921bfa5e1d1d28\",\n      \"size\": 42166579\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:96aae9022e0e1b310a415e7c2ff1b435d853e8eabb2711cc70f4ad4010cc81b7\",\n      \"size\": 389\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:a252cd0b56603e67d824736bff2f014f15182b108ab86f7ed3958cef2eeb28bc\",\n      \"size\": 24056835\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:68397b0ee36ada913324abbd10f763c03cb2998a271a57afe28662e07138ae07\",\n      \"size\": 158419834\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:56b30dcd928e09edc41b3d531da0f889509adc9b3c49672b1e9a56457e99f59c\",\n      \"size\": 160\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:1a4d3ce8dc865f660b6d5fddfd7a71eeac21d4e16be9f2880e022dc9b83eb0d3\",\n      \"size\": 2465\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:971316c348709d9c8b46bdb0e11d5f1a600cefc8ee375c1197d8969702a8e15b\",\n      \"size\": 26966480\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:52f9c7d1ecd115c054ddae911cd7eb26630d64415aa4c0849271a7357b1efe70\",\n      \"size\": 10059004\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:b0cd6c688125d95e547b0939504ea5a31b3ace83f5161005c325349d2b17b568\",\n      \"size\": 854\n    },\n    {\n      \"mediaType\": \"application/vnd.oci.image.layer.v1.tar+gzip\",\n      \"digest\": \"sha256:28432df1e02fcd4468b6441514bad40d39f4e29dcb075f236a915e380b1e0e80\",\n      \"size\": 154\n    }\n  ],\n  \"annotations\": {\n    \"com.docker.official-images.bashbrew.arch\": \"amd64\",\n    \"org.opencontainers.image.base.digest\": \"sha256:c775c38419b7decaeb04d1bad0d43724eb9b9da04a81d68d25a0327b45e4598b\",\n    \"org.opencontainers.image.base.name\": \"eclipse-temurin:21-jdk-resolute\",\n    \"org.opencontainers.image.created\": \"2026-11-12T02:14:36Z\",\n    \"org.opencontainers.image.revision\": \"4bcc1dea6507fba8ec40c602bf1bfdb963e21288\",\n    \"org.opencontainers.image.source\": \"https://github.com/carlossg/docker-maven.git#4bcc1dea6507fba8ec40c602bf1bfdb963e21288:eclipse-temurin-21-resolute\",\n    \"org.opencontainers.image.url\": \"https://hub.docker.com/_/maven\",\n    \"org.opencontainers.image.version\": \"3.10.0-eclipse-temurin-21-resolute\"\n  }\n}",
+    "Container": "",
+    "ContainerID": "",
+    "MountPoint": "",
+    "ProcessLabel": "",
+    "MountLabel": "",
+    "ImageAnnotations": {
+        "com.docker.official-images.bashbrew.arch": "amd64",
+        "org.opencontainers.image.base.digest": "sha256:c775c38419b7decaeb04d1bad0d43724eb9b9da04a81d68d25a0327b45e4598b",
+        "org.opencontainers.image.base.name": "eclipse-temurin:21-jdk-resolute",
+        "org.opencontainers.image.created": "2026-11-12T02:14:36Z",
+        "org.opencontainers.image.revision": "4bcc1dea6507fba8ec40c602bf1bfdb963e21288",
+        "org.opencontainers.image.source": "https://github.com/carlossg/docker-maven.git#4bcc1dea6507fba8ec40c602bf1bfdb963e21288:eclipse-temurin-21-resolute",
+        "org.opencontainers.image.url": "https://hub.docker.com/_/maven",
+        "org.opencontainers.image.version": "3.10.0-eclipse-temurin-21-resolute"
+    },
+    "ImageCreatedBy": "",
+    "OCIv1": {
+        "created": "2026-11-12T02:14:56.174053416Z",
+        "architecture": "amd64",
+        "os": "linux",
+        "config": {
+            "Env": [
+                "PATH=/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "JAVA_HOME=/opt/java/openjdk",
+                "LANG=en_US.UTF-8",
+                "LANGUAGE=en_US:en",
+                "LC_ALL=en_US.UTF-8",
+                "JAVA_VERSION=jdk-21.0.13+9",
+                "MAVEN_HOME=/usr/share/maven",
+                "MAVEN_CONFIG=/root/.m2"
+            ],
+            "Entrypoint": [
+                "/usr/local/bin/mvn-entrypoint.sh"
+            ],
+            "Cmd": [
+                "mvn"
+            ],
+            "Labels": {
+                "org.opencontainers.image.created": "2026-11-06T10:28:50.132595+00:00",
+                "org.opencontainers.image.description": "Apache Maven is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information.",
+                "org.opencontainers.image.source": "https://github.com/carlossg/docker-maven",
+                "org.opencontainers.image.title": "Apache Maven",
+                "org.opencontainers.image.url": "https://github.com/carlossg/docker-maven",
+                "org.opencontainers.image.version": "26.04"
+            }
+        },
+        "rootfs": {
+            "type": "layers",
+            "diff_ids": [
+                "sha256:2a89eb4dbc78f8fe790775a4e807e1355ba2f6b145c8dd7a267a782df1605124",
+                "sha256:758b22fe15be2c330dcead0c1b50476c074e113ec507627c6430337ffc9daa5e",
+                "sha256:6c915fae765e5bb70237ec3911a650f8c542016fa217c4e6f3bba9e6c2e3964a",
+                "sha256:5c4960c333b3988cb65f486ba0b06c21debeef7450cc3b7e033e7ae8bd91714a",
+                "sha256:52ba676c9b75d6d72bd58137defcdddd9e9c655a07c3b6274fe37e9c1ed1df28",
+                "sha256:5cf79090d938d3cf770b15fe16d985c7aabfb32837aeef2cbdda0e6973c1adac",
+                "sha256:19511e6c44aabc2156227cbf6ed354739d860c2fa24e5cec12ea2477d6c452ef",
+                "sha256:f89f0098f48666b302fdb0ff13a7a5fafb5065cda15762bc920bb0bf39edd264",
+                "sha256:e319e6e06134970516dbf39bff974942ec6d7f3ea67ffe16501a129fa1f9fe9d",
+                "sha256:1a1f85e990000c54f385b6da475a2a3fc1e350bca0ec5e55add1fbd90e1cddd1"
+            ]
+        },
+        "history": [
+            {
+                "created": "2026-11-06T10:28:49.539971557Z",
+                "created_by": "umoci raw add-layer --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:rockcraft-base /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/.temp_layer.8947.tar --tag 26.04"
+            },
+            {
+                "created": "2026-11-06T10:28:50.066213635Z",
+                "created_by": "umoci config --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 --clear=config.entrypoint --clear=config.cmd",
+                "comment": "Set entrypoint",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-06T10:28:50.09514263Z",
+                "created_by": "umoci config --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 --clear=config.cmd --config.cmd /bin/bash",
+                "comment": "Set default commands",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-06T10:28:50.124897422Z",
+                "created_by": "umoci config --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 --config.env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "comment": "Set default PATH for bare-based rock",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-06T10:28:50.148020867Z",
+                "created_by": "umoci config --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 --clear=config.labels --config.label org.opencontainers.image.version=26.04 --config.label org.opencontainers.image.title=ubuntu --config.label org.opencontainers.image.created=2026-11-06T10:28:50.132595+00:00 --config.label org.opencontainers.image.description=The Ubuntu container image maintained by Canonical\n\nUbuntu is a Debian-based Linux operating system that runs from the desktop to the cloud, to all your internet connected things.\nIt is the world's most popular operating system across public clouds and OpenStack clouds.\nIt is the number one platform for containers; from Docker to Kubernetes to LXD, Ubuntu can run your containers at scale.\nFast, secure and simple, Ubuntu powers millions of PCs worldwide.\n",
+                "comment": "Set labels",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-06T10:28:50.179663443Z",
+                "created_by": "umoci config --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 --clear=manifest.annotations --manifest.annotation org.opencontainers.image.version=26.04 --manifest.annotation org.opencontainers.image.title=ubuntu --manifest.annotation org.opencontainers.image.created=2026-11-06T10:28:50.132595+00:00 --manifest.annotation org.opencontainers.image.description=The Ubuntu container image maintained by Canonical\n\nUbuntu is a Debian-based Linux operating system that runs from the desktop to the cloud, to all your internet connected things.\nIt is the world's most popular operating system across public clouds and OpenStack clouds.\nIt is the number one platform for containers; from Docker to Kubernetes to LXD, Ubuntu can run your containers at scale.\nFast, secure and simple, Ubuntu powers millions of PCs worldwide.\n",
+                "comment": "Set annotations",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-06T10:28:50.193437721Z",
+                "created_by": "umoci raw add-layer --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/.temp_layer.control_data.8947.tar",
+                "comment": "Add rock control metadata"
+            },
+            {
+                "created": "2026-11-11T23:17:49.055778975Z",
+                "created_by": "ENV JAVA_HOME=/opt/java/openjdk",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-11T23:17:49.055778975Z",
+                "created_by": "ENV PATH=/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-11T23:17:49.055778975Z",
+                "created_by": "ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-11T23:17:49.055778975Z",
+                "created_by": "RUN /bin/sh -c set -eux;     apt-get update;     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends         curl         wget         gnupg         fontconfig         ca-certificates p11-kit         binutils         tzdata         locales     ;     echo \"en_US.UTF-8 UTF-8\" \u003e\u003e /etc/locale.gen;     locale-gen en_US.UTF-8;     rm -rf /var/lib/apt/lists/* # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-11T23:17:49.055778975Z",
+                "created_by": "ENV JAVA_VERSION=jdk-21.0.13+9",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-11T23:17:54.398496037Z",
+                "created_by": "RUN /bin/sh -c set -eux;     ARCH=\"$(dpkg --print-architecture)\";     case \"${ARCH}\" in        amd64)          ESUM='d7f5d5cf865a2902b70ff549b97586a7d3f234e016f041ab447ea740c7d66d1c';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_x64_linux_hotspot_21.0.13_9.tar.gz';          ;;        arm64)          ESUM='e3522e707fc7dbe2a72c30746b1e7068301a0213ecd213d4491f35a14eb55578';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.13_9.tar.gz';          ;;        ppc64el)          ESUM='cfaedcc659213833ead9c2a50987d8dcbd0e7a2d82217abb43acb64c0dd3d8cc';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_ppc64le_linux_hotspot_21.0.13_9.tar.gz';          ;;        s390x)          ESUM='597271ef81f7e4d0e2b86aa6e4d484af194253bdf238908a8394b78970dff713';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_s390x_linux_hotspot_21.0.13_9.tar.gz';          ;;        *)          echo \"Unsupported arch: ${ARCH}\";          exit 1;          ;;     esac;     wget --progress=dot:giga -O /tmp/openjdk.tar.gz ${BINARY_URL};     wget --progress=dot:giga -O /tmp/openjdk.tar.gz.sig ${BINARY_URL}.sig;     export GNUPGHOME=\"$(mktemp -d)\";     gpg --batch --keyserver keyserver.ubuntu.com --recv-keys 3B04D753C9050D9A5D343F39843C48A565F8F04B;     gpg --batch --verify /tmp/openjdk.tar.gz.sig /tmp/openjdk.tar.gz;     rm -rf \"${GNUPGHOME}\" /tmp/openjdk.tar.gz.sig;     echo \"${ESUM} */tmp/openjdk.tar.gz\" | sha256sum -c -;     mkdir -p \"$JAVA_HOME\";     tar --extract         --file /tmp/openjdk.tar.gz         --directory \"$JAVA_HOME\"         --strip-components 1         --no-same-owner     ;     rm -f /tmp/openjdk.tar.gz ${JAVA_HOME}/lib/src.zip;     find \"$JAVA_HOME/lib\" -name '*.so' -exec dirname '{}' ';' | sort -u \u003e /etc/ld.so.conf.d/docker-openjdk.conf;     ldconfig;     java -Xshare:dump; # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-11T23:17:55.472505465Z",
+                "created_by": "RUN /bin/sh -c set -eux;     echo \"Verifying install ...\";     fileEncoding=\"$(echo 'System.out.println(System.getProperty(\"file.encoding\"))' | jshell -s -)\"; [ \"$fileEncoding\" = 'UTF-8' ]; rm -rf ~/.java;     echo \"javac --version\"; javac --version;     echo \"java --version\"; java --version;     echo \"Complete.\" # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-11T23:17:55.518791963Z",
+                "created_by": "COPY --chmod=755 entrypoint.sh /__cacert_entrypoint.sh # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-11T23:17:55.518791963Z",
+                "created_by": "ENTRYPOINT [\"/__cacert_entrypoint.sh\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-11T23:17:55.518791963Z",
+                "created_by": "CMD [\"jshell\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-12T02:14:55.899243871Z",
+                "created_by": "RUN /bin/sh -c apt-get update   \u0026\u0026 apt-get install -y ca-certificates curl git openssh-client --no-install-recommends   \u0026\u0026 rm -rf /var/lib/apt/lists/* # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-12T02:14:56.012787183Z",
+                "created_by": "LABEL org.opencontainers.image.title=Apache Maven",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-12T02:14:56.012787183Z",
+                "created_by": "LABEL org.opencontainers.image.source=https://github.com/carlossg/docker-maven",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-12T02:14:56.012787183Z",
+                "created_by": "LABEL org.opencontainers.image.url=https://github.com/carlossg/docker-maven",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-12T02:14:56.012787183Z",
+                "created_by": "LABEL org.opencontainers.image.description=Apache Maven is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information.",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-12T02:14:56.012787183Z",
+                "created_by": "ENV MAVEN_HOME=/usr/share/maven",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-12T02:14:56.012787183Z",
+                "created_by": "COPY /usr/share/maven /usr/share/maven # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-12T02:14:56.065691566Z",
+                "created_by": "COPY /usr/local/bin/mvn-entrypoint.sh /usr/local/bin/mvn-entrypoint.sh # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-12T02:14:56.174053416Z",
+                "created_by": "RUN /bin/sh -c ln -s ${MAVEN_HOME}/bin/mvn /usr/bin/mvn # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-12T02:14:56.174053416Z",
+                "created_by": "ARG USER_HOME_DIR=/root",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-12T02:14:56.174053416Z",
+                "created_by": "ENV MAVEN_CONFIG=/root/.m2",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-12T02:14:56.174053416Z",
+                "created_by": "ENTRYPOINT [\"/usr/local/bin/mvn-entrypoint.sh\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-12T02:14:56.174053416Z",
+                "created_by": "CMD [\"mvn\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            }
+        ]
+    },
+    "Docker": {
+        "created": "2026-11-12T02:14:56.174053416Z",
+        "container_config": {
+            "Hostname": "",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "PATH=/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "JAVA_HOME=/opt/java/openjdk",
+                "LANG=en_US.UTF-8",
+                "LANGUAGE=en_US:en",
+                "LC_ALL=en_US.UTF-8",
+                "JAVA_VERSION=jdk-21.0.13+9",
+                "MAVEN_HOME=/usr/share/maven",
+                "MAVEN_CONFIG=/root/.m2"
+            ],
+            "Cmd": [
+                "mvn"
+            ],
+            "Image": "",
+            "Volumes": null,
+            "WorkingDir": "",
+            "Entrypoint": [
+                "/usr/local/bin/mvn-entrypoint.sh"
+            ],
+            "OnBuild": null,
+            "Labels": {
+                "org.opencontainers.image.created": "2026-11-06T10:28:50.132595+00:00",
+                "org.opencontainers.image.description": "Apache Maven is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information.",
+                "org.opencontainers.image.source": "https://github.com/carlossg/docker-maven",
+                "org.opencontainers.image.title": "Apache Maven",
+                "org.opencontainers.image.url": "https://github.com/carlossg/docker-maven",
+                "org.opencontainers.image.version": "26.04"
+            }
+        },
+        "config": {
+            "Hostname": "",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "PATH=/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "JAVA_HOME=/opt/java/openjdk",
+                "LANG=en_US.UTF-8",
+                "LANGUAGE=en_US:en",
+                "LC_ALL=en_US.UTF-8",
+                "JAVA_VERSION=jdk-21.0.13+9",
+                "MAVEN_HOME=/usr/share/maven",
+                "MAVEN_CONFIG=/root/.m2"
+            ],
+            "Cmd": [
+                "mvn"
+            ],
+            "Image": "",
+            "Volumes": null,
+            "WorkingDir": "",
+            "Entrypoint": [
+                "/usr/local/bin/mvn-entrypoint.sh"
+            ],
+            "OnBuild": null,
+            "Labels": {
+                "org.opencontainers.image.created": "2026-11-06T10:28:50.132595+00:00",
+                "org.opencontainers.image.description": "Apache Maven is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information.",
+                "org.opencontainers.image.source": "https://github.com/carlossg/docker-maven",
+                "org.opencontainers.image.title": "Apache Maven",
+                "org.opencontainers.image.url": "https://github.com/carlossg/docker-maven",
+                "org.opencontainers.image.version": "26.04"
+            }
+        },
+        "architecture": "amd64",
+        "os": "linux",
+        "rootfs": {
+            "type": "layers",
+            "diff_ids": [
+                "sha256:2a89eb4dbc78f8fe790775a4e807e1355ba2f6b145c8dd7a267a782df1605124",
+                "sha256:758b22fe15be2c330dcead0c1b50476c074e113ec507627c6430337ffc9daa5e",
+                "sha256:6c915fae765e5bb70237ec3911a650f8c542016fa217c4e6f3bba9e6c2e3964a",
+                "sha256:5c4960c333b3988cb65f486ba0b06c21debeef7450cc3b7e033e7ae8bd91714a",
+                "sha256:52ba676c9b75d6d72bd58137defcdddd9e9c655a07c3b6274fe37e9c1ed1df28",
+                "sha256:5cf79090d938d3cf770b15fe16d985c7aabfb32837aeef2cbdda0e6973c1adac",
+                "sha256:19511e6c44aabc2156227cbf6ed354739d860c2fa24e5cec12ea2477d6c452ef",
+                "sha256:f89f0098f48666b302fdb0ff13a7a5fafb5065cda15762bc920bb0bf39edd264",
+                "sha256:e319e6e06134970516dbf39bff974942ec6d7f3ea67ffe16501a129fa1f9fe9d",
+                "sha256:1a1f85e990000c54f385b6da475a2a3fc1e350bca0ec5e55add1fbd90e1cddd1"
+            ]
+        },
+        "history": [
+            {
+                "created": "2026-11-06T10:28:49.539971557Z",
+                "created_by": "umoci raw add-layer --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:rockcraft-base /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/.temp_layer.8947.tar --tag 26.04"
+            },
+            {
+                "created": "2026-11-06T10:28:50.066213635Z",
+                "created_by": "umoci config --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 --clear=config.entrypoint --clear=config.cmd",
+                "comment": "Set entrypoint",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-06T10:28:50.09514263Z",
+                "created_by": "umoci config --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 --clear=config.cmd --config.cmd /bin/bash",
+                "comment": "Set default commands",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-06T10:28:50.124897422Z",
+                "created_by": "umoci config --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 --config.env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "comment": "Set default PATH for bare-based rock",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-06T10:28:50.148020867Z",
+                "created_by": "umoci config --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 --clear=config.labels --config.label org.opencontainers.image.version=26.04 --config.label org.opencontainers.image.title=ubuntu --config.label org.opencontainers.image.created=2026-11-06T10:28:50.132595+00:00 --config.label org.opencontainers.image.description=The Ubuntu container image maintained by Canonical\n\nUbuntu is a Debian-based Linux operating system that runs from the desktop to the cloud, to all your internet connected things.\nIt is the world's most popular operating system across public clouds and OpenStack clouds.\nIt is the number one platform for containers; from Docker to Kubernetes to LXD, Ubuntu can run your containers at scale.\nFast, secure and simple, Ubuntu powers millions of PCs worldwide.\n",
+                "comment": "Set labels",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-06T10:28:50.179663443Z",
+                "created_by": "umoci config --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 --clear=manifest.annotations --manifest.annotation org.opencontainers.image.version=26.04 --manifest.annotation org.opencontainers.image.title=ubuntu --manifest.annotation org.opencontainers.image.created=2026-11-06T10:28:50.132595+00:00 --manifest.annotation org.opencontainers.image.description=The Ubuntu container image maintained by Canonical\n\nUbuntu is a Debian-based Linux operating system that runs from the desktop to the cloud, to all your internet connected things.\nIt is the world's most popular operating system across public clouds and OpenStack clouds.\nIt is the number one platform for containers; from Docker to Kubernetes to LXD, Ubuntu can run your containers at scale.\nFast, secure and simple, Ubuntu powers millions of PCs worldwide.\n",
+                "comment": "Set annotations",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-06T10:28:50.193437721Z",
+                "created_by": "umoci raw add-layer --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/.temp_layer.control_data.8947.tar",
+                "comment": "Add rock control metadata"
+            },
+            {
+                "created": "2026-11-11T23:17:49.055778975Z",
+                "created_by": "ENV JAVA_HOME=/opt/java/openjdk",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-11T23:17:49.055778975Z",
+                "created_by": "ENV PATH=/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-11T23:17:49.055778975Z",
+                "created_by": "ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-11T23:17:49.055778975Z",
+                "created_by": "RUN /bin/sh -c set -eux;     apt-get update;     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends         curl         wget         gnupg         fontconfig         ca-certificates p11-kit         binutils         tzdata         locales     ;     echo \"en_US.UTF-8 UTF-8\" \u003e\u003e /etc/locale.gen;     locale-gen en_US.UTF-8;     rm -rf /var/lib/apt/lists/* # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-11T23:17:49.055778975Z",
+                "created_by": "ENV JAVA_VERSION=jdk-21.0.13+9",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-11T23:17:54.398496037Z",
+                "created_by": "RUN /bin/sh -c set -eux;     ARCH=\"$(dpkg --print-architecture)\";     case \"${ARCH}\" in        amd64)          ESUM='d7f5d5cf865a2902b70ff549b97586a7d3f234e016f041ab447ea740c7d66d1c';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_x64_linux_hotspot_21.0.13_9.tar.gz';          ;;        arm64)          ESUM='e3522e707fc7dbe2a72c30746b1e7068301a0213ecd213d4491f35a14eb55578';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.13_9.tar.gz';          ;;        ppc64el)          ESUM='cfaedcc659213833ead9c2a50987d8dcbd0e7a2d82217abb43acb64c0dd3d8cc';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_ppc64le_linux_hotspot_21.0.13_9.tar.gz';          ;;        s390x)          ESUM='597271ef81f7e4d0e2b86aa6e4d484af194253bdf238908a8394b78970dff713';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_s390x_linux_hotspot_21.0.13_9.tar.gz';          ;;        *)          echo \"Unsupported arch: ${ARCH}\";          exit 1;          ;;     esac;     wget --progress=dot:giga -O /tmp/openjdk.tar.gz ${BINARY_URL};     wget --progress=dot:giga -O /tmp/openjdk.tar.gz.sig ${BINARY_URL}.sig;     export GNUPGHOME=\"$(mktemp -d)\";     gpg --batch --keyserver keyserver.ubuntu.com --recv-keys 3B04D753C9050D9A5D343F39843C48A565F8F04B;     gpg --batch --verify /tmp/openjdk.tar.gz.sig /tmp/openjdk.tar.gz;     rm -rf \"${GNUPGHOME}\" /tmp/openjdk.tar.gz.sig;     echo \"${ESUM} */tmp/openjdk.tar.gz\" | sha256sum -c -;     mkdir -p \"$JAVA_HOME\";     tar --extract         --file /tmp/openjdk.tar.gz         --directory \"$JAVA_HOME\"         --strip-components 1         --no-same-owner     ;     rm -f /tmp/openjdk.tar.gz ${JAVA_HOME}/lib/src.zip;     find \"$JAVA_HOME/lib\" -name '*.so' -exec dirname '{}' ';' | sort -u \u003e /etc/ld.so.conf.d/docker-openjdk.conf;     ldconfig;     java -Xshare:dump; # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-11T23:17:55.472505465Z",
+                "created_by": "RUN /bin/sh -c set -eux;     echo \"Verifying install ...\";     fileEncoding=\"$(echo 'System.out.println(System.getProperty(\"file.encoding\"))' | jshell -s -)\"; [ \"$fileEncoding\" = 'UTF-8' ]; rm -rf ~/.java;     echo \"javac --version\"; javac --version;     echo \"java --version\"; java --version;     echo \"Complete.\" # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-11T23:17:55.518791963Z",
+                "created_by": "COPY --chmod=755 entrypoint.sh /__cacert_entrypoint.sh # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-11T23:17:55.518791963Z",
+                "created_by": "ENTRYPOINT [\"/__cacert_entrypoint.sh\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-11T23:17:55.518791963Z",
+                "created_by": "CMD [\"jshell\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-12T02:14:55.899243871Z",
+                "created_by": "RUN /bin/sh -c apt-get update   \u0026\u0026 apt-get install -y ca-certificates curl git openssh-client --no-install-recommends   \u0026\u0026 rm -rf /var/lib/apt/lists/* # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-12T02:14:56.012787183Z",
+                "created_by": "LABEL org.opencontainers.image.title=Apache Maven",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-12T02:14:56.012787183Z",
+                "created_by": "LABEL org.opencontainers.image.source=https://github.com/carlossg/docker-maven",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-12T02:14:56.012787183Z",
+                "created_by": "LABEL org.opencontainers.image.url=https://github.com/carlossg/docker-maven",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-12T02:14:56.012787183Z",
+                "created_by": "LABEL org.opencontainers.image.description=Apache Maven is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information.",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-12T02:14:56.012787183Z",
+                "created_by": "ENV MAVEN_HOME=/usr/share/maven",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-12T02:14:56.012787183Z",
+                "created_by": "COPY /usr/share/maven /usr/share/maven # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-12T02:14:56.065691566Z",
+                "created_by": "COPY /usr/local/bin/mvn-entrypoint.sh /usr/local/bin/mvn-entrypoint.sh # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-12T02:14:56.174053416Z",
+                "created_by": "RUN /bin/sh -c ln -s ${MAVEN_HOME}/bin/mvn /usr/bin/mvn # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+            },
+            {
+                "created": "2026-11-12T02:14:56.174053416Z",
+                "created_by": "ARG USER_HOME_DIR=/root",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-12T02:14:56.174053416Z",
+                "created_by": "ENV MAVEN_CONFIG=/root/.m2",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-12T02:14:56.174053416Z",
+                "created_by": "ENTRYPOINT [\"/usr/local/bin/mvn-entrypoint.sh\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            },
+            {
+                "created": "2026-11-12T02:14:56.174053416Z",
+                "created_by": "CMD [\"mvn\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+            }
+        ]
+    },
+    "DefaultMountsFilePath": "",
+    "Isolation": "oci",
+    "NamespaceOptions": [
+        {
+            "Name": "cgroup",
+            "Host": false,
+            "Path": ""
+        },
+        {
+            "Name": "ipc",
+            "Host": false,
+            "Path": ""
+        },
+        {
+            "Name": "mount",
+            "Host": false,
+            "Path": ""
+        },
+        {
+            "Name": "network",
+            "Host": false,
+            "Path": ""
+        },
+        {
+            "Name": "pid",
+            "Host": false,
+            "Path": ""
+        },
+        {
+            "Name": "user",
+            "Host": true,
+            "Path": ""
+        },
+        {
+            "Name": "uts",
+            "Host": false,
+            "Path": ""
+        }
+    ],
+    "Capabilities": null,
+    "ConfigureNetwork": "NetworkDefault",
+    "CNIPluginPath": "",
+    "CNIConfigDir": "",
+    "IDMappingOptions": {
+        "HostUIDMapping": true,
+        "HostGIDMapping": true,
+        "UIDMap": [],
+        "GIDMap": [],
+        "AutoUserNs": false,
+        "AutoUserNsOpts": {
+            "Size": 0,
+            "InitialSize": 0,
+            "PasswdFile": "",
+            "GroupFile": "",
+            "AdditionalUIDMappings": null,
+            "AdditionalGIDMappings": null
+        }
+    },
+    "History": [
+        {
+            "created": "2026-11-06T10:28:49.539971557Z",
+            "created_by": "umoci raw add-layer --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:rockcraft-base /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/.temp_layer.8947.tar --tag 26.04"
+        },
+        {
+            "created": "2026-11-06T10:28:50.066213635Z",
+            "created_by": "umoci config --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 --clear=config.entrypoint --clear=config.cmd",
+            "comment": "Set entrypoint",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-06T10:28:50.09514263Z",
+            "created_by": "umoci config --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 --clear=config.cmd --config.cmd /bin/bash",
+            "comment": "Set default commands",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-06T10:28:50.124897422Z",
+            "created_by": "umoci config --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 --config.env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+            "comment": "Set default PATH for bare-based rock",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-06T10:28:50.148020867Z",
+            "created_by": "umoci config --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 --clear=config.labels --config.label org.opencontainers.image.version=26.04 --config.label org.opencontainers.image.title=ubuntu --config.label org.opencontainers.image.created=2026-11-06T10:28:50.132595+00:00 --config.label org.opencontainers.image.description=The Ubuntu container image maintained by Canonical\n\nUbuntu is a Debian-based Linux operating system that runs from the desktop to the cloud, to all your internet connected things.\nIt is the world's most popular operating system across public clouds and OpenStack clouds.\nIt is the number one platform for containers; from Docker to Kubernetes to LXD, Ubuntu can run your containers at scale.\nFast, secure and simple, Ubuntu powers millions of PCs worldwide.\n",
+            "comment": "Set labels",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-06T10:28:50.179663443Z",
+            "created_by": "umoci config --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 --clear=manifest.annotations --manifest.annotation org.opencontainers.image.version=26.04 --manifest.annotation org.opencontainers.image.title=ubuntu --manifest.annotation org.opencontainers.image.created=2026-11-06T10:28:50.132595+00:00 --manifest.annotation org.opencontainers.image.description=The Ubuntu container image maintained by Canonical\n\nUbuntu is a Debian-based Linux operating system that runs from the desktop to the cloud, to all your internet connected things.\nIt is the world's most popular operating system across public clouds and OpenStack clouds.\nIt is the number one platform for containers; from Docker to Kubernetes to LXD, Ubuntu can run your containers at scale.\nFast, secure and simple, Ubuntu powers millions of PCs worldwide.\n",
+            "comment": "Set annotations",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-06T10:28:50.193437721Z",
+            "created_by": "umoci raw add-layer --image /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/ubuntu:26.04 /home/buildd/rockcraft-ubuntu-f9b0ae373a9aa61a96756fa393588993/images/.temp_layer.control_data.8947.tar",
+            "comment": "Add rock control metadata"
+        },
+        {
+            "created": "2026-11-11T23:17:49.055778975Z",
+            "created_by": "ENV JAVA_HOME=/opt/java/openjdk",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-11T23:17:49.055778975Z",
+            "created_by": "ENV PATH=/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-11T23:17:49.055778975Z",
+            "created_by": "ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-11T23:17:49.055778975Z",
+            "created_by": "RUN /bin/sh -c set -eux;     apt-get update;     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends         curl         wget         gnupg         fontconfig         ca-certificates p11-kit         binutils         tzdata         locales     ;     echo \"en_US.UTF-8 UTF-8\" \u003e\u003e /etc/locale.gen;     locale-gen en_US.UTF-8;     rm -rf /var/lib/apt/lists/* # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-11T23:17:49.055778975Z",
+            "created_by": "ENV JAVA_VERSION=jdk-21.0.13+9",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-11T23:17:54.398496037Z",
+            "created_by": "RUN /bin/sh -c set -eux;     ARCH=\"$(dpkg --print-architecture)\";     case \"${ARCH}\" in        amd64)          ESUM='d7f5d5cf865a2902b70ff549b97586a7d3f234e016f041ab447ea740c7d66d1c';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_x64_linux_hotspot_21.0.13_9.tar.gz';          ;;        arm64)          ESUM='e3522e707fc7dbe2a72c30746b1e7068301a0213ecd213d4491f35a14eb55578';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.13_9.tar.gz';          ;;        ppc64el)          ESUM='cfaedcc659213833ead9c2a50987d8dcbd0e7a2d82217abb43acb64c0dd3d8cc';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_ppc64le_linux_hotspot_21.0.13_9.tar.gz';          ;;        s390x)          ESUM='597271ef81f7e4d0e2b86aa6e4d484af194253bdf238908a8394b78970dff713';          BINARY_URL='https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_s390x_linux_hotspot_21.0.13_9.tar.gz';          ;;        *)          echo \"Unsupported arch: ${ARCH}\";          exit 1;          ;;     esac;     wget --progress=dot:giga -O /tmp/openjdk.tar.gz ${BINARY_URL};     wget --progress=dot:giga -O /tmp/openjdk.tar.gz.sig ${BINARY_URL}.sig;     export GNUPGHOME=\"$(mktemp -d)\";     gpg --batch --keyserver keyserver.ubuntu.com --recv-keys 3B04D753C9050D9A5D343F39843C48A565F8F04B;     gpg --batch --verify /tmp/openjdk.tar.gz.sig /tmp/openjdk.tar.gz;     rm -rf \"${GNUPGHOME}\" /tmp/openjdk.tar.gz.sig;     echo \"${ESUM} */tmp/openjdk.tar.gz\" | sha256sum -c -;     mkdir -p \"$JAVA_HOME\";     tar --extract         --file /tmp/openjdk.tar.gz         --directory \"$JAVA_HOME\"         --strip-components 1         --no-same-owner     ;     rm -f /tmp/openjdk.tar.gz ${JAVA_HOME}/lib/src.zip;     find \"$JAVA_HOME/lib\" -name '*.so' -exec dirname '{}' ';' | sort -u \u003e /etc/ld.so.conf.d/docker-openjdk.conf;     ldconfig;     java -Xshare:dump; # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-11T23:17:55.472505465Z",
+            "created_by": "RUN /bin/sh -c set -eux;     echo \"Verifying install ...\";     fileEncoding=\"$(echo 'System.out.println(System.getProperty(\"file.encoding\"))' | jshell -s -)\"; [ \"$fileEncoding\" = 'UTF-8' ]; rm -rf ~/.java;     echo \"javac --version\"; javac --version;     echo \"java --version\"; java --version;     echo \"Complete.\" # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-11T23:17:55.518791963Z",
+            "created_by": "COPY --chmod=755 entrypoint.sh /__cacert_entrypoint.sh # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-11T23:17:55.518791963Z",
+            "created_by": "ENTRYPOINT [\"/__cacert_entrypoint.sh\"]",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-11T23:17:55.518791963Z",
+            "created_by": "CMD [\"jshell\"]",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-12T02:14:55.899243871Z",
+            "created_by": "RUN /bin/sh -c apt-get update   \u0026\u0026 apt-get install -y ca-certificates curl git openssh-client --no-install-recommends   \u0026\u0026 rm -rf /var/lib/apt/lists/* # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-12T02:14:56.012787183Z",
+            "created_by": "LABEL org.opencontainers.image.title=Apache Maven",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-12T02:14:56.012787183Z",
+            "created_by": "LABEL org.opencontainers.image.source=https://github.com/carlossg/docker-maven",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-12T02:14:56.012787183Z",
+            "created_by": "LABEL org.opencontainers.image.url=https://github.com/carlossg/docker-maven",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-12T02:14:56.012787183Z",
+            "created_by": "LABEL org.opencontainers.image.description=Apache Maven is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information.",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-12T02:14:56.012787183Z",
+            "created_by": "ENV MAVEN_HOME=/usr/share/maven",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-12T02:14:56.012787183Z",
+            "created_by": "COPY /usr/share/maven /usr/share/maven # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-12T02:14:56.065691566Z",
+            "created_by": "COPY /usr/local/bin/mvn-entrypoint.sh /usr/local/bin/mvn-entrypoint.sh # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-12T02:14:56.174053416Z",
+            "created_by": "RUN /bin/sh -c ln -s ${MAVEN_HOME}/bin/mvn /usr/bin/mvn # buildkit",
+            "comment": "buildkit.dockerfile.v0"
+        },
+        {
+            "created": "2026-11-12T02:14:56.174053416Z",
+            "created_by": "ARG USER_HOME_DIR=/root",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-12T02:14:56.174053416Z",
+            "created_by": "ENV MAVEN_CONFIG=/root/.m2",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-12T02:14:56.174053416Z",
+            "created_by": "ENTRYPOINT [\"/usr/local/bin/mvn-entrypoint.sh\"]",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        },
+        {
+            "created": "2026-11-12T02:14:56.174053416Z",
+            "created_by": "CMD [\"mvn\"]",
+            "comment": "buildkit.dockerfile.v0",
+            "empty_layer": true
+        }
+    ],
+    "Devices": null,
+    "DeviceSpecs": null,
+    "CDIConfigDir": ""
+}

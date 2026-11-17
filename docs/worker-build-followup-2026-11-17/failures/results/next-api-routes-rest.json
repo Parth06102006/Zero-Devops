@@ -1,0 +1,351 @@
+{
+  "case": {
+    "name": "next-api-routes-rest",
+    "repo": "vercel/next.js",
+    "sha": "59db850442194327ef46acb3e65dfeeb52984f7a",
+    "path": "examples/api-routes-rest",
+    "stack": "Next.js",
+    "kind": "node",
+    "reference_build": "npm install && npm run build",
+    "reference_start": "npm start -- --hostname 0.0.0.0",
+    "port": 3000,
+    "probe": "/",
+    "static_output": null,
+    "context": "examples/api-routes-rest",
+    "env": {}
+  },
+  "started_at": "2026-11-17T19:20:08.714255+00:00",
+  "complete": true,
+  "batch": "failures",
+  "reference_qualified": true,
+  "qualification": "historical qualification from primary57",
+  "prior_worker": {
+    "lane": 1,
+    "worker_container": "zdfix-worker",
+    "broker_vhost": "/",
+    "commit_sha": "59db850442194327ef46acb3e65dfeeb52984f7a",
+    "deployment_id": "8d581eb4-ab6d-4bfe-b417-596ff9948358",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: build failed: exit status 125|",
+    "end_to_end_seconds": 222.915,
+    "resource_samples": [
+      {
+        "seconds": 0.43,
+        "stats": "0.74%|232.3MiB / 2GiB|39",
+        "cgroup": "cpu.stat\nusage_usec 2023130988\nuser_usec 1459830975\nsystem_usec 563300013\nnice_usec 0\nnr_periods 22216\nnr_throttled 2970\nthrottled_usec 284328524\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n302854144"
+      },
+      {
+        "seconds": 22.37,
+        "stats": "6.87%|239.8MiB / 2GiB|41",
+        "cgroup": "cpu.stat\nusage_usec 2025360853\nuser_usec 1461230478\nsystem_usec 564130374\nnice_usec 0\nnr_periods 22409\nnr_throttled 2970\nthrottled_usec 284328524\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n330842112"
+      },
+      {
+        "seconds": 44.71,
+        "stats": "92.71%|565.2MiB / 2GiB|75",
+        "cgroup": "cpu.stat\nusage_usec 2037743549\nuser_usec 1466799060\nsystem_usec 570944489\nnice_usec 0\nnr_periods 22627\nnr_throttled 2980\nthrottled_usec 285922457\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n1018576896"
+      },
+      {
+        "seconds": 68.62,
+        "stats": "149.03%|688.2MiB / 2GiB|75",
+        "cgroup": "cpu.stat\nusage_usec 2057261141\nuser_usec 1478459991\nsystem_usec 578801149\nnice_usec 0\nnr_periods 22852\nnr_throttled 3035\nthrottled_usec 290986812\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n1574727680"
+      },
+      {
+        "seconds": 90.89,
+        "stats": "86.50%|733MiB / 2GiB|75",
+        "cgroup": "cpu.stat\nusage_usec 2086177959\nuser_usec 1492726899\nsystem_usec 593451059\nnice_usec 0\nnr_periods 23074\nnr_throttled 3113\nthrottled_usec 295732025\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n1849450496"
+      },
+      {
+        "seconds": 113.21,
+        "stats": "0.12%|752.8MiB / 2GiB|75",
+        "cgroup": "cpu.stat\nusage_usec 2102341334\nuser_usec 1499579721\nsystem_usec 602761613\nnice_usec 0\nnr_periods 23208\nnr_throttled 3133\nthrottled_usec 297394136\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n1979596800"
+      },
+      {
+        "seconds": 135.29,
+        "stats": "32.10%|744MiB / 2GiB|75",
+        "cgroup": "cpu.stat\nusage_usec 2103131698\nuser_usec 1499931471\nsystem_usec 603200227\nnice_usec 0\nnr_periods 23232\nnr_throttled 3135\nthrottled_usec 297586417\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n1971388416"
+      },
+      {
+        "seconds": 162.5,
+        "stats": "55.54%|601.5MiB / 2GiB|49",
+        "cgroup": "cpu.stat\nusage_usec 2137486436\nuser_usec 1524951764\nsystem_usec 612534672\nnice_usec 0\nnr_periods 23505\nnr_throttled 3278\nthrottled_usec 335726620\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n1478332416"
+      },
+      {
+        "seconds": 188.0,
+        "stats": "145.78%|843.6MiB / 2GiB|74",
+        "cgroup": "cpu.stat\nusage_usec 2162576703\nuser_usec 1539015883\nsystem_usec 623560820\nnice_usec 0\nnr_periods 23754\nnr_throttled 3355\nthrottled_usec 342055824\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n1985519616"
+      },
+      {
+        "seconds": 211.79,
+        "stats": "122.29%|896.5MiB / 2GiB|74",
+        "cgroup": "cpu.stat\nusage_usec 2195638295\nuser_usec 1554418759\nsystem_usec 641219536\nnice_usec 0\nnr_periods 23997\nnr_throttled 3422\nthrottled_usec 347003686\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n2147237888"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "examples/api-routes-rest",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "nextjs",
+    "phase_events": [
+      {
+        "at": "2026-11-17T13:53:07.304Z",
+        "event": "deployment job completed"
+      },
+      {
+        "at": "2026-11-17T13:53:08.185Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-17T13:53:08.196Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-17T13:53:08.199Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-17T13:53:08.201Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-17T13:53:51.352Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-17T13:53:51.353Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-17T13:53:51.353Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-17T13:53:51.361Z",
+        "event": "unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled"
+      },
+      {
+        "at": "2026-11-17T13:53:51.361Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-17T13:56:48.819Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"8d581eb4-ab6d-4bfe-b417-596ff9948358\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 150,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"8d581eb4-ab6d-4bfe-b417-596ff9948358\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: build failed: exit status 125\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": false
+  },
+  "prior_classification": "other-build-failure",
+  "worker": {
+    "lane": 2,
+    "worker_container": "zdround2-2-worker",
+    "broker_vhost": "zdround2-2",
+    "commit_sha": "59db850442194327ef46acb3e65dfeeb52984f7a",
+    "deployment_id": "44a14362-8068-4eb7-b297-f289e9445ece",
+    "state": "success",
+    "database_row": "success||",
+    "end_to_end_seconds": 323.47,
+    "resource_samples": [
+      {
+        "seconds": 0.43,
+        "stats": "2.78%|419.7MiB / 2GiB|104",
+        "cgroup": "cpu.stat\nusage_usec 1529230821\nuser_usec 978242007\nsystem_usec 550988813\nnice_usec 0\nnr_periods 18445\nnr_throttled 3222\nthrottled_usec 375342268\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n536764416"
+      },
+      {
+        "seconds": 24.22,
+        "stats": "82.96%|752.6MiB / 2GiB|140",
+        "cgroup": "cpu.stat\nusage_usec 1539539667\nuser_usec 982817947\nsystem_usec 556721720\nnice_usec 0\nnr_periods 18663\nnr_throttled 3231\nthrottled_usec 376409572\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1348583424"
+      },
+      {
+        "seconds": 47.84,
+        "stats": "62.11%|853.3MiB / 2GiB|140",
+        "cgroup": "cpu.stat\nusage_usec 1551804360\nuser_usec 989910598\nsystem_usec 561893761\nnice_usec 0\nnr_periods 18884\nnr_throttled 3237\nthrottled_usec 376625871\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1574121472"
+      },
+      {
+        "seconds": 69.92,
+        "stats": "88.87%|905.1MiB / 2GiB|140",
+        "cgroup": "cpu.stat\nusage_usec 1568734686\nuser_usec 998685953\nsystem_usec 570048733\nnice_usec 0\nnr_periods 19090\nnr_throttled 3277\nthrottled_usec 378654478\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1768726528"
+      },
+      {
+        "seconds": 91.87,
+        "stats": "0.00%|897.6MiB / 2GiB|140",
+        "cgroup": "cpu.stat\nusage_usec 1576719622\nuser_usec 1002912191\nsystem_usec 573807430\nnice_usec 0\nnr_periods 19237\nnr_throttled 3286\nthrottled_usec 379148792\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1756774400"
+      },
+      {
+        "seconds": 114.06,
+        "stats": "110.93%|885.4MiB / 2GiB|140",
+        "cgroup": "cpu.stat\nusage_usec 1579334059\nuser_usec 1003925893\nsystem_usec 575408166\nnice_usec 0\nnr_periods 19287\nnr_throttled 3289\nthrottled_usec 379219128\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1448898560"
+      },
+      {
+        "seconds": 139.18,
+        "stats": "148.33%|1.148GiB / 2GiB|159",
+        "cgroup": "cpu.stat\nusage_usec 1611868166\nuser_usec 1019594903\nsystem_usec 592273263\nnice_usec 0\nnr_periods 19539\nnr_throttled 3358\nthrottled_usec 385633616\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1628528640"
+      },
+      {
+        "seconds": 163.48,
+        "stats": "92.94%|1.055GiB / 2GiB|141",
+        "cgroup": "cpu.stat\nusage_usec 1637446633\nuser_usec 1037490883\nsystem_usec 599955749\nnice_usec 0\nnr_periods 19770\nnr_throttled 3446\nthrottled_usec 410778995\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1466236928"
+      },
+      {
+        "seconds": 187.77,
+        "stats": "145.97%|1.196GiB / 2GiB|141",
+        "cgroup": "cpu.stat\nusage_usec 1658730621\nuser_usec 1048952934\nsystem_usec 609777686\nnice_usec 0\nnr_periods 20009\nnr_throttled 3499\nthrottled_usec 415688498\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1806557184\nmemory.current\n1710497792"
+      },
+      {
+        "seconds": 212.08,
+        "stats": "124.93%|1.171GiB / 2GiB|141",
+        "cgroup": "cpu.stat\nusage_usec 1687814763\nuser_usec 1062351312\nsystem_usec 625463451\nnice_usec 0\nnr_periods 20252\nnr_throttled 3569\nthrottled_usec 420808300\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1853227008\nmemory.current\n1845186560"
+      },
+      {
+        "seconds": 237.62,
+        "stats": "85.41%|1.324GiB / 2GiB|113",
+        "cgroup": "cpu.stat\nusage_usec 1716455811\nuser_usec 1071164903\nsystem_usec 645290907\nnice_usec 0\nnr_periods 20508\nnr_throttled 3586\nthrottled_usec 421472239\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1910734848\nmemory.current\n1893355520"
+      },
+      {
+        "seconds": 274.51,
+        "stats": "92.35%|263.2MiB / 2GiB|110",
+        "cgroup": "cpu.stat\nusage_usec 1747850801\nuser_usec 1081723146\nsystem_usec 666127654\nnice_usec 0\nnr_periods 20861\nnr_throttled 3683\nthrottled_usec 428554461\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147487744\nmemory.current\n769380352"
+      },
+      {
+        "seconds": 314.63,
+        "stats": "63.45%|504.8MiB / 2GiB|105",
+        "cgroup": "cpu.stat\nusage_usec 1765353011\nuser_usec 1089726180\nsystem_usec 675626831\nnice_usec 0\nnr_periods 21126\nnr_throttled 3783\nthrottled_usec 449223419\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147487744\nmemory.current\n821452800"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "examples/api-routes-rest",
+      "scanner_policy_version": "v1"
+    },
+    "deployment": "not attempted",
+    "framework": "nextjs",
+    "git_phase_diagnostics": [
+      "ZERODEVOPS_GIT phase=fetch attempt=1 seconds=19.201 success=true",
+      "ZERODEVOPS_GIT phase=checkout seconds=4.288 verified_sha=59db850442194327ef46acb3e65dfeeb52984f7a"
+    ],
+    "mock_upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"44a14362-8068-4eb7-b297-f289e9445ece\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 75,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"44a14362-8068-4eb7-b297-f289e9445ece\",\"status\":\"success\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": true,
+    "image_layer_bytes": 777161216,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 3.788,
+      "probe_url": "http://127.0.0.1:3000/",
+      "first_response": "200|0.250548|text/html; charset=utf-8",
+      "response_sample": "<!DOCTYPE html><html><head><meta charSet=\"utf-8\" data-next-head=\"\"/><meta name=\"viewport\" content=\"width=device-width\" data-next-head=\"\"/><noscript data-n-css=\"\"></noscript><script>(globalThis[\"TURBOPACK\"] || (globalThis[\"TURBOPACK\"] = [])).push({\"ot",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.003908
+        },
+        {
+          "status": 200,
+          "seconds": 0.00563
+        },
+        {
+          "status": 200,
+          "seconds": 0.00488
+        },
+        {
+          "status": 200,
+          "seconds": 0.039613
+        },
+        {
+          "status": 200,
+          "seconds": 0.010488
+        },
+        {
+          "status": 200,
+          "seconds": 0.993821
+        },
+        {
+          "status": 200,
+          "seconds": 0.101412
+        },
+        {
+          "status": 200,
+          "seconds": 0.006339
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    },
+    "external_container_http": [
+      {
+        "from_container": "zdround2-2-mock",
+        "target_worker_ip": "172.26.0.5",
+        "url": "http://172.26.0.5:3000/",
+        "exit_code": 0,
+        "response": "200|0.011402|text/html; charset=utf-8",
+        "reachable_expected_class": true
+      }
+    ]
+  },
+  "worker_classification": "build-and-runtime-pass",
+  "classification": "build-and-runtime-pass",
+  "finished_at": "2026-11-17T19:26:06.471852+00:00"
+}
