@@ -124,7 +124,7 @@ func TestRecipeArtifactsAndRuntime(t *testing.T) {
 		if e != nil {
 			t.Fatal(e)
 		}
-		if !strings.Contains(content, `COPY ["apps/web/static","/zerodevops-runtime-assets/static/"]`) || !strings.Contains(content, "COPY --from=builder /zerodevops-runtime-assets/ /app/") {
+		if !strings.Contains(content, `COPY ["apps/web/static","/zerodevops-runtime-assets/static/"]`) || !strings.Contains(content, "COPY --from=builder --chown=app /zerodevops-runtime-assets/ /app/") {
 			t.Fatal(content)
 		}
 	})

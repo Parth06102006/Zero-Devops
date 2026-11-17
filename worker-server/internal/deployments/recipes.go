@@ -260,6 +260,13 @@ func renderRuntime(app, contextDir, content string, b *Builder) (string, error) 
 			return "", errors.New("runtime assets require a named source stage")
 		}
 		stage := stages[len(stages)-1][1]
+		// Preserve source permissions while giving restrictive assets to the
+		// configured runtime identity. Avoid globally broadening file modes.
+		chown := ""
+		users := regexp.MustCompile(`(?m)^USER\s+([A-Za-z0-9_:-]+)\s*$`).FindAllStringSubmatch(content[index:], -1)
+		if len(users) > 0 {
+			chown = " --chown=" + users[len(users)-1][1]
+		}
 		content = content[:index] + "\n" + prepare + "\n" + content[index:]
 		index = strings.LastIndex(content, "\nUSER ")
 		if index < 0 {
@@ -268,7 +275,7 @@ func renderRuntime(app, contextDir, content string, b *Builder) (string, error) 
 		if index < 0 {
 			return "", errors.New("runtime assets require a final CMD or USER")
 		}
-		content = content[:index] + "\nCOPY --from=" + stage + " /zerodevops-runtime-assets/ /app/\n" + content[index:]
+		content = content[:index] + "\nCOPY --from=" + stage + chown + " /zerodevops-runtime-assets/ /app/\n" + content[index:]
 	}
 	if o.RuntimeWorkdir != "" {
 		dir := o.RuntimeWorkdir
