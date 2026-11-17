@@ -18,10 +18,15 @@ import (
 // Build options are repository data, never shell commands. Context is relative
 // to the checkout root; package paths are relative to the selected application.
 type buildOptions struct {
-	BuildContext string `json:"build_context"`
-	GoPackage    string `json:"go_package"`
-	CargoPackage string `json:"cargo_package"`
-	CargoBinary  string `json:"cargo_binary"`
+	BuildContext   string   `json:"build_context"`
+	GoPackage      string   `json:"go_package"`
+	CargoPackage   string   `json:"cargo_package"`
+	CargoBinary    string   `json:"cargo_binary"`
+	Framework      string   `json:"framework"`
+	OutputDir      string   `json:"output_dir"`
+	RuntimeCommand []string `json:"runtime_command"`
+	RuntimeAssets  []string `json:"runtime_assets"`
+	RuntimeWorkdir string   `json:"runtime_workdir"`
 }
 
 func readBuildOptions(appDir string) (buildOptions, error) {
@@ -320,6 +325,9 @@ func prepareBuildContext(repoDir, appDir string, builder *Builder) (string, erro
 				return "", err
 			}
 		}
+		if err := applyNativeRuntime(appDir, contextDir, builder); err != nil {
+			return "", err
+		}
 		return contextDir, validateContextPaths(repoDir, contextDir)
 	}
 	manifest, err := readCargo(repoDir, appDir)
@@ -389,6 +397,10 @@ func prepareBuildContext(repoDir, appDir string, builder *Builder) (string, erro
 	}
 	content := strings.ReplaceAll(string(data), "__CARGO_BUILD__", "RUN "+string(command))
 	content = strings.ReplaceAll(content, "__CARGO_BINARY__", bin)
+	content, err = renderRuntime(appDir, contextDir, content, builder)
+	if err != nil {
+		return "", err
+	}
 	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
 		return "", err
 	}

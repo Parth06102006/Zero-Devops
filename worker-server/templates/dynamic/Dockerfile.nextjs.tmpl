@@ -7,6 +7,7 @@ RUN npm ci --ignore-scripts
 
 COPY . .
 RUN npm run build
+RUN test -d .next && mkdir -p /app/public
 
 FROM docker.io/library/node:24-alpine
 

@@ -142,6 +142,54 @@ data, not shell commands. Queue command propagation remains a separate concern.
 These changes do not implement image publication, application routing, or
 external health checks. A build or local HTTP smoke pass is not a deployment.
 
+Framework selection checks owning frameworks before their supporting libraries:
+Astro plus Svelte is Astro; plain Svelte configuration does not imply SvelteKit;
+Laravel's Composer dependency selects a PHP application with a Vite asset build.
+Conflicting owning frameworks require an explicit selection. SvelteKit requires
+a literal supported Node/static adapter indication or an explicit recipe choice.
+Configuration is inspected as data, never evaluated on the host. VitePress's
+literal build-script root determines its `.vitepress/dist` output. Static recipes
+validate the selected `index.html`; Node SvelteKit validates `build/index.js`.
+Next's optional `public/` directory is normalized in the builder image.
+
+Additional fields in the same app-local `zero-devops.build.json` provide explicit
+recipe and runtime choices (use only fields applicable to the selected recipe):
+
+```json
+{
+  "framework": "vite",
+  "output_dir": "website/dist"
+}
+```
+
+```json
+{
+  "runtime_assets": ["static", "resources/banner.txt"],
+  "runtime_workdir": ".",
+  "runtime_command": ["node", "dist/main.js"]
+}
+```
+
+Output directories apply to static recipes. Runtime commands are exec argument
+arrays; no implicit shell is added. Runtime assets are existing app-relative
+source paths copied to the same paths under `/app`; workdir is relative to `/app`.
+Paths must remain inside the selected app, including symlink targets. Asset
+packaging requires a generated multistage recipe; explicit Dockerfiles own their
+packaging. Rust includes an existing conventional `static/` directory by default;
+`runtime_assets: []` disables that convention. Compiled Nest applications start
+with Node directly, using validated literal compiler/entry settings and a build
+artifact check. Dynamic or unsupported configuration needs an explicit command.
+The Laravel recipe retains the existing PHP CLI server policy for local runtime
+verification; production PHP serving infrastructure is not provisioned here.
+
+Git fetch and checkout have separate deadlines: fetch defaults to 180 seconds
+per attempt (at most two attempts), checkout to 120 seconds. Operators may set
+`GIT_FETCH_TIMEOUT_SECONDS` and `GIT_CHECKOUT_TIMEOUT_SECONDS` to 1–300. Only
+recognized transient fetch errors retry, with bounded backoff. Permanent
+authentication/ref errors fail immediately. Fetches remain shallow and pinned
+to the requested SHA; checkout verifies `HEAD` exactly and never substitutes a
+moving branch. Logs include phase timings without credentials.
+
 Copy `.env.example` → `.env` in `worker-server/`.
 
 ```env

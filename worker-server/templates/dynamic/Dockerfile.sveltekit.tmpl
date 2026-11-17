@@ -11,6 +11,7 @@ RUN npm ci --ignore-scripts
 
 COPY . .
 RUN npm run build
+RUN test -f build/index.js
 
 FROM docker.io/library/node:24-alpine AS runtime
 

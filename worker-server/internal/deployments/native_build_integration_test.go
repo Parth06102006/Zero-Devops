@@ -46,7 +46,8 @@ func TestNativeBuildIntegration(t *testing.T) {
 				writeFile(t, root, "shared/src/lib.rs", "pub fn message() -> &'static str {\"chosen-workspace-server\"}")
 				app = filepath.Join(root, "apps", "web")
 				writeFile(t, app, "Cargo.toml", "[package]\nname=\"web\"\nversion.workspace=true\nedition.workspace=true\n[dependencies]\nshared={path=\"../../shared\"}\n")
-				writeFile(t, app, "src/main.rs", "fn main() {println!(\"{}\",shared::message());}")
+				writeFile(t, app, "static/root/index.html", "chosen-workspace-server")
+				writeFile(t, app, "src/main.rs", "fn main() {assert_eq!(std::fs::read_to_string(\"static/root/index.html\").unwrap(),shared::message());println!(\"{}\",shared::message());}")
 				builder = &Builder{Name: langRust, Template: "dynamic/Dockerfile.rust.tmpl"}
 			}
 			if err := writeDockerfile(app, builder, pkgManagerNPM); err != nil {

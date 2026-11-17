@@ -108,8 +108,6 @@ var buildRoot = func() string {
 	return filepath.Join(os.TempDir(), "zerodevops-build")
 }()
 
-const gitCloneTimeout = 60 * time.Second
-
 func validateCloneURL(rawURL string) error {
 	u, err := url.Parse(rawURL)
 	if err != nil {
@@ -143,6 +141,10 @@ func cloneRepo(cloneURL, deploymentID, commitSHA string, credential domain.Clone
 	if !commitSHAPattern.MatchString(commitSHA) {
 		return "", fmt.Errorf("clone rejected: invalid commit SHA %q", commitSHA)
 	}
+	policy, err := readCheckoutPolicy()
+	if err != nil {
+		return "", err
+	}
 
 	destPath := filepath.Join(buildRoot, deploymentID)
 
@@ -154,7 +156,7 @@ func cloneRepo(cloneURL, deploymentID, commitSHA string, credential domain.Clone
 		return "", err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), gitCloneTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	//nolint:gosec // cloneURL validated by validateCloneURL and commitSHA by commitSHAPattern above
@@ -178,12 +180,24 @@ func cloneRepo(cloneURL, deploymentID, commitSHA string, credential domain.Clone
 		"GIT_ASKPASS=" + askpassPath,
 		"GITHUB_INSTALLATION_TOKEN=" + credential.Token,
 	}
-	if err := runGitWithEnv(ctx, []string{gitChangeDirFlag, destPath, "fetch", "--depth", "1", "origin", commitSHA}, gitEnv); err != nil {
+	if err := fetchPinned(policy, func(ctx context.Context) error {
+		return runGitWithEnv(ctx, []string{gitChangeDirFlag, destPath, "fetch", "--depth", "1", "origin", commitSHA}, gitEnv)
+	}); err != nil {
 		return "", fmt.Errorf("git fetch failed: %w", err)
 	}
-	if err := runGit(ctx, []string{gitChangeDirFlag, destPath, "checkout", "FETCH_HEAD"}); err != nil {
+	checkoutCtx, checkoutCancel := context.WithTimeout(context.Background(), policy.checkout)
+	defer checkoutCancel()
+	started := time.Now()
+	if err := runGit(checkoutCtx, []string{gitChangeDirFlag, destPath, "checkout", "--detach", commitSHA}); err != nil {
 		return "", fmt.Errorf("git checkout failed: %w", err)
 	}
+	verify := exec.CommandContext(checkoutCtx, "git", gitChangeDirFlag, destPath, "rev-parse", "HEAD")
+	verify.WaitDelay = gitWaitDelay
+	head, err := verify.Output()
+	if err != nil || strings.TrimSpace(string(head)) != commitSHA {
+		return "", errors.New("git checkout SHA verification failed")
+	}
+	fmt.Printf("ZERODEVOPS_GIT phase=checkout seconds=%.3f verified_sha=%s\n", time.Since(started).Seconds(), commitSHA)
 
 	return destPath, nil
 }
@@ -394,8 +408,22 @@ func writeDockerfile(repoPath string, builder *Builder, pm string) error {
 		}
 	}
 
-	if outDir := resolveOutputDir(repoPath, builder); outDir != "" {
+	options, err := readBuildOptions(repoPath)
+	if err != nil {
+		return err
+	}
+	outDir, err := recipeOutput(repoPath, builder, options)
+	if err != nil {
+		return err
+	}
+	if outDir != "" {
 		content = strings.ReplaceAll(content, outputDirPlaceholder, outDir)
+	}
+	if builder.Name != langRust && builder.Name != langGo {
+		content, err = renderRuntime(repoPath, repoPath, content, builder)
+		if err != nil {
+			return err
+		}
 	}
 
 	//nolint:gosec // repoPath is from cloneRepo which returns a controlled path
