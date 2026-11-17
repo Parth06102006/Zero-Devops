@@ -1,0 +1,221 @@
+{
+  "case": {
+    "name": "vite-svelte-ts",
+    "repo": "vitejs/vite",
+    "sha": "9a8d1a98922c5e445e8a618b8c27f84c63b9fbff",
+    "path": "packages/create-vite/template-svelte-ts",
+    "stack": "Vite/svelte-ts",
+    "kind": "node",
+    "reference_build": "npm install --ignore-scripts && npm run build",
+    "reference_start": "npm run preview -- --host 0.0.0.0 --port 4173",
+    "port": 4173,
+    "probe": "/",
+    "static_output": "dist",
+    "context": "packages/create-vite/template-svelte-ts",
+    "env": {}
+  },
+  "reference_qualified": true,
+  "reference_eligibility": "preserved baseline; reference build/runtime not rerun",
+  "baseline_classification": "missing-lockfile/install-policy",
+  "baseline_worker": {
+    "deployment_id": "c6705206-83f7-4261-a2de-8df25947c1ba",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: build failed: exit status 1|",
+    "end_to_end_seconds": 8.457,
+    "resource_samples": [
+      {
+        "seconds": 0.42,
+        "stats": "0.79%|108.4MiB / 2GiB|28",
+        "cgroup": "cpu.stat\nusage_usec 105375910\nuser_usec 57743551\nsystem_usec 47632358\nnice_usec 0\nnr_periods 1825\nnr_throttled 315\nthrottled_usec 38846649\nnr_bursts 0\nburst_usec 0\nmemory.peak\n897433600\nmemory.current\n137777152"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "packages/create-vite/template-svelte-ts",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "sveltekit",
+    "phase_events": [
+      {
+        "at": "2026-11-16T13:41:40.696Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-16T13:41:40.698Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-16T13:41:40.702Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-16T13:41:40.705Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-16T13:41:46.627Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-16T13:41:46.627Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-16T13:41:46.627Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-16T13:41:46.627Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-16T13:41:48.244Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"c6705206-83f7-4261-a2de-8df25947c1ba\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 148,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"c6705206-83f7-4261-a2de-8df25947c1ba\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: build failed: exit status 1\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "clone_and_directory_resolution_seconds": 5.922,
+    "failed_build_seconds": 1.617
+  },
+  "started_at": "2026-11-16T20:13:59.449184+00:00",
+  "complete": true,
+  "worker": {
+    "commit_sha": "9a8d1a98922c5e445e8a618b8c27f84c63b9fbff",
+    "deployment_id": "27f6b2e0-20c4-4d56-9e45-df00afed3918",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: build failed: exit status 125|",
+    "end_to_end_seconds": 55.829,
+    "resource_samples": [
+      {
+        "seconds": 0.29,
+        "stats": "1.19%|227.8MiB / 2GiB|48",
+        "cgroup": "cpu.stat\nusage_usec 278799259\nuser_usec 156361909\nsystem_usec 122437350\nnice_usec 0\nnr_periods 3648\nnr_throttled 621\nthrottled_usec 42453732\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1170931712\nmemory.current\n245862400"
+      },
+      {
+        "seconds": 24.0,
+        "stats": "102.52%|424.7MiB / 2GiB|83",
+        "cgroup": "cpu.stat\nusage_usec 298631766\nuser_usec 168873212\nsystem_usec 129758554\nnice_usec 0\nnr_periods 3874\nnr_throttled 672\nthrottled_usec 45391280\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1170931712\nmemory.current\n960815104"
+      },
+      {
+        "seconds": 45.66,
+        "stats": "67.19%|466.2MiB / 2GiB|88",
+        "cgroup": "cpu.stat\nusage_usec 312546661\nuser_usec 177039245\nsystem_usec 135507415\nnice_usec 0\nnr_periods 4033\nnr_throttled 699\nthrottled_usec 46596360\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1208299520\nmemory.current\n1058672640"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "packages/create-vite/template-svelte-ts",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "sveltekit",
+    "phase_events": [
+      {
+        "at": "2026-11-16T20:13:59.497Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-16T20:13:59.498Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-16T20:13:59.500Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-16T20:13:59.505Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-16T20:14:04.864Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-16T20:14:04.865Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-16T20:14:04.865Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-16T20:14:04.891Z",
+        "event": "unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled"
+      },
+      {
+        "at": "2026-11-16T20:14:04.891Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-16T20:14:54.639Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"27f6b2e0-20c4-4d56-9e45-df00afed3918\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 150,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"27f6b2e0-20c4-4d56-9e45-df00afed3918\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: build failed: exit status 125\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": false
+  },
+  "classification": "other-build-failure"
+}

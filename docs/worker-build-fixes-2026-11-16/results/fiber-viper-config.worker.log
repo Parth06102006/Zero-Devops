@@ -1,0 +1,39 @@
+2026-11-17T13:56:57.934Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-47d96803-1263-4c6f-ae79-1f4d3903ffad", "delivery_tag": 8}
+2026-11-17T13:56:57.939Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-47d96803-1263-4c6f-ae79-1f4d3903ffad", "deployment_id": "47d96803-1263-4c6f-ae79-1f4d3903ffad"}
+2026-11-17T13:56:57.943Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-47d96803-1263-4c6f-ae79-1f4d3903ffad", "deployment_id": "47d96803-1263-4c6f-ae79-1f4d3903ffad"}
+2026-11-17T13:56:57.946Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-47d96803-1263-4c6f-ae79-1f4d3903ffad", "deployment_id": "47d96803-1263-4c6f-ae79-1f4d3903ffad"}
+2026-11-17T13:57:00.843Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-47d96803-1263-4c6f-ae79-1f4d3903ffad", "deployment_id": "47d96803-1263-4c6f-ae79-1f4d3903ffad"}
+2026-11-17T13:57:00.843Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-47d96803-1263-4c6f-ae79-1f4d3903ffad", "deployment_id": "47d96803-1263-4c6f-ae79-1f4d3903ffad", "framework": "go", "package_manager": "npm"}
+2026-11-17T13:57:00.843Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-47d96803-1263-4c6f-ae79-1f4d3903ffad", "deployment_id": "47d96803-1263-4c6f-ae79-1f4d3903ffad", "template": "dynamic/Dockerfile.go.tmpl"}
+2026-11-17T13:57:00.855Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-47d96803-1263-4c6f-ae79-1f4d3903ffad", "deployment_id": "47d96803-1263-4c6f-ae79-1f4d3903ffad", "image_tag": "deploy-47d96803-1263-4c6f-ae79-1f4d3903ffad:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/golang:1.26.0-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: ENV CGO_ENABLED=0 GOOS=linux GOTOOLCHAIN=local
+[1/2] STEP 4/7: COPY go.mod go.sum* ./
+[1/2] STEP 5/7: RUN go mod download
+[1/2] STEP 6/7: COPY . .
+[1/2] STEP 7/7: RUN ["go","build","-o","/app/app","."]
+[2/2] STEP 1/7: FROM docker.io/library/alpine:3.20
+[2/2] STEP 2/7: WORKDIR /app
+[2/2] STEP 3/7: RUN addgroup -S app && adduser -S app -G app
+[2/2] STEP 4/7: COPY --from=builder /app/app /app/app
+[2/2] STEP 5/7: USER app
+[2/2] STEP 6/7: EXPOSE 8080
+[2/2] STEP 7/7: CMD ["/app/app"]
+[2/2] COMMIT deploy-47d96803-1263-4c6f-ae79-1f4d3903ffad:latest
+Getting image source signatures
+Copying blob sha256:08bc4e534116aa76b16015484b82eac51f9a593416feae9296c8a2d4bb7aa4a2
+Copying blob sha256:3c577459f611110252a8eca1c3479a7457745ed7082fd53b3263c9d6c340d727
+Copying config sha256:c3d0ef40e05af50303f11cb1887333776b1d0c878155a95cc459bc8bc579290d
+Writing manifest to image destination
+--> c3d0ef40e05a
+Successfully tagged localhost/deploy-47d96803-1263-4c6f-ae79-1f4d3903ffad:latest
+c3d0ef40e05af50303f11cb1887333776b1d0c878155a95cc459bc8bc579290d
+2026-11-17T13:59:14.651Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-47d96803-1263-4c6f-ae79-1f4d3903ffad", "deployment_id": "47d96803-1263-4c6f-ae79-1f4d3903ffad", "tar_path": "/tmp/zerodevops-build/47d96803-1263-4c6f-ae79-1f4d3903ffad/viper-config/47d96803-1263-4c6f-ae79-1f4d3903ffad.tar"}
+Getting image source signatures
+Copying blob sha256:08bc4e534116aa76b16015484b82eac51f9a593416feae9296c8a2d4bb7aa4a2
+Copying blob sha256:3c577459f611110252a8eca1c3479a7457745ed7082fd53b3263c9d6c340d727
+Copying config sha256:c3d0ef40e05af50303f11cb1887333776b1d0c878155a95cc459bc8bc579290d
+Writing manifest to image destination
+2026-11-17T13:59:14.955Z	INFO	deployments/deployments.go:572	dynamic build finished (stub finalize, no upload yet)	{"request_id": "zdfix-47d96803-1263-4c6f-ae79-1f4d3903ffad", "deployment_id": "47d96803-1263-4c6f-ae79-1f4d3903ffad"}
+2026-11-17T13:59:14.998Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-47d96803-1263-4c6f-ae79-1f4d3903ffad", "deployment_id": "47d96803-1263-4c6f-ae79-1f4d3903ffad"}

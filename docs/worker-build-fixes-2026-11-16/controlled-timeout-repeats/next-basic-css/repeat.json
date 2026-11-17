@@ -1,0 +1,159 @@
+{
+  "case": {
+    "name": "next-basic-css",
+    "repo": "vercel/next.js",
+    "sha": "59db850442194327ef46acb3e65dfeeb52984f7a",
+    "path": "examples/basic-css",
+    "stack": "Next.js",
+    "kind": "node",
+    "reference_build": "npm install && npm run build",
+    "reference_start": "npm start -- --hostname 0.0.0.0",
+    "port": 3000,
+    "probe": "/",
+    "static_output": null,
+    "context": "examples/basic-css",
+    "env": {}
+  },
+  "reference_qualified": true,
+  "record_type": "controlled-serial-repeat",
+  "primary_deployment_id": "a5b9ff50-a736-4fe8-abb5-a111f446552d",
+  "primary_classification": "other-build-failure",
+  "purpose": "unchanged worker and per-builder limits, serial execution after the primary replay; not substituted into the primary 57-case rate",
+  "started_at": "2026-11-17T14:21:46.342027+00:00",
+  "complete": true,
+  "worker": {
+    "lane": 1,
+    "worker_container": "zdfix-worker",
+    "broker_vhost": "/",
+    "commit_sha": "59db850442194327ef46acb3e65dfeeb52984f7a",
+    "deployment_id": "0080c51e-37a9-488f-872b-b57cbe706cbe",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: build failed: exit status 125|",
+    "end_to_end_seconds": 171.844,
+    "resource_samples": [
+      {
+        "seconds": 0.43,
+        "stats": "5.90%|604.3MiB / 2GiB|125",
+        "cgroup": "cpu.stat\nusage_usec 3002494676\nuser_usec 2071790469\nsystem_usec 930704206\nnice_usec 0\nnr_periods 35604\nnr_throttled 6310\nthrottled_usec 693961533\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n660398080"
+      },
+      {
+        "seconds": 24.4,
+        "stats": "123.18%|1.104GiB / 2GiB|161",
+        "cgroup": "cpu.stat\nusage_usec 3016839558\nuser_usec 2078658762\nsystem_usec 938180795\nnice_usec 0\nnr_periods 35835\nnr_throttled 6323\nthrottled_usec 695774265\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n1671540736"
+      },
+      {
+        "seconds": 47.31,
+        "stats": "129.09%|1.12GiB / 2GiB|161",
+        "cgroup": "cpu.stat\nusage_usec 3042325314\nuser_usec 2091701569\nsystem_usec 950623744\nnice_usec 0\nnr_periods 36058\nnr_throttled 6413\nthrottled_usec 702255385\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n1899700224"
+      },
+      {
+        "seconds": 71.58,
+        "stats": "70.43%|1.11GiB / 2GiB|161",
+        "cgroup": "cpu.stat\nusage_usec 3068111949\nuser_usec 2104051105\nsystem_usec 964060843\nnice_usec 0\nnr_periods 36297\nnr_throttled 6467\nthrottled_usec 706014257\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n1987477504"
+      },
+      {
+        "seconds": 93.58,
+        "stats": "100.72%|1.075GiB / 2GiB|174",
+        "cgroup": "cpu.stat\nusage_usec 3071012878\nuser_usec 2105375716\nsystem_usec 965637161\nnice_usec 0\nnr_periods 36338\nnr_throttled 6471\nthrottled_usec 706121387\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n1955385344"
+      },
+      {
+        "seconds": 118.37,
+        "stats": "99.76%|1.176GiB / 2GiB|160",
+        "cgroup": "cpu.stat\nusage_usec 3100022344\nuser_usec 2126817063\nsystem_usec 973205281\nnice_usec 0\nnr_periods 36584\nnr_throttled 6571\nthrottled_usec 718930195\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n1826766848"
+      },
+      {
+        "seconds": 141.59,
+        "stats": "128.47%|1.231GiB / 2GiB|160",
+        "cgroup": "cpu.stat\nusage_usec 3127286061\nuser_usec 2140321556\nsystem_usec 986964504\nnice_usec 0\nnr_periods 36812\nnr_throttled 6657\nthrottled_usec 724474302\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n2146844672"
+      },
+      {
+        "seconds": 163.87,
+        "stats": "79.38%|1.249GiB / 2GiB|160",
+        "cgroup": "cpu.stat\nusage_usec 3144670487\nuser_usec 2148037936\nsystem_usec 996632550\nnice_usec 0\nnr_periods 36985\nnr_throttled 6674\nthrottled_usec 725785419\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n2131120128"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "examples/basic-css",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "nextjs",
+    "phase_events": [
+      {
+        "at": "2026-11-17T14:21:46.411Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-17T14:21:46.412Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-17T14:21:46.415Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-17T14:21:46.417Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-17T14:22:07.484Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-17T14:22:07.484Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-17T14:22:07.484Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-17T14:22:07.493Z",
+        "event": "unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled"
+      },
+      {
+        "at": "2026-11-17T14:22:07.493Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-17T14:24:36.510Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"0080c51e-37a9-488f-872b-b57cbe706cbe\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 150,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"0080c51e-37a9-488f-872b-b57cbe706cbe\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: build failed: exit status 125\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": false
+  },
+  "classification": "other-build-failure"
+}

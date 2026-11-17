@@ -1,0 +1,13 @@
+ok  	Zero_Devops/worker_server/cmd/worker-server	0.030s
+ok  	Zero_Devops/worker_server/internal/config	0.030s
+ok  	Zero_Devops/worker_server/internal/deployments	0.564s
+ok  	Zero_Devops/worker_server/internal/deployments/contract	0.035s
+?   	Zero_Devops/worker_server/internal/deployments/repository/pgsql	[no test files]
+ok  	Zero_Devops/worker_server/internal/deployments/schema	0.143s
+ok  	Zero_Devops/worker_server/internal/domain	0.035s
+?   	Zero_Devops/worker_server/internal/githubcredentials	[no test files]
+ok  	Zero_Devops/worker_server/internal/logger	0.029s
+ok  	Zero_Devops/worker_server/internal/middleware	0.029s
+ok  	Zero_Devops/worker_server/internal/queue	0.029s
+ok  	Zero_Devops/worker_server/internal/upload	0.029s
+ok  	Zero_Devops/worker_server/internal/worker	0.029s

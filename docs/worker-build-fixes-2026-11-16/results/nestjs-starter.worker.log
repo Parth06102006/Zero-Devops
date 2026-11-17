@@ -1,0 +1,82 @@
+2026-11-17T14:14:31.595Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-448d62a2-c01e-4e77-a39d-221f0a51a573", "delivery_tag": 17}
+2026-11-17T14:14:31.599Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-448d62a2-c01e-4e77-a39d-221f0a51a573", "deployment_id": "448d62a2-c01e-4e77-a39d-221f0a51a573"}
+2026-11-17T14:14:31.601Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-448d62a2-c01e-4e77-a39d-221f0a51a573", "deployment_id": "448d62a2-c01e-4e77-a39d-221f0a51a573"}
+2026-11-17T14:14:31.603Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-448d62a2-c01e-4e77-a39d-221f0a51a573", "deployment_id": "448d62a2-c01e-4e77-a39d-221f0a51a573"}
+2026-11-17T14:14:32.985Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-448d62a2-c01e-4e77-a39d-221f0a51a573", "deployment_id": "448d62a2-c01e-4e77-a39d-221f0a51a573"}
+2026-11-17T14:14:32.987Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-448d62a2-c01e-4e77-a39d-221f0a51a573", "deployment_id": "448d62a2-c01e-4e77-a39d-221f0a51a573", "framework": "node", "package_manager": "npm"}
+2026-11-17T14:14:32.987Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-448d62a2-c01e-4e77-a39d-221f0a51a573", "deployment_id": "448d62a2-c01e-4e77-a39d-221f0a51a573", "template": "dynamic/Dockerfile.node.tmpl"}
+2026-11-17T14:14:32.993Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-448d62a2-c01e-4e77-a39d-221f0a51a573", "deployment_id": "448d62a2-c01e-4e77-a39d-221f0a51a573", "image_tag": "deploy-448d62a2-c01e-4e77-a39d-221f0a51a573:latest"}
+[1/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/6: WORKDIR /app
+[1/2] STEP 3/6: COPY package*.json ./
+[1/2] STEP 4/6: RUN npm ci --ignore-scripts
+npm warn deprecated tsconfck@3.1.6: unmaintained
+
+added 340 packages, and audited 341 packages in 27s
+
+108 packages are looking for funding
+  run `npm fund` for details
+
+14 vulnerabilities (2 low, 6 moderate, 6 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/6: COPY . .
+[1/2] STEP 6/6: RUN npm run build
+
+> nest-typescript-starter@1.0.0 build
+> nest build
+
+[2/2] STEP 1/8: FROM docker.io/library/node:24-alpine
+[2/2] STEP 2/8: WORKDIR /app
+[2/2] STEP 3/8: ENV NODE_ENV=production
+[2/2] STEP 4/8: COPY package*.json ./
+[2/2] STEP 5/8: RUN npm ci --ignore-scripts --omit=dev
+
+added 99 packages, and audited 100 packages in 6s
+
+43 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 6/8: COPY --from=builder /app/dist ./dist
+[2/2] STEP 7/8: EXPOSE 3000
+[2/2] STEP 8/8: CMD ["npm", "start"]
+[2/2] COMMIT deploy-448d62a2-c01e-4e77-a39d-221f0a51a573:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:967828ae51d4df0ee8e209d067f20b90ce62d76f5b26cb6ab29f73e6dba1747c
+Copying config sha256:cd6b78a50f03c5d48f3ccd3071010adb8364c5874e85b1f24e73ec7a67f1c928
+Writing manifest to image destination
+--> cd6b78a50f03
+Successfully tagged localhost/deploy-448d62a2-c01e-4e77-a39d-221f0a51a573:latest
+cd6b78a50f03c5d48f3ccd3071010adb8364c5874e85b1f24e73ec7a67f1c928
+2026-11-17T14:15:23.172Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-448d62a2-c01e-4e77-a39d-221f0a51a573", "deployment_id": "448d62a2-c01e-4e77-a39d-221f0a51a573", "tar_path": "/tmp/zerodevops-build/448d62a2-c01e-4e77-a39d-221f0a51a573/448d62a2-c01e-4e77-a39d-221f0a51a573.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:967828ae51d4df0ee8e209d067f20b90ce62d76f5b26cb6ab29f73e6dba1747c
+Copying config sha256:cd6b78a50f03c5d48f3ccd3071010adb8364c5874e85b1f24e73ec7a67f1c928
+Writing manifest to image destination
+2026-11-17T14:15:24.589Z	INFO	deployments/deployments.go:572	dynamic build finished (stub finalize, no upload yet)	{"request_id": "zdfix-448d62a2-c01e-4e77-a39d-221f0a51a573", "deployment_id": "448d62a2-c01e-4e77-a39d-221f0a51a573"}
+2026-11-17T14:15:24.617Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-448d62a2-c01e-4e77-a39d-221f0a51a573", "deployment_id": "448d62a2-c01e-4e77-a39d-221f0a51a573"}

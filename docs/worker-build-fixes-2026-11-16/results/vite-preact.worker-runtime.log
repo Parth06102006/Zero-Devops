@@ -1,0 +1,26 @@
+/bin/sh: set: line 0: can't access tty; job control turned off
+ INFO  Accepting connections at http://localhost:4173
+ HTTP  11/16/2026 8:52:53 PM 127.0.0.1 GET /
+ HTTP  11/16/2026 8:52:53 PM 127.0.0.1 Returned 200 in 41 ms
+ HTTP  11/16/2026 8:52:54 PM 127.0.0.1 GET /
+ HTTP  11/16/2026 8:52:54 PM 127.0.0.1 Returned 200 in 1 ms
+ HTTP  11/16/2026 8:52:54 PM 127.0.0.1 GET /
+ HTTP  11/16/2026 8:52:54 PM 127.0.0.1 Returned 200 in 1 ms
+ HTTP  11/16/2026 8:52:54 PM 127.0.0.1 GET /
+ HTTP  11/16/2026 8:52:54 PM 127.0.0.1 Returned 200 in 1 ms
+ HTTP  11/16/2026 8:52:54 PM 127.0.0.1 GET /
+ HTTP  11/16/2026 8:52:54 PM 127.0.0.1 Returned 200 in 2 ms
+ HTTP  11/16/2026 8:52:54 PM 127.0.0.1 GET /
+ HTTP  11/16/2026 8:52:54 PM 127.0.0.1 Returned 200 in 1 ms
+ HTTP  11/16/2026 8:52:54 PM 127.0.0.1 GET /
+ HTTP  11/16/2026 8:52:54 PM 127.0.0.1 Returned 200 in 1 ms
+ HTTP  11/16/2026 8:52:54 PM 127.0.0.1 GET /
+ HTTP  11/16/2026 8:52:54 PM 127.0.0.1 Returned 200 in 2 ms
+ HTTP  11/16/2026 8:52:55 PM 127.0.0.1 GET /
+ HTTP  11/16/2026 8:52:55 PM 127.0.0.1 Returned 200 in 2 ms
+Terminated
+subprocess exited on killed
+
+ INFO  Gracefully shutting down. Please wait...
+subprocess exited with status 1
+Error: exit status 1

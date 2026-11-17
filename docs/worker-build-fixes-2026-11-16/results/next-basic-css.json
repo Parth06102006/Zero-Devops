@@ -1,0 +1,209 @@
+{
+  "case": {
+    "name": "next-basic-css",
+    "repo": "vercel/next.js",
+    "sha": "59db850442194327ef46acb3e65dfeeb52984f7a",
+    "path": "examples/basic-css",
+    "stack": "Next.js",
+    "kind": "node",
+    "reference_build": "npm install && npm run build",
+    "reference_start": "npm start -- --hostname 0.0.0.0",
+    "port": 3000,
+    "probe": "/",
+    "static_output": null,
+    "context": "examples/basic-css",
+    "env": {}
+  },
+  "reference_qualified": true,
+  "reference_eligibility": "preserved baseline; reference build/runtime not rerun",
+  "baseline_classification": "missing-lockfile/install-policy",
+  "baseline_worker": {
+    "deployment_id": "240ae487-23f1-4d98-ab28-53406363df9c",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: build failed: exit status 1|",
+    "end_to_end_seconds": 27.913,
+    "resource_samples": [
+      {
+        "seconds": 0.56,
+        "stats": "1.07%|117.2MiB / 2GiB|65",
+        "cgroup": "cpu.stat\nusage_usec 207013519\nuser_usec 103445072\nsystem_usec 103568446\nnice_usec 0\nnr_periods 4930\nnr_throttled 340\nthrottled_usec 43081368\nnr_bursts 0\nburst_usec 0\nmemory.peak\n897433600\nmemory.current\n160808960"
+      },
+      {
+        "seconds": 24.32,
+        "stats": "95.36%|216.8MiB / 2GiB|64",
+        "cgroup": "cpu.stat\nusage_usec 218405689\nuser_usec 108424218\nsystem_usec 109981470\nnice_usec 0\nnr_periods 5154\nnr_throttled 345\nthrottled_usec 44133803\nnr_bursts 0\nburst_usec 0\nmemory.peak\n897433600\nmemory.current\n239497216"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "examples/basic-css",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "nextjs",
+    "phase_events": [
+      {
+        "at": "2026-11-16T14:14:30.525Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-16T14:14:30.534Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-16T14:14:30.537Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-16T14:14:30.539Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-16T14:14:52.942Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-16T14:14:52.943Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-16T14:14:52.943Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-16T14:14:52.943Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-16T14:14:55.970Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"240ae487-23f1-4d98-ab28-53406363df9c\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 148,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"240ae487-23f1-4d98-ab28-53406363df9c\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: build failed: exit status 1\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "clone_and_directory_resolution_seconds": 22.403,
+    "failed_build_seconds": 3.027
+  },
+  "started_at": "2026-11-17T13:59:24.621679+00:00",
+  "complete": true,
+  "worker": {
+    "lane": 1,
+    "worker_container": "zdfix-worker",
+    "broker_vhost": "/",
+    "commit_sha": "59db850442194327ef46acb3e65dfeeb52984f7a",
+    "deployment_id": "a5b9ff50-a736-4fe8-abb5-a111f446552d",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: git checkout failed: git checkout failed: context deadline exceeded|",
+    "end_to_end_seconds": 60.767,
+    "resource_samples": [
+      {
+        "seconds": 0.51,
+        "stats": "4.72%|286.2MiB / 2GiB|48",
+        "cgroup": "cpu.stat\nusage_usec 2296714296\nuser_usec 1605797634\nsystem_usec 690916661\nnice_usec 0\nnr_periods 25368\nnr_throttled 3659\nthrottled_usec 364363804\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n380432384"
+      },
+      {
+        "seconds": 22.99,
+        "stats": "2.41%|288.9MiB / 2GiB|50",
+        "cgroup": "cpu.stat\nusage_usec 2298909210\nuser_usec 1607110674\nsystem_usec 691798536\nnice_usec 0\nnr_periods 25574\nnr_throttled 3659\nthrottled_usec 364363804\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n404668416"
+      },
+      {
+        "seconds": 45.64,
+        "stats": "17.83%|292.2MiB / 2GiB|50",
+        "cgroup": "cpu.stat\nusage_usec 2301477479\nuser_usec 1608810138\nsystem_usec 692667341\nnice_usec 0\nnr_periods 25791\nnr_throttled 3659\nthrottled_usec 364363804\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n428589056"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "examples/basic-css",
+      "scanner_policy_version": "v1"
+    },
+    "framework": null,
+    "phase_events": [
+      {
+        "at": "2026-11-17T13:59:24.720Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-17T13:59:24.724Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-17T13:59:24.745Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-17T13:59:24.749Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-17T14:00:24.767Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"a5b9ff50-a736-4fe8-abb5-a111f446552d\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 188,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"a5b9ff50-a736-4fe8-abb5-a111f446552d\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: git checkout failed: git checkout failed: context deadline exceeded\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": false
+  },
+  "classification": "other-build-failure"
+}

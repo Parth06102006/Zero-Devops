@@ -1,0 +1,48 @@
+2026-11-17T14:01:31.000Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-7433e9ea-192c-4ec9-8637-a493eb1982b4", "delivery_tag": 11}
+2026-11-17T14:01:31.002Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-7433e9ea-192c-4ec9-8637-a493eb1982b4", "deployment_id": "7433e9ea-192c-4ec9-8637-a493eb1982b4"}
+2026-11-17T14:01:31.006Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-7433e9ea-192c-4ec9-8637-a493eb1982b4", "deployment_id": "7433e9ea-192c-4ec9-8637-a493eb1982b4"}
+2026-11-17T14:01:31.011Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-7433e9ea-192c-4ec9-8637-a493eb1982b4", "deployment_id": "7433e9ea-192c-4ec9-8637-a493eb1982b4"}
+2026-11-17T14:01:34.422Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-7433e9ea-192c-4ec9-8637-a493eb1982b4", "deployment_id": "7433e9ea-192c-4ec9-8637-a493eb1982b4"}
+2026-11-17T14:01:34.422Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-7433e9ea-192c-4ec9-8637-a493eb1982b4", "deployment_id": "7433e9ea-192c-4ec9-8637-a493eb1982b4", "framework": "go", "package_manager": "npm"}
+2026-11-17T14:01:34.422Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-7433e9ea-192c-4ec9-8637-a493eb1982b4", "deployment_id": "7433e9ea-192c-4ec9-8637-a493eb1982b4", "template": "dynamic/Dockerfile.go.tmpl"}
+2026-11-17T14:01:34.436Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-7433e9ea-192c-4ec9-8637-a493eb1982b4", "deployment_id": "7433e9ea-192c-4ec9-8637-a493eb1982b4", "image_tag": "deploy-7433e9ea-192c-4ec9-8637-a493eb1982b4:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/golang:1.26.0-alpine AS builder
+Trying to pull docker.io/library/golang:1.26.0-alpine...
+Getting image source signatures
+Copying blob sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1
+Copying blob sha256:589002ba0eaed121a1dbf42f6648f29e5be55d5c8a6ee0f8eaa0285cc21ac153
+Copying blob sha256:54e3cee16f61a04c1478b0bea063f6591a583f68c5ec96ad17bd6022fc6cf49e
+Copying blob sha256:8ede2856567d2593950de6f98f5d2763ae304caeb0ff577a1318c065a8fd650c
+Copying blob sha256:620ce275e86ec364135f603517679f51437c2da390313e710d0f78203dbae68a
+Copying config sha256:8c55aae65bdd289086c5de6408976ec89465e0d90d2758fca0995369cac7e732
+Writing manifest to image destination
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: ENV CGO_ENABLED=0 GOOS=linux GOTOOLCHAIN=local
+[1/2] STEP 4/7: COPY go.mod go.sum* ./
+[1/2] STEP 5/7: RUN go mod download
+[1/2] STEP 6/7: COPY . .
+[1/2] STEP 7/7: RUN ["go","build","-o","/app/app","."]
+[2/2] STEP 1/7: FROM docker.io/library/alpine:3.20
+[2/2] STEP 2/7: WORKDIR /app
+[2/2] STEP 3/7: RUN addgroup -S app && adduser -S app -G app
+[2/2] STEP 4/7: COPY --from=builder /app/app /app/app
+[2/2] STEP 5/7: USER app
+[2/2] STEP 6/7: EXPOSE 8080
+[2/2] STEP 7/7: CMD ["/app/app"]
+[2/2] COMMIT deploy-7433e9ea-192c-4ec9-8637-a493eb1982b4:latest
+Getting image source signatures
+Copying blob sha256:08bc4e534116aa76b16015484b82eac51f9a593416feae9296c8a2d4bb7aa4a2
+Copying blob sha256:64c9ea697db12b880e06c2879e776acbf909a38b1b393f60e71d56d351e2bfe8
+Copying config sha256:dea1fa3b61e0226fcb80f72b3f41d7b1c0732dba9719aaba09c23f681381278b
+Writing manifest to image destination
+--> dea1fa3b61e0
+Successfully tagged localhost/deploy-7433e9ea-192c-4ec9-8637-a493eb1982b4:latest
+dea1fa3b61e0226fcb80f72b3f41d7b1c0732dba9719aaba09c23f681381278b
+2026-11-17T14:03:27.837Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-7433e9ea-192c-4ec9-8637-a493eb1982b4", "deployment_id": "7433e9ea-192c-4ec9-8637-a493eb1982b4", "tar_path": "/tmp/zerodevops-build/7433e9ea-192c-4ec9-8637-a493eb1982b4/dynamic-routing/7433e9ea-192c-4ec9-8637-a493eb1982b4.tar"}
+Getting image source signatures
+Copying blob sha256:08bc4e534116aa76b16015484b82eac51f9a593416feae9296c8a2d4bb7aa4a2
+Copying blob sha256:64c9ea697db12b880e06c2879e776acbf909a38b1b393f60e71d56d351e2bfe8
+Copying config sha256:dea1fa3b61e0226fcb80f72b3f41d7b1c0732dba9719aaba09c23f681381278b
+Writing manifest to image destination
+2026-11-17T14:03:28.035Z	INFO	deployments/deployments.go:572	dynamic build finished (stub finalize, no upload yet)	{"request_id": "zdfix-7433e9ea-192c-4ec9-8637-a493eb1982b4", "deployment_id": "7433e9ea-192c-4ec9-8637-a493eb1982b4"}
+2026-11-17T14:03:28.076Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-7433e9ea-192c-4ec9-8637-a493eb1982b4", "deployment_id": "7433e9ea-192c-4ec9-8637-a493eb1982b4"}

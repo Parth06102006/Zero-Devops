@@ -4,11 +4,21 @@ Probe and worker routines adapted from the original campaign harness, whose
 baseline evidence is never modified. Eligibility is historical; reference
 builds are not rerun. All services and storage belong to this replay.
 """
-import argparse, base64, datetime, hashlib, json, os, pathlib, re, shlex, shutil, statistics, subprocess, sys, time, urllib.request, uuid
+import argparse, base64, datetime, hashlib, json, os, pathlib, re, shlex, shutil, statistics, subprocess, sys, time, urllib.parse, urllib.request, uuid
 REPO=pathlib.Path(__file__).resolve().parents[2]
 ROOT=REPO/'docs/worker-build-fixes-2026-11-16'
 RESULTS=ROOT/'results'
-WORKER='zdfix-worker'; DB='zdfix-db'; REF='zdfix-unused-reference'
+LANE=int(os.environ.get('ZDFIX_LANE','1'))
+if LANE not in [1,2,3,4]:raise RuntimeError('invalid isolated worker lane')
+PREFIX='zdfix' if LANE==1 else 'zdfix'+str(LANE)
+WORKER=PREFIX+'-worker'; MOCK=PREFIX+'-mock'; DB='zdfix-db'; RABBIT='zdfix-rabbit'
+VHOST='/' if LANE==1 else 'lane'+str(LANE)
+REF='zdfix-unused-reference'
+
+def write_json(path,data):
+ temp=path.with_name(path.name+'.'+str(os.getpid())+'.tmp')
+ temp.write_text(json.dumps(data,indent=2))
+ temp.replace(path)
 def cmd(argv,timeout=30,check=False):
  p=subprocess.run(argv,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=timeout)
  if check and p.returncode:raise RuntimeError('command failed '+repr(argv)+': '+p.stdout[-2000:])
@@ -45,7 +55,8 @@ def execute(container,args,log,timeout=1200):
  _,final_cgroup=dex(container,['sh','-c','head -1 /sys/fs/cgroup/memory.peak; head -15 /sys/fs/cgroup/cpu.stat; head -10 /sys/fs/cgroup/memory.events'],10)
  return {'seconds':round(time.monotonic()-start,3),'exit_code':rc,'timed_out':timed,'resource_samples':samples,'cgroup_before':baseline,'cgroup_after':final_cgroup}
 def api(path,data=None):
- port=cmd(['docker','port','zdfix-rabbit','15672/tcp'],check=True)[1].rsplit(':',1)[1]
+ port=cmd(['docker','port',RABBIT,'15672/tcp'],check=True)[1].rsplit(':',1)[1]
+ path=path.replace('%2F',urllib.parse.quote(VHOST,safe=''))
  headers={'Authorization':'Basic '+base64.b64encode(b'e2e:e2e').decode(),'Content-Type':'application/json'}
  req=urllib.request.Request('http://127.0.0.1:'+port+path,data=None if data is None else json.dumps(data).encode(),headers=headers,method='GET' if data is None else 'POST')
  with urllib.request.urlopen(req,timeout=20) as r:return json.load(r)
@@ -56,7 +67,13 @@ def source(c):return ROOT/'sources'/c['repo'].replace('/','--')
 def app_path(c):return source(c)/c['path']
 def source_metrics(c):
  p=app_path(c);files=[f for f in p.rglob('*') if f.is_file()];return {'app_source_bytes':sum(f.stat().st_size for f in files),'app_source_files':len(files),'repo_source_bytes':sum(f.stat().st_size for f in source(c).rglob('*') if f.is_file())}
+def probe_port_closed(container,port):
+ script='import socket; s=socket.socket(); s.settimeout(0.3); print("open" if s.connect_ex(("127.0.0.1",'+str(int(port))+'))==0 else "closed"); s.close()'
+ rc,out=dex(container,['python3','-c',script],10)
+ if rc or out not in ['open','closed']:raise RuntimeError('could not verify runtime probe port: '+out)
+ return out=='closed'
 def probe_runtime(container,name,start_command,c,label):
+ if not probe_port_closed(container,c['port']):raise RuntimeError('runtime probe port already in use before startup; refuse a potentially stale HTTP result')
  log=RESULTS/(c['name']+'.'+label+'-runtime.log')
  command="set -m; "+start_command+" & p=$!; trap 'kill -- -\"$p\" 2>/dev/null || kill \"$p\" 2>/dev/null || true; wait \"$p\" 2>/dev/null || true' EXIT TERM INT; while kill -0 \"$p\" 2>/dev/null; do sleep 1; done; wait \"$p\""
  began=time.monotonic()
@@ -89,7 +106,12 @@ def probe_runtime(container,name,start_command,c,label):
   dex(container,['python3','-c',killer],15)
   try:p.wait(timeout=12)
   except subprocess.TimeoutExpired:p.wait(timeout=95)
- return {'ready':ready,'startup_seconds':round(startup,3),'probe_url':'http://127.0.0.1:'+str(c['port'])+c['probe'],'first_response':last,'response_sample':body,'warm_http':http,'note':'Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded'}
+ closed=False
+ for _ in range(10):
+  closed=probe_port_closed(container,c['port'])
+  if closed:break
+  time.sleep(0.2)
+ return {'ready':ready,'port_closed_before_start':True,'port_closed_after_stop':closed,'startup_seconds':round(startup,3),'probe_url':'http://127.0.0.1:'+str(c['port'])+c['probe'],'first_response':last,'response_sample':body,'warm_http':http,'note':'Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded'}
 def worker(c,record):
  ident=str(uuid.uuid4());event=str(uuid.uuid4());corr='zdfix-'+ident
  req={'version':1,'event_id':event,'deployment_id':ident,'project_id':'isolated-zdfix','installation_id':1,'repository_id':1,'clone_url':'https://github.com/'+c['repo']+'.git','commit_sha':c['sha'],'requested_ref':'HEAD','trigger':'manual','generation':1,'retry_count':0,'correlation_id':corr,'configuration':{'executable':{'go':'go','rust':'cargo','python':'python','java':'mvn','php':'composer','ruby':'bundle','dotnet':'dotnet'}.get(c['kind'],'npm'),'args':['run','build'] if c['kind']=='node' else [],'working_dir':c['path'],'scanner_policy_version':'v1'}}
@@ -106,9 +128,9 @@ def worker(c,record):
   time.sleep(2)
  if state not in ['success','canceled']:raise RuntimeError('worker did not terminate within deadline; pause campaign')
  _,logs=cmd(['docker','logs','--since',since,WORKER],60)
- _,mock=cmd(['docker','logs','--since',since,'zdfix-mock'],60)
+ _,mock=cmd(['docker','logs','--since',since,MOCK],60)
  (RESULTS/(c['name']+'.worker.log')).write_text(logs+'\n');(RESULTS/(c['name']+'.mock.log')).write_text(mock+'\n')
- wr={'commit_sha':c['sha'],'deployment_id':ident,'state':state,'database_row':row,'end_to_end_seconds':round(time.time()-began,3),'resource_samples':samples,'configuration_sent':req['configuration']}
+ wr={'lane':LANE,'worker_container':WORKER,'broker_vhost':VHOST,'commit_sha':c['sha'],'deployment_id':ident,'state':state,'database_row':row,'end_to_end_seconds':round(time.time()-began,3),'resource_samples':samples,'configuration_sent':req['configuration']}
  match=re.search(r'"framework": "([^"]+)"',logs);wr['framework']=match[1] if match else None
  phases=[]
  for line in logs.splitlines():
@@ -179,19 +201,26 @@ def replay(baseline, names):
    raise RuntimeError('incomplete evidence exists for '+name+'; inspect before resuming')
   print('START',name,flush=True)
   record={'case':c,'reference_qualified':True,'reference_eligibility':'preserved baseline; reference build/runtime not rerun','baseline_classification':original['classification'],'baseline_worker':original.get('worker',{}),'started_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'complete':False}
+  if (ROOT/'latest-resume.json').exists():
+   resumed=json.loads((ROOT/'latest-resume.json').read_text())
+   reconciliation=ROOT/resumed['directory']/'reconciliation.json'
+   details=json.loads(reconciliation.read_text())
+   if name in details.get('interrupted_cases',{}):
+    record['prior_user_interrupted_attempt']=details['interrupted_cases'][name]
+    record['resume_reconciliation']=str(reconciliation.relative_to(ROOT))
   try:
    worker(c,record)
    record['classification']=classify(record)
    record['complete']=True
   except Exception as exc:
    record['harness_error']=repr(exc)
-   path.write_text(json.dumps(record,indent=2))
+   write_json(path,record)
    raise
-  path.write_text(json.dumps(record,indent=2))
+  write_json(path,record)
   print('RESULT',name,record['classification'],flush=True)
   records=[json.load(open(p)) for p in RESULTS.glob('*.json') if not p.name.endswith('.worker-image.json')]
   finished=[r for r in records if r.get('complete')]
-  (ROOT/'progress.json').write_text(json.dumps({'completed':len(finished),'denominator':57,'image_builds':sum(r['worker'].get('image_built',False) for r in finished),'runtime_passes':sum(r['worker'].get('runtime',{}).get('ready',False) for r in finished),'outcomes':{k:sum(r['classification']==k for r in finished) for k in sorted({r['classification'] for r in finished})}},indent=2))
+  write_json(ROOT/'progress.json',{'completed':len(finished),'denominator':57,'image_builds':sum(r['worker'].get('image_built',False) for r in finished),'runtime_passes':sum(r['worker'].get('runtime',{}).get('ready',False) for r in finished),'outcomes':{k:sum(r['classification']==k for r in finished) for k in sorted({r['classification'] for r in finished})}})
 
 if __name__=='__main__':
  parser=argparse.ArgumentParser()

@@ -1,0 +1,37 @@
+START actix-state
+START actix-state
+RESULT actix-state build-and-runtime-pass
+START actix-nested-routing
+RESULT actix-nested-routing build-and-runtime-pass
+START actix-error-handling
+RESULT actix-error-handling build-and-runtime-pass
+START astro-framework-vue
+RESULT astro-framework-vue build-and-runtime-pass
+START astro-portfolio
+RESULT astro-portfolio build-and-runtime-pass
+START fiber-sse
+RESULT fiber-sse build-and-runtime-pass
+START fiber-stream-request-body
+RESULT fiber-stream-request-body build-and-runtime-pass
+START fiber-viper-config
+RESULT fiber-viper-config build-and-runtime-pass
+START next-with-absolute-imports
+RESULT next-with-absolute-imports other-build-failure
+START fiber-form-data
+RESULT fiber-form-data build-and-runtime-pass
+START astro-with-tailwindcss
+RESULT astro-with-tailwindcss build-and-runtime-pass
+START vue-docs
+RESULT vue-docs static-output-path/misleading-ssr
+START gs-serving-web-content
+RESULT gs-serving-web-content build-and-runtime-pass
+START laravel-skeleton
+RESULT laravel-skeleton static-output-path/misleading-ssr
+START dotnet-insights-web
+RESULT dotnet-insights-web other-build-failure
+START sinatra-simple
+RESULT sinatra-simple detection-unsupported
+START slim-skeleton
+RESULT slim-skeleton build-and-runtime-pass
+START fastapi-first-steps
+RESULT fastapi-first-steps detection-unsupported

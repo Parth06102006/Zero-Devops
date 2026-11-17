@@ -1,0 +1,99 @@
+2026-11-16T20:21:17.166Z	ERROR	worker/worker.go:109	deployment job failed	{"request_id": "zdfix-e2d8030a-39c2-48d5-b767-79a023910bc0", "deployment_id": "e2d8030a-39c2-48d5-b767-79a023910bc0", "error": "build failed: exit status 1"}
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:109
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T20:21:18.693Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-ae513f8a-497f-46ae-b7e0-6cefd8efcbd8", "delivery_tag": 16}
+2026-11-16T20:21:18.694Z	INFO	deployments/deployments.go:443	inserting worker deployment row	{"request_id": "zdfix-ae513f8a-497f-46ae-b7e0-6cefd8efcbd8", "deployment_id": "ae513f8a-497f-46ae-b7e0-6cefd8efcbd8"}
+2026-11-16T20:21:18.696Z	INFO	deployments/deployments.go:450	marking as building	{"request_id": "zdfix-ae513f8a-497f-46ae-b7e0-6cefd8efcbd8", "deployment_id": "ae513f8a-497f-46ae-b7e0-6cefd8efcbd8"}
+2026-11-16T20:21:18.698Z	INFO	deployments/deployments.go:455	publishing building status	{"request_id": "zdfix-ae513f8a-497f-46ae-b7e0-6cefd8efcbd8", "deployment_id": "ae513f8a-497f-46ae-b7e0-6cefd8efcbd8"}
+2026-11-16T20:21:27.716Z	INFO	deployments/deployments.go:460	detecting framework	{"request_id": "zdfix-ae513f8a-497f-46ae-b7e0-6cefd8efcbd8", "deployment_id": "ae513f8a-497f-46ae-b7e0-6cefd8efcbd8"}
+2026-11-16T20:21:27.716Z	INFO	deployments/deployments.go:466	framework detected	{"request_id": "zdfix-ae513f8a-497f-46ae-b7e0-6cefd8efcbd8", "deployment_id": "ae513f8a-497f-46ae-b7e0-6cefd8efcbd8", "framework": "astro", "package_manager": "npm"}
+2026-11-16T20:21:27.716Z	INFO	deployments/deployments.go:474	writing Dockerfile from template	{"request_id": "zdfix-ae513f8a-497f-46ae-b7e0-6cefd8efcbd8", "deployment_id": "ae513f8a-497f-46ae-b7e0-6cefd8efcbd8", "template": "static/Dockerfile.astro.tmpl"}
+2026-11-16T20:21:27.742Z	WARN	deployments/deployments.go:618	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-ae513f8a-497f-46ae-b7e0-6cefd8efcbd8", "deployment_id": "ae513f8a-497f-46ae-b7e0-6cefd8efcbd8"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:618
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T20:21:27.742Z	INFO	deployments/deployments.go:485	building image with buildah	{"request_id": "zdfix-ae513f8a-497f-46ae-b7e0-6cefd8efcbd8", "deployment_id": "ae513f8a-497f-46ae-b7e0-6cefd8efcbd8", "image_tag": "deploy-ae513f8a-497f-46ae-b7e0-6cefd8efcbd8:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/node:20-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN npm install --ignore-scripts --package-lock=false
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@example/basics@0.0.1',
+npm warn EBADENGINE   required: { node: '>=22.23.4' },
+npm warn EBADENGINE   current: { node: 'v20.20.2', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'astro@7.4.12',
+npm warn EBADENGINE   required: { npm: '>=9.6.5', node: '>=22.23.4', pnpm: '>=7.1.0' },
+npm warn EBADENGINE   current: { node: 'v20.20.2', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@astrojs/compiler-rs@0.5.3',
+npm warn EBADENGINE   required: { node: '>=22.12.0' },
+npm warn EBADENGINE   current: { node: 'v20.20.2', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@astrojs/telemetry@3.4.2',
+npm warn EBADENGINE   required: { node: '>=22.23.4' },
+npm warn EBADENGINE   current: { node: 'v20.20.2', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'cookie@2.0.2',
+npm warn EBADENGINE   required: { node: '>=22' },
+npm warn EBADENGINE   current: { node: 'v20.20.2', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'p-queue@10.0.0',
+npm warn EBADENGINE   required: { node: '>=22' },
+npm warn EBADENGINE   current: { node: 'v20.20.2', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@astrojs/prism@4.1.2',
+npm warn EBADENGINE   required: { node: '>=22.23.4' },
+npm warn EBADENGINE   current: { node: 'v20.20.2', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'undici@8.12.4',
+npm warn EBADENGINE   required: { node: '>=22.19.0' },
+npm warn EBADENGINE   current: { node: 'v20.20.2', npm: '10.8.2' }
+npm warn EBADENGINE }
+
+added 192 packages, and audited 193 packages in 52s
+
+70 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN npm run build
+
+> @example/basics@0.0.1 build
+> astro build
+
+Node.js v20.20.2 is not supported by Astro!
+Please upgrade Node.js to a supported version: ">=22.23.4"
+
+subprocess exited with status 1
+subprocess exited with status 1
+Error: building at STEP "RUN npm run build": exit status 1
+2026-11-16T20:22:22.199Z	ERROR	worker/worker.go:109	deployment job failed	{"request_id": "zdfix-ae513f8a-497f-46ae-b7e0-6cefd8efcbd8", "deployment_id": "ae513f8a-497f-46ae-b7e0-6cefd8efcbd8", "error": "build failed: exit status 1"}
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:109
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290

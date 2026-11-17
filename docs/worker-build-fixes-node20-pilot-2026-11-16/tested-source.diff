@@ -1,0 +1,42 @@
+diff --git a/scripts/worker-build-campaign/environment.py b/scripts/worker-build-campaign/environment.py
+index e99fa62..7696da2 100644
+--- a/scripts/worker-build-campaign/environment.py
++++ b/scripts/worker-build-campaign/environment.py
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env python3
+ """Provision/stop ONLY zdfix-* services. No production services or publication."""
+-import argparse, datetime, hashlib, json, os, pathlib, subprocess, time
++import argparse, datetime, hashlib, json, os, pathlib, shutil, subprocess, time
+ 
+ REPO = pathlib.Path(__file__).resolve().parents[2]
+ OUT = REPO / 'docs/worker-build-fixes-2026-11-16'
+@@ -72,9 +72,10 @@ def setup():
+         'ALLOW_UNLOCKED_NPM_INSTALL':'true',
+     }
+     envargs=[item for k,v in env.items() for item in ['-e',k+'='+v]]
++    shutil.copy2('/tmp/zd-fix-builds-worker', TEMP/'worker-engine')
+     docker(*common, '--name','zdfix-worker','--privileged','--cpus','1.5','--memory','2g','--pids-limit','512',
+            '-v','zdfix-worker-storage:/var/lib/containers','-v',str(TEMP)+':/e2e:ro',
+-           '-v','/tmp/zd-fix-builds-worker:/app/worker-engine:ro',
++           '--entrypoint','/e2e/worker-engine',
+            '-v',str(REPO/'worker-server/templates')+':/app/templates:ro', *envargs, IMAGE)
+     write_metadata(env)
+     print('isolated services ready',flush=True)
+@@ -95,8 +96,17 @@ def recover_startup():
+     label=docker('inspect','zdfix-worker','--format','{{index .Config.Labels "zero-devops-build-fixes"}}')
+     if label!='20261116':raise RuntimeError('worker is not owned by this run')
+     wait_for(['docker','exec','zdfix-rabbit','rabbitmq-diagnostics','-q','check_port_connectivity'])
+-    docker('start','zdfix-worker')
+     env=dict(item.split('=',1) for item in json.loads(docker('inspect','zdfix-worker','--format','{{json .Config.Env}}')))
++    if docker('inspect','zdfix-worker','--format','{{.State.Running}}')=='true':raise RuntimeError('worker is already running; inspect before replacing')
++    # Docker Desktop retained the old inode for the initial single-file bind
++    # after go build replaced it. Mount the directory and execute its copy.
++    docker('rm','zdfix-worker')
++    shutil.copy2('/tmp/zd-fix-builds-worker',TEMP/'worker-engine')
++    envargs=[item for k,v in env.items() for item in ['-e',k+'='+v]]
++    docker('run','-d','--label',LABEL,'--network','zdfix-network','--name','zdfix-worker',
++           '--privileged','--cpus','1.5','--memory','2g','--pids-limit','512',
++           '-v','zdfix-worker-storage:/var/lib/containers','-v',str(TEMP)+':/e2e:ro',
++           '--entrypoint','/e2e/worker-engine','-v',str(REPO/'worker-server/templates')+':/app/templates:ro',*envargs,IMAGE)
+     write_metadata(env)
+     print('startup recovered after RabbitMQ listener readiness',flush=True)

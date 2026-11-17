@@ -1,0 +1,284 @@
+{
+  "case": {
+    "name": "vite-lit-ts",
+    "repo": "vitejs/vite",
+    "sha": "9a8d1a98922c5e445e8a618b8c27f84c63b9fbff",
+    "path": "packages/create-vite/template-lit-ts",
+    "stack": "Vite/lit-ts",
+    "kind": "node",
+    "reference_build": "npm install --ignore-scripts && npm run build",
+    "reference_start": "npm run preview -- --host 0.0.0.0 --port 4173",
+    "port": 4173,
+    "probe": "/",
+    "static_output": "dist",
+    "context": "packages/create-vite/template-lit-ts",
+    "env": {}
+  },
+  "reference_qualified": true,
+  "reference_eligibility": "preserved baseline; reference build/runtime not rerun",
+  "baseline_classification": "missing-lockfile/install-policy",
+  "baseline_worker": {
+    "deployment_id": "9c1d1db1-a368-463b-b108-c0e152ed2068",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: build failed: exit status 1|",
+    "end_to_end_seconds": 8.515,
+    "resource_samples": [
+      {
+        "seconds": 0.45,
+        "stats": "1.49%|83.25MiB / 2GiB|40",
+        "cgroup": "cpu.stat\nusage_usec 126814143\nuser_usec 67569522\nsystem_usec 59244620\nnice_usec 0\nnr_periods 2493\nnr_throttled 315\nthrottled_usec 38846649\nnr_bursts 0\nburst_usec 0\nmemory.peak\n897433600\nmemory.current\n114343936"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "packages/create-vite/template-lit-ts",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "vite",
+    "phase_events": [
+      {
+        "at": "2026-11-16T13:47:29.457Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-16T13:47:29.458Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-16T13:47:29.472Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-16T13:47:29.476Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-16T13:47:35.815Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-16T13:47:35.815Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-16T13:47:35.815Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-16T13:47:35.815Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-16T13:47:37.644Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"9c1d1db1-a368-463b-b108-c0e152ed2068\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 148,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"9c1d1db1-a368-463b-b108-c0e152ed2068\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: build failed: exit status 1\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "clone_and_directory_resolution_seconds": 6.339,
+    "failed_build_seconds": 1.829
+  },
+  "started_at": "2026-11-16T20:19:17.788694+00:00",
+  "complete": true,
+  "worker": {
+    "commit_sha": "9a8d1a98922c5e445e8a618b8c27f84c63b9fbff",
+    "deployment_id": "b63b310d-9729-4f66-a095-fefdbc24e03a",
+    "state": "success",
+    "database_row": "success||s3://testbucket/images/b63b310d-9729-4f66-a095-fefdbc24e03a.tar",
+    "end_to_end_seconds": 41.264,
+    "resource_samples": [
+      {
+        "seconds": 0.32,
+        "stats": "0.86%|244.3MiB / 2GiB|82",
+        "cgroup": "cpu.stat\nusage_usec 520749167\nuser_usec 295317664\nsystem_usec 225431503\nnice_usec 0\nnr_periods 6437\nnr_throttled 1284\nthrottled_usec 92460602\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1225216000\nmemory.current\n260194304"
+      },
+      {
+        "seconds": 22.14,
+        "stats": "75.14%|438.2MiB / 2GiB|118",
+        "cgroup": "cpu.stat\nusage_usec 539896882\nuser_usec 307080370\nsystem_usec 232816512\nnice_usec 0\nnr_periods 6653\nnr_throttled 1339\nthrottled_usec 96324943\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1225216000\nmemory.current\n971345920"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "packages/create-vite/template-lit-ts",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "vite",
+    "phase_events": [
+      {
+        "at": "2026-11-16T20:19:17.854Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-16T20:19:17.855Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-16T20:19:17.857Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-16T20:19:17.859Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-16T20:19:23.354Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-16T20:19:23.354Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-16T20:19:23.354Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-16T20:19:23.361Z",
+        "event": "unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled"
+      },
+      {
+        "at": "2026-11-16T20:19:23.361Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-16T20:19:55.761Z",
+        "event": "saving image tar"
+      },
+      {
+        "at": "2026-11-16T20:19:56.550Z",
+        "event": "uploading image tar"
+      },
+      {
+        "at": "2026-11-16T20:19:56.550Z",
+        "event": "opening file for upload"
+      },
+      {
+        "at": "2026-11-16T20:19:56.550Z",
+        "event": "uploading to S3"
+      },
+      {
+        "at": "2026-11-16T20:19:56.888Z",
+        "event": "upload complete"
+      },
+      {
+        "at": "2026-11-16T20:19:56.897Z",
+        "event": "marking as finished"
+      },
+      {
+        "at": "2026-11-16T20:19:56.974Z",
+        "event": "deployment job completed"
+      }
+    ],
+    "upload_bytes": 149917743,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"b63b310d-9729-4f66-a095-fefdbc24e03a\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 154,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"b63b310d-9729-4f66-a095-fefdbc24e03a\",\"status\":\"success\",\"output_url\":\"s3://testbucket/images/b63b310d-9729-4f66-a095-fefdbc24e03a.tar\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": true,
+    "image_layer_bytes": 149890048,
+    "image_config_bytes": 7384,
+    "runtime": {
+      "ready": true,
+      "startup_seconds": 2.409,
+      "probe_url": "http://127.0.0.1:4173/",
+      "first_response": "200|0.036898|text/html; charset=utf-8",
+      "response_sample": "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <link rel=\"icon\" type=\"image/svg+xml\" href=\"/favicon.svg\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>Vite + Lit + TS</title>",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.00306
+        },
+        {
+          "status": 200,
+          "seconds": 0.003067
+        },
+        {
+          "status": 200,
+          "seconds": 0.00257
+        },
+        {
+          "status": 200,
+          "seconds": 0.005612
+        },
+        {
+          "status": 200,
+          "seconds": 0.003612
+        },
+        {
+          "status": 200,
+          "seconds": 0.003374
+        },
+        {
+          "status": 200,
+          "seconds": 0.00294
+        },
+        {
+          "status": 200,
+          "seconds": 0.003387
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    }
+  },
+  "classification": "build-and-runtime-pass"
+}

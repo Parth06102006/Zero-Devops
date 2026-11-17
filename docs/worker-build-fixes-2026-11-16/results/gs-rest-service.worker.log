@@ -1,0 +1,87 @@
+2026-11-17T14:10:00.238Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-1db5fb94-f071-4725-8c7e-fae2e465d01d", "delivery_tag": 16}
+2026-11-17T14:10:00.241Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-1db5fb94-f071-4725-8c7e-fae2e465d01d", "deployment_id": "1db5fb94-f071-4725-8c7e-fae2e465d01d"}
+2026-11-17T14:10:00.244Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-1db5fb94-f071-4725-8c7e-fae2e465d01d", "deployment_id": "1db5fb94-f071-4725-8c7e-fae2e465d01d"}
+2026-11-17T14:10:00.246Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-1db5fb94-f071-4725-8c7e-fae2e465d01d", "deployment_id": "1db5fb94-f071-4725-8c7e-fae2e465d01d"}
+2026-11-17T14:10:04.654Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-1db5fb94-f071-4725-8c7e-fae2e465d01d", "deployment_id": "1db5fb94-f071-4725-8c7e-fae2e465d01d"}
+2026-11-17T14:10:04.654Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-1db5fb94-f071-4725-8c7e-fae2e465d01d", "deployment_id": "1db5fb94-f071-4725-8c7e-fae2e465d01d", "framework": "java-maven", "package_manager": "npm"}
+2026-11-17T14:10:04.654Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-1db5fb94-f071-4725-8c7e-fae2e465d01d", "deployment_id": "1db5fb94-f071-4725-8c7e-fae2e465d01d", "template": "dynamic/Dockerfile.java.tmpl"}
+2026-11-17T14:10:04.669Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-1db5fb94-f071-4725-8c7e-fae2e465d01d", "deployment_id": "1db5fb94-f071-4725-8c7e-fae2e465d01d", "image_tag": "deploy-1db5fb94-f071-4725-8c7e-fae2e465d01d:latest"}
+[1/2] STEP 1/4: FROM docker.io/library/eclipse-temurin:21-jdk-alpine AS builder
+Trying to pull docker.io/library/eclipse-temurin:21-jdk-alpine...
+Getting image source signatures
+Copying blob sha256:3ba8dd297de437cbe53be6f3a5f7672a27d395ede86af7228a2c2dae0d4b3a97
+Copying blob sha256:881fc932939efef04ca120ad44bbd2c0917851eb247aa4995428afb1e80ede17
+Copying blob sha256:51708f96cbd718f1f575c791b74dcc853920cce80b5df73a45d493d942e3c1e1
+Copying blob sha256:7c544b56550d0dd78ef07c133f66808efcee816fc25e79733d1f3c903d04618d
+Copying blob sha256:7c36cbce71b14bcd4166587886630abcc540e354e67a19519ae83a2606006916
+Copying config sha256:2de376709464449dd04066c8c050eea198a07d6637f22566a8caa62253877a28
+Writing manifest to image destination
+[1/2] STEP 2/4: WORKDIR /app
+[1/2] STEP 3/4: COPY . .
+[1/2] STEP 4/4: RUN if [ -f pom.xml ]; then       apk add --no-cache maven &&       mvn -q -DskipTests package &&       find target -maxdepth 1 -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' -exec cp {} /app/app.jar \; ;     elif [ -f gradlew ]; then       chmod +x gradlew && ./gradlew build -x test --no-daemon &&       find build/libs -maxdepth 1 -name '*.jar' ! -name '*-plain.jar' -exec cp {} /app/app.jar \; ;     else       apk add --no-cache gradle &&       gradle build -x test --no-daemon &&       find build/libs -maxdepth 1 -name '*.jar' ! -name '*-plain.jar' -exec cp {} /app/app.jar \; ;     fi
+( 1/21) Installing java-common (1.0-r2)
+( 2/21) Installing java-cacerts (1.1-r0)
+( 3/21) Installing openjdk25-jre-headless (25.0.5.0.3_p1-r0)
+( 4/21) Installing libxau (1.0.12-r0)
+( 5/21) Installing libmd (1.2.0-r0)
+( 6/21) Installing libbsd (0.12.2-r0)
+( 7/21) Installing libxdmcp (1.1.5-r1)
+( 8/21) Installing libxcb (1.17.0-r2)
+( 9/21) Installing libx11 (1.8.14-r0)
+(10/21) Installing libxext (1.3.7-r0)
+(11/21) Installing libxi (1.8.4-r0)
+(12/21) Installing libxrender (0.9.13-r0)
+(13/21) Installing libxtst (1.2.6-r0)
+(14/21) Installing alsa-lib (1.2.15.3-r0)
+(15/21) Installing giflib (5.2.2-r2)
+(16/21) Installing libjpeg-turbo (3.1.3-r0)
+(17/21) Installing lcms2 (2.19-r0)
+(18/21) Installing openjdk25-jre (25.0.5.0.3_p1-r0)
+(19/21) Installing openjdk25-jmods (25.0.5.0.3_p1-r0)
+(20/21) Installing openjdk25-jdk (25.0.5.0.3_p1-r0)
+(21/21) Installing maven (3.9.16-r0)
+Executing busybox-1.37.0-r31.trigger
+Executing ca-certificates-20261020-r0.trigger
+Executing java-common-1.0-r2.trigger
+OK: 397.1 MiB in 98 packages
+[2/2] STEP 1/7: FROM docker.io/library/eclipse-temurin:21-jre-alpine
+Trying to pull docker.io/library/eclipse-temurin:21-jre-alpine...
+Getting image source signatures
+Copying blob sha256:e84ee4d88719efe0c0f5723556c11c87be2c0094c89dce0bb75f768f6dd74605
+Copying blob sha256:881fc932939efef04ca120ad44bbd2c0917851eb247aa4995428afb1e80ede17
+Copying blob sha256:2d99ac440d39bbade5ae9f2dd56b69d8234c4e540282df61003829295761e4fe
+Copying blob sha256:6ac8bacad3044dd68d9bbbc26ed22c6674c4149fc01ef8d074f009f484341d4f
+Copying blob sha256:c85a6771097082b2df91a6477c3314ec25a91b894210dd741baae08d3e41b4b3
+Copying config sha256:fe627b2563ceeae30cd349fd41fffa2379f79a31581cb8e5a599a29be4f0e598
+Writing manifest to image destination
+[2/2] STEP 2/7: WORKDIR /app
+[2/2] STEP 3/7: RUN addgroup -S app && adduser -S app -G app
+[2/2] STEP 4/7: COPY --from=builder /app/app.jar /app/app.jar
+[2/2] STEP 5/7: USER app
+[2/2] STEP 6/7: EXPOSE 8080
+[2/2] STEP 7/7: CMD ["java", "-jar", "/app/app.jar"]
+[2/2] COMMIT deploy-1db5fb94-f071-4725-8c7e-fae2e465d01d:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:84acb449159b20ac628a10d0ad6dea5a5b4d640ad6a692ab7c8f78f86a0d5046
+Copying blob sha256:4ef03777e368e6a66e2a59c99a455b1a0b51edd957531cddd32d5edf04cd9e44
+Copying blob sha256:f5e61faefc0df1544e4e1a1532c670293d25a9a4b4a92c7f4f814c2c307eadd7
+Copying blob sha256:219987be08917e94711722bcd85ffebf2d6f506eb147e45f8b24865a4414a9e2
+Copying blob sha256:0dc621a4f75105072d64bad9f5e5fd83ea972147d449f114a7a3ac31893dc13e
+Copying config sha256:e6ab2fe79b0299fbe3b3c6fde6c6faf9152c1c1e4c71a49755454e9ebeb5607c
+Writing manifest to image destination
+--> e6ab2fe79b02
+Successfully tagged localhost/deploy-1db5fb94-f071-4725-8c7e-fae2e465d01d:latest
+e6ab2fe79b0299fbe3b3c6fde6c6faf9152c1c1e4c71a49755454e9ebeb5607c
+2026-11-17T14:14:19.033Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-1db5fb94-f071-4725-8c7e-fae2e465d01d", "deployment_id": "1db5fb94-f071-4725-8c7e-fae2e465d01d", "tar_path": "/tmp/zerodevops-build/1db5fb94-f071-4725-8c7e-fae2e465d01d/complete/1db5fb94-f071-4725-8c7e-fae2e465d01d.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:84acb449159b20ac628a10d0ad6dea5a5b4d640ad6a692ab7c8f78f86a0d5046
+Copying blob sha256:4ef03777e368e6a66e2a59c99a455b1a0b51edd957531cddd32d5edf04cd9e44
+Copying blob sha256:f5e61faefc0df1544e4e1a1532c670293d25a9a4b4a92c7f4f814c2c307eadd7
+Copying blob sha256:219987be08917e94711722bcd85ffebf2d6f506eb147e45f8b24865a4414a9e2
+Copying blob sha256:0dc621a4f75105072d64bad9f5e5fd83ea972147d449f114a7a3ac31893dc13e
+Copying config sha256:e6ab2fe79b0299fbe3b3c6fde6c6faf9152c1c1e4c71a49755454e9ebeb5607c
+Writing manifest to image destination
+2026-11-17T14:14:20.080Z	INFO	deployments/deployments.go:572	dynamic build finished (stub finalize, no upload yet)	{"request_id": "zdfix-1db5fb94-f071-4725-8c7e-fae2e465d01d", "deployment_id": "1db5fb94-f071-4725-8c7e-fae2e465d01d"}
+2026-11-17T14:14:20.110Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-1db5fb94-f071-4725-8c7e-fae2e465d01d", "deployment_id": "1db5fb94-f071-4725-8c7e-fae2e465d01d"}

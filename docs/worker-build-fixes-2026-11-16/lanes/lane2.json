@@ -1,0 +1,24 @@
+{
+  "lane": 2,
+  "containers": [
+    "zdfix2-worker",
+    "zdfix2-mock"
+  ],
+  "volumes": [
+    "zdfix2-worker-storage"
+  ],
+  "network": "zdfix2-network",
+  "broker_vhost": "lane2",
+  "shared_test_services": [
+    "zdfix-db",
+    "zdfix-rabbit"
+  ],
+  "source_commit": "20544b6c95b9cb1536250f2d8a7fef24560ceb04",
+  "initial_images": [],
+  "binary_sha256": "bea5778308ebf8035c5279bd5cd75bff571c652bd5d5d552fe25c6002611d29c",
+  "limits": {
+    "nano_cpus": 1500000000,
+    "memory_bytes": 2147483648,
+    "pids": 512
+  }
+}

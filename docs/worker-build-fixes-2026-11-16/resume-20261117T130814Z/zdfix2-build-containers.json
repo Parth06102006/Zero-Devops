@@ -1,0 +1,9 @@
+[
+  {
+    "id": "5950afb13a5816bdbe718c7b844183d159ef3d8b4192dbc4075295db2fc00e46",
+    "builder": true,
+    "imageid": "25c86c2c6b0d88ae0efc8294382f73963ac0a5ee0d7b5b942505b034b8300836",
+    "imagename": "docker.io/library/rust:1-alpine",
+    "containername": "rust-working-container"
+  }
+]

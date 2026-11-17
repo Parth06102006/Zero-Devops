@@ -1,0 +1,11 @@
+{
+  "completed": 16,
+  "denominator": 57,
+  "image_builds": 12,
+  "runtime_passes": 12,
+  "outcomes": {
+    "build-and-runtime-pass": 12,
+    "other-build-failure": 2,
+    "toolchain-version": 2
+  }
+}

@@ -1,0 +1,45 @@
+START actix-hello-world
+START actix-hello-world
+RESULT actix-hello-world build-and-runtime-pass
+START actix-static-files
+RESULT actix-static-files image-build-pass/runtime-fail
+START react-redux-realworld
+RESULT react-redux-realworld build-and-runtime-pass
+START gatsby-starter
+RESULT gatsby-starter native-dependency/install-scripts
+START astro-framework-svelte
+RESULT astro-framework-svelte other-build-failure
+START next-blog-starter
+RESULT next-blog-starter build-and-runtime-pass
+START next-api-routes-rest
+RESULT next-api-routes-rest other-build-failure
+START astro-framework-react
+RESULT astro-framework-react build-and-runtime-pass
+START next-basic-css
+RESULT next-basic-css other-build-failure
+START next-with-typescript
+RESULT next-with-typescript other-build-failure
+START fiber-dynamic-routing
+RESULT fiber-dynamic-routing build-and-runtime-pass
+START next-hello-world
+RESULT next-hello-world other-build-failure
+START fiber-optional-parameter
+RESULT fiber-optional-parameter build-and-runtime-pass
+START fiber-multiple-ports
+RESULT fiber-multiple-ports build-and-runtime-pass
+START node-prisma-realworld
+RESULT node-prisma-realworld missing-code-generation
+START gs-rest-service
+RESULT gs-rest-service build-and-runtime-pass
+START nestjs-starter
+RESULT nestjs-starter image-build-pass/runtime-fail
+START react-jobs
+RESULT react-jobs build-and-runtime-pass
+START vue-jobs
+RESULT vue-jobs build-and-runtime-pass
+START fastapi-query-params
+RESULT fastapi-query-params detection-unsupported
+START fastapi-path-params
+RESULT fastapi-path-params detection-unsupported
+START flask-tutorial
+RESULT flask-tutorial other-build-failure

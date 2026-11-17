@@ -1,0 +1,83 @@
+/bin/sh: set: line 0: can't access tty; job control turned off
+[2026-11-17T13:22:52Z INFO  hello_world] Starting HTTP server at http://localhost:8080
+[2026-11-17T13:22:52Z INFO  actix_server::builder] starting 1 workers
+[2026-11-17T13:22:52Z INFO  actix_server::server] Tokio runtime found; starting in existing Tokio runtime
+[2026-11-17T13:22:52Z INFO  actix_server::server] starting service: "actix-web-service-127.0.0.1:8080", workers: 1, listening on: 127.0.0.1:8080
+REQ: 
+HttpRequest HTTP/1.1 GET:/
+  headers:
+    "accept": "*/*"
+    "user-agent": "curl/8.11.1"
+    "host": "127.0.0.1:8080"
+
+[2026-11-17T13:22:53Z INFO  actix_web::middleware::logger] 127.0.0.1 "GET / HTTP/1.1" 200 12 "-" "curl/8.11.1" 0.000252
+[2026-11-17T13:22:53Z INFO  actix_web::middleware::logger] 127.0.0.1 "GET / HTTP/1.1" 200 12 "-" "curl/8.11.1" 0.000079
+REQ: 
+HttpRequest HTTP/1.1 GET:/
+  headers:
+    "user-agent": "curl/8.11.1"
+    "accept": "*/*"
+    "host": "127.0.0.1:8080"
+
+[2026-11-17T13:22:53Z INFO  actix_web::middleware::logger] 127.0.0.1 "GET / HTTP/1.1" 200 12 "-" "curl/8.11.1" 0.000082
+REQ: 
+HttpRequest HTTP/1.1 GET:/
+  headers:
+    "accept": "*/*"
+    "user-agent": "curl/8.11.1"
+    "host": "127.0.0.1:8080"
+
+[2026-11-17T13:22:53Z INFO  actix_web::middleware::logger] 127.0.0.1 "GET / HTTP/1.1" 200 12 "-" "curl/8.11.1" 0.000079
+REQ: 
+HttpRequest HTTP/1.1 GET:/
+  headers:
+    "user-agent": "curl/8.11.1"
+    "accept": "*/*"
+    "host": "127.0.0.1:8080"
+
+[2026-11-17T13:22:53Z INFO  actix_web::middleware::logger] 127.0.0.1 "GET / HTTP/1.1" 200 12 "-" "curl/8.11.1" 0.000166
+REQ: 
+HttpRequest HTTP/1.1 GET:/
+  headers:
+    "accept": "*/*"
+    "user-agent": "curl/8.11.1"
+    "host": "127.0.0.1:8080"
+
+REQ: 
+HttpRequest HTTP/1.1 GET:/
+  headers:
+    "user-agent": "curl/8.11.1"
+    "accept": "*/*"
+    "host": "127.0.0.1:8080"
+
+[2026-11-17T13:22:54Z INFO  actix_web::middleware::logger] 127.0.0.1 "GET / HTTP/1.1" 200 12 "-" "curl/8.11.1" 0.000156
+[2026-11-17T13:22:54Z INFO  actix_web::middleware::logger] 127.0.0.1 "GET / HTTP/1.1" 200 12 "-" "curl/8.11.1" 0.000089
+REQ: 
+HttpRequest HTTP/1.1 GET:/
+  headers:
+    "accept": "*/*"
+    "user-agent": "curl/8.11.1"
+    "host": "127.0.0.1:8080"
+
+[2026-11-17T13:22:54Z INFO  actix_web::middleware::logger] 127.0.0.1 "GET / HTTP/1.1" 200 12 "-" "curl/8.11.1" 0.000081
+REQ: 
+HttpRequest HTTP/1.1 GET:/
+  headers:
+    "user-agent": "curl/8.11.1"
+    "accept": "*/*"
+    "host": "127.0.0.1:8080"
+
+REQ: 
+HttpRequest HTTP/1.1 GET:/
+  headers:
+    "accept": "*/*"
+    "user-agent": "curl/8.11.1"
+    "host": "127.0.0.1:8080"
+
+[2026-11-17T13:22:54Z INFO  actix_web::middleware::logger] 127.0.0.1 "GET / HTTP/1.1" 200 12 "-" "curl/8.11.1" 0.000101
+[2026-11-17T13:22:54Z INFO  actix_server::server] SIGTERM received; starting graceful shutdown
+[2026-11-17T13:22:54Z INFO  actix_server::worker] shutting down idle worker
+[2026-11-17T13:22:54Z INFO  actix_server::accept] accept thread stopped
+subprocess exited on killed
+subprocess exited with status 1
+Error: exit status 1

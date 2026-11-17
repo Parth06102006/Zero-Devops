@@ -1,0 +1,97 @@
+2026-11-17T14:16:22.692Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-af67a89f-f37f-44af-8295-4af1df25c5a7", "delivery_tag": 19}
+2026-11-17T14:16:22.693Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-af67a89f-f37f-44af-8295-4af1df25c5a7", "deployment_id": "af67a89f-f37f-44af-8295-4af1df25c5a7"}
+2026-11-17T14:16:22.696Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-af67a89f-f37f-44af-8295-4af1df25c5a7", "deployment_id": "af67a89f-f37f-44af-8295-4af1df25c5a7"}
+2026-11-17T14:16:22.699Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-af67a89f-f37f-44af-8295-4af1df25c5a7", "deployment_id": "af67a89f-f37f-44af-8295-4af1df25c5a7"}
+2026-11-17T14:16:24.054Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-af67a89f-f37f-44af-8295-4af1df25c5a7", "deployment_id": "af67a89f-f37f-44af-8295-4af1df25c5a7"}
+2026-11-17T14:16:24.055Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-af67a89f-f37f-44af-8295-4af1df25c5a7", "deployment_id": "af67a89f-f37f-44af-8295-4af1df25c5a7", "framework": "vite", "package_manager": "npm"}
+2026-11-17T14:16:24.055Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-af67a89f-f37f-44af-8295-4af1df25c5a7", "deployment_id": "af67a89f-f37f-44af-8295-4af1df25c5a7", "template": "static/Dockerfile.vite.tmpl"}
+2026-11-17T14:16:24.065Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-af67a89f-f37f-44af-8295-4af1df25c5a7", "deployment_id": "af67a89f-f37f-44af-8295-4af1df25c5a7", "image_tag": "deploy-af67a89f-f37f-44af-8295-4af1df25c5a7:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN npm ci --ignore-scripts
+
+added 203 packages, and audited 204 packages in 13s
+
+53 packages are looking for funding
+  run `npm fund` for details
+
+20 vulnerabilities (5 moderate, 14 high, 1 critical)
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN npm run build
+
+> vue-crash-2024@0.0.0 build
+> vite build
+
+vite v5.3.2 building for production...
+transforming...
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 95 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                          0.44 kB │ gzip:   0.29 kB
+dist/assets/logo-Bpq0hC1H.png            6.36 kB
+dist/assets/primeicons-C6QP2o4f.woff2   35.15 kB
+dist/assets/primeicons-MpK4pl85.ttf     84.98 kB
+dist/assets/primeicons-WjwUDZjB.woff    85.06 kB
+dist/assets/primeicons-DMOk5skT.eot     85.16 kB
+dist/assets/primeicons-Dr5RGzOO.svg    342.53 kB │ gzip: 105.26 kB
+dist/assets/index-BjssDvv6.css          35.87 kB │ gzip:   7.61 kB
+dist/assets/index-DWDGrCWa.js          162.83 kB │ gzip:  60.25 kB
+✓ built in 4.52s
+[1/2] STEP 7/7: RUN test -f ./dist/index.html || (echo "ZERODEVOPS_SSR_MISMATCH: no index.html in dist after npm run build" && exit 1)
+[2/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS runtime
+[2/2] STEP 2/6: WORKDIR /app
+[2/2] STEP 3/6: RUN npm install -g serve
+
+added 67 packages in 13s
+
+20 packages are looking for funding
+  run `npm fund` for details
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 4/6: COPY --from=builder /app/dist ./dist
+[2/2] STEP 5/6: EXPOSE 4173
+[2/2] STEP 6/6: CMD ["serve", "-s", "dist", "-l", "4173"]
+[2/2] COMMIT deploy-af67a89f-f37f-44af-8295-4af1df25c5a7:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:4ec106da929e86173be8967d91b012dd9d0ae57bd3d51bc59c30d2f6575de0b0
+Copying config sha256:713254f291e857a28546162a3658c52132adb19bc008b6abe004240b4d4b4f0d
+Writing manifest to image destination
+--> 713254f291e8
+Successfully tagged localhost/deploy-af67a89f-f37f-44af-8295-4af1df25c5a7:latest
+713254f291e857a28546162a3658c52132adb19bc008b6abe004240b4d4b4f0d
+2026-11-17T14:17:03.896Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-af67a89f-f37f-44af-8295-4af1df25c5a7", "deployment_id": "af67a89f-f37f-44af-8295-4af1df25c5a7", "tar_path": "/tmp/zerodevops-build/af67a89f-f37f-44af-8295-4af1df25c5a7/af67a89f-f37f-44af-8295-4af1df25c5a7.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:4ec106da929e86173be8967d91b012dd9d0ae57bd3d51bc59c30d2f6575de0b0
+Copying config sha256:713254f291e857a28546162a3658c52132adb19bc008b6abe004240b4d4b4f0d
+Writing manifest to image destination
+2026-11-17T14:17:04.812Z	INFO	deployments/deployments.go:547	uploading image tar	{"request_id": "zdfix-af67a89f-f37f-44af-8295-4af1df25c5a7", "deployment_id": "af67a89f-f37f-44af-8295-4af1df25c5a7"}
+2026-11-17T14:17:04.812Z	INFO	upload/upload.go:37	opening file for upload	{"file": "/tmp/zerodevops-build/af67a89f-f37f-44af-8295-4af1df25c5a7/af67a89f-f37f-44af-8295-4af1df25c5a7.tar"}
+2026-11-17T14:17:04.812Z	INFO	upload/upload.go:48	uploading to S3	{"bucket": "testbucket", "key": "images/af67a89f-f37f-44af-8295-4af1df25c5a7.tar"}
+2026-11-17T14:17:05.414Z	INFO	upload/upload.go:66	upload complete	{"url": "s3://testbucket/images/af67a89f-f37f-44af-8295-4af1df25c5a7.tar"}
+2026-11-17T14:17:05.416Z	INFO	deployments/deployments.go:557	marking as finished	{"request_id": "zdfix-af67a89f-f37f-44af-8295-4af1df25c5a7", "deployment_id": "af67a89f-f37f-44af-8295-4af1df25c5a7"}
+2026-11-17T14:17:05.451Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-af67a89f-f37f-44af-8295-4af1df25c5a7", "deployment_id": "af67a89f-f37f-44af-8295-4af1df25c5a7"}

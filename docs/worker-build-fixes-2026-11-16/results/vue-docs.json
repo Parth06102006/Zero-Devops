@@ -1,0 +1,240 @@
+{
+  "case": {
+    "name": "vue-docs",
+    "repo": "vuejs/docs",
+    "sha": "40aa88af0094f7bab4aaf786e55c748a6a251d88",
+    "path": ".",
+    "stack": "VitePress/large-docs",
+    "kind": "node",
+    "reference_build": "corepack enable && pnpm install --frozen-lockfile && pnpm run build",
+    "reference_start": "pnpm exec vitepress preview --host 0.0.0.0 --port 4173",
+    "port": 4173,
+    "probe": "/",
+    "static_output": "src/.vitepress/dist",
+    "context": ".",
+    "env": {}
+  },
+  "reference_qualified": true,
+  "reference_eligibility": "preserved baseline; reference build/runtime not rerun",
+  "baseline_classification": "static-output-path/misleading-ssr",
+  "baseline_worker": {
+    "deployment_id": "6fc617b6-a960-437b-9cf4-8c608d8459cf",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: detected server-side rendering (build succeeded but produced no static output): no runnable server entrypoint found (no \"start\" script in package.json) \u2014 set deployment_type manually in project settings|",
+    "end_to_end_seconds": 70.742,
+    "resource_samples": [
+      {
+        "seconds": 0.53,
+        "stats": "0.58%|198.9MiB / 2GiB|104",
+        "cgroup": "cpu.stat\nusage_usec 461736948\nuser_usec 268545776\nsystem_usec 193191171\nnice_usec 0\nnr_periods 8453\nnr_throttled 1151\nthrottled_usec 131283294\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1532112896\nmemory.current\n289218560"
+      },
+      {
+        "seconds": 31.98,
+        "stats": "17.74%|663.8MiB / 2GiB|149",
+        "cgroup": "cpu.stat\nusage_usec 503093284\nuser_usec 291643810\nsystem_usec 211449473\nnice_usec 0\nnr_periods 8763\nnr_throttled 1393\nthrottled_usec 218857237\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1532112896\nmemory.current\n1047834624"
+      },
+      {
+        "seconds": 60.38,
+        "stats": "146.22%|1.269GiB / 2GiB|165",
+        "cgroup": "cpu.stat\nusage_usec 542223368\nuser_usec 321861368\nsystem_usec 220361999\nnice_usec 0\nnr_periods 9048\nnr_throttled 1590\nthrottled_usec 245355786\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1623183360\nmemory.current\n1514680320"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": ".",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "vue",
+    "phase_events": [
+      {
+        "at": "2026-11-16T14:46:57.275Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-16T14:46:57.277Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-16T14:46:57.279Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-16T14:46:57.281Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-16T14:47:00.711Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-16T14:47:00.711Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-16T14:47:00.711Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-16T14:47:00.712Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-16T14:48:05.849Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"6fc617b6-a960-437b-9cf4-8c608d8459cf\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 327,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"6fc617b6-a960-437b-9cf4-8c608d8459cf\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: detected server-side rendering (build succeeded but produced no static output): no runnable server entrypoint found (no \\\"start\\\" script in package.json) \u2014 set deployment_type manually in project settings\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "clone_and_directory_resolution_seconds": 3.43,
+    "failed_build_seconds": 65.137
+  },
+  "started_at": "2026-11-17T14:07:47.175939+00:00",
+  "complete": true,
+  "worker": {
+    "lane": 2,
+    "worker_container": "zdfix2-worker",
+    "broker_vhost": "lane2",
+    "commit_sha": "40aa88af0094f7bab4aaf786e55c748a6a251d88",
+    "deployment_id": "388472a0-73a4-419e-b639-535c4900ae2f",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: detected server-side rendering (build succeeded but produced no static output): no runnable server entrypoint found (no \"start\" script in package.json) \u2014 set deployment_type manually in project settings|",
+    "end_to_end_seconds": 95.586,
+    "resource_samples": [
+      {
+        "seconds": 0.44,
+        "stats": "0.41%|357.1MiB / 2GiB|74",
+        "cgroup": "cpu.stat\nusage_usec 2885140020\nuser_usec 2173423346\nsystem_usec 711716674\nnice_usec 0\nnr_periods 30550\nnr_throttled 4738\nthrottled_usec 611557943\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n429457408"
+      },
+      {
+        "seconds": 24.83,
+        "stats": "53.95%|692.2MiB / 2GiB|113",
+        "cgroup": "cpu.stat\nusage_usec 2903206395\nuser_usec 2181895106\nsystem_usec 721311289\nnice_usec 0\nnr_periods 30793\nnr_throttled 4757\nthrottled_usec 612575812\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n1077723136"
+      },
+      {
+        "seconds": 48.82,
+        "stats": "2.56%|727MiB / 2GiB|113",
+        "cgroup": "cpu.stat\nusage_usec 2912176744\nuser_usec 2185895543\nsystem_usec 726281201\nnice_usec 0\nnr_periods 31017\nnr_throttled 4761\nthrottled_usec 612790353\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n1310560256"
+      },
+      {
+        "seconds": 71.15,
+        "stats": "103.67%|673.9MiB / 2GiB|117",
+        "cgroup": "cpu.stat\nusage_usec 2916025265\nuser_usec 2187573469\nsystem_usec 728451796\nnice_usec 0\nnr_periods 31071\nnr_throttled 4770\nthrottled_usec 613045239\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n1256357888"
+      },
+      {
+        "seconds": 94.27,
+        "stats": "0.01%|327.5MiB / 2GiB|73",
+        "cgroup": "cpu.stat\nusage_usec 2945939897\nuser_usec 2210527250\nsystem_usec 735412647\nnice_usec 0\nnr_periods 31293\nnr_throttled 4901\nthrottled_usec 626191181\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n371220480"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": ".",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "vue",
+    "phase_events": [
+      {
+        "at": "2026-11-17T14:07:47.267Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-17T14:07:47.270Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-17T14:07:47.273Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-17T14:07:47.275Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-17T14:07:49.882Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-17T14:07:49.882Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-17T14:07:49.882Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-17T14:07:49.888Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-17T14:09:21.218Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"388472a0-73a4-419e-b639-535c4900ae2f\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 327,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"388472a0-73a4-419e-b639-535c4900ae2f\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: detected server-side rendering (build succeeded but produced no static output): no runnable server entrypoint found (no \\\"start\\\" script in package.json) \u2014 set deployment_type manually in project settings\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": false
+  },
+  "classification": "static-output-path/misleading-ssr"
+}

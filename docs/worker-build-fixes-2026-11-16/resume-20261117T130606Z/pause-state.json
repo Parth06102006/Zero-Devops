@@ -1,0 +1,17 @@
+{
+  "status": "paused-by-user",
+  "at": "2026-11-16T21:14:06.928909+00:00",
+  "branch": "fix-builds",
+  "head": "20544b6c95b9cb1536250f2d8a7fef24560ceb04",
+  "completed": 17,
+  "denominator": 57,
+  "images": 15,
+  "local_http_passes": 15,
+  "interrupted_cases": {
+    "1": "actix-hello-world",
+    "2": "actix-state"
+  },
+  "containers": "stopped; retained",
+  "build_stores": "retained; not pruned",
+  "resume_warning": "Keep workers stopped until interrupted queue jobs, database rows and Buildah intermediate containers are reconciled. The durable broker may have requeued the interrupted jobs."
+}

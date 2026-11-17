@@ -1,0 +1,50 @@
+{
+  "created_at": "2026-11-16T20:32:35.600908+00:00",
+  "branch": "fix-builds",
+  "source_commit": "20544b6c95b9cb1536250f2d8a7fef24560ceb04",
+  "binary_sha256": "bea5778308ebf8035c5279bd5cd75bff571c652bd5d5d552fe25c6002611d29c",
+  "image": "sha256:8e8dd9c411899b3c8a4fb437213282885360a27dd11232c59f86f3051f4cba54",
+  "containers": [
+    "zdfix-worker",
+    "zdfix-mock",
+    "zdfix-db",
+    "zdfix-rabbit",
+    "zdfix-cold",
+    "zdfix-native-tests"
+  ],
+  "volumes": [
+    "zdfix-worker-storage",
+    "zdfix-db-data",
+    "zdfix-rabbit-data",
+    "zdfix-cold-storage",
+    "zdfix-native-storage"
+  ],
+  "limits": {
+    "cpus": 1.5,
+    "memory_bytes": 2147483648,
+    "pids": 512,
+    "sequential": true
+  },
+  "worker_environment": {
+    "DATABASE_HOST": "postgres",
+    "DATABASE_PORT": "5432",
+    "DATABASE_USER": "e2e",
+    "DATABASE_PASS": "e2e",
+    "DATABASE_NAME": "e2e",
+    "RABBITMQ_CONNECTION_STRING": "amqp://e2e:e2e@rabbit:5672/",
+    "SERVER_INTERNAL_URL": "http://mock:8000",
+    "WORKER_INTERNAL_AUTH_TOKEN": "test-only",
+    "CLOUDFLARE_ACCOUNT_ID": "e2e",
+    "CLOUDFLARE_BUCKET_NAME": "testbucket",
+    "CLOUDFLARE_ACCESS_KEY_ID": "test",
+    "CLOUDFLARE_ACCESS_KEY_SECRET": "test",
+    "SSL_CERT_FILE": "/e2e/mock.crt",
+    "APP_ENV": "development",
+    "MAX_RETRIES_COUNT": "1",
+    "GOMAXPROCS": "1",
+    "BUILDAH_ISOLATION": "chroot",
+    "ALLOW_UNLOCKED_NPM_INSTALL": "true"
+  },
+  "qualification": "57 preserved baseline reference passes; worker builds and smoke probes rerun at immutable SHAs; no reference rebuild",
+  "publication": "fake upload sink only; no real deployment or publication"
+}

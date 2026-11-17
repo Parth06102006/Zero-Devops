@@ -1,0 +1,41 @@
+[
+    {
+        "id": "b791832e17c3",
+        "names": [
+            "docker.io/library/node:24-alpine"
+        ],
+        "digest": "sha256:116b800c3754b440ee0aa3ed2f20f5bf3d99a554bfd9adeea09ea8017f6e85f5",
+        "createdat": "5 days ago",
+        "size": "175 MB",
+        "created": 1794428200,
+        "createdatraw": "2026-11-11T20:16:40.615693014Z",
+        "readonly": false,
+        "history": null
+    },
+    {
+        "id": "25c86c2c6b0d",
+        "names": [
+            "docker.io/library/rust:1-alpine"
+        ],
+        "digest": "sha256:2cccd8b212b37dad15a555589c1b6787da4ab913fe24d8a9b2d99d3498869409",
+        "createdat": "4 days ago",
+        "size": "1.04 GB",
+        "created": 1794515183,
+        "createdatraw": "2026-11-12T20:26:23.128441223Z",
+        "readonly": false,
+        "history": null
+    },
+    {
+        "id": "ca5c0cf62026",
+        "names": [
+            "localhost/zdfix-paused-lane1-9238a536619a:snapshot"
+        ],
+        "digest": "sha256:01c0294a90d061996d54d477bdcff3e29be9e4909c67df7023cdd9263d8a5def",
+        "createdat": "5 seconds ago",
+        "size": "1.07 GB",
+        "created": 1794920902,
+        "createdatraw": "2026-11-17T13:08:22.902446473Z",
+        "readonly": false,
+        "history": null
+    }
+]

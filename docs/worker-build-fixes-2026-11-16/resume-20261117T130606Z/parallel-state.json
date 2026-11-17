@@ -1,0 +1,29 @@
+{
+  "started_at": "2026-11-16T21:09:19.002255+00:00",
+  "finished_at": null,
+  "workers": 2,
+  "approved_maximum": {
+    "workers": 4,
+    "builder_cpus": 6,
+    "builder_memory_bytes": 8589934592
+  },
+  "actual_builder_limits": {
+    "total_cpus": 3.0,
+    "total_memory_bytes": 4294967296,
+    "per_worker_cpus": 1.5,
+    "per_worker_memory_bytes": 2147483648
+  },
+  "docker_capacity": {
+    "cpus": 12,
+    "memory_bytes": 6061568000
+  },
+  "reserved_host_service_memory_bytes": 1610612736,
+  "in_flight": {
+    "1": "actix-hello-world",
+    "2": "actix-state"
+  },
+  "completed_parallel": [],
+  "errors": [],
+  "supporting_services": "shared run-owned test DB and broker; separate AMQP vhost, private network, mock endpoint, worker and build store per lane",
+  "scheduling": "longest reference builds first; Rust estimated cold because reference cache was shared"
+}

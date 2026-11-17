@@ -1,0 +1,8 @@
+zdfix2-worker Exited (2) About a minute ago
+zdfix2-mock Exited (137) About a minute ago
+zdfix-native-tests Exited (0) 34 minutes ago
+zdfix-cold Exited (137) About a minute ago
+zdfix-worker Exited (2) About a minute ago
+zdfix-mock Exited (137) About a minute ago
+zdfix-rabbit Exited (0) About a minute ago
+zdfix-db Exited (0) About a minute ago

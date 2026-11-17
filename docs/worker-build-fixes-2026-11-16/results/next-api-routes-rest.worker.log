@@ -1,0 +1,99 @@
+2026-11-17T13:53:07.304Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-93e1d45d-8843-4169-a2e6-1b79ff290bb7", "deployment_id": "93e1d45d-8843-4169-a2e6-1b79ff290bb7"}
+2026-11-17T13:53:08.185Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-8d581eb4-ab6d-4bfe-b417-596ff9948358", "delivery_tag": 7}
+2026-11-17T13:53:08.196Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-8d581eb4-ab6d-4bfe-b417-596ff9948358", "deployment_id": "8d581eb4-ab6d-4bfe-b417-596ff9948358"}
+2026-11-17T13:53:08.199Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-8d581eb4-ab6d-4bfe-b417-596ff9948358", "deployment_id": "8d581eb4-ab6d-4bfe-b417-596ff9948358"}
+2026-11-17T13:53:08.201Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-8d581eb4-ab6d-4bfe-b417-596ff9948358", "deployment_id": "8d581eb4-ab6d-4bfe-b417-596ff9948358"}
+2026-11-17T13:53:51.352Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-8d581eb4-ab6d-4bfe-b417-596ff9948358", "deployment_id": "8d581eb4-ab6d-4bfe-b417-596ff9948358"}
+2026-11-17T13:53:51.353Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-8d581eb4-ab6d-4bfe-b417-596ff9948358", "deployment_id": "8d581eb4-ab6d-4bfe-b417-596ff9948358", "framework": "nextjs", "package_manager": "npm"}
+2026-11-17T13:53:51.353Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-8d581eb4-ab6d-4bfe-b417-596ff9948358", "deployment_id": "8d581eb4-ab6d-4bfe-b417-596ff9948358", "template": "dynamic/Dockerfile.nextjs.tmpl"}
+2026-11-17T13:53:51.361Z	WARN	deployments/deployments.go:622	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-8d581eb4-ab6d-4bfe-b417-596ff9948358", "deployment_id": "8d581eb4-ab6d-4bfe-b417-596ff9948358"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:622
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-17T13:53:51.361Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-8d581eb4-ab6d-4bfe-b417-596ff9948358", "deployment_id": "8d581eb4-ab6d-4bfe-b417-596ff9948358", "image_tag": "deploy-8d581eb4-ab6d-4bfe-b417-596ff9948358:latest"}
+[1/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/6: WORKDIR /app
+[1/2] STEP 3/6: COPY package*.json ./
+[1/2] STEP 4/6: RUN npm install --ignore-scripts --package-lock=false
+
+added 34 packages, and audited 35 packages in 2m
+
+6 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/6: COPY . .
+[1/2] STEP 6/6: RUN npm run build
+
+> build
+> next build
+
+▲ Next.js 16.4.6 (Turbopack)
+⚠ React 18 support is deprecated in Next.js 16 and will be removed in Next.js 17. Please upgrade to React 19. Learn more: https://nextjs.org/docs/messages/react-version
+✓ Running next.config took 59ms
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+
+  Running TypeScript ...
+⚠ Minimum recommended TypeScript version is v5.1.0, older versions can potentially be incompatible with Next.js. Detected: 4.9.5
+  Finished TypeScript in 5.8s ...
+  Creating an optimized production build ...
+✓ Compiled successfully in 8.4s
+  Collecting page data using 8 workers ...
+  Generating static pages using 8 workers (0/4) ...
+  Generating static pages using 8 workers (1/4) 
+  Generating static pages using 8 workers (2/4) 
+  Generating static pages using 8 workers (3/4) 
+✓ Generating static pages using 8 workers (4/4) in 1277ms
+  Finalizing page optimization ...
+
+Route (pages)
+┌ ○ /
+├ ○ /404
+├ ƒ /api/user/[id]
+├ ƒ /api/users
+└ ○ /user/[id]
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+[2/2] STEP 1/10: FROM docker.io/library/node:24-alpine
+[2/2] STEP 2/10: WORKDIR /app
+[2/2] STEP 3/10: ENV NODE_ENV=production
+[2/2] STEP 4/10: COPY package*.json ./
+[2/2] STEP 5/10: RUN npm install --ignore-scripts --package-lock=false --omit=dev
+
+added 27 packages, and audited 28 packages in 52s
+
+6 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 6/10: COPY --from=builder /app/.next ./.next
+[2/2] STEP 7/10: COPY --from=builder /app/public ./public
+Error: building at STEP "COPY --from=builder /app/public ./public": checking on sources under "/var/lib/containers/storage/overlay/85ae2beb1917c4f83583fc78766dee6dab35aec05d62883bee3d70139e9789d5/merged": copier: stat: "/app/public": no such file or directory
+2026-11-17T13:56:48.819Z	ERROR	worker/worker.go:109	deployment job failed	{"request_id": "zdfix-8d581eb4-ab6d-4bfe-b417-596ff9948358", "deployment_id": "8d581eb4-ab6d-4bfe-b417-596ff9948358", "error": "build failed: exit status 125"}
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:109
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290

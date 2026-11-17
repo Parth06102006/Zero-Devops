@@ -1,0 +1,396 @@
+{
+  "case": {
+    "name": "actix-nested-routing",
+    "repo": "actix/examples",
+    "sha": "9206b40d50b04ab44f9a51f6b0282d9103323700",
+    "path": "basics/nested-routing",
+    "stack": "Rust/Actix",
+    "kind": "rust",
+    "reference_build": "CARGO_BUILD_JOBS=1 cargo build --release --locked -p nested-routing",
+    "reference_start": "/app/campaign-server",
+    "port": 8080,
+    "probe": "/products/123",
+    "static_output": null,
+    "context": ".",
+    "env": {}
+  },
+  "reference_qualified": true,
+  "reference_eligibility": "preserved baseline; reference build/runtime not rerun",
+  "baseline_classification": "workspace-context",
+  "baseline_worker": {
+    "deployment_id": "6908f65e-2085-4268-81b7-811e2ff6b92b",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: build failed: exit status 101|",
+    "end_to_end_seconds": 8.778,
+    "resource_samples": [
+      {
+        "seconds": 0.79,
+        "stats": "0.60%|122.3MiB / 2GiB|133",
+        "cgroup": "cpu.stat\nusage_usec 918225172\nuser_usec 597274778\nsystem_usec 320950394\nnice_usec 0\nnr_periods 15243\nnr_throttled 2517\nthrottled_usec 388281569\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1839321088\nmemory.current\n135135232"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "cargo",
+      "args": [],
+      "working_dir": "basics/nested-routing",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "rust",
+    "phase_events": [
+      {
+        "at": "2026-11-16T15:56:23.845Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-16T15:56:23.848Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-16T15:56:23.852Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-16T15:56:23.854Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-16T15:56:27.492Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-16T15:56:27.492Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-16T15:56:27.492Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-16T15:56:27.493Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-16T15:56:30.656Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"6908f65e-2085-4268-81b7-811e2ff6b92b\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 150,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"6908f65e-2085-4268-81b7-811e2ff6b92b\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: build failed: exit status 101\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "clone_and_directory_resolution_seconds": 3.638,
+    "failed_build_seconds": 3.163
+  },
+  "started_at": "2026-11-17T13:22:57.103471+00:00",
+  "complete": true,
+  "worker": {
+    "lane": 2,
+    "worker_container": "zdfix2-worker",
+    "broker_vhost": "lane2",
+    "commit_sha": "9206b40d50b04ab44f9a51f6b0282d9103323700",
+    "deployment_id": "7547e698-4f3b-4e5c-89cd-e4ce181b7c0c",
+    "state": "success",
+    "database_row": "success||",
+    "end_to_end_seconds": 649.494,
+    "resource_samples": [
+      {
+        "seconds": 0.6,
+        "stats": "21.14%|82.6MiB / 2GiB|12",
+        "cgroup": "cpu.stat\nusage_usec 591332910\nuser_usec 478269292\nsystem_usec 113063618\nnice_usec 0\nnr_periods 6379\nnr_throttled 132\nthrottled_usec 4048749\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1610379264\nmemory.current\n166391808"
+      },
+      {
+        "seconds": 24.27,
+        "stats": "61.60%|457.4MiB / 2GiB|40",
+        "cgroup": "cpu.stat\nusage_usec 602965722\nuser_usec 484280438\nsystem_usec 118685283\nnice_usec 0\nnr_periods 6590\nnr_throttled 134\nthrottled_usec 4076398\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1610379264\nmemory.current\n780873728"
+      },
+      {
+        "seconds": 47.75,
+        "stats": "0.02%|638.8MiB / 2GiB|40",
+        "cgroup": "cpu.stat\nusage_usec 608681701\nuser_usec 487822600\nsystem_usec 120859101\nnice_usec 0\nnr_periods 6735\nnr_throttled 135\nthrottled_usec 4079167\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1610379264\nmemory.current\n1029152768"
+      },
+      {
+        "seconds": 70.83,
+        "stats": "96.88%|922.6MiB / 2GiB|48",
+        "cgroup": "cpu.stat\nusage_usec 626063713\nuser_usec 493977702\nsystem_usec 132086011\nnice_usec 0\nnr_periods 6936\nnr_throttled 145\nthrottled_usec 4268128\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1610379264\nmemory.current\n1581154304"
+      },
+      {
+        "seconds": 94.06,
+        "stats": "90.85%|1018MiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 648047131\nuser_usec 510032818\nsystem_usec 138014312\nnice_usec 0\nnr_periods 7159\nnr_throttled 152\nthrottled_usec 4539552\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1622773760\nmemory.current\n1495957504"
+      },
+      {
+        "seconds": 116.22,
+        "stats": "99.78%|1.161GiB / 2GiB|50",
+        "cgroup": "cpu.stat\nusage_usec 669546135\nuser_usec 525180769\nsystem_usec 144365366\nnice_usec 0\nnr_periods 7380\nnr_throttled 156\nthrottled_usec 4677346\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1631514624\nmemory.current\n1631780864"
+      },
+      {
+        "seconds": 138.21,
+        "stats": "97.25%|1005MiB / 2GiB|47",
+        "cgroup": "cpu.stat\nusage_usec 691393072\nuser_usec 542168544\nsystem_usec 149224527\nnice_usec 0\nnr_periods 7600\nnr_throttled 161\nthrottled_usec 4863162\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1635418112\nmemory.current\n1472393216"
+      },
+      {
+        "seconds": 160.01,
+        "stats": "98.87%|1.205GiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 713308695\nuser_usec 561055979\nsystem_usec 152252716\nnice_usec 0\nnr_periods 7818\nnr_throttled 164\nthrottled_usec 4985773\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1635418112\nmemory.current\n1581940736"
+      },
+      {
+        "seconds": 181.92,
+        "stats": "79.55%|1.035GiB / 2GiB|49",
+        "cgroup": "cpu.stat\nusage_usec 734653247\nuser_usec 577629084\nsystem_usec 157024163\nnice_usec 0\nnr_periods 8037\nnr_throttled 170\nthrottled_usec 5162665\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1635418112\nmemory.current\n1460121600"
+      },
+      {
+        "seconds": 203.71,
+        "stats": "85.30%|1.037GiB / 2GiB|48",
+        "cgroup": "cpu.stat\nusage_usec 753905276\nuser_usec 592815166\nsystem_usec 161090109\nnice_usec 0\nnr_periods 8251\nnr_throttled 173\nthrottled_usec 5286388\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1635418112\nmemory.current\n1451749376"
+      },
+      {
+        "seconds": 225.69,
+        "stats": "70.90%|1.035GiB / 2GiB|48",
+        "cgroup": "cpu.stat\nusage_usec 774813651\nuser_usec 610729655\nsystem_usec 164083996\nnice_usec 0\nnr_periods 8467\nnr_throttled 178\nthrottled_usec 5487512\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1635418112\nmemory.current\n1365417984"
+      },
+      {
+        "seconds": 247.58,
+        "stats": "98.59%|1.072GiB / 2GiB|49",
+        "cgroup": "cpu.stat\nusage_usec 794299758\nuser_usec 626363853\nsystem_usec 167935905\nnice_usec 0\nnr_periods 8680\nnr_throttled 183\nthrottled_usec 5682355\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1635418112\nmemory.current\n1407991808"
+      },
+      {
+        "seconds": 269.34,
+        "stats": "96.04%|1.13GiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 812684536\nuser_usec 641132593\nsystem_usec 171551942\nnice_usec 0\nnr_periods 8878\nnr_throttled 187\nthrottled_usec 5834184\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1635418112\nmemory.current\n1481236480"
+      },
+      {
+        "seconds": 291.18,
+        "stats": "96.30%|1.081GiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 834601642\nuser_usec 661217856\nsystem_usec 173383785\nnice_usec 0\nnr_periods 9097\nnr_throttled 192\nthrottled_usec 5978999\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1635418112\nmemory.current\n1443520512"
+      },
+      {
+        "seconds": 313.17,
+        "stats": "97.79%|1.09GiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 856781347\nuser_usec 681797754\nsystem_usec 174983593\nnice_usec 0\nnr_periods 9316\nnr_throttled 197\nthrottled_usec 6154064\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1635418112\nmemory.current\n1434087424"
+      },
+      {
+        "seconds": 335.21,
+        "stats": "98.55%|1.11GiB / 2GiB|49",
+        "cgroup": "cpu.stat\nusage_usec 878515742\nuser_usec 699431743\nsystem_usec 179083999\nnice_usec 0\nnr_periods 9537\nnr_throttled 201\nthrottled_usec 6273269\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1635418112\nmemory.current\n1509781504"
+      },
+      {
+        "seconds": 359.13,
+        "stats": "71.12%|1.113GiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 902300966\nuser_usec 720076265\nsystem_usec 182224701\nnice_usec 0\nnr_periods 9776\nnr_throttled 204\nthrottled_usec 6361145\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1635418112\nmemory.current\n1541148672"
+      },
+      {
+        "seconds": 383.2,
+        "stats": "97.83%|1.177GiB / 2GiB|50",
+        "cgroup": "cpu.stat\nusage_usec 926578124\nuser_usec 737463384\nsystem_usec 189114739\nnice_usec 0\nnr_periods 10025\nnr_throttled 209\nthrottled_usec 6579901\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1635418112\nmemory.current\n1609924608"
+      },
+      {
+        "seconds": 407.92,
+        "stats": "93.88%|1.117GiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 950167573\nuser_usec 756328940\nsystem_usec 193838633\nnice_usec 0\nnr_periods 10265\nnr_throttled 213\nthrottled_usec 6721566\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1635418112\nmemory.current\n1503498240"
+      },
+      {
+        "seconds": 429.89,
+        "stats": "99.41%|1.212GiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 972861174\nuser_usec 774730455\nsystem_usec 198130718\nnice_usec 0\nnr_periods 10493\nnr_throttled 218\nthrottled_usec 6839340\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1638703104\nmemory.current\n1600081920"
+      },
+      {
+        "seconds": 452.79,
+        "stats": "96.65%|1.144GiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 995069503\nuser_usec 794235276\nsystem_usec 200834226\nnice_usec 0\nnr_periods 10713\nnr_throttled 224\nthrottled_usec 7189416\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1718579200\nmemory.current\n1495142400"
+      },
+      {
+        "seconds": 476.68,
+        "stats": "99.59%|1.18GiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 1020002419\nuser_usec 816499998\nsystem_usec 203502420\nnice_usec 0\nnr_periods 10961\nnr_throttled 229\nthrottled_usec 7391047\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1718579200\nmemory.current\n1521451008"
+      },
+      {
+        "seconds": 499.41,
+        "stats": "94.24%|1.172GiB / 2GiB|49",
+        "cgroup": "cpu.stat\nusage_usec 1041940175\nuser_usec 835483478\nsystem_usec 206456697\nnice_usec 0\nnr_periods 11179\nnr_throttled 234\nthrottled_usec 7497223\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1718579200\nmemory.current\n1540689920"
+      },
+      {
+        "seconds": 521.28,
+        "stats": "98.41%|1.202GiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 1064155464\nuser_usec 856115865\nsystem_usec 208039598\nnice_usec 0\nnr_periods 11398\nnr_throttled 238\nthrottled_usec 7653987\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1718579200\nmemory.current\n1541574656"
+      },
+      {
+        "seconds": 543.61,
+        "stats": "98.46%|1.203GiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 1086665024\nuser_usec 876991909\nsystem_usec 209673115\nnice_usec 0\nnr_periods 11621\nnr_throttled 243\nthrottled_usec 7812746\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1718579200\nmemory.current\n1547350016"
+      },
+      {
+        "seconds": 565.81,
+        "stats": "98.60%|1.176GiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 1109010660\nuser_usec 897257789\nsystem_usec 211752870\nnice_usec 0\nnr_periods 11843\nnr_throttled 247\nthrottled_usec 8019294\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1718579200\nmemory.current\n1532780544"
+      },
+      {
+        "seconds": 587.91,
+        "stats": "99.12%|1.331GiB / 2GiB|49",
+        "cgroup": "cpu.stat\nusage_usec 1130795468\nuser_usec 914628302\nsystem_usec 216167165\nnice_usec 0\nnr_periods 12064\nnr_throttled 253\nthrottled_usec 8240125\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1718579200\nmemory.current\n1648623616"
+      },
+      {
+        "seconds": 609.71,
+        "stats": "96.59%|1.193GiB / 2GiB|49",
+        "cgroup": "cpu.stat\nusage_usec 1153755620\nuser_usec 935892460\nsystem_usec 217863159\nnice_usec 0\nnr_periods 12291\nnr_throttled 258\nthrottled_usec 8316133\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1718579200\nmemory.current\n1491021824"
+      },
+      {
+        "seconds": 632.34,
+        "stats": "99.09%|1.332GiB / 2GiB|51",
+        "cgroup": "cpu.stat\nusage_usec 1175649951\nuser_usec 955848009\nsystem_usec 219801941\nnice_usec 0\nnr_periods 12509\nnr_throttled 262\nthrottled_usec 8464667\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1718579200\nmemory.current\n1612558336"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "cargo",
+      "args": [],
+      "working_dir": "basics/nested-routing",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "rust",
+    "phase_events": [
+      {
+        "at": "2026-11-17T13:22:57.234Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-17T13:22:57.250Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-17T13:22:57.256Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-17T13:22:57.259Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-17T13:22:59.541Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-17T13:22:59.542Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-17T13:22:59.542Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-17T13:22:59.828Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-17T13:33:45.720Z",
+        "event": "saving image tar"
+      },
+      {
+        "at": "2026-11-17T13:33:46.007Z",
+        "event": "dynamic build finished (stub finalize, no upload yet)"
+      },
+      {
+        "at": "2026-11-17T13:33:46.130Z",
+        "event": "deployment job completed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"7547e698-4f3b-4e5c-89cd-e4ce181b7c0c\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 75,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"7547e698-4f3b-4e5c-89cd-e4ce181b7c0c\",\"status\":\"success\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": true,
+    "image_layer_bytes": 15621120,
+    "image_config_bytes": 1579,
+    "runtime": {
+      "ready": true,
+      "startup_seconds": 1.317,
+      "probe_url": "http://127.0.0.1:8080/products/123",
+      "first_response": "200|0.000783|",
+      "response_sample": "",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.000706
+        },
+        {
+          "status": 200,
+          "seconds": 0.001265
+        },
+        {
+          "status": 200,
+          "seconds": 0.000961
+        },
+        {
+          "status": 200,
+          "seconds": 0.000901
+        },
+        {
+          "status": 200,
+          "seconds": 0.000654
+        },
+        {
+          "status": 200,
+          "seconds": 0.000801
+        },
+        {
+          "status": 200,
+          "seconds": 0.000748
+        },
+        {
+          "status": 200,
+          "seconds": 0.001346
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    }
+  },
+  "classification": "build-and-runtime-pass"
+}

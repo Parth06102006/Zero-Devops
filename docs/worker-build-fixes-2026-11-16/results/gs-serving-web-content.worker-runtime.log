@@ -1,0 +1,27 @@
+/bin/sh: set: line 0: can't access tty; job control turned off
+Picked up JAVA_TOOL_OPTIONS: -XX:ActiveProcessorCount=1 -Xmx512m
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.2)
+
+2026-11-17T14:14:11.954Z  INFO 23765 --- [           main] c.e.s.ServingWebContentApplication       : Starting ServingWebContentApplication v0.0.1-SNAPSHOT using Java 21.0.13 with PID 23765 (/app/app.jar started by app in /app)
+2026-11-17T14:14:11.959Z  INFO 23765 --- [           main] c.e.s.ServingWebContentApplication       : No active profile set, falling back to 1 default profile: "default"
+2026-11-17T14:14:14.528Z  INFO 23765 --- [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-11-17T14:14:14.553Z  INFO 23765 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-11-17T14:14:14.553Z  INFO 23765 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.27]
+2026-11-17T14:14:14.739Z  INFO 23765 --- [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 2580 ms
+2026-11-17T14:14:15.233Z  INFO 23765 --- [           main] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page: class path resource [static/index.html]
+2026-11-17T14:14:15.808Z  INFO 23765 --- [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
+2026-11-17T14:14:15.834Z  INFO 23765 --- [           main] c.e.s.ServingWebContentApplication       : Started ServingWebContentApplication in 5.187 seconds (process running for 6.457)
+2026-11-17T14:14:15.949Z  INFO 23765 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-11-17T14:14:15.950Z  INFO 23765 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-11-17T14:14:15.953Z  INFO 23765 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
+subprocess exited on killed
+subprocess exited with status 1
+Error: exit status 1

@@ -1,0 +1,10 @@
+{
+  "completed": 17,
+  "denominator": 57,
+  "image_builds": 15,
+  "runtime_passes": 15,
+  "outcomes": {
+    "build-and-runtime-pass": 15,
+    "other-build-failure": 2
+  }
+}

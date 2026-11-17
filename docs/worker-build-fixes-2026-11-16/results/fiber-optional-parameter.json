@@ -1,0 +1,273 @@
+{
+  "case": {
+    "name": "fiber-optional-parameter",
+    "repo": "gofiber/recipes",
+    "sha": "258cf9908a6d53a700c0354f05c12b908e107596",
+    "path": "optional-parameter",
+    "stack": "Go/Fiber",
+    "kind": "go",
+    "reference_build": "GOMAXPROCS=1 go build -p 1 -o /app/app .",
+    "reference_start": "/app/app",
+    "port": 3000,
+    "probe": "/0",
+    "static_output": null,
+    "context": "optional-parameter",
+    "env": {}
+  },
+  "reference_qualified": true,
+  "reference_eligibility": "preserved baseline; reference build/runtime not rerun",
+  "baseline_classification": "base-image-resolution",
+  "baseline_worker": {
+    "deployment_id": "ef0675a1-5324-449c-978b-af588c46e8e7",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: build failed: exit status 125|",
+    "end_to_end_seconds": 4.308,
+    "resource_samples": [
+      {
+        "seconds": 0.67,
+        "stats": "0.40%|129MiB / 2GiB|123",
+        "cgroup": "cpu.stat\nusage_usec 887699045\nuser_usec 580347355\nsystem_usec 307351690\nnice_usec 0\nnr_periods 13846\nnr_throttled 2514\nthrottled_usec 387943204\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1839321088\nmemory.current\n150269952"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "go",
+      "args": [],
+      "working_dir": "optional-parameter",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "go",
+    "phase_events": [
+      {
+        "at": "2026-11-16T15:38:12.241Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-16T15:38:12.257Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-16T15:38:12.260Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-16T15:38:12.263Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-16T15:38:15.173Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-16T15:38:15.173Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-16T15:38:15.173Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-16T15:38:15.174Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-16T15:38:15.230Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"ef0675a1-5324-449c-978b-af588c46e8e7\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 150,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"ef0675a1-5324-449c-978b-af588c46e8e7\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: build failed: exit status 125\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "clone_and_directory_resolution_seconds": 2.91,
+    "failed_build_seconds": 0.056
+  },
+  "started_at": "2026-11-17T14:04:41.517369+00:00",
+  "complete": true,
+  "worker": {
+    "lane": 1,
+    "worker_container": "zdfix-worker",
+    "broker_vhost": "/",
+    "commit_sha": "258cf9908a6d53a700c0354f05c12b908e107596",
+    "deployment_id": "32befb33-2253-49ad-be88-21f36ce1db0b",
+    "state": "success",
+    "database_row": "success||",
+    "end_to_end_seconds": 89.648,
+    "resource_samples": [
+      {
+        "seconds": 0.46,
+        "stats": "0.39%|389MiB / 2GiB|62",
+        "cgroup": "cpu.stat\nusage_usec 2426464902\nuser_usec 1694887423\nsystem_usec 731577479\nnice_usec 0\nnr_periods 27867\nnr_throttled 4251\nthrottled_usec 450737081\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n488460288"
+      },
+      {
+        "seconds": 25.24,
+        "stats": "22.01%|571.7MiB / 2GiB|92",
+        "cgroup": "cpu.stat\nusage_usec 2437100968\nuser_usec 1698755244\nsystem_usec 738345723\nnice_usec 0\nnr_periods 28079\nnr_throttled 4258\nthrottled_usec 450783902\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n989483008"
+      },
+      {
+        "seconds": 53.59,
+        "stats": "147.21%|875.8MiB / 2GiB|103",
+        "cgroup": "cpu.stat\nusage_usec 2477396869\nuser_usec 1727989666\nsystem_usec 749407202\nnice_usec 0\nnr_periods 28361\nnr_throttled 4495\nthrottled_usec 485835755\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n1516613632"
+      },
+      {
+        "seconds": 79.29,
+        "stats": "135.32%|890MiB / 2GiB|99",
+        "cgroup": "cpu.stat\nusage_usec 2515823896\nuser_usec 1760078410\nsystem_usec 755745485\nnice_usec 0\nnr_periods 28618\nnr_throttled 4750\nthrottled_usec 529205137\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n1714135040"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "go",
+      "args": [],
+      "working_dir": "optional-parameter",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "go",
+    "phase_events": [
+      {
+        "at": "2026-11-17T14:04:41.606Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-17T14:04:41.608Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-17T14:04:41.612Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-17T14:04:41.617Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-17T14:04:43.893Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-17T14:04:43.893Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-17T14:04:43.893Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-17T14:04:43.900Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-17T14:06:08.488Z",
+        "event": "saving image tar"
+      },
+      {
+        "at": "2026-11-17T14:06:08.718Z",
+        "event": "dynamic build finished (stub finalize, no upload yet)"
+      },
+      {
+        "at": "2026-11-17T14:06:08.751Z",
+        "event": "deployment job completed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"32befb33-2253-49ad-be88-21f36ce1db0b\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 75,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"32befb33-2253-49ad-be88-21f36ce1db0b\",\"status\":\"success\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": true,
+    "image_layer_bytes": 21746176,
+    "image_config_bytes": 1570,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 1.253,
+      "probe_url": "http://127.0.0.1:3000/0",
+      "first_response": "200|0.001058|text/plain; charset=utf-8",
+      "response_sample": "Hello, Alice!",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.000531
+        },
+        {
+          "status": 200,
+          "seconds": 0.000912
+        },
+        {
+          "status": 200,
+          "seconds": 0.000463
+        },
+        {
+          "status": 200,
+          "seconds": 0.000463
+        },
+        {
+          "status": 200,
+          "seconds": 0.00059
+        },
+        {
+          "status": 200,
+          "seconds": 0.000467
+        },
+        {
+          "status": 200,
+          "seconds": 0.000543
+        },
+        {
+          "status": 200,
+          "seconds": 0.000514
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    }
+  },
+  "classification": "build-and-runtime-pass"
+}

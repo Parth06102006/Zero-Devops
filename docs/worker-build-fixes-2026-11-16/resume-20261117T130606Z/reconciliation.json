@@ -1,0 +1,10 @@
+{
+  "at": "20261117T130606Z",
+  "source_commit": "20544b6c95b9cb1536250f2d8a7fef24560ceb04",
+  "binary_sha256": "bea5778308ebf8035c5279bd5cd75bff571c652bd5d5d552fe25c6002611d29c",
+  "archived_containers": [],
+  "interrupted_cases": {},
+  "queues": {},
+  "snapshot_images": [],
+  "completed": false
+}

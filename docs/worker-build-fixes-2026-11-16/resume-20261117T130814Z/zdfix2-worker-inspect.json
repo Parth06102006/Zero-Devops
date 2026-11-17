@@ -1,0 +1,261 @@
+{
+  "Id": "1f8582378e9fe80c7ef863d0f4e2c788c2b611e341c6816ea764e1e50f5935ea",
+  "Created": "2026-11-16T21:06:25.988152006Z",
+  "Path": "/e2e/worker-engine",
+  "Args": [],
+  "State": {
+    "Status": "exited",
+    "Running": false,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 0,
+    "ExitCode": 2,
+    "Error": "",
+    "StartedAt": "2026-11-16T21:06:26.159137092Z",
+    "FinishedAt": "2026-11-16T21:12:49.467799401Z"
+  },
+  "Image": "sha256:8e8dd9c411899b3c8a4fb437213282885360a27dd11232c59f86f3051f4cba54",
+  "ResolvConfPath": "/var/lib/docker/containers/1f8582378e9fe80c7ef863d0f4e2c788c2b611e341c6816ea764e1e50f5935ea/resolv.conf",
+  "HostnamePath": "/var/lib/docker/containers/1f8582378e9fe80c7ef863d0f4e2c788c2b611e341c6816ea764e1e50f5935ea/hostname",
+  "HostsPath": "/var/lib/docker/containers/1f8582378e9fe80c7ef863d0f4e2c788c2b611e341c6816ea764e1e50f5935ea/hosts",
+  "LogPath": "/var/lib/docker/containers/1f8582378e9fe80c7ef863d0f4e2c788c2b611e341c6816ea764e1e50f5935ea/1f8582378e9fe80c7ef863d0f4e2c788c2b611e341c6816ea764e1e50f5935ea-json.log",
+  "Name": "/zdfix2-worker",
+  "RestartCount": 0,
+  "Driver": "overlayfs",
+  "Platform": "linux",
+  "MountLabel": "",
+  "ProcessLabel": "",
+  "AppArmorProfile": "",
+  "ExecIDs": null,
+  "HostConfig": {
+    "Binds": [
+      "/tmp/zd-fix-builds-final-services:/e2e:ro",
+      "/mnt/c/Users/Parth garg/OneDrive/Desktop/Zero_Devops/worker-server/templates:/app/templates:ro",
+      "zdfix2-worker-storage:/var/lib/containers"
+    ],
+    "ContainerIDFile": "",
+    "LogConfig": {
+      "Type": "json-file",
+      "Config": {}
+    },
+    "NetworkMode": "zdfix2-network",
+    "PortBindings": {},
+    "RestartPolicy": {
+      "Name": "no",
+      "MaximumRetryCount": 0
+    },
+    "AutoRemove": false,
+    "VolumeDriver": "",
+    "VolumesFrom": null,
+    "ConsoleSize": [
+      0,
+      0
+    ],
+    "CapAdd": null,
+    "CapDrop": null,
+    "CgroupnsMode": "private",
+    "Dns": [],
+    "DnsOptions": [],
+    "DnsSearch": [],
+    "ExtraHosts": null,
+    "GroupAdd": null,
+    "IpcMode": "private",
+    "Cgroup": "",
+    "Links": null,
+    "OomScoreAdj": 0,
+    "PidMode": "",
+    "Privileged": true,
+    "PublishAllPorts": false,
+    "ReadonlyRootfs": false,
+    "SecurityOpt": [
+      "label=disable"
+    ],
+    "UTSMode": "",
+    "UsernsMode": "",
+    "ShmSize": 67108864,
+    "Runtime": "runc",
+    "Isolation": "",
+    "CpuShares": 0,
+    "Memory": 2147483648,
+    "NanoCpus": 1500000000,
+    "CgroupParent": "",
+    "BlkioWeight": 0,
+    "BlkioWeightDevice": [],
+    "BlkioDeviceReadBps": [],
+    "BlkioDeviceWriteBps": [],
+    "BlkioDeviceReadIOps": [],
+    "BlkioDeviceWriteIOps": [],
+    "CpuPeriod": 0,
+    "CpuQuota": 0,
+    "CpuRealtimePeriod": 0,
+    "CpuRealtimeRuntime": 0,
+    "CpusetCpus": "",
+    "CpusetMems": "",
+    "Devices": [],
+    "DeviceCgroupRules": null,
+    "DeviceRequests": null,
+    "MemoryReservation": 0,
+    "MemorySwap": 4294967296,
+    "MemorySwappiness": null,
+    "OomKillDisable": null,
+    "PidsLimit": 512,
+    "Ulimits": null,
+    "CpuCount": 0,
+    "CpuPercent": 0,
+    "IOMaximumIOps": 0,
+    "IOMaximumBandwidth": 0,
+    "MaskedPaths": null,
+    "ReadonlyPaths": null
+  },
+  "Storage": {
+    "RootFS": {
+      "Snapshot": {
+        "Name": "overlayfs"
+      }
+    }
+  },
+  "Mounts": [
+    {
+      "Type": "bind",
+      "Source": "/tmp/zd-fix-builds-final-services",
+      "Destination": "/e2e",
+      "Mode": "ro",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/mnt/c/Users/Parth garg/OneDrive/Desktop/Zero_Devops/worker-server/templates",
+      "Destination": "/app/templates",
+      "Mode": "ro",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "volume",
+      "Name": "zdfix2-worker-storage",
+      "Source": "/var/lib/docker/volumes/zdfix2-worker-storage/_data",
+      "Destination": "/var/lib/containers",
+      "Driver": "local",
+      "Mode": "z",
+      "RW": true,
+      "Propagation": ""
+    },
+    {
+      "Type": "volume",
+      "Name": "88af96da234eb6382c2695aa2c37b1260f6d644b9c6b5e3f83bb8a2353cc943f",
+      "Source": "/var/lib/docker/volumes/88af96da234eb6382c2695aa2c37b1260f6d644b9c6b5e3f83bb8a2353cc943f/_data",
+      "Destination": "/home/build/.local/share/containers",
+      "Driver": "local",
+      "Mode": "",
+      "RW": true,
+      "Propagation": ""
+    }
+  ],
+  "Config": {
+    "Hostname": "1f8582378e9f",
+    "Domainname": "",
+    "User": "",
+    "AttachStdin": false,
+    "AttachStdout": false,
+    "AttachStderr": false,
+    "Tty": false,
+    "OpenStdin": false,
+    "StdinOnce": false,
+    "Env": [
+      "DATABASE_USER=e2e",
+      "SERVER_INTERNAL_URL=http://mock:8000",
+      "WORKER_INTERNAL_AUTH_TOKEN=test-only",
+      "CLOUDFLARE_ACCOUNT_ID=e2e",
+      "CLOUDFLARE_BUCKET_NAME=testbucket",
+      "BUILDAH_ISOLATION=chroot",
+      "DATABASE_PORT=5432",
+      "GOMAXPROCS=1",
+      "DATABASE_HOST=postgres",
+      "DATABASE_NAME=e2e",
+      "SSL_CERT_FILE=/e2e/mock.crt",
+      "APP_ENV=development",
+      "MAX_RETRIES_COUNT=1",
+      "ALLOW_UNLOCKED_NPM_INSTALL=true",
+      "DATABASE_PASS=e2e",
+      "RABBITMQ_CONNECTION_STRING=amqp://e2e:e2e@rabbit:5672/lane2",
+      "CLOUDFLARE_ACCESS_KEY_ID=test",
+      "CLOUDFLARE_ACCESS_KEY_SECRET=test",
+      "PATH=/usr/local/bin:/usr/bin",
+      "container=oci"
+    ],
+    "Cmd": null,
+    "Image": "zero-devops-e2e-worker:local",
+    "Volumes": {
+      "/home/build/.local/share/containers": {},
+      "/var/lib/containers": {}
+    },
+    "WorkingDir": "/app",
+    "Entrypoint": [
+      "/e2e/worker-engine"
+    ],
+    "Labels": {
+      "built.by.commit": "24ca4c190c70eeb8f35eaeccd7cffb9414b915ec",
+      "built.by.digest": "sha256:113ae526992d1e4d777ecfb152085119d47d9ee32c2b6ffe2e25e16dbd3e953d",
+      "built.by.exec": "containers_build_push.sh",
+      "built.by.logs": "https://cirrus-ci.com/task/6049421198098432",
+      "built.by.repo": "https://github.com/containers/image_build.git",
+      "desktop.docker.io/wsl-distro": "Ubuntu",
+      "io.buildah.version": "1.39.3",
+      "io.containers.capabilities": "CHOWN,DAC_OVERRIDE,FOWNER,FSETID,KILL,NET_BIND_SERVICE,SETFCAP,SETGID,SETPCAP,SETUID,CHOWN,DAC_OVERRIDE,FOWNER,FSETID,KILL,NET_BIND_SERVICE,SETFCAP,SETGID,SETPCAP,SETUID,SYS_CHROOT",
+      "license": "MIT",
+      "name": "fedora",
+      "org.opencontainers.image.authors": "podman@lists.podman.io",
+      "org.opencontainers.image.created": "2025-05-16T15:21:43+00:00",
+      "org.opencontainers.image.documentation": "https://github.com/containers/image_build/blob/24ca4c190c70eeb8f35eaeccd7cffb9414b915ec/buildah/README.md",
+      "org.opencontainers.image.license": "MIT",
+      "org.opencontainers.image.name": "fedora",
+      "org.opencontainers.image.revision": "24ca4c190c70eeb8f35eaeccd7cffb9414b915ec",
+      "org.opencontainers.image.source": "https://github.com/containers/image_build/blob/24ca4c190c70eeb8f35eaeccd7cffb9414b915ec/buildah/",
+      "org.opencontainers.image.url": "https://quay.io/buildah/stable",
+      "org.opencontainers.image.vendor": "Fedora Project",
+      "org.opencontainers.image.version": "1.39.3",
+      "vendor": "Fedora Project",
+      "version": "42",
+      "zero-devops-build-fixes": "20261116"
+    }
+  },
+  "NetworkSettings": {
+    "SandboxID": "",
+    "SandboxKey": "",
+    "Ports": {},
+    "Networks": {
+      "zdfix2-network": {
+        "IPAMConfig": null,
+        "Links": null,
+        "Aliases": null,
+        "DriverOpts": null,
+        "GwPriority": 0,
+        "NetworkID": "9c46d4eb494673c85e0da7ace97a393e229a01e5542340b6032a89afb10ba487",
+        "EndpointID": "",
+        "Gateway": "",
+        "IPAddress": "",
+        "MacAddress": "",
+        "IPPrefixLen": 0,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DNSNames": [
+          "zdfix2-worker",
+          "1f8582378e9f"
+        ]
+      }
+    }
+  },
+  "ImageManifestDescriptor": {
+    "mediaType": "application/vnd.oci.image.manifest.v1+json",
+    "digest": "sha256:226fe11da5bf74071ea05950547fd3f19ecdc9891a08594797a97a7cbb033903",
+    "size": 2757,
+    "platform": {
+      "architecture": "amd64",
+      "os": "linux"
+    }
+  }
+}

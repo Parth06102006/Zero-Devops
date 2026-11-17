@@ -1,0 +1,91 @@
+2026-11-17T13:43:09.108Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-3ee62231-95af-4ae4-98de-cbd2b42ca34b", "delivery_tag": 5}
+2026-11-17T13:43:09.111Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-3ee62231-95af-4ae4-98de-cbd2b42ca34b", "deployment_id": "3ee62231-95af-4ae4-98de-cbd2b42ca34b"}
+2026-11-17T13:43:09.144Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-3ee62231-95af-4ae4-98de-cbd2b42ca34b", "deployment_id": "3ee62231-95af-4ae4-98de-cbd2b42ca34b"}
+2026-11-17T13:43:09.147Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-3ee62231-95af-4ae4-98de-cbd2b42ca34b", "deployment_id": "3ee62231-95af-4ae4-98de-cbd2b42ca34b"}
+2026-11-17T13:43:22.840Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-3ee62231-95af-4ae4-98de-cbd2b42ca34b", "deployment_id": "3ee62231-95af-4ae4-98de-cbd2b42ca34b"}
+2026-11-17T13:43:22.840Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-3ee62231-95af-4ae4-98de-cbd2b42ca34b", "deployment_id": "3ee62231-95af-4ae4-98de-cbd2b42ca34b", "framework": "sveltekit", "package_manager": "npm"}
+2026-11-17T13:43:22.840Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-3ee62231-95af-4ae4-98de-cbd2b42ca34b", "deployment_id": "3ee62231-95af-4ae4-98de-cbd2b42ca34b", "template": "dynamic/Dockerfile.sveltekit.tmpl"}
+2026-11-17T13:43:22.845Z	WARN	deployments/deployments.go:622	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-3ee62231-95af-4ae4-98de-cbd2b42ca34b", "deployment_id": "3ee62231-95af-4ae4-98de-cbd2b42ca34b"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:622
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-17T13:43:22.868Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-3ee62231-95af-4ae4-98de-cbd2b42ca34b", "deployment_id": "3ee62231-95af-4ae4-98de-cbd2b42ca34b", "image_tag": "deploy-3ee62231-95af-4ae4-98de-cbd2b42ca34b:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN ["node","-e","const s=require('/usr/local/lib/node_modules/npm/node_modules/semver');const r=require('./package.json').engines.node;if(!s.satisfies(process.versions.node,r)){console.error('Selected Node '+process.versions.node+' does not satisfy engines.node '+r+'; set a compatible exact .node-version');process.exit(1)}"]
+[1/2] STEP 5/7: RUN npm install --ignore-scripts --package-lock=false
+
+added 209 packages, and audited 210 packages in 2m
+
+71 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 6/7: COPY . .
+[1/2] STEP 7/7: RUN npm run build
+
+> @example/framework-svelte@0.0.1 build
+> astro build
+
+▶ Astro collects anonymous usage data.
+  This information helps us improve Astro.
+  Run "astro telemetry disable" to opt-out.
+  https://astro.build/telemetry
+
+13:45:18 [types] Generated 758ms
+13:45:18 [build] output: "static"
+13:45:18 [build] mode: "static"
+13:45:18 [build] directory: /app/dist/
+13:45:18 [build] Collecting build info...
+13:45:18 [build] ✓ Completed in 979ms.
+13:45:18 [build] Building static entrypoints...
+13:45:18 [vite] ✓ built in 353ms
+13:45:19 [vite] ✓ built in 192ms
+13:45:19 [build] Rearranging server assets...
+
+ generating static routes 
+13:45:19   ├─ /index.html (+44ms) 
+13:45:19 ✓ Completed in 170ms.
+
+13:45:19 [build] ✓ Completed in 870ms.
+13:45:19 [build] 1 page(s) built in 1.85s
+13:45:19 [build] Complete!
+[2/2] STEP 1/10: FROM docker.io/library/node:24-alpine AS runtime
+[2/2] STEP 2/10: WORKDIR /app
+[2/2] STEP 3/10: ENV NODE_ENV=production
+[2/2] STEP 4/10: ENV PORT=3000
+[2/2] STEP 5/10: COPY package*.json ./
+[2/2] STEP 6/10: RUN ["node","-e","const s=require('/usr/local/lib/node_modules/npm/node_modules/semver');const r=require('./package.json').engines.node;if(!s.satisfies(process.versions.node,r)){console.error('Selected Node '+process.versions.node+' does not satisfy engines.node '+r+'; set a compatible exact .node-version');process.exit(1)}"]
+[2/2] STEP 7/10: RUN npm install --ignore-scripts --package-lock=false --omit=dev
+
+added 209 packages, and audited 210 packages in 2m
+
+71 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 8/10: COPY --from=builder /app/build ./build
+Error: building at STEP "COPY --from=builder /app/build ./build": checking on sources under "/var/lib/containers/storage/overlay/8f3060d356e1956efaf212f58dcca988c2cf172e870eb57dc2057c3e30ac84ce/merged": copier: stat: "/app/build": no such file or directory
+2026-11-17T13:47:16.930Z	ERROR	worker/worker.go:109	deployment job failed	{"request_id": "zdfix-3ee62231-95af-4ae4-98de-cbd2b42ca34b", "deployment_id": "3ee62231-95af-4ae4-98de-cbd2b42ca34b", "error": "build failed: exit status 125"}
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:109
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290

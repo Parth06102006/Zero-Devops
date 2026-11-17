@@ -1,0 +1,268 @@
+{
+  "case": {
+    "name": "slim-skeleton",
+    "repo": "slimphp/Slim-Skeleton",
+    "sha": "0ef01549870b3234a3a9f602904a39c3ed73f44c",
+    "path": ".",
+    "stack": "PHP/Slim",
+    "kind": "php",
+    "reference_build": "composer install --no-interaction --no-dev --prefer-dist",
+    "reference_start": "php -S 0.0.0.0:8080 -t public",
+    "port": 8080,
+    "probe": "/",
+    "static_output": null,
+    "context": ".",
+    "env": {}
+  },
+  "reference_qualified": true,
+  "reference_eligibility": "preserved baseline; reference build/runtime not rerun",
+  "baseline_classification": "base-image-resolution",
+  "baseline_worker": {
+    "deployment_id": "379659e0-ca68-4c25-8473-fa5d0b3925e1",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: build failed: exit status 125|",
+    "end_to_end_seconds": 4.266,
+    "resource_samples": [
+      {
+        "seconds": 0.68,
+        "stats": "9.47%|145.2MiB / 2GiB|129",
+        "cgroup": "cpu.stat\nusage_usec 903587452\nuser_usec 589688510\nsystem_usec 313898941\nnice_usec 0\nnr_periods 14480\nnr_throttled 2515\nthrottled_usec 387945911\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1839321088\nmemory.current\n251002880"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "composer",
+      "args": [],
+      "working_dir": ".",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "php",
+    "phase_events": [
+      {
+        "at": "2026-11-16T15:44:51.205Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-16T15:44:51.206Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-16T15:44:51.210Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-16T15:44:51.212Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-16T15:44:52.370Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-16T15:44:52.370Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-16T15:44:52.370Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-16T15:44:52.370Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-16T15:44:52.413Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"379659e0-ca68-4c25-8473-fa5d0b3925e1\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 150,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"379659e0-ca68-4c25-8473-fa5d0b3925e1\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: build failed: exit status 125\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "clone_and_directory_resolution_seconds": 1.158,
+    "failed_build_seconds": 0.043
+  },
+  "started_at": "2026-11-17T14:16:28.017752+00:00",
+  "complete": true,
+  "worker": {
+    "lane": 2,
+    "worker_container": "zdfix2-worker",
+    "broker_vhost": "lane2",
+    "commit_sha": "0ef01549870b3234a3a9f602904a39c3ed73f44c",
+    "deployment_id": "3d86b785-d5c9-4e47-a6ce-2bffcf6f3be8",
+    "state": "success",
+    "database_row": "success||",
+    "end_to_end_seconds": 57.844,
+    "resource_samples": [
+      {
+        "seconds": 0.39,
+        "stats": "8.45%|465.4MiB / 2GiB|90",
+        "cgroup": "cpu.stat\nusage_usec 3083450377\nuser_usec 2296358184\nsystem_usec 787092193\nnice_usec 0\nnr_periods 35002\nnr_throttled 5174\nthrottled_usec 643894021\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n655159296"
+      },
+      {
+        "seconds": 22.09,
+        "stats": "43.28%|520.8MiB / 2GiB|97",
+        "cgroup": "cpu.stat\nusage_usec 3088174923\nuser_usec 2299142909\nsystem_usec 789032013\nnice_usec 0\nnr_periods 35189\nnr_throttled 5174\nthrottled_usec 643894021\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n834260992"
+      },
+      {
+        "seconds": 44.27,
+        "stats": "20.69%|546.2MiB / 2GiB|95",
+        "cgroup": "cpu.stat\nusage_usec 3096699301\nuser_usec 2303874088\nsystem_usec 792825213\nnice_usec 0\nnr_periods 35373\nnr_throttled 5179\nthrottled_usec 644137727\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n1028874240"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "composer",
+      "args": [],
+      "working_dir": ".",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "php",
+    "phase_events": [
+      {
+        "at": "2026-11-17T14:16:28.101Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-17T14:16:28.102Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-17T14:16:28.104Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-17T14:16:28.107Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-17T14:16:29.282Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-17T14:16:29.282Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-17T14:16:29.282Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-17T14:16:29.288Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-17T14:17:24.124Z",
+        "event": "saving image tar"
+      },
+      {
+        "at": "2026-11-17T14:17:24.791Z",
+        "event": "dynamic build finished (stub finalize, no upload yet)"
+      },
+      {
+        "at": "2026-11-17T14:17:24.810Z",
+        "event": "deployment job completed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"3d86b785-d5c9-4e47-a6ce-2bffcf6f3be8\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 75,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"3d86b785-d5c9-4e47-a6ce-2bffcf6f3be8\",\"status\":\"success\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": true,
+    "image_layer_bytes": 110475776,
+    "image_config_bytes": 9294,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 1.338,
+      "probe_url": "http://127.0.0.1:8080/",
+      "first_response": "200|0.068516|text/html; charset=UTF-8",
+      "response_sample": "Hello world!",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.001267
+        },
+        {
+          "status": 200,
+          "seconds": 0.001226
+        },
+        {
+          "status": 200,
+          "seconds": 0.001536
+        },
+        {
+          "status": 200,
+          "seconds": 0.001751
+        },
+        {
+          "status": 200,
+          "seconds": 0.001401
+        },
+        {
+          "status": 200,
+          "seconds": 0.001515
+        },
+        {
+          "status": 200,
+          "seconds": 0.001196
+        },
+        {
+          "status": 200,
+          "seconds": 0.001438
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    }
+  },
+  "classification": "build-and-runtime-pass"
+}

@@ -1,0 +1,32 @@
+{
+  "/": [
+    {
+      "payload_bytes": 76,
+      "redelivered": false,
+      "exchange": "",
+      "routing_key": "deploy.status",
+      "message_count": 0,
+      "properties": {
+        "delivery_mode": 2,
+        "content_type": "application/json"
+      },
+      "payload": "{\"deployment_id\":\"25821ac0-b5d6-407e-90fb-a93cca11550b\",\"status\":\"building\"}",
+      "payload_encoding": "string"
+    }
+  ],
+  "lane2": [
+    {
+      "payload_bytes": 76,
+      "redelivered": false,
+      "exchange": "",
+      "routing_key": "deploy.status",
+      "message_count": 0,
+      "properties": {
+        "delivery_mode": 2,
+        "content_type": "application/json"
+      },
+      "payload": "{\"deployment_id\":\"159d0d6f-aacd-4ad9-8862-bc80f0992412\",\"status\":\"building\"}",
+      "payload_encoding": "string"
+    }
+  ]
+}

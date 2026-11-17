@@ -1,0 +1,344 @@
+{
+  "case": {
+    "name": "react-redux-realworld",
+    "repo": "gothinkster/react-redux-realworld-example-app",
+    "sha": "ee72eba4056392c95a27bc48d385d3f54ba38a18",
+    "path": ".",
+    "stack": "React/CRA",
+    "kind": "node",
+    "reference_build": "npm install --ignore-scripts && npm run build",
+    "reference_start": "npx --yes serve -s build -l 4100",
+    "port": 4100,
+    "probe": "/",
+    "static_output": "build",
+    "context": ".",
+    "env": {}
+  },
+  "reference_qualified": true,
+  "reference_eligibility": "preserved baseline; reference build/runtime not rerun",
+  "baseline_classification": "missing-lockfile/install-policy",
+  "baseline_worker": {
+    "deployment_id": "408ab48e-99eb-465c-af1c-3ea38cef5c33",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: build failed: exit status 1|",
+    "end_to_end_seconds": 4.041,
+    "resource_samples": [
+      {
+        "seconds": 0.53,
+        "stats": "0.35%|193.3MiB / 2GiB|78",
+        "cgroup": "cpu.stat\nusage_usec 281105643\nuser_usec 143015754\nsystem_usec 138089889\nnice_usec 0\nnr_periods 6376\nnr_throttled 503\nthrottled_usec 59985968\nnr_bursts 0\nburst_usec 0\nmemory.peak\n897433600\nmemory.current\n249675776"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": ".",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "react",
+    "phase_events": [
+      {
+        "at": "2026-11-16T14:25:38.141Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-16T14:25:38.145Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-16T14:25:38.148Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-16T14:25:38.150Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-16T14:25:40.052Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-16T14:25:40.052Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-16T14:25:40.052Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-16T14:25:40.066Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-16T14:25:41.804Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"408ab48e-99eb-465c-af1c-3ea38cef5c33\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 148,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"408ab48e-99eb-465c-af1c-3ea38cef5c33\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: build failed: exit status 1\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "clone_and_directory_resolution_seconds": 1.902,
+    "failed_build_seconds": 1.738
+  },
+  "started_at": "2026-11-17T13:34:33.212116+00:00",
+  "complete": true,
+  "worker": {
+    "lane": 1,
+    "worker_container": "zdfix-worker",
+    "broker_vhost": "/",
+    "commit_sha": "ee72eba4056392c95a27bc48d385d3f54ba38a18",
+    "deployment_id": "6708db9f-58e1-49f2-becb-26f4dd1bbd53",
+    "state": "success",
+    "database_row": "success||s3://testbucket/images/6708db9f-58e1-49f2-becb-26f4dd1bbd53.tar",
+    "end_to_end_seconds": 287.867,
+    "resource_samples": [
+      {
+        "seconds": 0.46,
+        "stats": "3.23%|123.7MiB / 2GiB|20",
+        "cgroup": "cpu.stat\nusage_usec 1183457772\nuser_usec 960349098\nsystem_usec 223108673\nnice_usec 0\nnr_periods 12836\nnr_throttled 247\nthrottled_usec 8228169\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1771548672\nmemory.current\n155463680"
+      },
+      {
+        "seconds": 22.61,
+        "stats": "55.03%|345.4MiB / 2GiB|55",
+        "cgroup": "cpu.stat\nusage_usec 1194042064\nuser_usec 966723976\nsystem_usec 227318087\nnice_usec 0\nnr_periods 13027\nnr_throttled 252\nthrottled_usec 8433531\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1771548672\nmemory.current\n698142720"
+      },
+      {
+        "seconds": 44.55,
+        "stats": "19.02%|351.7MiB / 2GiB|55",
+        "cgroup": "cpu.stat\nusage_usec 1197719590\nuser_usec 968974558\nsystem_usec 228745032\nnice_usec 0\nnr_periods 13188\nnr_throttled 252\nthrottled_usec 8433531\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1771548672\nmemory.current\n735784960"
+      },
+      {
+        "seconds": 66.42,
+        "stats": "4.18%|361.2MiB / 2GiB|55",
+        "cgroup": "cpu.stat\nusage_usec 1202023576\nuser_usec 971713706\nsystem_usec 230309869\nnice_usec 0\nnr_periods 13340\nnr_throttled 257\nthrottled_usec 8897007\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1771548672\nmemory.current\n778366976"
+      },
+      {
+        "seconds": 88.37,
+        "stats": "18.13%|370.9MiB / 2GiB|55",
+        "cgroup": "cpu.stat\nusage_usec 1204250671\nuser_usec 973132876\nsystem_usec 231117795\nnice_usec 0\nnr_periods 13465\nnr_throttled 259\nthrottled_usec 9152888\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1771548672\nmemory.current\n799326208"
+      },
+      {
+        "seconds": 110.56,
+        "stats": "19.64%|386.4MiB / 2GiB|55",
+        "cgroup": "cpu.stat\nusage_usec 1209177977\nuser_usec 976370176\nsystem_usec 232807801\nnice_usec 0\nnr_periods 13628\nnr_throttled 264\nthrottled_usec 9562751\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1771548672\nmemory.current\n832106496"
+      },
+      {
+        "seconds": 132.68,
+        "stats": "11.58%|402.1MiB / 2GiB|57",
+        "cgroup": "cpu.stat\nusage_usec 1214581864\nuser_usec 979857444\nsystem_usec 234724420\nnice_usec 0\nnr_periods 13803\nnr_throttled 269\nthrottled_usec 10100313\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1771548672\nmemory.current\n882343936"
+      },
+      {
+        "seconds": 154.72,
+        "stats": "7.48%|419.9MiB / 2GiB|57",
+        "cgroup": "cpu.stat\nusage_usec 1219119186\nuser_usec 982792011\nsystem_usec 236327174\nnice_usec 0\nnr_periods 13968\nnr_throttled 273\nthrottled_usec 10883659\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1771548672\nmemory.current\n909692928"
+      },
+      {
+        "seconds": 177.11,
+        "stats": "9.16%|428.4MiB / 2GiB|57",
+        "cgroup": "cpu.stat\nusage_usec 1223508126\nuser_usec 985700563\nsystem_usec 237807562\nnice_usec 0\nnr_periods 14135\nnr_throttled 278\nthrottled_usec 11270978\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1771548672\nmemory.current\n928681984"
+      },
+      {
+        "seconds": 199.3,
+        "stats": "10.98%|443MiB / 2GiB|57",
+        "cgroup": "cpu.stat\nusage_usec 1228561254\nuser_usec 989055361\nsystem_usec 239505893\nnice_usec 0\nnr_periods 14310\nnr_throttled 284\nthrottled_usec 12006456\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1771548672\nmemory.current\n949714944"
+      },
+      {
+        "seconds": 231.95,
+        "stats": "153.32%|822.7MiB / 2GiB|57",
+        "cgroup": "cpu.stat\nusage_usec 1266604848\nuser_usec 1009798909\nsystem_usec 256805938\nnice_usec 0\nnr_periods 14611\nnr_throttled 504\nthrottled_usec 41001523\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1771548672\nmemory.current\n1484488704"
+      },
+      {
+        "seconds": 256.74,
+        "stats": "115.84%|694.8MiB / 2GiB|74",
+        "cgroup": "cpu.stat\nusage_usec 1295098806\nuser_usec 1025280139\nsystem_usec 269818666\nnice_usec 0\nnr_periods 14851\nnr_throttled 639\nthrottled_usec 50056100\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1771548672\nmemory.current\n1434689536"
+      },
+      {
+        "seconds": 281.84,
+        "stats": "93.86%|578.4MiB / 2GiB|28",
+        "cgroup": "cpu.stat\nusage_usec 1321449502\nuser_usec 1040602053\nsystem_usec 280847448\nnice_usec 0\nnr_periods 15096\nnr_throttled 752\nthrottled_usec 57525969\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1771548672\nmemory.current\n1323921408"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": ".",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "react",
+    "phase_events": [
+      {
+        "at": "2026-11-17T13:34:33.612Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-17T13:34:33.618Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-17T13:34:33.621Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-17T13:34:33.624Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-17T13:34:35.556Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-17T13:34:35.556Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-17T13:34:35.556Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-17T13:34:35.568Z",
+        "event": "unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled"
+      },
+      {
+        "at": "2026-11-17T13:34:35.570Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-17T13:39:18.070Z",
+        "event": "saving image tar"
+      },
+      {
+        "at": "2026-11-17T13:39:19.725Z",
+        "event": "uploading image tar"
+      },
+      {
+        "at": "2026-11-17T13:39:19.725Z",
+        "event": "opening file for upload"
+      },
+      {
+        "at": "2026-11-17T13:39:19.725Z",
+        "event": "uploading to S3"
+      },
+      {
+        "at": "2026-11-17T13:39:20.214Z",
+        "event": "upload complete"
+      },
+      {
+        "at": "2026-11-17T13:39:20.216Z",
+        "event": "marking as finished"
+      },
+      {
+        "at": "2026-11-17T13:39:20.238Z",
+        "event": "deployment job completed"
+      }
+    ],
+    "upload_bytes": 189998127,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"6708db9f-58e1-49f2-becb-26f4dd1bbd53\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 154,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"6708db9f-58e1-49f2-becb-26f4dd1bbd53\",\"status\":\"success\",\"output_url\":\"s3://testbucket/images/6708db9f-58e1-49f2-becb-26f4dd1bbd53.tar\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": true,
+    "image_layer_bytes": 189970432,
+    "image_config_bytes": 7544,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 2.572,
+      "probe_url": "http://127.0.0.1:3000/",
+      "first_response": "200|0.046959|text/html; charset=utf-8",
+      "response_sample": "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><link rel=\"shortcut icon\" href=\"/favicon.ico\"><link rel=\"stylesheet\" href=\"//demo.productionready.io/main.css\"><link href=\"/",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.00593
+        },
+        {
+          "status": 200,
+          "seconds": 0.004269
+        },
+        {
+          "status": 200,
+          "seconds": 0.003264
+        },
+        {
+          "status": 200,
+          "seconds": 0.004432
+        },
+        {
+          "status": 200,
+          "seconds": 0.003718
+        },
+        {
+          "status": 200,
+          "seconds": 0.004848
+        },
+        {
+          "status": 200,
+          "seconds": 0.005806
+        },
+        {
+          "status": 200,
+          "seconds": 0.005555
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    }
+  },
+  "classification": "build-and-runtime-pass"
+}

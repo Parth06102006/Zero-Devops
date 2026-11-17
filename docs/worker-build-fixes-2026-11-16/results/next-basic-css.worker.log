@@ -1,0 +1,11 @@
+2026-11-17T13:59:24.720Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-a5b9ff50-a736-4fe8-abb5-a111f446552d", "delivery_tag": 9}
+2026-11-17T13:59:24.724Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-a5b9ff50-a736-4fe8-abb5-a111f446552d", "deployment_id": "a5b9ff50-a736-4fe8-abb5-a111f446552d"}
+2026-11-17T13:59:24.745Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-a5b9ff50-a736-4fe8-abb5-a111f446552d", "deployment_id": "a5b9ff50-a736-4fe8-abb5-a111f446552d"}
+2026-11-17T13:59:24.749Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-a5b9ff50-a736-4fe8-abb5-a111f446552d", "deployment_id": "a5b9ff50-a736-4fe8-abb5-a111f446552d"}
+2026-11-17T14:00:24.767Z	ERROR	worker/worker.go:109	deployment job failed	{"request_id": "zdfix-a5b9ff50-a736-4fe8-abb5-a111f446552d", "deployment_id": "a5b9ff50-a736-4fe8-abb5-a111f446552d", "error": "git checkout failed: git checkout failed: context deadline exceeded"}
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:109
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290

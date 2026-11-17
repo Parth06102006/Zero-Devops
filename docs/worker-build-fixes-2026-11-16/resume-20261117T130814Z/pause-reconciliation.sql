@@ -1,0 +1,1 @@
+UPDATE deployments SET status='canceled',error_message='Campaign interrupted by explicit user pause; excluded from measured application failures',finished_at=now() WHERE status='building' AND id IN ('25821ac0-b5d6-407e-90fb-a93cca11550b'::uuid,'159d0d6f-aacd-4ad9-8862-bc80f0992412'::uuid) RETURNING id,status;

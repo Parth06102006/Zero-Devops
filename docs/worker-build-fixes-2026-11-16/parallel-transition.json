@@ -1,0 +1,6 @@
+{
+  "active_case": "astro-blog",
+  "stop_before_case": "astro-portfolio",
+  "marker": "docs/worker-build-fixes-2026-11-16/results/astro-portfolio.json",
+  "reason": "user authorized up to four isolated concurrent cases"
+}

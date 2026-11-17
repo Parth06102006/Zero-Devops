@@ -1,0 +1,371 @@
+2026-11-17T13:33:52.000Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-59a5e913-07a1-4f91-86dc-35e7310985b6", "delivery_tag": 3}
+2026-11-17T13:33:52.007Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-59a5e913-07a1-4f91-86dc-35e7310985b6", "deployment_id": "59a5e913-07a1-4f91-86dc-35e7310985b6"}
+2026-11-17T13:33:52.012Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-59a5e913-07a1-4f91-86dc-35e7310985b6", "deployment_id": "59a5e913-07a1-4f91-86dc-35e7310985b6"}
+2026-11-17T13:33:52.015Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-59a5e913-07a1-4f91-86dc-35e7310985b6", "deployment_id": "59a5e913-07a1-4f91-86dc-35e7310985b6"}
+2026-11-17T13:33:53.842Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-59a5e913-07a1-4f91-86dc-35e7310985b6", "deployment_id": "59a5e913-07a1-4f91-86dc-35e7310985b6"}
+2026-11-17T13:33:53.842Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-59a5e913-07a1-4f91-86dc-35e7310985b6", "deployment_id": "59a5e913-07a1-4f91-86dc-35e7310985b6", "framework": "rust", "package_manager": "npm"}
+2026-11-17T13:33:53.842Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-59a5e913-07a1-4f91-86dc-35e7310985b6", "deployment_id": "59a5e913-07a1-4f91-86dc-35e7310985b6", "template": "dynamic/Dockerfile.rust.tmpl"}
+2026-11-17T13:33:53.872Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-59a5e913-07a1-4f91-86dc-35e7310985b6", "deployment_id": "59a5e913-07a1-4f91-86dc-35e7310985b6", "image_tag": "deploy-59a5e913-07a1-4f91-86dc-35e7310985b6:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/rust:1-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: ENV CARGO_BUILD_JOBS=1
+[1/2] STEP 4/7: RUN apk add --no-cache musl-dev
+OK: 198.1 MiB in 31 packages
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN ["cargo","build","--release","--manifest-path","basics/error-handling/Cargo.toml","--package","error-handling","--bin","error-handling","--target-dir","/app/.zerodevops-target","--locked"]
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded actix-rt v2.15.0
+  Downloaded actix-macros v0.2.5
+  Downloaded alloc-stdlib v0.3.0
+  Downloaded alloc-no-stdlib v3.0.0
+  Downloaded anstyle-query v1.1.5
+  Downloaded cpufeatures v0.3.1
+  Downloaded actix-codec v0.5.4
+  Downloaded cfg-if v1.0.5
+  Downloaded colorchoice v1.0.5
+  Downloaded defmt-parser v1.0.0
+  Downloaded errno v0.3.14
+  Downloaded equivalent v1.0.2
+  Downloaded env_filter v2.0.0
+  Downloaded fnv v1.0.7
+  Downloaded futures-core v0.3.34
+  Downloaded futures-task v0.3.34
+  Downloaded adler2 v2.0.1
+  Downloaded httpdate v1.0.3
+  Downloaded actix-utils v3.0.2
+  Downloaded block-buffer v0.12.1
+  Downloaded percent-encoding v2.3.2
+  Downloaded serde_core v1.0.229
+  Downloaded bytestring v1.5.1
+  Downloaded crypto-common v0.2.2
+  Downloaded form_urlencoded v1.2.2
+  Downloaded is_terminal_polyfill v1.70.2
+  Downloaded itoa v1.0.18
+  Downloaded multiversion_no_op v1.0.0
+  Downloaded idna_adapter v1.2.2
+  Downloaded num-conv v0.2.2
+  Downloaded multiversion-macros v0.9.0
+  Downloaded local-channel v0.1.5
+  Downloaded local-waker v0.1.4
+  Downloaded convert_case v0.10.0
+  Downloaded core_detect v1.0.0
+  Downloaded deranged v0.5.8
+  Downloaded futures-sink v0.3.34
+  Downloaded defmt-macros v1.1.1
+  Downloaded env_logger v0.11.11
+  Downloaded actix-service v2.0.3
+  Downloaded anstyle v1.0.14
+  Downloaded anstyle-parse v1.0.0
+  Downloaded digest v0.11.3
+  Downloaded displaydoc v0.2.7
+  Downloaded find-msvc-tools v0.1.13
+  Downloaded jobserver v0.1.35
+  Downloaded mime v0.3.18
+  Downloaded actix-router v0.5.4
+  Downloaded bitflags v1.3.2
+  Downloaded impl-more v0.3.8
+  Downloaded multiversion v0.9.0
+  Downloaded serde_urlencoded v0.7.1
+  Downloaded pin-project-lite v0.2.17
+  Downloaded sha1 v0.11.0
+  Downloaded rustc_version v0.4.1
+  Downloaded potential_utf v0.1.6
+  Downloaded powerfmt v0.2.0
+  Downloaded cookie v0.16.2
+  Downloaded actix-web-codegen v4.4.0
+  Downloaded anstream v1.0.0
+  Downloaded chacha20 v0.10.2
+  Downloaded defmt v1.1.1
+  Downloaded time-core v0.1.9
+  Downloaded tokio-macros v2.7.2
+  Downloaded unicode-xid v0.2.6
+  Downloaded httparse v1.10.1
+  Downloaded hybrid-array v0.4.15
+  Downloaded utf8parse v0.2.2
+  Downloaded utf8_iter v1.0.4
+  Downloaded parking_lot v0.12.5
+  Downloaded yoke-derive v0.8.3
+  Downloaded lock_api v0.4.14
+  Downloaded version_check v0.9.5
+  Downloaded parking_lot_core v0.9.12
+  Downloaded zerofrom-derive v0.1.8
+  Downloaded zerofrom v0.1.8
+  Downloaded actix-server v2.10.0
+  Downloaded litemap v0.8.3
+  Downloaded pkg-config v0.3.34
+  Downloaded crc32fast v1.5.2
+  Downloaded foldhash v0.2.0
+  Downloaded getrandom v0.4.3
+  Downloaded icu_provider v2.3.1
+  Downloaded scopeguard v1.2.0
+  Downloaded once_cell v1.21.4
+  Downloaded language-tags v0.3.2
+  Downloaded log v0.4.34
+  Downloaded shlex v2.0.1
+  Downloaded signal-hook-registry v1.4.8
+  Downloaded simd-adler32 v0.3.10
+  Downloaded slab v0.4.12
+  Downloaded stable_deref_trait v1.2.1
+  Downloaded synstructure v0.14.0
+  Downloaded bitflags v2.13.2
+  Downloaded simdutf8 v0.1.5
+  Downloaded thiserror v2.0.21
+  Downloaded smallvec v1.16.1
+  Downloaded tinystr v0.8.4
+  Downloaded zerovec-derive v0.11.6
+  Downloaded rustversion v1.0.23
+  Downloaded thiserror-impl v2.0.21
+  Downloaded semver v1.0.28
+  Downloaded quote v1.0.47
+  Downloaded zmij v1.0.23
+  Downloaded rand_core v0.10.1
+  Downloaded base64 v0.22.1
+  Downloaded bytes v1.12.1
+  Downloaded writeable v0.6.4
+  Downloaded flate2 v1.1.10
+  Downloaded unicode-ident v1.0.26
+  Downloaded tracing-attributes v0.1.31
+  Downloaded icu_locale_core v2.3.0
+  Downloaded yoke v0.8.3
+  Downloaded icu_normalizer_data v2.3.0
+  Downloaded miniz_oxide v0.9.1
+  Downloaded serde_derive v1.0.229
+  Downloaded time-macros v0.2.32
+  Downloaded zstd-safe v8.2.0
+  Downloaded proc-macro2 v1.0.107
+  Downloaded const-oid v0.10.2
+  Downloaded derive_more v2.1.1
+  Downloaded zstd v0.14.3
+  Downloaded ryu v1.0.23
+  Downloaded icu_collections v2.3.0
+  Downloaded socket2 v0.6.5
+  Downloaded tracing-core v0.1.36
+  Downloaded url v2.5.8
+  Downloaded zerotrie v0.2.5
+  Downloaded derive_more-impl v2.1.1
+  Downloaded cc v1.4.7
+  Downloaded regex-lite v0.1.9
+  Downloaded http v0.2.12
+  Downloaded typenum v1.20.1
+  Downloaded memchr v2.8.3
+  Downloaded serde_json v1.0.154
+  Downloaded unicode-segmentation v1.13.3
+  Downloaded serde v1.0.229
+  Downloaded zerovec v0.11.8
+  Downloaded mio v1.2.3
+  Downloaded tokio-util v0.7.20
+  Downloaded icu_properties v2.3.0
+  Downloaded indexmap v2.14.2
+  Downloaded rand v0.10.3
+  Downloaded jiff-core v0.1.1
+  Downloaded zlib-rs v0.6.8
+  Downloaded hashbrown v0.17.1
+  Downloaded aho-corasick v1.1.5
+  Downloaded idna v1.1.0
+  Downloaded h2 v0.3.27
+  Downloaded actix-http v3.19.0
+  Downloaded icu_properties_data v2.3.0
+  Downloaded regex v1.13.1
+  Downloaded futures-util v0.3.34
+  Downloaded time v0.3.55
+  Downloaded syn v2.0.119
+  Downloaded syn v3.0.6
+  Downloaded brotli-decompressor v6.0.1
+  Downloaded actix-web v4.17.0
+  Downloaded regex-syntax v0.8.11
+  Downloaded tracing v0.1.44
+  Downloaded regex-automata v0.4.18
+  Downloaded zstd-sys v2.1.2+zstd.1.5.7
+  Downloaded icu_normalizer v2.3.0
+  Downloaded encoding_rs v0.8.41
+  Downloaded tokio v1.53.3
+  Downloaded jiff v0.2.37
+  Downloaded brotli v9.0.0
+  Downloaded libc v0.2.189
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.26
+   Compiling quote v1.0.47
+   Compiling syn v3.0.6
+   Compiling libc v0.2.189
+   Compiling cfg-if v1.0.5
+   Compiling synstructure v0.14.0
+   Compiling zerofrom-derive v0.1.8
+   Compiling zerofrom v0.1.8
+   Compiling yoke-derive v0.8.3
+   Compiling stable_deref_trait v1.2.1
+   Compiling smallvec v1.16.1
+   Compiling yoke v0.8.3
+   Compiling pin-project-lite v0.2.17
+   Compiling log v0.4.34
+   Compiling zerovec-derive v0.11.6
+   Compiling serde_core v1.0.229
+   Compiling zerovec v0.11.8
+   Compiling displaydoc v0.2.7
+   Compiling scopeguard v1.2.0
+   Compiling parking_lot_core v0.9.12
+   Compiling bytes v1.12.1
+   Compiling syn v2.0.119
+   Compiling memchr v2.8.3
+   Compiling futures-core v0.3.34
+   Compiling jobserver v0.1.35
+   Compiling lock_api v0.4.14
+   Compiling errno v0.3.14
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.13
+   Compiling rustversion v1.0.23
+   Compiling cc v1.4.7
+   Compiling signal-hook-registry v1.4.8
+   Compiling parking_lot v0.12.5
+   Compiling tinystr v0.8.4
+   Compiling mio v1.2.3
+   Compiling socket2 v0.6.5
+   Compiling tokio-macros v2.7.2
+   Compiling once_cell v1.21.4
+   Compiling pkg-config v0.3.34
+   Compiling litemap v0.8.3
+   Compiling writeable v0.6.4
+   Compiling icu_locale_core v2.3.0
+   Compiling zstd-sys v2.1.2+zstd.1.5.7
+   Compiling tracing-core v0.1.36
+   Compiling tokio v1.53.3
+   Compiling tracing-attributes v0.1.31
+   Compiling zerotrie v0.2.5
+   Compiling potential_utf v0.1.6
+   Compiling typenum v1.20.1
+   Compiling icu_normalizer_data v2.3.0
+   Compiling icu_properties_data v2.3.0
+   Compiling utf8_iter v1.0.4
+   Compiling itoa v1.0.18
+   Compiling icu_collections v2.3.0
+   Compiling hybrid-array v0.4.15
+   Compiling icu_provider v2.3.1
+   Compiling tracing v0.1.44
+   Compiling aho-corasick v1.1.5
+   Compiling futures-sink v0.3.34
+   Compiling percent-encoding v2.3.2
+   Compiling regex-syntax v0.8.11
+   Compiling regex-automata v0.4.18
+   Compiling serde v1.0.229
+   Compiling futures-task v0.3.34
+   Compiling unicode-segmentation v1.13.3
+   Compiling slab v0.4.12
+   Compiling getrandom v0.4.3
+   Compiling cpufeatures v0.3.1
+   Compiling alloc-no-stdlib v3.0.0
+   Compiling zstd-safe v8.2.0
+   Compiling rand_core v0.10.1
+   Compiling fnv v1.0.7
+   Compiling crc32fast v1.5.2
+   Compiling http v0.2.12
+   Compiling alloc-stdlib v0.3.0
+   Compiling futures-util v0.3.34
+   Compiling convert_case v0.10.0
+   Compiling icu_properties v2.3.0
+   Compiling icu_normalizer v2.3.0
+   Compiling regex v1.13.1
+   Compiling tokio-util v0.7.20
+   Compiling block-buffer v0.12.1
+   Compiling crypto-common v0.2.2
+   Compiling multiversion-macros v0.9.0
+   Compiling encoding_rs v0.8.41
+   Compiling serde_derive v1.0.229
+   Compiling local-waker v0.1.4
+   Compiling simd-adler32 v0.3.10
+   Compiling unicode-xid v0.2.6
+   Compiling version_check v0.9.5
+   Compiling const-oid v0.10.2
+   Compiling zmij v1.0.23
+   Compiling num-conv v0.2.2
+   Compiling equivalent v1.0.2
+   Compiling hashbrown v0.17.1
+   Compiling time-core v0.1.9
+   Compiling httparse v1.10.1
+   Compiling adler2 v2.0.1
+   Compiling miniz_oxide v0.9.1
+   Compiling time-macros v0.2.32
+   Compiling indexmap v2.14.2
+   Compiling digest v0.11.3
+   Compiling cookie v0.16.2
+   Compiling derive_more-impl v2.1.1
+   Compiling bytestring v1.5.1
+   Compiling multiversion v0.9.0
+   Compiling idna_adapter v1.2.2
+   Compiling brotli-decompressor v6.0.1
+   Compiling chacha20 v0.10.2
+   Compiling form_urlencoded v1.2.2
+   Compiling actix-service v2.0.3
+   Compiling core_detect v1.0.0
+   Compiling deranged v0.5.8
+   Compiling multiversion_no_op v1.0.0
+   Compiling utf8parse v0.2.2
+   Compiling simdutf8 v0.1.5
+   Compiling bitflags v2.13.2
+   Compiling powerfmt v0.2.0
+   Compiling serde_json v1.0.154
+   Compiling regex-lite v0.1.9
+   Compiling time v0.3.55
+   Compiling actix-router v0.5.4
+   Compiling actix-codec v0.5.4
+   Compiling anstyle-parse v1.0.0
+   Compiling rand v0.10.3
+   Compiling flate2 v1.1.10
+   Compiling brotli v9.0.0
+   Compiling idna v1.1.0
+   Compiling zstd v0.14.3
+   Compiling derive_more v2.1.1
+   Compiling sha1 v0.11.0
+   Compiling h2 v0.3.27
+   Compiling actix-utils v3.0.2
+   Compiling local-channel v0.1.5
+   Compiling actix-rt v2.15.0
+   Compiling mime v0.3.18
+   Compiling jiff-core v0.1.1
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling ryu v1.0.23
+   Compiling base64 v0.22.1
+   Compiling httpdate v1.0.3
+   Compiling anstyle-query v1.1.5
+   Compiling language-tags v0.3.2
+   Compiling foldhash v0.2.0
+   Compiling colorchoice v1.0.5
+   Compiling anstyle v1.0.14
+   Compiling anstream v1.0.0
+   Compiling actix-http v3.19.0
+   Compiling serde_urlencoded v0.7.1
+   Compiling jiff v0.2.37
+   Compiling actix-server v2.10.0
+   Compiling url v2.5.8
+   Compiling actix-web-codegen v4.4.0
+   Compiling env_filter v2.0.0
+   Compiling actix-macros v0.2.5
+   Compiling impl-more v0.3.8
+   Compiling actix-web v4.17.0
+   Compiling env_logger v0.11.11
+   Compiling error-handling v0.0.0 (/app/basics/error-handling)
+    Finished `release` profile [optimized] target(s) in 11m 29s
+[1/2] STEP 7/7: RUN cp /app/.zerodevops-target/release/error-handling /app/server
+[2/2] STEP 1/7: FROM docker.io/library/alpine:3.20
+[2/2] STEP 2/7: WORKDIR /app
+[2/2] STEP 3/7: RUN addgroup -S app && adduser -S app -G app
+[2/2] STEP 4/7: COPY --from=builder /app/server /app/server
+[2/2] STEP 5/7: USER app
+[2/2] STEP 6/7: EXPOSE 8080
+[2/2] STEP 7/7: CMD ["/app/server"]
+[2/2] COMMIT deploy-59a5e913-07a1-4f91-86dc-35e7310985b6:latest
+Getting image source signatures
+Copying blob sha256:08bc4e534116aa76b16015484b82eac51f9a593416feae9296c8a2d4bb7aa4a2
+Copying blob sha256:75a30edc0bb5456f5c866accce6e3de8afa7dbfc20a4d621f068578f3db84437
+Copying config sha256:c37c2c31de8caacec83581ccd2a83de00aa2ba40548c3a64f4ee1d3f799384cb
+Writing manifest to image destination
+--> c37c2c31de8c
+Successfully tagged localhost/deploy-59a5e913-07a1-4f91-86dc-35e7310985b6:latest
+c37c2c31de8caacec83581ccd2a83de00aa2ba40548c3a64f4ee1d3f799384cb
+2026-11-17T13:45:32.115Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-59a5e913-07a1-4f91-86dc-35e7310985b6", "deployment_id": "59a5e913-07a1-4f91-86dc-35e7310985b6", "tar_path": "/tmp/zerodevops-build/59a5e913-07a1-4f91-86dc-35e7310985b6/basics/error-handling/59a5e913-07a1-4f91-86dc-35e7310985b6.tar"}
+Getting image source signatures
+Copying blob sha256:08bc4e534116aa76b16015484b82eac51f9a593416feae9296c8a2d4bb7aa4a2
+Copying blob sha256:75a30edc0bb5456f5c866accce6e3de8afa7dbfc20a4d621f068578f3db84437
+Copying config sha256:c37c2c31de8caacec83581ccd2a83de00aa2ba40548c3a64f4ee1d3f799384cb
+Writing manifest to image destination
+2026-11-17T13:45:32.301Z	INFO	deployments/deployments.go:572	dynamic build finished (stub finalize, no upload yet)	{"request_id": "zdfix-59a5e913-07a1-4f91-86dc-35e7310985b6", "deployment_id": "59a5e913-07a1-4f91-86dc-35e7310985b6"}
+2026-11-17T13:45:32.386Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-59a5e913-07a1-4f91-86dc-35e7310985b6", "deployment_id": "59a5e913-07a1-4f91-86dc-35e7310985b6"}

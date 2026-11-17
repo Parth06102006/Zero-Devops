@@ -1,0 +1,29 @@
+2026-11-17T14:17:37.570Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-290d878b-89e7-4729-93ac-9e1ba4cf2174", "delivery_tag": 22}
+2026-11-17T14:17:37.570Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-290d878b-89e7-4729-93ac-9e1ba4cf2174", "deployment_id": "290d878b-89e7-4729-93ac-9e1ba4cf2174"}
+2026-11-17T14:17:37.573Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-290d878b-89e7-4729-93ac-9e1ba4cf2174", "deployment_id": "290d878b-89e7-4729-93ac-9e1ba4cf2174"}
+2026-11-17T14:17:37.575Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-290d878b-89e7-4729-93ac-9e1ba4cf2174", "deployment_id": "290d878b-89e7-4729-93ac-9e1ba4cf2174"}
+2026-11-17T14:17:39.140Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-290d878b-89e7-4729-93ac-9e1ba4cf2174", "deployment_id": "290d878b-89e7-4729-93ac-9e1ba4cf2174"}
+2026-11-17T14:17:39.140Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-290d878b-89e7-4729-93ac-9e1ba4cf2174", "deployment_id": "290d878b-89e7-4729-93ac-9e1ba4cf2174", "framework": "python", "package_manager": "npm"}
+2026-11-17T14:17:39.141Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-290d878b-89e7-4729-93ac-9e1ba4cf2174", "deployment_id": "290d878b-89e7-4729-93ac-9e1ba4cf2174", "template": "dynamic/Dockerfile.python.tmpl"}
+2026-11-17T14:17:39.148Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-290d878b-89e7-4729-93ac-9e1ba4cf2174", "deployment_id": "290d878b-89e7-4729-93ac-9e1ba4cf2174", "image_tag": "deploy-290d878b-89e7-4729-93ac-9e1ba4cf2174:latest"}
+STEP 1/9: FROM docker.io/library/python:3.12-slim AS base
+Trying to pull docker.io/library/python:3.12-slim...
+Getting image source signatures
+Copying blob sha256:05e0eee5572e9c9f50408a2132590133b830a668a1cf2ff2b150f19c57707e2b
+Copying blob sha256:37fb86c2a767b88d500c6872195f88078f64765fe0d2f9cc375cc2efbd4c0a41
+Copying blob sha256:68bced9e0afa4479df17c3646e27c7c7e9ce9ba70c0e6c73b6826487b89037d9
+Copying blob sha256:2dc99d2d0a39fce31e37615eb4c932e16dcc4c2b0ce9993714280081b5dbe085
+Copying config sha256:78976a69c067520ef8be34cde307ef9f6fea6dcefa50edb57039773d241ca0db
+Writing manifest to image destination
+STEP 2/9: WORKDIR /app
+STEP 3/9: ENV PYTHONDONTWRITEBYTECODE=1
+STEP 4/9: ENV PYTHONUNBUFFERED=1
+STEP 5/9: COPY requirements.txt ./
+Error: building at STEP "COPY requirements.txt ./": checking on sources under "/tmp/zerodevops-build/290d878b-89e7-4729-93ac-9e1ba4cf2174/examples/tutorial": copier: stat: "/requirements.txt": no such file or directory
+2026-11-17T14:18:01.785Z	ERROR	worker/worker.go:109	deployment job failed	{"request_id": "zdfix-290d878b-89e7-4729-93ac-9e1ba4cf2174", "deployment_id": "290d878b-89e7-4729-93ac-9e1ba4cf2174", "error": "build failed: exit status 125"}
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:109
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290

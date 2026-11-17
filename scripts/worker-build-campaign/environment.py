@@ -4,7 +4,7 @@ import argparse, datetime, hashlib, json, os, pathlib, shutil, subprocess, time
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 OUT = REPO / 'docs/worker-build-fixes-2026-11-16'
-TEMP = pathlib.Path('/tmp/zd-fix-builds-final-services')
+TEMP = pathlib.Path('/tmp/zd-fix-builds-resumed-20261117-services')
 IMAGE = 'zero-devops-e2e-worker:local'
 LABEL = 'zero-devops-build-fixes=20261116'
 CONTAINERS = ['zdfix-worker', 'zdfix-mock', 'zdfix-db', 'zdfix-rabbit', 'zdfix-cold', 'zdfix-native-tests']
@@ -152,25 +152,71 @@ def fix_upload_endpoint():
     docker('restart','zdfix-mock');docker('restart','zdfix-worker')
     print('fake upload endpoint aliases and certificate repaired before application jobs',flush=True)
 
+def add_lane(lane):
+    if lane not in [2,3,4]:raise RuntimeError('extra lane must be 2, 3, or 4')
+    prefix='zdfix'+str(lane);network=prefix+'-network';worker=prefix+'-worker';mock=prefix+'-mock';volume=prefix+'-worker-storage';vhost='lane'+str(lane)
+    for kind,name in [('container',worker),('container',mock),('network',network),('volume',volume)]:
+        if subprocess.run(['docker',kind,'inspect',name],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0:raise RuntimeError('refusing existing resource '+name)
+    for service in ['zdfix-db','zdfix-rabbit']:
+        if docker('inspect',service,'--format','{{index .Config.Labels "zero-devops-build-fixes"}}')!='20261116':raise RuntimeError('unowned supporting service')
+    docker('network','create','--label',LABEL,network)
+    docker('volume','create','--label',LABEL,volume)
+    docker('network','connect','--alias','postgres',network,'zdfix-db')
+    docker('network','connect','--alias','rabbit',network,'zdfix-rabbit')
+    docker('exec','zdfix-rabbit','rabbitmqctl','add_vhost',vhost)
+    docker('exec','zdfix-rabbit','rabbitmqctl','set_permissions','-p',vhost,'e2e','.*','.*','.*')
+    docker('run','-d','--label',LABEL,'--network',network,'--name',mock,'--network-alias','mock',
+           '--network-alias','e2e.r2.cloudflarestorage.com','--network-alias','testbucket.e2e.r2.cloudflarestorage.com',
+           '--cpus','0.5','--memory','128m','--pids-limit','64','-v',str(TEMP)+':/e2e:ro',
+           '-v',str(REPO/'scripts/worker-build-campaign')+':/harness:ro','--entrypoint','python3',IMAGE,'/harness/mock_services.py')
+    original=json.loads((OUT/'environment.json').read_text())
+    env=dict(original['worker_environment']);env['RABBITMQ_CONNECTION_STRING']='amqp://e2e:e2e@rabbit:5672/'+vhost
+    envargs=[item for k,v in env.items() for item in ['-e',k+'='+v]]
+    docker('run','-d','--label',LABEL,'--network',network,'--name',worker,'--privileged','--cpus','1.5',
+           '--memory','2g','--pids-limit','512','-v',volume+':/var/lib/containers','-v',str(TEMP)+':/e2e:ro',
+           '-v',str(REPO/'worker-server/templates')+':/app/templates:ro','--entrypoint','/e2e/worker-engine',*envargs,IMAGE)
+    for _ in range(60):
+        if 'Worker consumer registered' in docker('logs',worker):break
+        time.sleep(1)
+    else:raise RuntimeError('extra worker did not become ready')
+    directory=OUT/'lanes';directory.mkdir(exist_ok=True)
+    metadata={'lane':lane,'containers':[worker,mock],'volumes':[volume],'network':network,'broker_vhost':vhost,
+              'shared_test_services':['zdfix-db','zdfix-rabbit'],'source_commit':original['source_commit'],
+              'initial_images':json.loads(docker('exec',worker,'buildah','images','--json')),
+              'binary_sha256':docker('exec',worker,'sha256sum','/e2e/worker-engine').split()[0],
+              'limits':json.loads(docker('inspect',worker,'--format','{"nano_cpus":{{.HostConfig.NanoCpus}},"memory_bytes":{{.HostConfig.Memory}},"pids":{{.HostConfig.PidsLimit}}}'))}
+    (directory/('lane'+str(lane)+'.json')).write_text(json.dumps(metadata,indent=2))
+    print('isolated lane ready:',lane,flush=True)
+
 def stop():
     removed=[]
     anonymous=[]
-    for name in CONTAINERS:
+    extra=[]
+    for path in (OUT/'lanes').glob('lane*.json'):
+        extra.append(json.loads(path.read_text()))
+    archived=[]
+    for path in OUT.glob('resume-*/reconciliation.json'):
+        archived.extend(json.loads(path.read_text()).get('archived_containers',[]))
+    containers=archived+[c for lane in extra for c in lane['containers']]+CONTAINERS
+    volumes=[v for lane in extra for v in lane['volumes']]+VOLUMES
+    for name in containers:
         result=subprocess.run(['docker','inspect','--format','{{index .Config.Labels "zero-devops-build-fixes"}}',name],text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         if result.returncode:continue
         if result.stdout.strip()!='20261116':raise RuntimeError('refusing unrelated resource '+name)
         mounts=json.loads(docker('inspect',name,'--format','{{json .Mounts}}'))
-        anonymous.extend(m['Name'] for m in mounts if m['Type']=='volume' and m['Name'] not in VOLUMES)
+        anonymous.extend(m['Name'] for m in mounts if m['Type']=='volume' and m['Name'] not in volumes)
         docker('rm','-f','-v',name);removed.append(name)
-    for name in VOLUMES:
+    for name in volumes:
         result=subprocess.run(['docker','volume','inspect','--format','{{index .Labels "zero-devops-build-fixes"}}',name],text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         if result.returncode:continue
         if result.stdout.strip()!='20261116':raise RuntimeError('refusing unrelated volume '+name)
         docker('volume','rm',name)
-    result=subprocess.run(['docker','network','inspect','--format','{{index .Labels "zero-devops-build-fixes"}}','zdfix-network'],text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-    if result.returncode==0 and result.stdout.strip()=='20261116':docker('network','rm','zdfix-network')
-    (OUT/'cleanup.json').write_text(json.dumps({'containers_removed':removed,'named_volumes_removed':VOLUMES,'anonymous_volumes_removed':anonymous,'at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'no_global_prune':True},indent=2))
+    for network in [lane['network'] for lane in extra]+['zdfix-network']:
+        result=subprocess.run(['docker','network','inspect','--format','{{index .Labels "zero-devops-build-fixes"}}',network],text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        if result.returncode==0 and result.stdout.strip()=='20261116':docker('network','rm',network)
+    (OUT/'cleanup.json').write_text(json.dumps({'containers_removed':removed,'named_volumes_removed':volumes,'anonymous_volumes_removed':anonymous,'at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'no_global_prune':True},indent=2))
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['setup','recover-startup','fix-upload-endpoint','cold-pulls','stop']);args=parser.parse_args()
-    {'setup':setup,'recover-startup':recover_startup,'fix-upload-endpoint':fix_upload_endpoint,'cold-pulls':cold_pulls,'stop':stop}[args.action]()
+    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['setup','recover-startup','fix-upload-endpoint','cold-pulls','add-lane','stop']);parser.add_argument('--lane',type=int);args=parser.parse_args()
+    if args.action=='add-lane':add_lane(args.lane)
+    else:{'setup':setup,'recover-startup':recover_startup,'fix-upload-endpoint':fix_upload_endpoint,'cold-pulls':cold_pulls,'stop':stop}[args.action]()

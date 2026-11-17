@@ -1,0 +1,320 @@
+{
+  "case": {
+    "name": "gs-serving-web-content",
+    "repo": "spring-guides/gs-serving-web-content",
+    "sha": "389c81105e7fbd3485b1885e71ba7ada1e37cfbf",
+    "path": "complete",
+    "stack": "Java/Spring",
+    "kind": "java",
+    "reference_build": "chmod +x mvnw && ./mvnw -q -DskipTests package",
+    "reference_start": "java -jar $(find target -maxdepth 1 -name \"*.jar\" ! -name \"*.original\" | head -1)",
+    "port": 8080,
+    "probe": "/greeting",
+    "static_output": null,
+    "context": "complete",
+    "env": {
+      "JAVA_TOOL_OPTIONS": "-XX:ActiveProcessorCount=1 -Xmx512m"
+    }
+  },
+  "reference_qualified": true,
+  "reference_eligibility": "preserved baseline; reference build/runtime not rerun",
+  "baseline_classification": "base-image-resolution",
+  "baseline_worker": {
+    "deployment_id": "cb0ab67a-e9a1-46b2-9d1f-80aad5982270",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: build failed: exit status 125|",
+    "end_to_end_seconds": 4.225,
+    "resource_samples": [
+      {
+        "seconds": 0.67,
+        "stats": "0.61%|126.6MiB / 2GiB|125",
+        "cgroup": "cpu.stat\nusage_usec 889053214\nuser_usec 580904950\nsystem_usec 308148264\nnice_usec 0\nnr_periods 13973\nnr_throttled 2514\nthrottled_usec 387943204\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1839321088\nmemory.current\n146939904"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "mvn",
+      "args": [],
+      "working_dir": "complete",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "java-maven",
+    "phase_events": [
+      {
+        "at": "2026-11-16T15:41:25.988Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-16T15:41:25.989Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-16T15:41:25.993Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-16T15:41:25.996Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-16T15:41:27.863Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-16T15:41:27.864Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-16T15:41:27.864Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-16T15:41:27.864Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-16T15:41:27.919Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"cb0ab67a-e9a1-46b2-9d1f-80aad5982270\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 150,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"cb0ab67a-e9a1-46b2-9d1f-80aad5982270\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: build failed: exit status 125\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "clone_and_directory_resolution_seconds": 1.867,
+    "failed_build_seconds": 0.055
+  },
+  "started_at": "2026-11-17T14:09:24.737424+00:00",
+  "complete": true,
+  "worker": {
+    "lane": 2,
+    "worker_container": "zdfix2-worker",
+    "broker_vhost": "lane2",
+    "commit_sha": "389c81105e7fbd3485b1885e71ba7ada1e37cfbf",
+    "deployment_id": "34ffd834-53d0-4b5a-af1f-f9ba62756e51",
+    "state": "success",
+    "database_row": "success||",
+    "end_to_end_seconds": 283.52,
+    "resource_samples": [
+      {
+        "seconds": 0.4,
+        "stats": "1.27%|331MiB / 2GiB|78",
+        "cgroup": "cpu.stat\nusage_usec 2946245465\nuser_usec 2210642266\nsystem_usec 735603199\nnice_usec 0\nnr_periods 31310\nnr_throttled 4901\nthrottled_usec 626191181\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n382181376"
+      },
+      {
+        "seconds": 23.69,
+        "stats": "22.46%|363.2MiB / 2GiB|79",
+        "cgroup": "cpu.stat\nusage_usec 2951297577\nuser_usec 2213658741\nsystem_usec 737638836\nnice_usec 0\nnr_periods 31533\nnr_throttled 4901\nthrottled_usec 626191181\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n530845696"
+      },
+      {
+        "seconds": 47.04,
+        "stats": "11.69%|365.7MiB / 2GiB|79",
+        "cgroup": "cpu.stat\nusage_usec 2956631523\nuser_usec 2216905617\nsystem_usec 739725906\nnice_usec 0\nnr_periods 31765\nnr_throttled 4901\nthrottled_usec 626191181\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n610177024"
+      },
+      {
+        "seconds": 70.55,
+        "stats": "44.35%|382.2MiB / 2GiB|83",
+        "cgroup": "cpu.stat\nusage_usec 2960457612\nuser_usec 2219411011\nsystem_usec 741046601\nnice_usec 0\nnr_periods 31991\nnr_throttled 4901\nthrottled_usec 626191181\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n692510720"
+      },
+      {
+        "seconds": 92.02,
+        "stats": "2.46%|518.4MiB / 2GiB|103",
+        "cgroup": "cpu.stat\nusage_usec 2965366369\nuser_usec 2222654000\nsystem_usec 742712369\nnice_usec 0\nnr_periods 32125\nnr_throttled 4901\nthrottled_usec 626191181\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n941240320"
+      },
+      {
+        "seconds": 115.63,
+        "stats": "13.09%|523.2MiB / 2GiB|103",
+        "cgroup": "cpu.stat\nusage_usec 2967880414\nuser_usec 2224021453\nsystem_usec 743858961\nnice_usec 0\nnr_periods 32316\nnr_throttled 4901\nthrottled_usec 626191181\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n1168302080"
+      },
+      {
+        "seconds": 137.18,
+        "stats": "8.75%|528.7MiB / 2GiB|103",
+        "cgroup": "cpu.stat\nusage_usec 2971495561\nuser_usec 2225780006\nsystem_usec 745715554\nnice_usec 0\nnr_periods 32531\nnr_throttled 4901\nthrottled_usec 626191181\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n1427603456"
+      },
+      {
+        "seconds": 160.79,
+        "stats": "8.57%|523.4MiB / 2GiB|103",
+        "cgroup": "cpu.stat\nusage_usec 2974191417\nuser_usec 2226927624\nsystem_usec 747263793\nnice_usec 0\nnr_periods 32764\nnr_throttled 4901\nthrottled_usec 626191181\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n1350676480"
+      },
+      {
+        "seconds": 182.29,
+        "stats": "77.57%|508.7MiB / 2GiB|120",
+        "cgroup": "cpu.stat\nusage_usec 2977563792\nuser_usec 2228398962\nsystem_usec 749164829\nnice_usec 0\nnr_periods 32975\nnr_throttled 4902\nthrottled_usec 626242137\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n1401675776"
+      },
+      {
+        "seconds": 206.01,
+        "stats": "37.08%|648MiB / 2GiB|127",
+        "cgroup": "cpu.stat\nusage_usec 2996947105\nuser_usec 2243377122\nsystem_usec 753569983\nnice_usec 0\nnr_periods 33210\nnr_throttled 4956\nthrottled_usec 629287944\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n1499529216"
+      },
+      {
+        "seconds": 228.34,
+        "stats": "12.65%|782.5MiB / 2GiB|122",
+        "cgroup": "cpu.stat\nusage_usec 3007696762\nuser_usec 2251343742\nsystem_usec 756353019\nnice_usec 0\nnr_periods 33382\nnr_throttled 4991\nthrottled_usec 632347626\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n1500065792"
+      },
+      {
+        "seconds": 252.02,
+        "stats": "34.82%|539.3MiB / 2GiB|82",
+        "cgroup": "cpu.stat\nusage_usec 3012893709\nuser_usec 2254641271\nsystem_usec 758252438\nnice_usec 0\nnr_periods 33559\nnr_throttled 4996\nthrottled_usec 632518351\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n1183997952"
+      },
+      {
+        "seconds": 275.61,
+        "stats": "18.85%|548.3MiB / 2GiB|82",
+        "cgroup": "cpu.stat\nusage_usec 3018343956\nuser_usec 2258356859\nsystem_usec 759987097\nnice_usec 0\nnr_periods 33795\nnr_throttled 4996\nthrottled_usec 632518351\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n1272696832"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "mvn",
+      "args": [],
+      "working_dir": "complete",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "java-maven",
+    "phase_events": [
+      {
+        "at": "2026-11-17T14:09:24.846Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-17T14:09:24.859Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-17T14:09:24.861Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-17T14:09:24.864Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-17T14:09:26.263Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-17T14:09:26.263Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-17T14:09:26.263Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-17T14:09:26.278Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-17T14:14:06.866Z",
+        "event": "saving image tar"
+      },
+      {
+        "at": "2026-11-17T14:14:07.928Z",
+        "event": "dynamic build finished (stub finalize, no upload yet)"
+      },
+      {
+        "at": "2026-11-17T14:14:07.959Z",
+        "event": "deployment job completed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"34ffd834-53d0-4b5a-af1f-f9ba62756e51\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 75,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"34ffd834-53d0-4b5a-af1f-f9ba62756e51\",\"status\":\"success\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": true,
+    "image_layer_bytes": 231078400,
+    "image_config_bytes": 5150,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 7.651,
+      "probe_url": "http://127.0.0.1:8080/greeting",
+      "first_response": "200|0.674432|text/html;charset=UTF-8",
+      "response_sample": "<!DOCTYPE HTML>\n<html>\n<head> \n    <title>Getting Started: Serving Web Content</title> \n    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n</head>\n<body>\n    <p >Hello, World!</p>\n</body>\n</html>",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.003566
+        },
+        {
+          "status": 200,
+          "seconds": 0.003644
+        },
+        {
+          "status": 200,
+          "seconds": 0.003367
+        },
+        {
+          "status": 200,
+          "seconds": 0.003517
+        },
+        {
+          "status": 200,
+          "seconds": 0.003782
+        },
+        {
+          "status": 200,
+          "seconds": 0.004011
+        },
+        {
+          "status": 200,
+          "seconds": 0.00353
+        },
+        {
+          "status": 200,
+          "seconds": 0.003386
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    }
+  },
+  "classification": "build-and-runtime-pass"
+}

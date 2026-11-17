@@ -1,0 +1,197 @@
+{
+  "case": {
+    "name": "dotnet-insights-web",
+    "repo": "dotnet/samples",
+    "sha": "3810558800760fc39282cc939bac645735514209",
+    "path": "azure/app-insights-aspnet-core-quickstart",
+    "stack": "C#/ASP.NET",
+    "kind": "dotnet",
+    "reference_build": "dotnet publish -c Release -o /out",
+    "reference_start": "dotnet /out/app-insights-aspnet-core-quickstart.dll",
+    "port": 8080,
+    "probe": "/",
+    "static_output": null,
+    "context": "azure/app-insights-aspnet-core-quickstart",
+    "env": {
+      "ASPNETCORE_URLS": "http://0.0.0.0:8080"
+    }
+  },
+  "reference_qualified": true,
+  "reference_eligibility": "preserved baseline; reference build/runtime not rerun",
+  "baseline_classification": "detection-unsupported",
+  "baseline_worker": {
+    "deployment_id": "53faebf3-5381-4d9e-a3c0-523c14dc046e",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: clone/prepare failed: no framework detected|",
+    "end_to_end_seconds": 50.727,
+    "resource_samples": [
+      {
+        "seconds": 0.82,
+        "stats": "0.70%|118.7MiB / 2GiB|132",
+        "cgroup": "cpu.stat\nusage_usec 904245745\nuser_usec 589906125\nsystem_usec 314339619\nnice_usec 0\nnr_periods 14644\nnr_throttled 2515\nthrottled_usec 387945911\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1839321088\nmemory.current\n133779456"
+      },
+      {
+        "seconds": 22.95,
+        "stats": "30.13%|153MiB / 2GiB|134",
+        "cgroup": "cpu.stat\nusage_usec 909516284\nuser_usec 593002496\nsystem_usec 316513788\nnice_usec 0\nnr_periods 14860\nnr_throttled 2515\nthrottled_usec 387945911\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1839321088\nmemory.current\n232914944"
+      },
+      {
+        "seconds": 44.96,
+        "stats": "26.42%|137.8MiB / 2GiB|134",
+        "cgroup": "cpu.stat\nusage_usec 915340485\nuser_usec 595973038\nsystem_usec 319367446\nnice_usec 0\nnr_periods 15080\nnr_throttled 2515\nthrottled_usec 387945911\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1839321088\nmemory.current\n300429312"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "dotnet",
+      "args": [],
+      "working_dir": "azure/app-insights-aspnet-core-quickstart",
+      "scanner_policy_version": "v1"
+    },
+    "framework": null,
+    "phase_events": [
+      {
+        "at": "2026-11-16T15:51:09.936Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-16T15:51:09.952Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-16T15:51:09.960Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-16T15:51:09.963Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-16T15:51:58.830Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-16T15:51:59.011Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"53faebf3-5381-4d9e-a3c0-523c14dc046e\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 164,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"53faebf3-5381-4d9e-a3c0-523c14dc046e\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: clone/prepare failed: no framework detected\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "clone_and_directory_resolution_seconds": 48.867
+  },
+  "started_at": "2026-11-17T14:15:18.175944+00:00",
+  "complete": true,
+  "worker": {
+    "lane": 2,
+    "worker_container": "zdfix2-worker",
+    "broker_vhost": "lane2",
+    "commit_sha": "3810558800760fc39282cc939bac645735514209",
+    "deployment_id": "7f09f195-d623-4c75-ba1a-74a12ee7a9e0",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: git checkout failed: git fetch failed: context deadline exceeded|",
+    "end_to_end_seconds": 61.404,
+    "resource_samples": [
+      {
+        "seconds": 0.34,
+        "stats": "0.27%|451.1MiB / 2GiB|84",
+        "cgroup": "cpu.stat\nusage_usec 3074556513\nuser_usec 2291506135\nsystem_usec 783050378\nnice_usec 0\nnr_periods 34433\nnr_throttled 5174\nthrottled_usec 643894021\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n505606144"
+      },
+      {
+        "seconds": 23.49,
+        "stats": "0.97%|468.7MiB / 2GiB|86",
+        "cgroup": "cpu.stat\nusage_usec 3077178207\nuser_usec 2293049730\nsystem_usec 784128477\nnice_usec 0\nnr_periods 34634\nnr_throttled 5174\nthrottled_usec 643894021\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n567443456"
+      },
+      {
+        "seconds": 46.88,
+        "stats": "22.81%|521.3MiB / 2GiB|86",
+        "cgroup": "cpu.stat\nusage_usec 3080771927\nuser_usec 2295070526\nsystem_usec 785701401\nnice_usec 0\nnr_periods 34843\nnr_throttled 5174\nthrottled_usec 643894021\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n619601920"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "dotnet",
+      "args": [],
+      "working_dir": "azure/app-insights-aspnet-core-quickstart",
+      "scanner_policy_version": "v1"
+    },
+    "framework": null,
+    "phase_events": [
+      {
+        "at": "2026-11-17T14:15:18.246Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-17T14:15:18.254Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-17T14:15:18.256Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-17T14:15:18.258Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-17T14:16:18.269Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"7f09f195-d623-4c75-ba1a-74a12ee7a9e0\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 185,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"7f09f195-d623-4c75-ba1a-74a12ee7a9e0\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: git checkout failed: git fetch failed: context deadline exceeded\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": false
+  },
+  "classification": "other-build-failure"
+}

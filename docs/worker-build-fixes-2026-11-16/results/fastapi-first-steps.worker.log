@@ -1,0 +1,12 @@
+2026-11-17T14:17:30.800Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-67296bba-c297-4aab-89f2-31393f8821d2", "delivery_tag": 18}
+2026-11-17T14:17:30.800Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-67296bba-c297-4aab-89f2-31393f8821d2", "deployment_id": "67296bba-c297-4aab-89f2-31393f8821d2"}
+2026-11-17T14:17:30.803Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-67296bba-c297-4aab-89f2-31393f8821d2", "deployment_id": "67296bba-c297-4aab-89f2-31393f8821d2"}
+2026-11-17T14:17:30.806Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-67296bba-c297-4aab-89f2-31393f8821d2", "deployment_id": "67296bba-c297-4aab-89f2-31393f8821d2"}
+2026-11-17T14:17:54.803Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-67296bba-c297-4aab-89f2-31393f8821d2", "deployment_id": "67296bba-c297-4aab-89f2-31393f8821d2"}
+2026-11-17T14:17:54.882Z	ERROR	worker/worker.go:109	deployment job failed	{"request_id": "zdfix-67296bba-c297-4aab-89f2-31393f8821d2", "deployment_id": "67296bba-c297-4aab-89f2-31393f8821d2", "error": "clone/prepare failed: no framework detected"}
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:109
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290

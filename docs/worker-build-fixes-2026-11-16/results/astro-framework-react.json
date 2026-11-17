@@ -1,0 +1,314 @@
+{
+  "case": {
+    "name": "astro-framework-react",
+    "repo": "withastro/astro",
+    "sha": "9d475f633be13000ac8bef08ee5a9b7a36a8cec8",
+    "path": "examples/framework-react",
+    "stack": "Astro/framework-react",
+    "kind": "node",
+    "reference_build": "npm install && npm run build",
+    "reference_start": "npm run preview -- --host 0.0.0.0 --port 4321",
+    "port": 4321,
+    "probe": "/",
+    "static_output": "dist",
+    "context": "examples/framework-react",
+    "env": {}
+  },
+  "reference_qualified": true,
+  "reference_eligibility": "preserved baseline; reference build/runtime not rerun",
+  "baseline_classification": "missing-lockfile/install-policy",
+  "baseline_worker": {
+    "deployment_id": "6b9621d7-7403-42db-8f93-21e5a5c64eb2",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: build failed: exit status 1|",
+    "end_to_end_seconds": 13.381,
+    "resource_samples": [
+      {
+        "seconds": 0.71,
+        "stats": "5.47%|103.7MiB / 2GiB|50",
+        "cgroup": "cpu.stat\nusage_usec 150119956\nuser_usec 78187196\nsystem_usec 71932760\nnice_usec 0\nnr_periods 3306\nnr_throttled 316\nthrottled_usec 38926720\nnr_bursts 0\nburst_usec 0\nmemory.peak\n897433600\nmemory.current\n116617216"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "examples/framework-react",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "astro",
+    "phase_events": [
+      {
+        "at": "2026-11-16T13:57:47.932Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-16T13:57:47.937Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-16T13:57:47.943Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-16T13:57:47.945Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-16T13:57:57.531Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-16T13:57:57.532Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-16T13:57:57.532Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-16T13:57:57.532Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-16T13:58:00.255Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"6b9621d7-7403-42db-8f93-21e5a5c64eb2\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 148,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"6b9621d7-7403-42db-8f93-21e5a5c64eb2\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: build failed: exit status 1\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "clone_and_directory_resolution_seconds": 9.586,
+    "failed_build_seconds": 2.723
+  },
+  "started_at": "2026-11-17T13:56:53.009943+00:00",
+  "complete": true,
+  "worker": {
+    "lane": 1,
+    "worker_container": "zdfix-worker",
+    "broker_vhost": "/",
+    "commit_sha": "9d475f633be13000ac8bef08ee5a9b7a36a8cec8",
+    "deployment_id": "fd299bc9-40f9-4961-9530-1ab14c18d0cb",
+    "state": "success",
+    "database_row": "success||s3://testbucket/images/fd299bc9-40f9-4961-9530-1ab14c18d0cb.tar",
+    "end_to_end_seconds": 144.368,
+    "resource_samples": [
+      {
+        "seconds": 0.41,
+        "stats": "1.07%|273.6MiB / 2GiB|42",
+        "cgroup": "cpu.stat\nusage_usec 2203927597\nuser_usec 1557243012\nsystem_usec 646684584\nnice_usec 0\nnr_periods 24091\nnr_throttled 3432\nthrottled_usec 347694484\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n292569088"
+      },
+      {
+        "seconds": 22.44,
+        "stats": "71.25%|513.6MiB / 2GiB|76",
+        "cgroup": "cpu.stat\nusage_usec 2215794365\nuser_usec 1563432523\nsystem_usec 652361841\nnice_usec 0\nnr_periods 24291\nnr_throttled 3436\nthrottled_usec 347757539\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n833974272"
+      },
+      {
+        "seconds": 44.69,
+        "stats": "38.77%|544.9MiB / 2GiB|76",
+        "cgroup": "cpu.stat\nusage_usec 2228018230\nuser_usec 1571105911\nsystem_usec 656912319\nnice_usec 0\nnr_periods 24488\nnr_throttled 3453\nthrottled_usec 348250128\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n1059033088"
+      },
+      {
+        "seconds": 67.0,
+        "stats": "7.11%|557.7MiB / 2GiB|76",
+        "cgroup": "cpu.stat\nusage_usec 2236862928\nuser_usec 1576662000\nsystem_usec 660200928\nnice_usec 0\nnr_periods 24676\nnr_throttled 3463\nthrottled_usec 348671616\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n1241157632"
+      },
+      {
+        "seconds": 91.83,
+        "stats": "151.51%|621.6MiB / 2GiB|76",
+        "cgroup": "cpu.stat\nusage_usec 2255212178\nuser_usec 1586655394\nsystem_usec 668556784\nnice_usec 0\nnr_periods 24897\nnr_throttled 3556\nthrottled_usec 359312267\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n1569447936"
+      },
+      {
+        "seconds": 114.61,
+        "stats": "112.71%|626.5MiB / 2GiB|88",
+        "cgroup": "cpu.stat\nusage_usec 2270119304\nuser_usec 1593556129\nsystem_usec 676563174\nnice_usec 0\nnr_periods 25024\nnr_throttled 3611\nthrottled_usec 362151251\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n1618325504"
+      },
+      {
+        "seconds": 138.4,
+        "stats": "95.49%|492.1MiB / 2GiB|50",
+        "cgroup": "cpu.stat\nusage_usec 2290186065\nuser_usec 1602810553\nsystem_usec 687375512\nnice_usec 0\nnr_periods 25253\nnr_throttled 3656\nthrottled_usec 364319329\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n1466994688"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": "examples/framework-react",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "astro",
+    "phase_events": [
+      {
+        "at": "2026-11-17T13:56:53.136Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-17T13:56:53.138Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-17T13:56:53.145Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-17T13:56:53.148Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-17T13:57:04.299Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-17T13:57:04.299Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-17T13:57:04.299Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-17T13:57:04.313Z",
+        "event": "unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled"
+      },
+      {
+        "at": "2026-11-17T13:57:04.313Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-17T13:59:14.311Z",
+        "event": "saving image tar"
+      },
+      {
+        "at": "2026-11-17T13:59:16.337Z",
+        "event": "uploading image tar"
+      },
+      {
+        "at": "2026-11-17T13:59:16.337Z",
+        "event": "opening file for upload"
+      },
+      {
+        "at": "2026-11-17T13:59:16.337Z",
+        "event": "uploading to S3"
+      },
+      {
+        "at": "2026-11-17T13:59:16.824Z",
+        "event": "upload complete"
+      },
+      {
+        "at": "2026-11-17T13:59:16.826Z",
+        "event": "marking as finished"
+      },
+      {
+        "at": "2026-11-17T13:59:17.090Z",
+        "event": "deployment job completed"
+      }
+    ],
+    "upload_bytes": 188280879,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"fd299bc9-40f9-4961-9530-1ab14c18d0cb\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 154,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"fd299bc9-40f9-4961-9530-1ab14c18d0cb\",\"status\":\"success\",\"output_url\":\"s3://testbucket/images/fd299bc9-40f9-4961-9530-1ab14c18d0cb.tar\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": true,
+    "image_layer_bytes": 188253184,
+    "image_config_bytes": 7529,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 2.536,
+      "probe_url": "http://127.0.0.1:4321/",
+      "first_response": "200|0.059674|text/html; charset=utf-8",
+      "response_sample": "<!DOCTYPE html><html lang=\"en\" data-astro-cid-lcdefpme><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width\"><meta name=\"generator\" content=\"Astro v7.4.12\"><link rel=\"icon\" type=\"image/svg+xml\" href=\"/favicon.svg\"><link rel=\"",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.004554
+        },
+        {
+          "status": 200,
+          "seconds": 0.003911
+        },
+        {
+          "status": 200,
+          "seconds": 0.004342
+        },
+        {
+          "status": 200,
+          "seconds": 0.003565
+        },
+        {
+          "status": 200,
+          "seconds": 0.003946
+        },
+        {
+          "status": 200,
+          "seconds": 0.003566
+        },
+        {
+          "status": 200,
+          "seconds": 0.003659
+        },
+        {
+          "status": 200,
+          "seconds": 0.003751
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    }
+  },
+  "classification": "build-and-runtime-pass"
+}

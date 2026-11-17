@@ -1,0 +1,105 @@
+{
+  "recorded_at": "2026-11-17T15:54:51.960821+00:00",
+  "denominator": 57,
+  "baseline": {
+    "images": 3,
+    "runtime_smokes": 2
+  },
+  "replay": {
+    "images": 39,
+    "runtime_smokes": 37,
+    "worker_success_states": 39
+  },
+  "deployment": "not attempted",
+  "reference_rebuild": "not performed; eligibility comes from preserved baseline",
+  "outcomes": {
+    "build-and-runtime-pass": 37,
+    "other-build-failure": 10,
+    "missing-code-generation": 1,
+    "image-build-pass/runtime-fail": 2,
+    "static-output-path/misleading-ssr": 2,
+    "native-dependency/install-scripts": 1,
+    "detection-unsupported": 4
+  },
+  "baseline_unchanged": true,
+  "product_source_unchanged": true,
+  "user_interrupted_attempts_excluded": [
+    {
+      "case": "actix-hello-world",
+      "deployment_id": "25821ac0-b5d6-407e-90fb-a93cca11550b",
+      "reason": "interrupted by explicit user pause; excluded from measured failures"
+    },
+    {
+      "case": "actix-state",
+      "deployment_id": "159d0d6f-aacd-4ad9-8862-bc80f0992412",
+      "reason": "interrupted by explicit user pause; excluded from measured failures"
+    }
+  ],
+  "targeted_baseline_groups": [
+    {
+      "baseline_category": "missing-lockfile/install-policy",
+      "cases": 30,
+      "baseline_images": 0,
+      "images": 21,
+      "http_smokes": 21
+    },
+    {
+      "baseline_category": "base-image-resolution",
+      "cases": 10,
+      "baseline_images": 0,
+      "images": 10,
+      "http_smokes": 10
+    },
+    {
+      "baseline_category": "workspace-context",
+      "cases": 5,
+      "baseline_images": 0,
+      "images": 5,
+      "http_smokes": 4
+    }
+  ],
+  "cold_pulls": {
+    "attempted": 8,
+    "passed": 8
+  },
+  "end_to_end_seconds": {
+    "median": 89.648,
+    "total": 8935.333
+  },
+  "excluded_reference_candidates": [
+    "sveltekit-realworld",
+    "react-docs",
+    "django-realworld",
+    "rails-realworld"
+  ],
+  "controlled_timeout_repeats": [
+    {
+      "case": "dotnet-insights-web",
+      "classification": "detection-unsupported",
+      "image_built": false,
+      "http_ready": false,
+      "worker_row": "canceled|max retries (1) exceeded: clone/prepare failed: no framework detected|"
+    },
+    {
+      "case": "next-basic-css",
+      "classification": "other-build-failure",
+      "image_built": false,
+      "http_ready": false,
+      "worker_row": "canceled|max retries (1) exceeded: build failed: exit status 125|"
+    },
+    {
+      "case": "next-hello-world",
+      "classification": "other-build-failure",
+      "image_built": false,
+      "http_ready": false,
+      "worker_row": "canceled|max retries (1) exceeded: build failed: exit status 125|"
+    },
+    {
+      "case": "next-with-typescript",
+      "classification": "other-build-failure",
+      "image_built": false,
+      "http_ready": false,
+      "worker_row": "canceled|max retries (1) exceeded: build failed: exit status 125|"
+    }
+  ]
+}

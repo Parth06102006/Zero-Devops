@@ -1,0 +1,370 @@
+{
+  "case": {
+    "name": "react-jobs",
+    "repo": "bradtraversy/react-crash-2024",
+    "sha": "fd4407ce0c26ede6b59fe11e21e207593629ae9a",
+    "path": ".",
+    "stack": "Vite/jobs",
+    "kind": "node",
+    "reference_build": "npm ci --ignore-scripts && npm run build",
+    "reference_start": "npm run preview -- --host 0.0.0.0 --port 4173",
+    "port": 4173,
+    "probe": "/",
+    "static_output": "dist",
+    "context": ".",
+    "env": {}
+  },
+  "reference_qualified": true,
+  "reference_eligibility": "preserved baseline; reference build/runtime not rerun",
+  "baseline_classification": "build-and-runtime-pass",
+  "baseline_worker": {
+    "deployment_id": "b8538e6a-3534-41c9-8b23-9c9bc0451538",
+    "state": "success",
+    "database_row": "success||s3://testbucket/images/b8538e6a-3534-41c9-8b23-9c9bc0451538.tar",
+    "end_to_end_seconds": 82.528,
+    "resource_samples": [
+      {
+        "seconds": 0.57,
+        "stats": "6.84%|43.44MiB / 2GiB|8",
+        "cgroup": "cpu.stat\nusage_usec 10403147\nuser_usec 6005850\nsystem_usec 4397296\nnice_usec 0\nnr_periods 452\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\nmemory.peak\n464859136\nmemory.current\n105947136"
+      },
+      {
+        "seconds": 30.66,
+        "stats": "143.66%|450.6MiB / 2GiB|43",
+        "cgroup": "cpu.stat\nusage_usec 48920095\nuser_usec 28037758\nsystem_usec 20882337\nnice_usec 0\nnr_periods 747\nnr_throttled 206\nthrottled_usec 28566278\nnr_bursts 0\nburst_usec 0\nmemory.peak\n817704960\nmemory.current\n798097408"
+      },
+      {
+        "seconds": 58.03,
+        "stats": "0.22%|280.9MiB / 2GiB|16",
+        "cgroup": "cpu.stat\nusage_usec 71072936\nuser_usec 41791730\nsystem_usec 29281205\nnice_usec 0\nnr_periods 947\nnr_throttled 287\nthrottled_usec 37287422\nnr_bursts 0\nburst_usec 0\nmemory.peak\n897433600\nmemory.current\n588918784"
+      },
+      {
+        "seconds": 81.01,
+        "stats": "0.06%|183.5MiB / 2GiB|11",
+        "cgroup": "cpu.stat\nusage_usec 83163051\nuser_usec 47485224\nsystem_usec 35677826\nnice_usec 0\nnr_periods 1109\nnr_throttled 313\nthrottled_usec 38678666\nnr_bursts 0\nburst_usec 0\nmemory.peak\n897433600\nmemory.current\n222920704"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": ".",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "vite",
+    "phase_events": [
+      {
+        "at": "2026-11-16T13:32:15.648Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-16T13:32:15.655Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-16T13:32:15.659Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-16T13:32:15.662Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-16T13:32:17.187Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-16T13:32:17.188Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-16T13:32:17.188Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-16T13:32:17.190Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-16T13:33:31.391Z",
+        "event": "saving image tar"
+      },
+      {
+        "at": "2026-11-16T13:33:33.034Z",
+        "event": "uploading image tar"
+      },
+      {
+        "at": "2026-11-16T13:33:33.034Z",
+        "event": "opening file for upload"
+      },
+      {
+        "at": "2026-11-16T13:33:33.034Z",
+        "event": "uploading to S3"
+      },
+      {
+        "at": "2026-11-16T13:33:33.993Z",
+        "event": "upload complete"
+      },
+      {
+        "at": "2026-11-16T13:33:34.079Z",
+        "event": "marking as finished"
+      },
+      {
+        "at": "2026-11-16T13:33:34.110Z",
+        "event": "deployment job completed"
+      }
+    ],
+    "upload_bytes": 150251567,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"b8538e6a-3534-41c9-8b23-9c9bc0451538\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 154,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"b8538e6a-3534-41c9-8b23-9c9bc0451538\",\"status\":\"success\",\"output_url\":\"s3://testbucket/images/b8538e6a-3534-41c9-8b23-9c9bc0451538.tar\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_bytes": null,
+    "runtime": {
+      "ready": true,
+      "startup_seconds": 2.682,
+      "probe_url": "http://127.0.0.1:4173/",
+      "first_response": "200|0.031555|text/html; charset=utf-8",
+      "response_sample": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <link rel=\"icon\" type=\"image/svg+xml\" href=\"/vite.svg\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>React Jobs</title>\n    <scrip",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.004346
+        },
+        {
+          "status": 200,
+          "seconds": 0.003041
+        },
+        {
+          "status": 200,
+          "seconds": 0.002701
+        },
+        {
+          "status": 200,
+          "seconds": 0.004041
+        },
+        {
+          "status": 200,
+          "seconds": 0.003631
+        },
+        {
+          "status": 200,
+          "seconds": 0.002968
+        },
+        {
+          "status": 200,
+          "seconds": 0.002738
+        },
+        {
+          "status": 200,
+          "seconds": 0.003007
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    },
+    "image_layer_bytes": 150223872,
+    "clone_and_directory_resolution_seconds": 1.525,
+    "build_seconds": 74.201,
+    "save_seconds": 1.643,
+    "upload_finalize_seconds": 1.076
+  },
+  "started_at": "2026-11-17T14:15:30.654007+00:00",
+  "complete": true,
+  "worker": {
+    "lane": 1,
+    "worker_container": "zdfix-worker",
+    "broker_vhost": "/",
+    "commit_sha": "fd4407ce0c26ede6b59fe11e21e207593629ae9a",
+    "deployment_id": "b8a0cd4e-baec-41ac-baaf-f7449c60031a",
+    "state": "success",
+    "database_row": "success||s3://testbucket/images/b8a0cd4e-baec-41ac-baaf-f7449c60031a.tar",
+    "end_to_end_seconds": 45.719,
+    "resource_samples": [
+      {
+        "seconds": 0.36,
+        "stats": "16.19%|782.8MiB / 2GiB|108",
+        "cgroup": "cpu.stat\nusage_usec 2883066559\nuser_usec 2005138856\nsystem_usec 877927702\nnice_usec 0\nnr_periods 33777\nnr_throttled 5995\nthrottled_usec 669513625\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n929488896"
+      },
+      {
+        "seconds": 24.58,
+        "stats": "109.87%|1006MiB / 2GiB|160",
+        "cgroup": "cpu.stat\nusage_usec 2915616508\nuser_usec 2023855571\nsystem_usec 891760937\nnice_usec 0\nnr_periods 34019\nnr_throttled 6157\nthrottled_usec 682907552\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147852288\nmemory.current\n1750827008"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "working_dir": ".",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "vite",
+    "phase_events": [
+      {
+        "at": "2026-11-17T14:15:30.727Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-17T14:15:30.728Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-17T14:15:30.730Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-17T14:15:30.732Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-17T14:15:31.925Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-17T14:15:31.925Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-17T14:15:31.925Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-17T14:15:31.932Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-17T14:16:14.282Z",
+        "event": "saving image tar"
+      },
+      {
+        "at": "2026-11-17T14:16:15.354Z",
+        "event": "uploading image tar"
+      },
+      {
+        "at": "2026-11-17T14:16:15.355Z",
+        "event": "opening file for upload"
+      },
+      {
+        "at": "2026-11-17T14:16:15.355Z",
+        "event": "uploading to S3"
+      },
+      {
+        "at": "2026-11-17T14:16:15.808Z",
+        "event": "upload complete"
+      },
+      {
+        "at": "2026-11-17T14:16:15.825Z",
+        "event": "marking as finished"
+      },
+      {
+        "at": "2026-11-17T14:16:15.859Z",
+        "event": "deployment job completed"
+      }
+    ],
+    "upload_bytes": 188449327,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"b8a0cd4e-baec-41ac-baaf-f7449c60031a\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 154,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"b8a0cd4e-baec-41ac-baaf-f7449c60031a\",\"status\":\"success\",\"output_url\":\"s3://testbucket/images/b8a0cd4e-baec-41ac-baaf-f7449c60031a.tar\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": true,
+    "image_layer_bytes": 188421632,
+    "image_config_bytes": 7542,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 1.323,
+      "probe_url": "http://127.0.0.1:4173/",
+      "first_response": "200|0.032935|text/html; charset=utf-8",
+      "response_sample": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <link rel=\"icon\" type=\"image/svg+xml\" href=\"/vite.svg\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>React Jobs</title>\n    <scrip",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.003847
+        },
+        {
+          "status": 200,
+          "seconds": 0.003105
+        },
+        {
+          "status": 200,
+          "seconds": 0.00311
+        },
+        {
+          "status": 200,
+          "seconds": 0.002774
+        },
+        {
+          "status": 200,
+          "seconds": 0.003055
+        },
+        {
+          "status": 200,
+          "seconds": 0.003993
+        },
+        {
+          "status": 200,
+          "seconds": 0.003447
+        },
+        {
+          "status": 200,
+          "seconds": 0.00378
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    }
+  },
+  "classification": "build-and-runtime-pass"
+}

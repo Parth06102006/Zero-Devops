@@ -1,0 +1,1673 @@
+2026-11-16T20:32:35.374Z	INFO	worker/worker.go:65	Worker consumer registered. Listening for 'deploy.jobs' messages on RabbitMQ...
+2026-11-16T20:39:55.160Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-902e1439-d6b3-4724-aadf-093e6d340b9b", "delivery_tag": 1}
+2026-11-16T20:39:55.366Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-902e1439-d6b3-4724-aadf-093e6d340b9b", "deployment_id": "902e1439-d6b3-4724-aadf-093e6d340b9b"}
+2026-11-16T20:39:55.492Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-902e1439-d6b3-4724-aadf-093e6d340b9b", "deployment_id": "902e1439-d6b3-4724-aadf-093e6d340b9b"}
+2026-11-16T20:39:55.576Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-902e1439-d6b3-4724-aadf-093e6d340b9b", "deployment_id": "902e1439-d6b3-4724-aadf-093e6d340b9b"}
+2026-11-16T20:40:01.270Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-902e1439-d6b3-4724-aadf-093e6d340b9b", "deployment_id": "902e1439-d6b3-4724-aadf-093e6d340b9b"}
+2026-11-16T20:40:01.272Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-902e1439-d6b3-4724-aadf-093e6d340b9b", "deployment_id": "902e1439-d6b3-4724-aadf-093e6d340b9b", "framework": "vite", "package_manager": "npm"}
+2026-11-16T20:40:01.272Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-902e1439-d6b3-4724-aadf-093e6d340b9b", "deployment_id": "902e1439-d6b3-4724-aadf-093e6d340b9b", "template": "static/Dockerfile.vite.tmpl"}
+2026-11-16T20:40:01.281Z	WARN	deployments/deployments.go:622	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-902e1439-d6b3-4724-aadf-093e6d340b9b", "deployment_id": "902e1439-d6b3-4724-aadf-093e6d340b9b"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:622
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T20:40:01.282Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-902e1439-d6b3-4724-aadf-093e6d340b9b", "deployment_id": "902e1439-d6b3-4724-aadf-093e6d340b9b", "image_tag": "deploy-902e1439-d6b3-4724-aadf-093e6d340b9b:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/node:24-alpine AS builder
+Trying to pull docker.io/library/node:24-alpine...
+Getting image source signatures
+Copying blob sha256:7bb632bc9bd793a348866a7dd7920cf89dfc87205c6d38cda182ea6d8065b8e5
+Copying blob sha256:881fc932939efef04ca120ad44bbd2c0917851eb247aa4995428afb1e80ede17
+Copying blob sha256:86781d25d3989ead8f09c45716da0159c1dd0be2c753a51f15b6c60f4b9a97db
+Copying blob sha256:7eb569707982863466c2b0bcfddda86fb4842fccfaec088d1354f6a29e2856bb
+Copying config sha256:b791832e17c3a8a5897bdb5087381ffbc07b77bc634d204bf603b5f63c1ffe57
+Writing manifest to image destination
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN npm install --ignore-scripts --package-lock=false
+
+added 15 packages, and audited 16 packages in 26s
+
+8 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN npm run build
+
+> vite-starter@0.0.0 build
+> vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 9 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                  0.45 kB │ gzip: 0.29 kB
+dist/assets/vite-BF8QNONU.svg    8.70 kB │ gzip: 1.60 kB
+dist/assets/hero-CLDdwZDr.png   13.05 kB
+dist/assets/index-CsUDhMuy.css   4.10 kB │ gzip: 1.46 kB
+dist/assets/index-CAoPt-vL.js    4.05 kB │ gzip: 1.77 kB
+
+✓ built in 278ms
+[1/2] STEP 7/7: RUN test -f ./dist/index.html || (echo "ZERODEVOPS_SSR_MISMATCH: no index.html in dist after npm run build" && exit 1)
+[2/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS runtime
+[2/2] STEP 2/6: WORKDIR /app
+[2/2] STEP 3/6: RUN npm install -g serve
+
+added 67 packages in 12s
+
+20 packages are looking for funding
+  run `npm fund` for details
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 4/6: COPY --from=builder /app/dist ./dist
+[2/2] STEP 5/6: EXPOSE 4173
+[2/2] STEP 6/6: CMD ["serve", "-s", "dist", "-l", "4173"]
+[2/2] COMMIT deploy-902e1439-d6b3-4724-aadf-093e6d340b9b:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:2ed4616c3efdc7e19c5ecdf57ad70da31257ce8b64c2350f5cf582bb3ce8421d
+Copying config sha256:e3bb7ef91f50cd8ff5c97f9c45504dda1c79a65b20c87952b58227ca0ccb3bfb
+Writing manifest to image destination
+--> e3bb7ef91f50
+Successfully tagged localhost/deploy-902e1439-d6b3-4724-aadf-093e6d340b9b:latest
+e3bb7ef91f50cd8ff5c97f9c45504dda1c79a65b20c87952b58227ca0ccb3bfb
+2026-11-16T20:41:14.438Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-902e1439-d6b3-4724-aadf-093e6d340b9b", "deployment_id": "902e1439-d6b3-4724-aadf-093e6d340b9b", "tar_path": "/tmp/zerodevops-build/902e1439-d6b3-4724-aadf-093e6d340b9b/packages/create-vite/template-vanilla/902e1439-d6b3-4724-aadf-093e6d340b9b.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:2ed4616c3efdc7e19c5ecdf57ad70da31257ce8b64c2350f5cf582bb3ce8421d
+Copying config sha256:e3bb7ef91f50cd8ff5c97f9c45504dda1c79a65b20c87952b58227ca0ccb3bfb
+Writing manifest to image destination
+2026-11-16T20:41:16.377Z	INFO	deployments/deployments.go:547	uploading image tar	{"request_id": "zdfix-902e1439-d6b3-4724-aadf-093e6d340b9b", "deployment_id": "902e1439-d6b3-4724-aadf-093e6d340b9b"}
+2026-11-16T20:41:16.377Z	INFO	upload/upload.go:37	opening file for upload	{"file": "/tmp/zerodevops-build/902e1439-d6b3-4724-aadf-093e6d340b9b/packages/create-vite/template-vanilla/902e1439-d6b3-4724-aadf-093e6d340b9b.tar"}
+2026-11-16T20:41:16.377Z	INFO	upload/upload.go:48	uploading to S3	{"bucket": "testbucket", "key": "images/902e1439-d6b3-4724-aadf-093e6d340b9b.tar"}
+2026-11-16T20:41:17.142Z	INFO	upload/upload.go:66	upload complete	{"url": "s3://testbucket/images/902e1439-d6b3-4724-aadf-093e6d340b9b.tar"}
+2026-11-16T20:41:17.149Z	INFO	deployments/deployments.go:557	marking as finished	{"request_id": "zdfix-902e1439-d6b3-4724-aadf-093e6d340b9b", "deployment_id": "902e1439-d6b3-4724-aadf-093e6d340b9b"}
+2026-11-16T20:41:17.344Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-902e1439-d6b3-4724-aadf-093e6d340b9b", "deployment_id": "902e1439-d6b3-4724-aadf-093e6d340b9b"}
+2026-11-16T20:41:24.060Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-e10b1a03-8211-4622-a829-55d7bab20526", "delivery_tag": 2}
+2026-11-16T20:41:24.062Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-e10b1a03-8211-4622-a829-55d7bab20526", "deployment_id": "e10b1a03-8211-4622-a829-55d7bab20526"}
+2026-11-16T20:41:24.068Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-e10b1a03-8211-4622-a829-55d7bab20526", "deployment_id": "e10b1a03-8211-4622-a829-55d7bab20526"}
+2026-11-16T20:41:24.071Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-e10b1a03-8211-4622-a829-55d7bab20526", "deployment_id": "e10b1a03-8211-4622-a829-55d7bab20526"}
+2026-11-16T20:41:29.135Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-e10b1a03-8211-4622-a829-55d7bab20526", "deployment_id": "e10b1a03-8211-4622-a829-55d7bab20526"}
+2026-11-16T20:41:29.136Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-e10b1a03-8211-4622-a829-55d7bab20526", "deployment_id": "e10b1a03-8211-4622-a829-55d7bab20526", "framework": "vite", "package_manager": "npm"}
+2026-11-16T20:41:29.136Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-e10b1a03-8211-4622-a829-55d7bab20526", "deployment_id": "e10b1a03-8211-4622-a829-55d7bab20526", "template": "static/Dockerfile.vite.tmpl"}
+2026-11-16T20:41:29.145Z	WARN	deployments/deployments.go:622	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-e10b1a03-8211-4622-a829-55d7bab20526", "deployment_id": "e10b1a03-8211-4622-a829-55d7bab20526"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:622
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T20:41:29.145Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-e10b1a03-8211-4622-a829-55d7bab20526", "deployment_id": "e10b1a03-8211-4622-a829-55d7bab20526", "image_tag": "deploy-e10b1a03-8211-4622-a829-55d7bab20526:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN npm install --ignore-scripts --package-lock=false
+
+added 17 packages, and audited 18 packages in 35s
+
+8 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN npm run build
+
+> vite-typescript-starter@0.0.0 build
+> tsc && vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 9 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                  0.45 kB │ gzip: 0.29 kB
+dist/assets/vite-BF8QNONU.svg    8.70 kB │ gzip: 1.60 kB
+dist/assets/hero-CLDdwZDr.png   13.05 kB
+dist/assets/index-CsUDhMuy.css   4.10 kB │ gzip: 1.46 kB
+dist/assets/index-wktXvZw9.js    4.49 kB │ gzip: 2.02 kB
+
+✓ built in 250ms
+[1/2] STEP 7/7: RUN test -f ./dist/index.html || (echo "ZERODEVOPS_SSR_MISMATCH: no index.html in dist after npm run build" && exit 1)
+[2/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS runtime
+[2/2] STEP 2/6: WORKDIR /app
+[2/2] STEP 3/6: RUN npm install -g serve
+
+added 67 packages in 8s
+
+20 packages are looking for funding
+  run `npm fund` for details
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 4/6: COPY --from=builder /app/dist ./dist
+[2/2] STEP 5/6: EXPOSE 4173
+[2/2] STEP 6/6: CMD ["serve", "-s", "dist", "-l", "4173"]
+[2/2] COMMIT deploy-e10b1a03-8211-4622-a829-55d7bab20526:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:d3ef8d6608100d3cc80d801b56596a316d5249948fe4ba009ba1b5a840036cdd
+Copying config sha256:dcb68e1bc2d3dd2733e58dccb6b8a727323702e0c4f0f915bab9da7895ba60ff
+Writing manifest to image destination
+--> dcb68e1bc2d3
+Successfully tagged localhost/deploy-e10b1a03-8211-4622-a829-55d7bab20526:latest
+dcb68e1bc2d3dd2733e58dccb6b8a727323702e0c4f0f915bab9da7895ba60ff
+2026-11-16T20:42:21.072Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-e10b1a03-8211-4622-a829-55d7bab20526", "deployment_id": "e10b1a03-8211-4622-a829-55d7bab20526", "tar_path": "/tmp/zerodevops-build/e10b1a03-8211-4622-a829-55d7bab20526/packages/create-vite/template-vanilla-ts/e10b1a03-8211-4622-a829-55d7bab20526.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:d3ef8d6608100d3cc80d801b56596a316d5249948fe4ba009ba1b5a840036cdd
+Copying config sha256:dcb68e1bc2d3dd2733e58dccb6b8a727323702e0c4f0f915bab9da7895ba60ff
+Writing manifest to image destination
+2026-11-16T20:42:22.116Z	INFO	deployments/deployments.go:547	uploading image tar	{"request_id": "zdfix-e10b1a03-8211-4622-a829-55d7bab20526", "deployment_id": "e10b1a03-8211-4622-a829-55d7bab20526"}
+2026-11-16T20:42:22.116Z	INFO	upload/upload.go:37	opening file for upload	{"file": "/tmp/zerodevops-build/e10b1a03-8211-4622-a829-55d7bab20526/packages/create-vite/template-vanilla-ts/e10b1a03-8211-4622-a829-55d7bab20526.tar"}
+2026-11-16T20:42:22.116Z	INFO	upload/upload.go:48	uploading to S3	{"bucket": "testbucket", "key": "images/e10b1a03-8211-4622-a829-55d7bab20526.tar"}
+2026-11-16T20:42:22.564Z	INFO	upload/upload.go:66	upload complete	{"url": "s3://testbucket/images/e10b1a03-8211-4622-a829-55d7bab20526.tar"}
+2026-11-16T20:42:22.567Z	INFO	deployments/deployments.go:557	marking as finished	{"request_id": "zdfix-e10b1a03-8211-4622-a829-55d7bab20526", "deployment_id": "e10b1a03-8211-4622-a829-55d7bab20526"}
+2026-11-16T20:42:22.673Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-e10b1a03-8211-4622-a829-55d7bab20526", "deployment_id": "e10b1a03-8211-4622-a829-55d7bab20526"}
+2026-11-16T20:42:29.592Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-082b435b-e555-44ba-a5b5-26d5e529b9e5", "delivery_tag": 3}
+2026-11-16T20:42:29.594Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-082b435b-e555-44ba-a5b5-26d5e529b9e5", "deployment_id": "082b435b-e555-44ba-a5b5-26d5e529b9e5"}
+2026-11-16T20:42:29.599Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-082b435b-e555-44ba-a5b5-26d5e529b9e5", "deployment_id": "082b435b-e555-44ba-a5b5-26d5e529b9e5"}
+2026-11-16T20:42:29.602Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-082b435b-e555-44ba-a5b5-26d5e529b9e5", "deployment_id": "082b435b-e555-44ba-a5b5-26d5e529b9e5"}
+2026-11-16T20:42:35.074Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-082b435b-e555-44ba-a5b5-26d5e529b9e5", "deployment_id": "082b435b-e555-44ba-a5b5-26d5e529b9e5"}
+2026-11-16T20:42:35.074Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-082b435b-e555-44ba-a5b5-26d5e529b9e5", "deployment_id": "082b435b-e555-44ba-a5b5-26d5e529b9e5", "framework": "vite", "package_manager": "npm"}
+2026-11-16T20:42:35.074Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-082b435b-e555-44ba-a5b5-26d5e529b9e5", "deployment_id": "082b435b-e555-44ba-a5b5-26d5e529b9e5", "template": "static/Dockerfile.vite.tmpl"}
+2026-11-16T20:42:35.081Z	WARN	deployments/deployments.go:622	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-082b435b-e555-44ba-a5b5-26d5e529b9e5", "deployment_id": "082b435b-e555-44ba-a5b5-26d5e529b9e5"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:622
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T20:42:35.081Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-082b435b-e555-44ba-a5b5-26d5e529b9e5", "deployment_id": "082b435b-e555-44ba-a5b5-26d5e529b9e5", "image_tag": "deploy-082b435b-e555-44ba-a5b5-26d5e529b9e5:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN npm install --ignore-scripts --package-lock=false
+
+added 24 packages, and audited 25 packages in 39s
+
+9 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN npm run build
+
+> vite-react-starter@0.0.0 build
+> vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 20 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.46 kB │ gzip:  0.29 kB
+dist/assets/react-CHdo91hT.svg    4.12 kB │ gzip:  2.06 kB
+dist/assets/vite-BF8QNONU.svg     8.70 kB │ gzip:  1.60 kB
+dist/assets/hero-CLDdwZDr.png    13.05 kB
+dist/assets/index-DykytF2W.css    4.10 kB │ gzip:  1.47 kB
+dist/assets/index-DSXtc1GT.js   222.44 kB │ gzip: 69.28 kB
+
+✓ built in 231ms
+[1/2] STEP 7/7: RUN test -f ./dist/index.html || (echo "ZERODEVOPS_SSR_MISMATCH: no index.html in dist after npm run build" && exit 1)
+[2/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS runtime
+[2/2] STEP 2/6: WORKDIR /app
+[2/2] STEP 3/6: RUN npm install -g serve
+
+added 67 packages in 7s
+
+20 packages are looking for funding
+  run `npm fund` for details
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 4/6: COPY --from=builder /app/dist ./dist
+[2/2] STEP 5/6: EXPOSE 4173
+[2/2] STEP 6/6: CMD ["serve", "-s", "dist", "-l", "4173"]
+[2/2] COMMIT deploy-082b435b-e555-44ba-a5b5-26d5e529b9e5:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:8a0d192a6b2850a55d111ee3921e82be0dced47deb482bf04e7773c74f4c96a4
+Copying config sha256:ff85bfeb29bb2ead0e29f4a0d9300a4d4df6c4a4688ef13abdb88f0bbfc05bc3
+Writing manifest to image destination
+--> ff85bfeb29bb
+Successfully tagged localhost/deploy-082b435b-e555-44ba-a5b5-26d5e529b9e5:latest
+ff85bfeb29bb2ead0e29f4a0d9300a4d4df6c4a4688ef13abdb88f0bbfc05bc3
+2026-11-16T20:43:30.290Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-082b435b-e555-44ba-a5b5-26d5e529b9e5", "deployment_id": "082b435b-e555-44ba-a5b5-26d5e529b9e5", "tar_path": "/tmp/zerodevops-build/082b435b-e555-44ba-a5b5-26d5e529b9e5/packages/create-vite/template-react/082b435b-e555-44ba-a5b5-26d5e529b9e5.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:8a0d192a6b2850a55d111ee3921e82be0dced47deb482bf04e7773c74f4c96a4
+Copying config sha256:ff85bfeb29bb2ead0e29f4a0d9300a4d4df6c4a4688ef13abdb88f0bbfc05bc3
+Writing manifest to image destination
+2026-11-16T20:43:31.203Z	INFO	deployments/deployments.go:547	uploading image tar	{"request_id": "zdfix-082b435b-e555-44ba-a5b5-26d5e529b9e5", "deployment_id": "082b435b-e555-44ba-a5b5-26d5e529b9e5"}
+2026-11-16T20:43:31.204Z	INFO	upload/upload.go:37	opening file for upload	{"file": "/tmp/zerodevops-build/082b435b-e555-44ba-a5b5-26d5e529b9e5/packages/create-vite/template-react/082b435b-e555-44ba-a5b5-26d5e529b9e5.tar"}
+2026-11-16T20:43:31.204Z	INFO	upload/upload.go:48	uploading to S3	{"bucket": "testbucket", "key": "images/082b435b-e555-44ba-a5b5-26d5e529b9e5.tar"}
+2026-11-16T20:43:31.716Z	INFO	upload/upload.go:66	upload complete	{"url": "s3://testbucket/images/082b435b-e555-44ba-a5b5-26d5e529b9e5.tar"}
+2026-11-16T20:43:31.721Z	INFO	deployments/deployments.go:557	marking as finished	{"request_id": "zdfix-082b435b-e555-44ba-a5b5-26d5e529b9e5", "deployment_id": "082b435b-e555-44ba-a5b5-26d5e529b9e5"}
+2026-11-16T20:43:31.814Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-082b435b-e555-44ba-a5b5-26d5e529b9e5", "deployment_id": "082b435b-e555-44ba-a5b5-26d5e529b9e5"}
+2026-11-16T20:43:38.634Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-85dcfd37-1ae4-4c66-9a8d-de8eabca89b7", "delivery_tag": 4}
+2026-11-16T20:43:38.635Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-85dcfd37-1ae4-4c66-9a8d-de8eabca89b7", "deployment_id": "85dcfd37-1ae4-4c66-9a8d-de8eabca89b7"}
+2026-11-16T20:43:38.637Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-85dcfd37-1ae4-4c66-9a8d-de8eabca89b7", "deployment_id": "85dcfd37-1ae4-4c66-9a8d-de8eabca89b7"}
+2026-11-16T20:43:38.640Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-85dcfd37-1ae4-4c66-9a8d-de8eabca89b7", "deployment_id": "85dcfd37-1ae4-4c66-9a8d-de8eabca89b7"}
+2026-11-16T20:43:44.297Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-85dcfd37-1ae4-4c66-9a8d-de8eabca89b7", "deployment_id": "85dcfd37-1ae4-4c66-9a8d-de8eabca89b7"}
+2026-11-16T20:43:44.297Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-85dcfd37-1ae4-4c66-9a8d-de8eabca89b7", "deployment_id": "85dcfd37-1ae4-4c66-9a8d-de8eabca89b7", "framework": "vite", "package_manager": "npm"}
+2026-11-16T20:43:44.297Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-85dcfd37-1ae4-4c66-9a8d-de8eabca89b7", "deployment_id": "85dcfd37-1ae4-4c66-9a8d-de8eabca89b7", "template": "static/Dockerfile.vite.tmpl"}
+2026-11-16T20:43:44.325Z	WARN	deployments/deployments.go:622	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-85dcfd37-1ae4-4c66-9a8d-de8eabca89b7", "deployment_id": "85dcfd37-1ae4-4c66-9a8d-de8eabca89b7"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:622
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T20:43:44.325Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-85dcfd37-1ae4-4c66-9a8d-de8eabca89b7", "deployment_id": "85dcfd37-1ae4-4c66-9a8d-de8eabca89b7", "image_tag": "deploy-85dcfd37-1ae4-4c66-9a8d-de8eabca89b7:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN npm install --ignore-scripts --package-lock=false
+
+added 28 packages, and audited 29 packages in 54s
+
+9 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN npm run build
+
+> vite-react-typescript-starter@0.0.0 build
+> tsc -b && vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 20 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.46 kB │ gzip:  0.30 kB
+dist/assets/react-CHdo91hT.svg    4.12 kB │ gzip:  2.06 kB
+dist/assets/vite-BF8QNONU.svg     8.70 kB │ gzip:  1.60 kB
+dist/assets/hero-CLDdwZDr.png    13.05 kB
+dist/assets/index-D64VDMd1.css    4.10 kB │ gzip:  1.47 kB
+dist/assets/index-GpEN3EET.js   222.44 kB │ gzip: 69.28 kB
+
+✓ built in 199ms
+[1/2] STEP 7/7: RUN test -f ./dist/index.html || (echo "ZERODEVOPS_SSR_MISMATCH: no index.html in dist after npm run build" && exit 1)
+[2/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS runtime
+[2/2] STEP 2/6: WORKDIR /app
+[2/2] STEP 3/6: RUN npm install -g serve
+
+added 67 packages in 8s
+
+20 packages are looking for funding
+  run `npm fund` for details
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 4/6: COPY --from=builder /app/dist ./dist
+[2/2] STEP 5/6: EXPOSE 4173
+[2/2] STEP 6/6: CMD ["serve", "-s", "dist", "-l", "4173"]
+[2/2] COMMIT deploy-85dcfd37-1ae4-4c66-9a8d-de8eabca89b7:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:9add4d1d4991a2404ab26c0c878b745789c5c244f6184e50fbb865bc6ad830bc
+Copying config sha256:f65df5b480b37c434a92810e52e50d7cf2889b3b9db46791d5e6d7a0f1bb0e2c
+Writing manifest to image destination
+--> f65df5b480b3
+Successfully tagged localhost/deploy-85dcfd37-1ae4-4c66-9a8d-de8eabca89b7:latest
+f65df5b480b37c434a92810e52e50d7cf2889b3b9db46791d5e6d7a0f1bb0e2c
+2026-11-16T20:44:53.493Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-85dcfd37-1ae4-4c66-9a8d-de8eabca89b7", "deployment_id": "85dcfd37-1ae4-4c66-9a8d-de8eabca89b7", "tar_path": "/tmp/zerodevops-build/85dcfd37-1ae4-4c66-9a8d-de8eabca89b7/packages/create-vite/template-react-ts/85dcfd37-1ae4-4c66-9a8d-de8eabca89b7.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:9add4d1d4991a2404ab26c0c878b745789c5c244f6184e50fbb865bc6ad830bc
+Copying config sha256:f65df5b480b37c434a92810e52e50d7cf2889b3b9db46791d5e6d7a0f1bb0e2c
+Writing manifest to image destination
+2026-11-16T20:44:54.549Z	INFO	deployments/deployments.go:547	uploading image tar	{"request_id": "zdfix-85dcfd37-1ae4-4c66-9a8d-de8eabca89b7", "deployment_id": "85dcfd37-1ae4-4c66-9a8d-de8eabca89b7"}
+2026-11-16T20:44:54.549Z	INFO	upload/upload.go:37	opening file for upload	{"file": "/tmp/zerodevops-build/85dcfd37-1ae4-4c66-9a8d-de8eabca89b7/packages/create-vite/template-react-ts/85dcfd37-1ae4-4c66-9a8d-de8eabca89b7.tar"}
+2026-11-16T20:44:54.549Z	INFO	upload/upload.go:48	uploading to S3	{"bucket": "testbucket", "key": "images/85dcfd37-1ae4-4c66-9a8d-de8eabca89b7.tar"}
+2026-11-16T20:44:55.020Z	INFO	upload/upload.go:66	upload complete	{"url": "s3://testbucket/images/85dcfd37-1ae4-4c66-9a8d-de8eabca89b7.tar"}
+2026-11-16T20:44:55.026Z	INFO	deployments/deployments.go:557	marking as finished	{"request_id": "zdfix-85dcfd37-1ae4-4c66-9a8d-de8eabca89b7", "deployment_id": "85dcfd37-1ae4-4c66-9a8d-de8eabca89b7"}
+2026-11-16T20:44:55.142Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-85dcfd37-1ae4-4c66-9a8d-de8eabca89b7", "deployment_id": "85dcfd37-1ae4-4c66-9a8d-de8eabca89b7"}
+2026-11-16T20:45:01.371Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-6af247d0-409b-40e8-b8b8-cfe512a931dd", "delivery_tag": 5}
+2026-11-16T20:45:01.379Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-6af247d0-409b-40e8-b8b8-cfe512a931dd", "deployment_id": "6af247d0-409b-40e8-b8b8-cfe512a931dd"}
+2026-11-16T20:45:01.382Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-6af247d0-409b-40e8-b8b8-cfe512a931dd", "deployment_id": "6af247d0-409b-40e8-b8b8-cfe512a931dd"}
+2026-11-16T20:45:01.384Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-6af247d0-409b-40e8-b8b8-cfe512a931dd", "deployment_id": "6af247d0-409b-40e8-b8b8-cfe512a931dd"}
+2026-11-16T20:45:07.006Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-6af247d0-409b-40e8-b8b8-cfe512a931dd", "deployment_id": "6af247d0-409b-40e8-b8b8-cfe512a931dd"}
+2026-11-16T20:45:07.006Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-6af247d0-409b-40e8-b8b8-cfe512a931dd", "deployment_id": "6af247d0-409b-40e8-b8b8-cfe512a931dd", "framework": "vite", "package_manager": "npm"}
+2026-11-16T20:45:07.006Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-6af247d0-409b-40e8-b8b8-cfe512a931dd", "deployment_id": "6af247d0-409b-40e8-b8b8-cfe512a931dd", "template": "static/Dockerfile.vite.tmpl"}
+2026-11-16T20:45:07.015Z	WARN	deployments/deployments.go:622	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-6af247d0-409b-40e8-b8b8-cfe512a931dd", "deployment_id": "6af247d0-409b-40e8-b8b8-cfe512a931dd"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:622
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T20:45:07.015Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-6af247d0-409b-40e8-b8b8-cfe512a931dd", "deployment_id": "6af247d0-409b-40e8-b8b8-cfe512a931dd", "image_tag": "deploy-6af247d0-409b-40e8-b8b8-cfe512a931dd:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN npm install --ignore-scripts --package-lock=false
+
+added 35 packages, and audited 36 packages in 32s
+
+9 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN npm run build
+
+> vite-vue-starter@0.0.0 build
+> vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 16 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                  0.45 kB │ gzip:  0.29 kB
+dist/assets/vite-BF8QNONU.svg    8.70 kB │ gzip:  1.60 kB
+dist/assets/hero-CLDdwZDr.png   13.05 kB
+dist/assets/index-CsUDhMuy.css   4.10 kB │ gzip:  1.46 kB
+dist/assets/index-CRxWFC_r.js   66.27 kB │ gzip: 26.01 kB
+
+✓ built in 235ms
+[1/2] STEP 7/7: RUN test -f ./dist/index.html || (echo "ZERODEVOPS_SSR_MISMATCH: no index.html in dist after npm run build" && exit 1)
+[2/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS runtime
+[2/2] STEP 2/6: WORKDIR /app
+[2/2] STEP 3/6: RUN npm install -g serve
+
+added 67 packages in 13s
+
+20 packages are looking for funding
+  run `npm fund` for details
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 4/6: COPY --from=builder /app/dist ./dist
+[2/2] STEP 5/6: EXPOSE 4173
+[2/2] STEP 6/6: CMD ["serve", "-s", "dist", "-l", "4173"]
+[2/2] COMMIT deploy-6af247d0-409b-40e8-b8b8-cfe512a931dd:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:686d170073a4358e2950769fd1fca9529351099aec723169621e3fd02ed6bbc8
+Copying config sha256:a09861150cb6c900908ccce69ad0db309ce3966a7cce8ce27c657cf2259004cb
+Writing manifest to image destination
+--> a09861150cb6
+Successfully tagged localhost/deploy-6af247d0-409b-40e8-b8b8-cfe512a931dd:latest
+a09861150cb6c900908ccce69ad0db309ce3966a7cce8ce27c657cf2259004cb
+2026-11-16T20:45:59.952Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-6af247d0-409b-40e8-b8b8-cfe512a931dd", "deployment_id": "6af247d0-409b-40e8-b8b8-cfe512a931dd", "tar_path": "/tmp/zerodevops-build/6af247d0-409b-40e8-b8b8-cfe512a931dd/packages/create-vite/template-vue/6af247d0-409b-40e8-b8b8-cfe512a931dd.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:686d170073a4358e2950769fd1fca9529351099aec723169621e3fd02ed6bbc8
+Copying config sha256:a09861150cb6c900908ccce69ad0db309ce3966a7cce8ce27c657cf2259004cb
+Writing manifest to image destination
+2026-11-16T20:46:00.918Z	INFO	deployments/deployments.go:547	uploading image tar	{"request_id": "zdfix-6af247d0-409b-40e8-b8b8-cfe512a931dd", "deployment_id": "6af247d0-409b-40e8-b8b8-cfe512a931dd"}
+2026-11-16T20:46:00.918Z	INFO	upload/upload.go:37	opening file for upload	{"file": "/tmp/zerodevops-build/6af247d0-409b-40e8-b8b8-cfe512a931dd/packages/create-vite/template-vue/6af247d0-409b-40e8-b8b8-cfe512a931dd.tar"}
+2026-11-16T20:46:00.918Z	INFO	upload/upload.go:48	uploading to S3	{"bucket": "testbucket", "key": "images/6af247d0-409b-40e8-b8b8-cfe512a931dd.tar"}
+2026-11-16T20:46:01.241Z	INFO	upload/upload.go:66	upload complete	{"url": "s3://testbucket/images/6af247d0-409b-40e8-b8b8-cfe512a931dd.tar"}
+2026-11-16T20:46:01.244Z	INFO	deployments/deployments.go:557	marking as finished	{"request_id": "zdfix-6af247d0-409b-40e8-b8b8-cfe512a931dd", "deployment_id": "6af247d0-409b-40e8-b8b8-cfe512a931dd"}
+2026-11-16T20:46:01.369Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-6af247d0-409b-40e8-b8b8-cfe512a931dd", "deployment_id": "6af247d0-409b-40e8-b8b8-cfe512a931dd"}
+2026-11-16T20:46:06.637Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-7186c347-2e7d-4c9b-b5de-058e0e2d0660", "delivery_tag": 6}
+2026-11-16T20:46:06.638Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-7186c347-2e7d-4c9b-b5de-058e0e2d0660", "deployment_id": "7186c347-2e7d-4c9b-b5de-058e0e2d0660"}
+2026-11-16T20:46:06.640Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-7186c347-2e7d-4c9b-b5de-058e0e2d0660", "deployment_id": "7186c347-2e7d-4c9b-b5de-058e0e2d0660"}
+2026-11-16T20:46:06.642Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-7186c347-2e7d-4c9b-b5de-058e0e2d0660", "deployment_id": "7186c347-2e7d-4c9b-b5de-058e0e2d0660"}
+2026-11-16T20:46:13.148Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-7186c347-2e7d-4c9b-b5de-058e0e2d0660", "deployment_id": "7186c347-2e7d-4c9b-b5de-058e0e2d0660"}
+2026-11-16T20:46:13.148Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-7186c347-2e7d-4c9b-b5de-058e0e2d0660", "deployment_id": "7186c347-2e7d-4c9b-b5de-058e0e2d0660", "framework": "vite", "package_manager": "npm"}
+2026-11-16T20:46:13.148Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-7186c347-2e7d-4c9b-b5de-058e0e2d0660", "deployment_id": "7186c347-2e7d-4c9b-b5de-058e0e2d0660", "template": "static/Dockerfile.vite.tmpl"}
+2026-11-16T20:46:13.161Z	WARN	deployments/deployments.go:622	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-7186c347-2e7d-4c9b-b5de-058e0e2d0660", "deployment_id": "7186c347-2e7d-4c9b-b5de-058e0e2d0660"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:622
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T20:46:13.161Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-7186c347-2e7d-4c9b-b5de-058e0e2d0660", "deployment_id": "7186c347-2e7d-4c9b-b5de-058e0e2d0660", "image_tag": "deploy-7186c347-2e7d-4c9b-b5de-058e0e2d0660:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN npm install --ignore-scripts --package-lock=false
+
+added 53 packages, and audited 54 packages in 40s
+
+9 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN npm run build
+
+> vite-vue-typescript-starter@0.0.0 build
+> vue-tsc -b && vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 18 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                  0.46 kB │ gzip:  0.30 kB
+dist/assets/vite-BF8QNONU.svg    8.70 kB │ gzip:  1.60 kB
+dist/assets/hero-CLDdwZDr.png   13.05 kB
+dist/assets/index-CsUDhMuy.css   4.10 kB │ gzip:  1.46 kB
+dist/assets/index-CNSY8KDa.js   66.33 kB │ gzip: 26.04 kB
+
+✓ built in 207ms
+[1/2] STEP 7/7: RUN test -f ./dist/index.html || (echo "ZERODEVOPS_SSR_MISMATCH: no index.html in dist after npm run build" && exit 1)
+[2/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS runtime
+[2/2] STEP 2/6: WORKDIR /app
+[2/2] STEP 3/6: RUN npm install -g serve
+
+added 67 packages in 9s
+
+20 packages are looking for funding
+  run `npm fund` for details
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 4/6: COPY --from=builder /app/dist ./dist
+[2/2] STEP 5/6: EXPOSE 4173
+[2/2] STEP 6/6: CMD ["serve", "-s", "dist", "-l", "4173"]
+[2/2] COMMIT deploy-7186c347-2e7d-4c9b-b5de-058e0e2d0660:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:f88ed168647b22c111cc0a152a69fc38f063d3f352c043261ef9924d52acf5e8
+Copying config sha256:5de764da7323a7c32e9bb9c2d59aba61adbaf6e7b57cf2760bebba940ae30760
+Writing manifest to image destination
+--> 5de764da7323
+Successfully tagged localhost/deploy-7186c347-2e7d-4c9b-b5de-058e0e2d0660:latest
+5de764da7323a7c32e9bb9c2d59aba61adbaf6e7b57cf2760bebba940ae30760
+2026-11-16T20:47:16.159Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-7186c347-2e7d-4c9b-b5de-058e0e2d0660", "deployment_id": "7186c347-2e7d-4c9b-b5de-058e0e2d0660", "tar_path": "/tmp/zerodevops-build/7186c347-2e7d-4c9b-b5de-058e0e2d0660/packages/create-vite/template-vue-ts/7186c347-2e7d-4c9b-b5de-058e0e2d0660.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:f88ed168647b22c111cc0a152a69fc38f063d3f352c043261ef9924d52acf5e8
+Copying config sha256:5de764da7323a7c32e9bb9c2d59aba61adbaf6e7b57cf2760bebba940ae30760
+Writing manifest to image destination
+2026-11-16T20:47:17.222Z	INFO	deployments/deployments.go:547	uploading image tar	{"request_id": "zdfix-7186c347-2e7d-4c9b-b5de-058e0e2d0660", "deployment_id": "7186c347-2e7d-4c9b-b5de-058e0e2d0660"}
+2026-11-16T20:47:17.222Z	INFO	upload/upload.go:37	opening file for upload	{"file": "/tmp/zerodevops-build/7186c347-2e7d-4c9b-b5de-058e0e2d0660/packages/create-vite/template-vue-ts/7186c347-2e7d-4c9b-b5de-058e0e2d0660.tar"}
+2026-11-16T20:47:17.222Z	INFO	upload/upload.go:48	uploading to S3	{"bucket": "testbucket", "key": "images/7186c347-2e7d-4c9b-b5de-058e0e2d0660.tar"}
+2026-11-16T20:47:17.536Z	INFO	upload/upload.go:66	upload complete	{"url": "s3://testbucket/images/7186c347-2e7d-4c9b-b5de-058e0e2d0660.tar"}
+2026-11-16T20:47:17.553Z	INFO	deployments/deployments.go:557	marking as finished	{"request_id": "zdfix-7186c347-2e7d-4c9b-b5de-058e0e2d0660", "deployment_id": "7186c347-2e7d-4c9b-b5de-058e0e2d0660"}
+2026-11-16T20:47:17.669Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-7186c347-2e7d-4c9b-b5de-058e0e2d0660", "deployment_id": "7186c347-2e7d-4c9b-b5de-058e0e2d0660"}
+2026-11-16T20:47:22.529Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-6bc0bb7f-a3a4-47d2-a98c-011bdb9b253e", "delivery_tag": 7}
+2026-11-16T20:47:22.530Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-6bc0bb7f-a3a4-47d2-a98c-011bdb9b253e", "deployment_id": "6bc0bb7f-a3a4-47d2-a98c-011bdb9b253e"}
+2026-11-16T20:47:22.541Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-6bc0bb7f-a3a4-47d2-a98c-011bdb9b253e", "deployment_id": "6bc0bb7f-a3a4-47d2-a98c-011bdb9b253e"}
+2026-11-16T20:47:22.543Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-6bc0bb7f-a3a4-47d2-a98c-011bdb9b253e", "deployment_id": "6bc0bb7f-a3a4-47d2-a98c-011bdb9b253e"}
+2026-11-16T20:47:28.055Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-6bc0bb7f-a3a4-47d2-a98c-011bdb9b253e", "deployment_id": "6bc0bb7f-a3a4-47d2-a98c-011bdb9b253e"}
+2026-11-16T20:47:28.056Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-6bc0bb7f-a3a4-47d2-a98c-011bdb9b253e", "deployment_id": "6bc0bb7f-a3a4-47d2-a98c-011bdb9b253e", "framework": "sveltekit", "package_manager": "npm"}
+2026-11-16T20:47:28.056Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-6bc0bb7f-a3a4-47d2-a98c-011bdb9b253e", "deployment_id": "6bc0bb7f-a3a4-47d2-a98c-011bdb9b253e", "template": "dynamic/Dockerfile.sveltekit.tmpl"}
+2026-11-16T20:47:28.065Z	WARN	deployments/deployments.go:622	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-6bc0bb7f-a3a4-47d2-a98c-011bdb9b253e", "deployment_id": "6bc0bb7f-a3a4-47d2-a98c-011bdb9b253e"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:622
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T20:47:28.065Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-6bc0bb7f-a3a4-47d2-a98c-011bdb9b253e", "deployment_id": "6bc0bb7f-a3a4-47d2-a98c-011bdb9b253e", "image_tag": "deploy-6bc0bb7f-a3a4-47d2-a98c-011bdb9b253e:latest"}
+[1/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/6: WORKDIR /app
+[1/2] STEP 3/6: COPY package*.json ./
+[1/2] STEP 4/6: RUN npm install --ignore-scripts --package-lock=false
+
+added 39 packages, and audited 40 packages in 24s
+
+9 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/6: COPY . .
+[1/2] STEP 6/6: RUN npm run build
+
+> vite-svelte-starter@0.0.0 build
+> vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 115 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                  0.46 kB │ gzip:  0.29 kB
+dist/assets/vite-BF8QNONU.svg    8.70 kB │ gzip:  1.60 kB
+dist/assets/hero-CLDdwZDr.png   13.05 kB
+dist/assets/index-CsUDhMuy.css   4.10 kB │ gzip:  1.46 kB
+dist/assets/index-UKYyRh1l.js   30.81 kB │ gzip: 12.40 kB
+
+✓ built in 323ms
+[2/2] STEP 1/9: FROM docker.io/library/node:24-alpine AS runtime
+[2/2] STEP 2/9: WORKDIR /app
+[2/2] STEP 3/9: ENV NODE_ENV=production
+[2/2] STEP 4/9: ENV PORT=3000
+[2/2] STEP 5/9: COPY package*.json ./
+[2/2] STEP 6/9: RUN npm install --ignore-scripts --package-lock=false --omit=dev
+
+up to date, audited 1 package in 16s
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 7/9: COPY --from=builder /app/build ./build
+Error: building at STEP "COPY --from=builder /app/build ./build": checking on sources under "/var/lib/containers/storage/overlay/b7d23115ecb2574850bb2205a1d55981eaf1e67298351034f2c81da1265f10f1/merged": copier: stat: "/app/build": no such file or directory
+2026-11-16T20:48:13.864Z	ERROR	worker/worker.go:109	deployment job failed	{"request_id": "zdfix-6bc0bb7f-a3a4-47d2-a98c-011bdb9b253e", "deployment_id": "6bc0bb7f-a3a4-47d2-a98c-011bdb9b253e", "error": "build failed: exit status 125"}
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:109
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T20:48:16.037Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-12c4c700-c201-42da-9667-b84c34359f8e", "delivery_tag": 8}
+2026-11-16T20:48:16.038Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-12c4c700-c201-42da-9667-b84c34359f8e", "deployment_id": "12c4c700-c201-42da-9667-b84c34359f8e"}
+2026-11-16T20:48:16.042Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-12c4c700-c201-42da-9667-b84c34359f8e", "deployment_id": "12c4c700-c201-42da-9667-b84c34359f8e"}
+2026-11-16T20:48:16.044Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-12c4c700-c201-42da-9667-b84c34359f8e", "deployment_id": "12c4c700-c201-42da-9667-b84c34359f8e"}
+2026-11-16T20:48:21.725Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-12c4c700-c201-42da-9667-b84c34359f8e", "deployment_id": "12c4c700-c201-42da-9667-b84c34359f8e"}
+2026-11-16T20:48:21.726Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-12c4c700-c201-42da-9667-b84c34359f8e", "deployment_id": "12c4c700-c201-42da-9667-b84c34359f8e", "framework": "sveltekit", "package_manager": "npm"}
+2026-11-16T20:48:21.726Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-12c4c700-c201-42da-9667-b84c34359f8e", "deployment_id": "12c4c700-c201-42da-9667-b84c34359f8e", "template": "dynamic/Dockerfile.sveltekit.tmpl"}
+2026-11-16T20:48:21.731Z	WARN	deployments/deployments.go:622	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-12c4c700-c201-42da-9667-b84c34359f8e", "deployment_id": "12c4c700-c201-42da-9667-b84c34359f8e"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:622
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T20:48:21.731Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-12c4c700-c201-42da-9667-b84c34359f8e", "deployment_id": "12c4c700-c201-42da-9667-b84c34359f8e", "image_tag": "deploy-12c4c700-c201-42da-9667-b84c34359f8e:latest"}
+[1/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/6: WORKDIR /app
+[1/2] STEP 3/6: COPY package*.json ./
+[1/2] STEP 4/6: RUN npm install --ignore-scripts --package-lock=false
+
+added 49 packages, and audited 50 packages in 34s
+
+11 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/6: COPY . .
+[1/2] STEP 6/6: RUN npm run build
+
+> vite-svelte-ts-starter@0.0.0 build
+> vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 115 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                  0.46 kB │ gzip:  0.30 kB
+dist/assets/vite-BF8QNONU.svg    8.70 kB │ gzip:  1.60 kB
+dist/assets/hero-CLDdwZDr.png   13.05 kB
+dist/assets/index-CsUDhMuy.css   4.10 kB │ gzip:  1.46 kB
+dist/assets/index-C6Y0TU_e.js   30.76 kB │ gzip: 12.38 kB
+
+✓ built in 436ms
+[2/2] STEP 1/9: FROM docker.io/library/node:24-alpine AS runtime
+[2/2] STEP 2/9: WORKDIR /app
+[2/2] STEP 3/9: ENV NODE_ENV=production
+[2/2] STEP 4/9: ENV PORT=3000
+[2/2] STEP 5/9: COPY package*.json ./
+[2/2] STEP 6/9: RUN npm install --ignore-scripts --package-lock=false --omit=dev
+
+up to date, audited 1 package in 18s
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 7/9: COPY --from=builder /app/build ./build
+Error: building at STEP "COPY --from=builder /app/build ./build": checking on sources under "/var/lib/containers/storage/overlay/f254f77d2b10c3aa7019f04767daf785cbefe01a1d5f732948ae3b4f3787e1d7/merged": copier: stat: "/app/build": no such file or directory
+2026-11-16T20:49:19.665Z	ERROR	worker/worker.go:109	deployment job failed	{"request_id": "zdfix-12c4c700-c201-42da-9667-b84c34359f8e", "deployment_id": "12c4c700-c201-42da-9667-b84c34359f8e", "error": "build failed: exit status 125"}
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:109
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T20:49:20.773Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-df1a0d5e-f142-4ab3-80d5-aed60f0f089c", "delivery_tag": 9}
+2026-11-16T20:49:20.790Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-df1a0d5e-f142-4ab3-80d5-aed60f0f089c", "deployment_id": "df1a0d5e-f142-4ab3-80d5-aed60f0f089c"}
+2026-11-16T20:49:20.792Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-df1a0d5e-f142-4ab3-80d5-aed60f0f089c", "deployment_id": "df1a0d5e-f142-4ab3-80d5-aed60f0f089c"}
+2026-11-16T20:49:20.794Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-df1a0d5e-f142-4ab3-80d5-aed60f0f089c", "deployment_id": "df1a0d5e-f142-4ab3-80d5-aed60f0f089c"}
+2026-11-16T20:49:25.890Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-df1a0d5e-f142-4ab3-80d5-aed60f0f089c", "deployment_id": "df1a0d5e-f142-4ab3-80d5-aed60f0f089c"}
+2026-11-16T20:49:25.890Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-df1a0d5e-f142-4ab3-80d5-aed60f0f089c", "deployment_id": "df1a0d5e-f142-4ab3-80d5-aed60f0f089c", "framework": "vite", "package_manager": "npm"}
+2026-11-16T20:49:25.890Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-df1a0d5e-f142-4ab3-80d5-aed60f0f089c", "deployment_id": "df1a0d5e-f142-4ab3-80d5-aed60f0f089c", "template": "static/Dockerfile.vite.tmpl"}
+2026-11-16T20:49:25.902Z	WARN	deployments/deployments.go:622	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-df1a0d5e-f142-4ab3-80d5-aed60f0f089c", "deployment_id": "df1a0d5e-f142-4ab3-80d5-aed60f0f089c"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:622
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T20:49:25.902Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-df1a0d5e-f142-4ab3-80d5-aed60f0f089c", "deployment_id": "df1a0d5e-f142-4ab3-80d5-aed60f0f089c", "image_tag": "deploy-df1a0d5e-f142-4ab3-80d5-aed60f0f089c:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN npm install --ignore-scripts --package-lock=false
+
+added 74 packages, and audited 75 packages in 30s
+
+16 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN npm run build
+
+> vite-solid-starter@0.0.0 build
+> vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 12 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                  0.46 kB │ gzip: 0.29 kB
+dist/assets/vite-BF8QNONU.svg    8.70 kB │ gzip: 1.60 kB
+dist/assets/hero-CLDdwZDr.png   13.05 kB
+dist/assets/index-DykytF2W.css   4.10 kB │ gzip: 1.47 kB
+dist/assets/index-CrC4ugkK.js   15.51 kB │ gzip: 5.89 kB
+
+✓ built in 401ms
+[1/2] STEP 7/7: RUN test -f ./dist/index.html || (echo "ZERODEVOPS_SSR_MISMATCH: no index.html in dist after npm run build" && exit 1)
+[2/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS runtime
+[2/2] STEP 2/6: WORKDIR /app
+[2/2] STEP 3/6: RUN npm install -g serve
+
+added 67 packages in 7s
+
+20 packages are looking for funding
+  run `npm fund` for details
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 4/6: COPY --from=builder /app/dist ./dist
+[2/2] STEP 5/6: EXPOSE 4173
+[2/2] STEP 6/6: CMD ["serve", "-s", "dist", "-l", "4173"]
+[2/2] COMMIT deploy-df1a0d5e-f142-4ab3-80d5-aed60f0f089c:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:ca047b2b30af36f7aa2fde04fba7bf29558c7d45a6ff96abd06e4e3f42246d07
+Copying config sha256:a32521f8f9a0a603006551f980f4706bb5453e01d3c3110286bdc670b881ef59
+Writing manifest to image destination
+--> a32521f8f9a0
+Successfully tagged localhost/deploy-df1a0d5e-f142-4ab3-80d5-aed60f0f089c:latest
+a32521f8f9a0a603006551f980f4706bb5453e01d3c3110286bdc670b881ef59
+2026-11-16T20:50:11.720Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-df1a0d5e-f142-4ab3-80d5-aed60f0f089c", "deployment_id": "df1a0d5e-f142-4ab3-80d5-aed60f0f089c", "tar_path": "/tmp/zerodevops-build/df1a0d5e-f142-4ab3-80d5-aed60f0f089c/packages/create-vite/template-solid/df1a0d5e-f142-4ab3-80d5-aed60f0f089c.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:ca047b2b30af36f7aa2fde04fba7bf29558c7d45a6ff96abd06e4e3f42246d07
+Copying config sha256:a32521f8f9a0a603006551f980f4706bb5453e01d3c3110286bdc670b881ef59
+Writing manifest to image destination
+2026-11-16T20:50:12.901Z	INFO	deployments/deployments.go:547	uploading image tar	{"request_id": "zdfix-df1a0d5e-f142-4ab3-80d5-aed60f0f089c", "deployment_id": "df1a0d5e-f142-4ab3-80d5-aed60f0f089c"}
+2026-11-16T20:50:12.902Z	INFO	upload/upload.go:37	opening file for upload	{"file": "/tmp/zerodevops-build/df1a0d5e-f142-4ab3-80d5-aed60f0f089c/packages/create-vite/template-solid/df1a0d5e-f142-4ab3-80d5-aed60f0f089c.tar"}
+2026-11-16T20:50:12.902Z	INFO	upload/upload.go:48	uploading to S3	{"bucket": "testbucket", "key": "images/df1a0d5e-f142-4ab3-80d5-aed60f0f089c.tar"}
+2026-11-16T20:50:13.488Z	INFO	upload/upload.go:66	upload complete	{"url": "s3://testbucket/images/df1a0d5e-f142-4ab3-80d5-aed60f0f089c.tar"}
+2026-11-16T20:50:13.490Z	INFO	deployments/deployments.go:557	marking as finished	{"request_id": "zdfix-df1a0d5e-f142-4ab3-80d5-aed60f0f089c", "deployment_id": "df1a0d5e-f142-4ab3-80d5-aed60f0f089c"}
+2026-11-16T20:50:13.619Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-df1a0d5e-f142-4ab3-80d5-aed60f0f089c", "deployment_id": "df1a0d5e-f142-4ab3-80d5-aed60f0f089c"}
+2026-11-16T20:50:17.849Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-5e3c66d8-c7d4-42cd-933d-c406795dcee4", "delivery_tag": 10}
+2026-11-16T20:50:17.850Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-5e3c66d8-c7d4-42cd-933d-c406795dcee4", "deployment_id": "5e3c66d8-c7d4-42cd-933d-c406795dcee4"}
+2026-11-16T20:50:17.852Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-5e3c66d8-c7d4-42cd-933d-c406795dcee4", "deployment_id": "5e3c66d8-c7d4-42cd-933d-c406795dcee4"}
+2026-11-16T20:50:17.854Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-5e3c66d8-c7d4-42cd-933d-c406795dcee4", "deployment_id": "5e3c66d8-c7d4-42cd-933d-c406795dcee4"}
+2026-11-16T20:50:22.848Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-5e3c66d8-c7d4-42cd-933d-c406795dcee4", "deployment_id": "5e3c66d8-c7d4-42cd-933d-c406795dcee4"}
+2026-11-16T20:50:22.848Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-5e3c66d8-c7d4-42cd-933d-c406795dcee4", "deployment_id": "5e3c66d8-c7d4-42cd-933d-c406795dcee4", "framework": "vite", "package_manager": "npm"}
+2026-11-16T20:50:22.848Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-5e3c66d8-c7d4-42cd-933d-c406795dcee4", "deployment_id": "5e3c66d8-c7d4-42cd-933d-c406795dcee4", "template": "static/Dockerfile.vite.tmpl"}
+2026-11-16T20:50:22.859Z	WARN	deployments/deployments.go:622	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-5e3c66d8-c7d4-42cd-933d-c406795dcee4", "deployment_id": "5e3c66d8-c7d4-42cd-933d-c406795dcee4"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:622
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T20:50:22.859Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-5e3c66d8-c7d4-42cd-933d-c406795dcee4", "deployment_id": "5e3c66d8-c7d4-42cd-933d-c406795dcee4", "image_tag": "deploy-5e3c66d8-c7d4-42cd-933d-c406795dcee4:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN npm install --ignore-scripts --package-lock=false
+
+added 78 packages, and audited 79 packages in 44s
+
+16 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN npm run build
+
+> vite-solid-typescript-starter@0.0.0 build
+> tsc -b && vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 12 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                  0.46 kB │ gzip: 0.30 kB
+dist/assets/vite-BF8QNONU.svg    8.70 kB │ gzip: 1.60 kB
+dist/assets/hero-CLDdwZDr.png   13.05 kB
+dist/assets/index-DykytF2W.css   4.10 kB │ gzip: 1.47 kB
+dist/assets/index-_URkZXHW.js   15.51 kB │ gzip: 5.89 kB
+
+✓ built in 243ms
+[1/2] STEP 7/7: RUN test -f ./dist/index.html || (echo "ZERODEVOPS_SSR_MISMATCH: no index.html in dist after npm run build" && exit 1)
+[2/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS runtime
+[2/2] STEP 2/6: WORKDIR /app
+[2/2] STEP 3/6: RUN npm install -g serve
+
+added 67 packages in 9s
+
+20 packages are looking for funding
+  run `npm fund` for details
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 4/6: COPY --from=builder /app/dist ./dist
+[2/2] STEP 5/6: EXPOSE 4173
+[2/2] STEP 6/6: CMD ["serve", "-s", "dist", "-l", "4173"]
+[2/2] COMMIT deploy-5e3c66d8-c7d4-42cd-933d-c406795dcee4:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:00d12c2301b86f2015dbefd651e4f1163acd43337e171fe1987ff8cbc4e44fab
+Copying config sha256:8418066955c2f78009f86e64c4001b7c4e250a6a2f9e2f128830eb3d0bcfa051
+Writing manifest to image destination
+--> 8418066955c2
+Successfully tagged localhost/deploy-5e3c66d8-c7d4-42cd-933d-c406795dcee4:latest
+8418066955c2f78009f86e64c4001b7c4e250a6a2f9e2f128830eb3d0bcfa051
+2026-11-16T20:51:25.393Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-5e3c66d8-c7d4-42cd-933d-c406795dcee4", "deployment_id": "5e3c66d8-c7d4-42cd-933d-c406795dcee4", "tar_path": "/tmp/zerodevops-build/5e3c66d8-c7d4-42cd-933d-c406795dcee4/packages/create-vite/template-solid-ts/5e3c66d8-c7d4-42cd-933d-c406795dcee4.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:00d12c2301b86f2015dbefd651e4f1163acd43337e171fe1987ff8cbc4e44fab
+Copying config sha256:8418066955c2f78009f86e64c4001b7c4e250a6a2f9e2f128830eb3d0bcfa051
+Writing manifest to image destination
+2026-11-16T20:51:26.397Z	INFO	deployments/deployments.go:547	uploading image tar	{"request_id": "zdfix-5e3c66d8-c7d4-42cd-933d-c406795dcee4", "deployment_id": "5e3c66d8-c7d4-42cd-933d-c406795dcee4"}
+2026-11-16T20:51:26.399Z	INFO	upload/upload.go:37	opening file for upload	{"file": "/tmp/zerodevops-build/5e3c66d8-c7d4-42cd-933d-c406795dcee4/packages/create-vite/template-solid-ts/5e3c66d8-c7d4-42cd-933d-c406795dcee4.tar"}
+2026-11-16T20:51:26.400Z	INFO	upload/upload.go:48	uploading to S3	{"bucket": "testbucket", "key": "images/5e3c66d8-c7d4-42cd-933d-c406795dcee4.tar"}
+2026-11-16T20:51:27.000Z	INFO	upload/upload.go:66	upload complete	{"url": "s3://testbucket/images/5e3c66d8-c7d4-42cd-933d-c406795dcee4.tar"}
+2026-11-16T20:51:27.005Z	INFO	deployments/deployments.go:557	marking as finished	{"request_id": "zdfix-5e3c66d8-c7d4-42cd-933d-c406795dcee4", "deployment_id": "5e3c66d8-c7d4-42cd-933d-c406795dcee4"}
+2026-11-16T20:51:27.141Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-5e3c66d8-c7d4-42cd-933d-c406795dcee4", "deployment_id": "5e3c66d8-c7d4-42cd-933d-c406795dcee4"}
+2026-11-16T20:51:32.553Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e", "delivery_tag": 11}
+2026-11-16T20:51:32.555Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e", "deployment_id": "8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e"}
+2026-11-16T20:51:32.557Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e", "deployment_id": "8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e"}
+2026-11-16T20:51:32.559Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e", "deployment_id": "8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e"}
+2026-11-16T20:51:38.987Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e", "deployment_id": "8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e"}
+2026-11-16T20:51:38.987Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e", "deployment_id": "8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e", "framework": "vite", "package_manager": "npm"}
+2026-11-16T20:51:38.987Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e", "deployment_id": "8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e", "template": "static/Dockerfile.vite.tmpl"}
+2026-11-16T20:51:38.996Z	WARN	deployments/deployments.go:622	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e", "deployment_id": "8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:622
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T20:51:38.996Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e", "deployment_id": "8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e", "image_tag": "deploy-8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN npm install --ignore-scripts --package-lock=false
+
+added 88 packages, and audited 89 packages in 36s
+
+22 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN npm run build
+
+> vite-preact-starter@0.0.0 build
+> vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 13 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                  0.46 kB │ gzip: 0.29 kB
+dist/assets/vite-BF8QNONU.svg    8.70 kB │ gzip: 1.60 kB
+dist/assets/hero-CLDdwZDr.png   13.05 kB
+dist/assets/index-DiN-lbiA.css   4.28 kB │ gzip: 1.48 kB
+dist/assets/index-e_QwmrLR.js   17.97 kB │ gzip: 7.44 kB
+
+✓ built in 202ms
+[1/2] STEP 7/7: RUN test -f ./dist/index.html || (echo "ZERODEVOPS_SSR_MISMATCH: no index.html in dist after npm run build" && exit 1)
+[2/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS runtime
+[2/2] STEP 2/6: WORKDIR /app
+[2/2] STEP 3/6: RUN npm install -g serve
+
+added 67 packages in 24s
+
+20 packages are looking for funding
+  run `npm fund` for details
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 4/6: COPY --from=builder /app/dist ./dist
+[2/2] STEP 5/6: EXPOSE 4173
+[2/2] STEP 6/6: CMD ["serve", "-s", "dist", "-l", "4173"]
+[2/2] COMMIT deploy-8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:6c3bdda99ec794a8a64375f2e18946d71061c8a73c77fb65282e13fc7cd28702
+Copying config sha256:c642cbce17d64514240ad2cd3bb4f7c79c21f2f6cf2594aebdfdbebea0325d54
+Writing manifest to image destination
+--> c642cbce17d6
+Successfully tagged localhost/deploy-8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e:latest
+c642cbce17d64514240ad2cd3bb4f7c79c21f2f6cf2594aebdfdbebea0325d54
+2026-11-16T20:52:48.513Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e", "deployment_id": "8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e", "tar_path": "/tmp/zerodevops-build/8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e/packages/create-vite/template-preact/8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:6c3bdda99ec794a8a64375f2e18946d71061c8a73c77fb65282e13fc7cd28702
+Copying config sha256:c642cbce17d64514240ad2cd3bb4f7c79c21f2f6cf2594aebdfdbebea0325d54
+Writing manifest to image destination
+2026-11-16T20:52:49.389Z	INFO	deployments/deployments.go:547	uploading image tar	{"request_id": "zdfix-8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e", "deployment_id": "8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e"}
+2026-11-16T20:52:49.389Z	INFO	upload/upload.go:37	opening file for upload	{"file": "/tmp/zerodevops-build/8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e/packages/create-vite/template-preact/8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e.tar"}
+2026-11-16T20:52:49.389Z	INFO	upload/upload.go:48	uploading to S3	{"bucket": "testbucket", "key": "images/8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e.tar"}
+2026-11-16T20:52:49.773Z	INFO	upload/upload.go:66	upload complete	{"url": "s3://testbucket/images/8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e.tar"}
+2026-11-16T20:52:49.790Z	INFO	deployments/deployments.go:557	marking as finished	{"request_id": "zdfix-8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e", "deployment_id": "8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e"}
+2026-11-16T20:52:49.867Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e", "deployment_id": "8ac0b1cb-a8d4-47b2-a57a-7b136c43f29e"}
+2026-11-16T20:52:56.123Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-0017a2ae-0cce-4d80-a87d-28f8fd01e1c4", "delivery_tag": 12}
+2026-11-16T20:52:56.124Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-0017a2ae-0cce-4d80-a87d-28f8fd01e1c4", "deployment_id": "0017a2ae-0cce-4d80-a87d-28f8fd01e1c4"}
+2026-11-16T20:52:56.127Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-0017a2ae-0cce-4d80-a87d-28f8fd01e1c4", "deployment_id": "0017a2ae-0cce-4d80-a87d-28f8fd01e1c4"}
+2026-11-16T20:52:56.129Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-0017a2ae-0cce-4d80-a87d-28f8fd01e1c4", "deployment_id": "0017a2ae-0cce-4d80-a87d-28f8fd01e1c4"}
+2026-11-16T20:53:01.768Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-0017a2ae-0cce-4d80-a87d-28f8fd01e1c4", "deployment_id": "0017a2ae-0cce-4d80-a87d-28f8fd01e1c4"}
+2026-11-16T20:53:01.768Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-0017a2ae-0cce-4d80-a87d-28f8fd01e1c4", "deployment_id": "0017a2ae-0cce-4d80-a87d-28f8fd01e1c4", "framework": "vite", "package_manager": "npm"}
+2026-11-16T20:53:01.768Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-0017a2ae-0cce-4d80-a87d-28f8fd01e1c4", "deployment_id": "0017a2ae-0cce-4d80-a87d-28f8fd01e1c4", "template": "static/Dockerfile.vite.tmpl"}
+2026-11-16T20:53:01.777Z	WARN	deployments/deployments.go:622	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-0017a2ae-0cce-4d80-a87d-28f8fd01e1c4", "deployment_id": "0017a2ae-0cce-4d80-a87d-28f8fd01e1c4"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:622
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T20:53:01.777Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-0017a2ae-0cce-4d80-a87d-28f8fd01e1c4", "deployment_id": "0017a2ae-0cce-4d80-a87d-28f8fd01e1c4", "image_tag": "deploy-0017a2ae-0cce-4d80-a87d-28f8fd01e1c4:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN npm install --ignore-scripts --package-lock=false
+
+added 92 packages, and audited 93 packages in 48s
+
+22 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN npm run build
+
+> vite-preact-ts-starter@0.0.0 build
+> tsc -b && vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 13 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                  0.46 kB │ gzip: 0.30 kB
+dist/assets/vite-BF8QNONU.svg    8.70 kB │ gzip: 1.60 kB
+dist/assets/hero-CLDdwZDr.png   13.05 kB
+dist/assets/index-DiN-lbiA.css   4.28 kB │ gzip: 1.48 kB
+dist/assets/index-BWRjUX5g.js   17.97 kB │ gzip: 7.44 kB
+
+✓ built in 187ms
+[1/2] STEP 7/7: RUN test -f ./dist/index.html || (echo "ZERODEVOPS_SSR_MISMATCH: no index.html in dist after npm run build" && exit 1)
+[2/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS runtime
+[2/2] STEP 2/6: WORKDIR /app
+[2/2] STEP 3/6: RUN npm install -g serve
+
+added 67 packages in 8s
+
+20 packages are looking for funding
+  run `npm fund` for details
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 4/6: COPY --from=builder /app/dist ./dist
+[2/2] STEP 5/6: EXPOSE 4173
+[2/2] STEP 6/6: CMD ["serve", "-s", "dist", "-l", "4173"]
+[2/2] COMMIT deploy-0017a2ae-0cce-4d80-a87d-28f8fd01e1c4:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:6b34a6acbbe5cbe25df4ca01e4c3341a8b0bdae6387242bb6d9200db79f8bb5e
+Copying config sha256:22093656611360c37e44558151e08636428f046b361a17f2ecdf3d9dda8095b8
+Writing manifest to image destination
+--> 220936566113
+Successfully tagged localhost/deploy-0017a2ae-0cce-4d80-a87d-28f8fd01e1c4:latest
+22093656611360c37e44558151e08636428f046b361a17f2ecdf3d9dda8095b8
+2026-11-16T20:54:07.707Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-0017a2ae-0cce-4d80-a87d-28f8fd01e1c4", "deployment_id": "0017a2ae-0cce-4d80-a87d-28f8fd01e1c4", "tar_path": "/tmp/zerodevops-build/0017a2ae-0cce-4d80-a87d-28f8fd01e1c4/packages/create-vite/template-preact-ts/0017a2ae-0cce-4d80-a87d-28f8fd01e1c4.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:6b34a6acbbe5cbe25df4ca01e4c3341a8b0bdae6387242bb6d9200db79f8bb5e
+Copying config sha256:22093656611360c37e44558151e08636428f046b361a17f2ecdf3d9dda8095b8
+Writing manifest to image destination
+2026-11-16T20:54:08.716Z	INFO	deployments/deployments.go:547	uploading image tar	{"request_id": "zdfix-0017a2ae-0cce-4d80-a87d-28f8fd01e1c4", "deployment_id": "0017a2ae-0cce-4d80-a87d-28f8fd01e1c4"}
+2026-11-16T20:54:08.716Z	INFO	upload/upload.go:37	opening file for upload	{"file": "/tmp/zerodevops-build/0017a2ae-0cce-4d80-a87d-28f8fd01e1c4/packages/create-vite/template-preact-ts/0017a2ae-0cce-4d80-a87d-28f8fd01e1c4.tar"}
+2026-11-16T20:54:08.716Z	INFO	upload/upload.go:48	uploading to S3	{"bucket": "testbucket", "key": "images/0017a2ae-0cce-4d80-a87d-28f8fd01e1c4.tar"}
+2026-11-16T20:54:09.053Z	INFO	upload/upload.go:66	upload complete	{"url": "s3://testbucket/images/0017a2ae-0cce-4d80-a87d-28f8fd01e1c4.tar"}
+2026-11-16T20:54:09.056Z	INFO	deployments/deployments.go:557	marking as finished	{"request_id": "zdfix-0017a2ae-0cce-4d80-a87d-28f8fd01e1c4", "deployment_id": "0017a2ae-0cce-4d80-a87d-28f8fd01e1c4"}
+2026-11-16T20:54:09.160Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-0017a2ae-0cce-4d80-a87d-28f8fd01e1c4", "deployment_id": "0017a2ae-0cce-4d80-a87d-28f8fd01e1c4"}
+2026-11-16T20:54:17.004Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-e753bb5d-e88f-4076-9016-eebc14d940e8", "delivery_tag": 13}
+2026-11-16T20:54:17.005Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-e753bb5d-e88f-4076-9016-eebc14d940e8", "deployment_id": "e753bb5d-e88f-4076-9016-eebc14d940e8"}
+2026-11-16T20:54:17.008Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-e753bb5d-e88f-4076-9016-eebc14d940e8", "deployment_id": "e753bb5d-e88f-4076-9016-eebc14d940e8"}
+2026-11-16T20:54:17.011Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-e753bb5d-e88f-4076-9016-eebc14d940e8", "deployment_id": "e753bb5d-e88f-4076-9016-eebc14d940e8"}
+2026-11-16T20:54:22.392Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-e753bb5d-e88f-4076-9016-eebc14d940e8", "deployment_id": "e753bb5d-e88f-4076-9016-eebc14d940e8"}
+2026-11-16T20:54:22.392Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-e753bb5d-e88f-4076-9016-eebc14d940e8", "deployment_id": "e753bb5d-e88f-4076-9016-eebc14d940e8", "framework": "vite", "package_manager": "npm"}
+2026-11-16T20:54:22.392Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-e753bb5d-e88f-4076-9016-eebc14d940e8", "deployment_id": "e753bb5d-e88f-4076-9016-eebc14d940e8", "template": "static/Dockerfile.vite.tmpl"}
+2026-11-16T20:54:22.396Z	WARN	deployments/deployments.go:622	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-e753bb5d-e88f-4076-9016-eebc14d940e8", "deployment_id": "e753bb5d-e88f-4076-9016-eebc14d940e8"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:622
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T20:54:22.396Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-e753bb5d-e88f-4076-9016-eebc14d940e8", "deployment_id": "e753bb5d-e88f-4076-9016-eebc14d940e8", "image_tag": "deploy-e753bb5d-e88f-4076-9016-eebc14d940e8:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN npm install --ignore-scripts --package-lock=false
+
+added 21 packages, and audited 22 packages in 26s
+
+8 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN npm run build
+
+> vite-lit-starter@0.0.0 build
+> vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 14 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                  0.49 kB │ gzip: 0.31 kB
+dist/assets/vite-BF8QNONU.svg    8.70 kB │ gzip: 1.60 kB
+dist/assets/hero-CLDdwZDr.png   13.05 kB
+dist/assets/index-gR6FGjAy.css   0.46 kB │ gzip: 0.28 kB
+dist/assets/index-DsTlOOtu.js   26.13 kB │ gzip: 8.87 kB
+
+✓ built in 192ms
+[1/2] STEP 7/7: RUN test -f ./dist/index.html || (echo "ZERODEVOPS_SSR_MISMATCH: no index.html in dist after npm run build" && exit 1)
+[2/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS runtime
+[2/2] STEP 2/6: WORKDIR /app
+[2/2] STEP 3/6: RUN npm install -g serve
+
+added 67 packages in 8s
+
+20 packages are looking for funding
+  run `npm fund` for details
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 4/6: COPY --from=builder /app/dist ./dist
+[2/2] STEP 5/6: EXPOSE 4173
+[2/2] STEP 6/6: CMD ["serve", "-s", "dist", "-l", "4173"]
+[2/2] COMMIT deploy-e753bb5d-e88f-4076-9016-eebc14d940e8:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:ed7cb011107b5290cc4af831386b371659538c258688a52a57fe6b3b9012c9d4
+Copying config sha256:c7b59365de28a7fc1f85c1429bef77356b4590ef656de84c654c91c4d21f7437
+Writing manifest to image destination
+--> c7b59365de28
+Successfully tagged localhost/deploy-e753bb5d-e88f-4076-9016-eebc14d940e8:latest
+c7b59365de28a7fc1f85c1429bef77356b4590ef656de84c654c91c4d21f7437
+2026-11-16T20:55:04.456Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-e753bb5d-e88f-4076-9016-eebc14d940e8", "deployment_id": "e753bb5d-e88f-4076-9016-eebc14d940e8", "tar_path": "/tmp/zerodevops-build/e753bb5d-e88f-4076-9016-eebc14d940e8/packages/create-vite/template-lit/e753bb5d-e88f-4076-9016-eebc14d940e8.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:ed7cb011107b5290cc4af831386b371659538c258688a52a57fe6b3b9012c9d4
+Copying config sha256:c7b59365de28a7fc1f85c1429bef77356b4590ef656de84c654c91c4d21f7437
+Writing manifest to image destination
+2026-11-16T20:55:05.419Z	INFO	deployments/deployments.go:547	uploading image tar	{"request_id": "zdfix-e753bb5d-e88f-4076-9016-eebc14d940e8", "deployment_id": "e753bb5d-e88f-4076-9016-eebc14d940e8"}
+2026-11-16T20:55:05.419Z	INFO	upload/upload.go:37	opening file for upload	{"file": "/tmp/zerodevops-build/e753bb5d-e88f-4076-9016-eebc14d940e8/packages/create-vite/template-lit/e753bb5d-e88f-4076-9016-eebc14d940e8.tar"}
+2026-11-16T20:55:05.419Z	INFO	upload/upload.go:48	uploading to S3	{"bucket": "testbucket", "key": "images/e753bb5d-e88f-4076-9016-eebc14d940e8.tar"}
+2026-11-16T20:55:05.753Z	INFO	upload/upload.go:66	upload complete	{"url": "s3://testbucket/images/e753bb5d-e88f-4076-9016-eebc14d940e8.tar"}
+2026-11-16T20:55:05.757Z	INFO	deployments/deployments.go:557	marking as finished	{"request_id": "zdfix-e753bb5d-e88f-4076-9016-eebc14d940e8", "deployment_id": "e753bb5d-e88f-4076-9016-eebc14d940e8"}
+2026-11-16T20:55:05.842Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-e753bb5d-e88f-4076-9016-eebc14d940e8", "deployment_id": "e753bb5d-e88f-4076-9016-eebc14d940e8"}
+2026-11-16T20:55:11.346Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-2b861d4e-695e-4c40-ad18-de0fff71f719", "delivery_tag": 14}
+2026-11-16T20:55:11.348Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-2b861d4e-695e-4c40-ad18-de0fff71f719", "deployment_id": "2b861d4e-695e-4c40-ad18-de0fff71f719"}
+2026-11-16T20:55:11.351Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-2b861d4e-695e-4c40-ad18-de0fff71f719", "deployment_id": "2b861d4e-695e-4c40-ad18-de0fff71f719"}
+2026-11-16T20:55:11.353Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-2b861d4e-695e-4c40-ad18-de0fff71f719", "deployment_id": "2b861d4e-695e-4c40-ad18-de0fff71f719"}
+2026-11-16T20:55:17.097Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-2b861d4e-695e-4c40-ad18-de0fff71f719", "deployment_id": "2b861d4e-695e-4c40-ad18-de0fff71f719"}
+2026-11-16T20:55:17.097Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-2b861d4e-695e-4c40-ad18-de0fff71f719", "deployment_id": "2b861d4e-695e-4c40-ad18-de0fff71f719", "framework": "vite", "package_manager": "npm"}
+2026-11-16T20:55:17.097Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-2b861d4e-695e-4c40-ad18-de0fff71f719", "deployment_id": "2b861d4e-695e-4c40-ad18-de0fff71f719", "template": "static/Dockerfile.vite.tmpl"}
+2026-11-16T20:55:17.106Z	WARN	deployments/deployments.go:622	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-2b861d4e-695e-4c40-ad18-de0fff71f719", "deployment_id": "2b861d4e-695e-4c40-ad18-de0fff71f719"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:622
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T20:55:17.106Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-2b861d4e-695e-4c40-ad18-de0fff71f719", "deployment_id": "2b861d4e-695e-4c40-ad18-de0fff71f719", "image_tag": "deploy-2b861d4e-695e-4c40-ad18-de0fff71f719:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN npm install --ignore-scripts --package-lock=false
+
+added 23 packages, and audited 24 packages in 25s
+
+8 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN npm run build
+
+> vite-lit-ts-starter@0.0.0 build
+> tsc && vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 26 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                  0.50 kB │ gzip: 0.31 kB
+dist/assets/vite-BF8QNONU.svg    8.70 kB │ gzip: 1.60 kB
+dist/assets/hero-CLDdwZDr.png   13.05 kB
+dist/assets/index-gR6FGjAy.css   0.46 kB │ gzip: 0.28 kB
+dist/assets/index-DAg0AghZ.js   26.84 kB │ gzip: 9.26 kB
+
+✓ built in 147ms
+[1/2] STEP 7/7: RUN test -f ./dist/index.html || (echo "ZERODEVOPS_SSR_MISMATCH: no index.html in dist after npm run build" && exit 1)
+[2/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS runtime
+[2/2] STEP 2/6: WORKDIR /app
+[2/2] STEP 3/6: RUN npm install -g serve
+
+added 67 packages in 7s
+
+20 packages are looking for funding
+  run `npm fund` for details
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 4/6: COPY --from=builder /app/dist ./dist
+[2/2] STEP 5/6: EXPOSE 4173
+[2/2] STEP 6/6: CMD ["serve", "-s", "dist", "-l", "4173"]
+[2/2] COMMIT deploy-2b861d4e-695e-4c40-ad18-de0fff71f719:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:59cff77c7ed7ade2bc4e31c0c4e0a6bd9da2298b168569b8d76329bf30df5491
+Copying config sha256:690b2da0ef8c0c4923efe83dc657efc3a9e9a82a56463192a4b7ed64e521cdb4
+Writing manifest to image destination
+--> 690b2da0ef8c
+Successfully tagged localhost/deploy-2b861d4e-695e-4c40-ad18-de0fff71f719:latest
+690b2da0ef8c0c4923efe83dc657efc3a9e9a82a56463192a4b7ed64e521cdb4
+2026-11-16T20:55:56.538Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-2b861d4e-695e-4c40-ad18-de0fff71f719", "deployment_id": "2b861d4e-695e-4c40-ad18-de0fff71f719", "tar_path": "/tmp/zerodevops-build/2b861d4e-695e-4c40-ad18-de0fff71f719/packages/create-vite/template-lit-ts/2b861d4e-695e-4c40-ad18-de0fff71f719.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:59cff77c7ed7ade2bc4e31c0c4e0a6bd9da2298b168569b8d76329bf30df5491
+Copying config sha256:690b2da0ef8c0c4923efe83dc657efc3a9e9a82a56463192a4b7ed64e521cdb4
+Writing manifest to image destination
+2026-11-16T20:55:57.410Z	INFO	deployments/deployments.go:547	uploading image tar	{"request_id": "zdfix-2b861d4e-695e-4c40-ad18-de0fff71f719", "deployment_id": "2b861d4e-695e-4c40-ad18-de0fff71f719"}
+2026-11-16T20:55:57.410Z	INFO	upload/upload.go:37	opening file for upload	{"file": "/tmp/zerodevops-build/2b861d4e-695e-4c40-ad18-de0fff71f719/packages/create-vite/template-lit-ts/2b861d4e-695e-4c40-ad18-de0fff71f719.tar"}
+2026-11-16T20:55:57.411Z	INFO	upload/upload.go:48	uploading to S3	{"bucket": "testbucket", "key": "images/2b861d4e-695e-4c40-ad18-de0fff71f719.tar"}
+2026-11-16T20:55:57.930Z	INFO	upload/upload.go:66	upload complete	{"url": "s3://testbucket/images/2b861d4e-695e-4c40-ad18-de0fff71f719.tar"}
+2026-11-16T20:55:57.948Z	INFO	deployments/deployments.go:557	marking as finished	{"request_id": "zdfix-2b861d4e-695e-4c40-ad18-de0fff71f719", "deployment_id": "2b861d4e-695e-4c40-ad18-de0fff71f719"}
+2026-11-16T20:55:58.047Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-2b861d4e-695e-4c40-ad18-de0fff71f719", "deployment_id": "2b861d4e-695e-4c40-ad18-de0fff71f719"}
+2026-11-16T20:56:04.314Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-f5837a0b-b839-4857-a4a5-805f4a94b05f", "delivery_tag": 15}
+2026-11-16T20:56:04.316Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-f5837a0b-b839-4857-a4a5-805f4a94b05f", "deployment_id": "f5837a0b-b839-4857-a4a5-805f4a94b05f"}
+2026-11-16T20:56:04.318Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-f5837a0b-b839-4857-a4a5-805f4a94b05f", "deployment_id": "f5837a0b-b839-4857-a4a5-805f4a94b05f"}
+2026-11-16T20:56:04.320Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-f5837a0b-b839-4857-a4a5-805f4a94b05f", "deployment_id": "f5837a0b-b839-4857-a4a5-805f4a94b05f"}
+2026-11-16T20:56:12.942Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-f5837a0b-b839-4857-a4a5-805f4a94b05f", "deployment_id": "f5837a0b-b839-4857-a4a5-805f4a94b05f"}
+2026-11-16T20:56:12.943Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-f5837a0b-b839-4857-a4a5-805f4a94b05f", "deployment_id": "f5837a0b-b839-4857-a4a5-805f4a94b05f", "framework": "astro", "package_manager": "npm"}
+2026-11-16T20:56:12.943Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-f5837a0b-b839-4857-a4a5-805f4a94b05f", "deployment_id": "f5837a0b-b839-4857-a4a5-805f4a94b05f", "template": "static/Dockerfile.astro.tmpl"}
+2026-11-16T20:56:12.966Z	WARN	deployments/deployments.go:622	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-f5837a0b-b839-4857-a4a5-805f4a94b05f", "deployment_id": "f5837a0b-b839-4857-a4a5-805f4a94b05f"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:622
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T20:56:12.966Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-f5837a0b-b839-4857-a4a5-805f4a94b05f", "deployment_id": "f5837a0b-b839-4857-a4a5-805f4a94b05f", "image_tag": "deploy-f5837a0b-b839-4857-a4a5-805f4a94b05f:latest"}
+[1/2] STEP 1/8: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/8: WORKDIR /app
+[1/2] STEP 3/8: COPY package*.json ./
+[1/2] STEP 4/8: RUN ["node","-e","const s=require('/usr/local/lib/node_modules/npm/node_modules/semver');const r=require('./package.json').engines.node;if(!s.satisfies(process.versions.node,r)){console.error('Selected Node '+process.versions.node+' does not satisfy engines.node '+r+'; set a compatible exact .node-version');process.exit(1)}"]
+[1/2] STEP 5/8: RUN npm install --ignore-scripts --package-lock=false
+
+added 185 packages, and audited 186 packages in 2m
+
+70 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 6/8: COPY . .
+[1/2] STEP 7/8: RUN npm run build
+
+> @example/minimal@0.0.1 build
+> astro build
+
+▶ Astro collects anonymous usage data.
+  This information helps us improve Astro.
+  Run "astro telemetry disable" to opt-out.
+  https://astro.build/telemetry
+
+20:58:04 [types] Generated 408ms
+20:58:04 [build] output: "static"
+20:58:04 [build] mode: "static"
+20:58:04 [build] directory: /app/dist/
+20:58:04 [build] Collecting build info...
+20:58:04 [build] ✓ Completed in 470ms.
+20:58:04 [build] Building static entrypoints...
+20:58:04 [vite] ✓ built in 290ms
+20:58:04 [vite] ✓ built in 37ms
+20:58:04 [build] Rearranging server assets...
+
+ generating static routes 
+20:58:04   ├─ /index.html (+22ms) 
+20:58:04 ✓ Completed in 49ms.
+
+20:58:04 [build] ✓ Completed in 481ms.
+20:58:04 [build] 1 page(s) built in 955ms
+20:58:04 [build] Complete!
+[1/2] STEP 8/8: RUN test -f ./dist/index.html || (echo "ZERODEVOPS_SSR_MISMATCH: no index.html in dist after npm run build" && exit 1)
+[2/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS runtime
+[2/2] STEP 2/6: WORKDIR /app
+[2/2] STEP 3/6: RUN npm install -g serve
+
+added 67 packages in 8s
+
+20 packages are looking for funding
+  run `npm fund` for details
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 4/6: COPY --from=builder /app/dist ./dist
+[2/2] STEP 5/6: EXPOSE 4321
+[2/2] STEP 6/6: CMD ["serve", "dist", "-l", "4321"]
+[2/2] COMMIT deploy-f5837a0b-b839-4857-a4a5-805f4a94b05f:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:329eb216ff584f8508ecef21684a3dffde35932a7e66e7d87a9ed64392939dd1
+Copying config sha256:25d171368aa91316005570abb895641f92c4dd8285f5c477d3e53321b2352d83
+Writing manifest to image destination
+--> 25d171368aa9
+Successfully tagged localhost/deploy-f5837a0b-b839-4857-a4a5-805f4a94b05f:latest
+25d171368aa91316005570abb895641f92c4dd8285f5c477d3e53321b2352d83
+2026-11-16T20:58:19.159Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-f5837a0b-b839-4857-a4a5-805f4a94b05f", "deployment_id": "f5837a0b-b839-4857-a4a5-805f4a94b05f", "tar_path": "/tmp/zerodevops-build/f5837a0b-b839-4857-a4a5-805f4a94b05f/examples/minimal/f5837a0b-b839-4857-a4a5-805f4a94b05f.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:329eb216ff584f8508ecef21684a3dffde35932a7e66e7d87a9ed64392939dd1
+Copying config sha256:25d171368aa91316005570abb895641f92c4dd8285f5c477d3e53321b2352d83
+Writing manifest to image destination
+2026-11-16T20:58:20.255Z	INFO	deployments/deployments.go:547	uploading image tar	{"request_id": "zdfix-f5837a0b-b839-4857-a4a5-805f4a94b05f", "deployment_id": "f5837a0b-b839-4857-a4a5-805f4a94b05f"}
+2026-11-16T20:58:20.255Z	INFO	upload/upload.go:37	opening file for upload	{"file": "/tmp/zerodevops-build/f5837a0b-b839-4857-a4a5-805f4a94b05f/examples/minimal/f5837a0b-b839-4857-a4a5-805f4a94b05f.tar"}
+2026-11-16T20:58:20.255Z	INFO	upload/upload.go:48	uploading to S3	{"bucket": "testbucket", "key": "images/f5837a0b-b839-4857-a4a5-805f4a94b05f.tar"}
+2026-11-16T20:58:20.721Z	INFO	upload/upload.go:66	upload complete	{"url": "s3://testbucket/images/f5837a0b-b839-4857-a4a5-805f4a94b05f.tar"}
+2026-11-16T20:58:20.727Z	INFO	deployments/deployments.go:557	marking as finished	{"request_id": "zdfix-f5837a0b-b839-4857-a4a5-805f4a94b05f", "deployment_id": "f5837a0b-b839-4857-a4a5-805f4a94b05f"}
+2026-11-16T20:58:20.962Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-f5837a0b-b839-4857-a4a5-805f4a94b05f", "deployment_id": "f5837a0b-b839-4857-a4a5-805f4a94b05f"}
+2026-11-16T20:58:25.208Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-3e7cc9d5-0ff7-425d-9edb-3653562ca5ba", "delivery_tag": 16}
+2026-11-16T20:58:25.213Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-3e7cc9d5-0ff7-425d-9edb-3653562ca5ba", "deployment_id": "3e7cc9d5-0ff7-425d-9edb-3653562ca5ba"}
+2026-11-16T20:58:25.215Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-3e7cc9d5-0ff7-425d-9edb-3653562ca5ba", "deployment_id": "3e7cc9d5-0ff7-425d-9edb-3653562ca5ba"}
+2026-11-16T20:58:25.219Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-3e7cc9d5-0ff7-425d-9edb-3653562ca5ba", "deployment_id": "3e7cc9d5-0ff7-425d-9edb-3653562ca5ba"}
+2026-11-16T20:58:33.548Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-3e7cc9d5-0ff7-425d-9edb-3653562ca5ba", "deployment_id": "3e7cc9d5-0ff7-425d-9edb-3653562ca5ba"}
+2026-11-16T20:58:33.549Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-3e7cc9d5-0ff7-425d-9edb-3653562ca5ba", "deployment_id": "3e7cc9d5-0ff7-425d-9edb-3653562ca5ba", "framework": "astro", "package_manager": "npm"}
+2026-11-16T20:58:33.549Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-3e7cc9d5-0ff7-425d-9edb-3653562ca5ba", "deployment_id": "3e7cc9d5-0ff7-425d-9edb-3653562ca5ba", "template": "static/Dockerfile.astro.tmpl"}
+2026-11-16T20:58:33.563Z	WARN	deployments/deployments.go:622	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-3e7cc9d5-0ff7-425d-9edb-3653562ca5ba", "deployment_id": "3e7cc9d5-0ff7-425d-9edb-3653562ca5ba"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:622
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T20:58:33.564Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-3e7cc9d5-0ff7-425d-9edb-3653562ca5ba", "deployment_id": "3e7cc9d5-0ff7-425d-9edb-3653562ca5ba", "image_tag": "deploy-3e7cc9d5-0ff7-425d-9edb-3653562ca5ba:latest"}
+[1/2] STEP 1/8: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/8: WORKDIR /app
+[1/2] STEP 3/8: COPY package*.json ./
+[1/2] STEP 4/8: RUN ["node","-e","const s=require('/usr/local/lib/node_modules/npm/node_modules/semver');const r=require('./package.json').engines.node;if(!s.satisfies(process.versions.node,r)){console.error('Selected Node '+process.versions.node+' does not satisfy engines.node '+r+'; set a compatible exact .node-version');process.exit(1)}"]
+[1/2] STEP 5/8: RUN npm install --ignore-scripts --package-lock=false
+
+added 185 packages, and audited 186 packages in 1m
+
+70 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 6/8: COPY . .
+[1/2] STEP 7/8: RUN npm run build
+
+> @example/basics@0.0.1 build
+> astro build
+
+▶ Astro collects anonymous usage data.
+  This information helps us improve Astro.
+  Run "astro telemetry disable" to opt-out.
+  https://astro.build/telemetry
+
+20:59:59 [types] Generated 360ms
+20:59:59 [build] output: "static"
+20:59:59 [build] mode: "static"
+20:59:59 [build] directory: /app/dist/
+20:59:59 [build] Collecting build info...
+20:59:59 [build] ✓ Completed in 421ms.
+20:59:59 [build] Building static entrypoints...
+20:59:59 [vite] ✓ built in 208ms
+20:59:59 [vite] ✓ built in 29ms
+20:59:59 [build] Rearranging server assets...
+
+ generating static routes 
+20:59:59   ├─ /index.html (+14ms) 
+20:59:59 ✓ Completed in 32ms.
+
+20:59:59 [build] ✓ Completed in 335ms.
+20:59:59 [build] 1 page(s) built in 759ms
+20:59:59 [build] Complete!
+[1/2] STEP 8/8: RUN test -f ./dist/index.html || (echo "ZERODEVOPS_SSR_MISMATCH: no index.html in dist after npm run build" && exit 1)
+[2/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS runtime
+[2/2] STEP 2/6: WORKDIR /app
+[2/2] STEP 3/6: RUN npm install -g serve
+
+added 67 packages in 7s
+
+20 packages are looking for funding
+  run `npm fund` for details
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 4/6: COPY --from=builder /app/dist ./dist
+[2/2] STEP 5/6: EXPOSE 4321
+[2/2] STEP 6/6: CMD ["serve", "dist", "-l", "4321"]
+[2/2] COMMIT deploy-3e7cc9d5-0ff7-425d-9edb-3653562ca5ba:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:861257617fa788e820e093343c6677e0cedbbfda72efea0d9df5b934d66f6b70
+Copying config sha256:a02223fc35e32bacce980a162a3abc19cd66a6e758593ea6ea6701433b3ff90e
+Writing manifest to image destination
+--> a02223fc35e3
+Successfully tagged localhost/deploy-3e7cc9d5-0ff7-425d-9edb-3653562ca5ba:latest
+a02223fc35e32bacce980a162a3abc19cd66a6e758593ea6ea6701433b3ff90e
+2026-11-16T21:00:12.366Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-3e7cc9d5-0ff7-425d-9edb-3653562ca5ba", "deployment_id": "3e7cc9d5-0ff7-425d-9edb-3653562ca5ba", "tar_path": "/tmp/zerodevops-build/3e7cc9d5-0ff7-425d-9edb-3653562ca5ba/examples/basics/3e7cc9d5-0ff7-425d-9edb-3653562ca5ba.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:861257617fa788e820e093343c6677e0cedbbfda72efea0d9df5b934d66f6b70
+Copying config sha256:a02223fc35e32bacce980a162a3abc19cd66a6e758593ea6ea6701433b3ff90e
+Writing manifest to image destination
+2026-11-16T21:00:13.475Z	INFO	deployments/deployments.go:547	uploading image tar	{"request_id": "zdfix-3e7cc9d5-0ff7-425d-9edb-3653562ca5ba", "deployment_id": "3e7cc9d5-0ff7-425d-9edb-3653562ca5ba"}
+2026-11-16T21:00:13.475Z	INFO	upload/upload.go:37	opening file for upload	{"file": "/tmp/zerodevops-build/3e7cc9d5-0ff7-425d-9edb-3653562ca5ba/examples/basics/3e7cc9d5-0ff7-425d-9edb-3653562ca5ba.tar"}
+2026-11-16T21:00:13.475Z	INFO	upload/upload.go:48	uploading to S3	{"bucket": "testbucket", "key": "images/3e7cc9d5-0ff7-425d-9edb-3653562ca5ba.tar"}
+2026-11-16T21:00:13.908Z	INFO	upload/upload.go:66	upload complete	{"url": "s3://testbucket/images/3e7cc9d5-0ff7-425d-9edb-3653562ca5ba.tar"}
+2026-11-16T21:00:13.927Z	INFO	deployments/deployments.go:557	marking as finished	{"request_id": "zdfix-3e7cc9d5-0ff7-425d-9edb-3653562ca5ba", "deployment_id": "3e7cc9d5-0ff7-425d-9edb-3653562ca5ba"}
+2026-11-16T21:00:14.206Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-3e7cc9d5-0ff7-425d-9edb-3653562ca5ba", "deployment_id": "3e7cc9d5-0ff7-425d-9edb-3653562ca5ba"}
+2026-11-16T21:00:18.691Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-9e389c15-570b-4370-9e16-b33aea6083f7", "delivery_tag": 17}
+2026-11-16T21:00:18.693Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-9e389c15-570b-4370-9e16-b33aea6083f7", "deployment_id": "9e389c15-570b-4370-9e16-b33aea6083f7"}
+2026-11-16T21:00:18.707Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-9e389c15-570b-4370-9e16-b33aea6083f7", "deployment_id": "9e389c15-570b-4370-9e16-b33aea6083f7"}
+2026-11-16T21:00:18.709Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-9e389c15-570b-4370-9e16-b33aea6083f7", "deployment_id": "9e389c15-570b-4370-9e16-b33aea6083f7"}
+2026-11-16T21:00:26.828Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-9e389c15-570b-4370-9e16-b33aea6083f7", "deployment_id": "9e389c15-570b-4370-9e16-b33aea6083f7"}
+2026-11-16T21:00:26.828Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-9e389c15-570b-4370-9e16-b33aea6083f7", "deployment_id": "9e389c15-570b-4370-9e16-b33aea6083f7", "framework": "astro", "package_manager": "npm"}
+2026-11-16T21:00:26.828Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-9e389c15-570b-4370-9e16-b33aea6083f7", "deployment_id": "9e389c15-570b-4370-9e16-b33aea6083f7", "template": "static/Dockerfile.astro.tmpl"}
+2026-11-16T21:00:26.836Z	WARN	deployments/deployments.go:622	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-9e389c15-570b-4370-9e16-b33aea6083f7", "deployment_id": "9e389c15-570b-4370-9e16-b33aea6083f7"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:622
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-16T21:00:26.836Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-9e389c15-570b-4370-9e16-b33aea6083f7", "deployment_id": "9e389c15-570b-4370-9e16-b33aea6083f7", "image_tag": "deploy-9e389c15-570b-4370-9e16-b33aea6083f7:latest"}
+[1/2] STEP 1/8: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/8: WORKDIR /app
+[1/2] STEP 3/8: COPY package*.json ./
+[1/2] STEP 4/8: RUN ["node","-e","const s=require('/usr/local/lib/node_modules/npm/node_modules/semver');const r=require('./package.json').engines.node;if(!s.satisfies(process.versions.node,r)){console.error('Selected Node '+process.versions.node+' does not satisfy engines.node '+r+'; set a compatible exact .node-version');process.exit(1)}"]
+[1/2] STEP 5/8: RUN npm install --ignore-scripts --package-lock=false
+
+added 200 packages, and audited 201 packages in 1m
+
+78 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 6/8: COPY . .
+[1/2] STEP 7/8: RUN npm run build
+
+> @example/blog@0.0.1 build
+> astro build
+
+▶ Astro collects anonymous usage data.
+  This information helps us improve Astro.
+  Run "astro telemetry disable" to opt-out.
+  https://astro.build/telemetry
+
+21:01:49 [content] Syncing content
+21:01:49 [content] Synced content
+21:01:49 [types] Generated 1.78s
+21:01:49 [build] output: "static"
+21:01:49 [build] mode: "static"
+21:01:49 [build] directory: /app/dist/
+21:01:49 [build] Collecting build info...
+21:01:49 [build] ✓ Completed in 1.87s.
+21:01:49 [build] Building static entrypoints...
+21:01:50 [assets] Copying fonts (2 files)...
+21:01:50 [vite] ✓ built in 746ms
+21:01:50 [vite] ✓ built in 100ms
+21:01:50 [build] Rearranging server assets...
+
+ generating static routes 
+21:01:50   ├─ /about/index.html (+20ms) 
+21:01:50   ├─ /blog/index.html (+9ms) 
+21:01:50   ├─ /blog/first-post/index.html (+6ms) 
+21:01:50   ├─ /blog/markdown-style-guide/index.html (+7ms) 
+21:01:50   ├─ /blog/second-post/index.html (+4ms) 
+21:01:50   ├─ /blog/third-post/index.html (+4ms) 
+21:01:50   ├─ /blog/using-mdx/index.html (+13ms) 
+21:01:50   ├─ /rss.xml (+51ms) 
+21:01:50   ├─ /index.html (+6ms) 
+21:01:50 ✓ Completed in 169ms.
+
+ generating optimized images 
+21:01:50 [vite] ✓ built in 67ms
+21:01:50   ▶ /_astro/blog-placeholder-about.BtEdEmGp_2eecaz.webp (before: 21kB, after: 14kB) (+232ms) (1/12)
+21:01:50   ▶ /_astro/blog-placeholder-about.BtEdEmGp_Z2srqQK.webp (before: 21kB, after: 14kB) (+76ms) (2/12)
+21:01:51   ▶ /_astro/blog-placeholder-1.Bx0Zcyzv_Z1v5W1C.webp (before: 31kB, after: 13kB) (+102ms) (3/12)
+21:01:51   ▶ /_astro/blog-placeholder-1.Bx0Zcyzv_Z29X6w5.webp (before: 31kB, after: 23kB) (+83ms) (4/12)
+21:01:51   ▶ /_astro/blog-placeholder-5.CB3Xi-gp_j9V0O.webp (before: 34kB, after: 9kB) (+53ms) (5/12)
+21:01:51   ▶ /_astro/blog-placeholder-5.CB3Xi-gp_Z1y5ehD.webp (before: 34kB, after: 19kB) (+61ms) (6/12)
+21:01:51   ▶ /_astro/blog-placeholder-2.1WQRLJGH_15TD1q.webp (before: 32kB, after: 16kB) (+46ms) (7/12)
+21:01:51   ▶ /_astro/blog-placeholder-2.1WQRLJGH_2ml2Jq.webp (before: 32kB, after: 30kB) (+69ms) (8/12)
+21:01:51   ▶ /_astro/blog-placeholder-4.gLBdjEDe_Z15Ss3d.webp (before: 37kB, after: 22kB) (+55ms) (9/12)
+21:01:51   ▶ /_astro/blog-placeholder-4.gLBdjEDe_sXP1K.webp (before: 37kB, after: 37kB) (+69ms) (10/12)
+21:01:51   ▶ /_astro/blog-placeholder-3.ijrf8Ohr_Z1373cG.webp (before: 28kB, after: 12kB) (+44ms) (11/12)
+21:01:51   ▶ /_astro/blog-placeholder-3.ijrf8Ohr_1S4sd1.webp (before: 28kB, after: 24kB) (+58ms) (12/12)
+21:01:51 ✓ Completed in 956ms.
+
+21:01:51 [build] ✓ Completed in 2.11s.
+21:01:51 [@astrojs/sitemap] `sitemap-index.xml` created at `dist`
+21:01:51 [build] 8 page(s) built in 3.99s
+21:01:51 [build] Complete!
+[1/2] STEP 8/8: RUN test -f ./dist/index.html || (echo "ZERODEVOPS_SSR_MISMATCH: no index.html in dist after npm run build" && exit 1)
+[2/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS runtime
+[2/2] STEP 2/6: WORKDIR /app
+[2/2] STEP 3/6: RUN npm install -g serve
+
+added 67 packages in 8s
+
+20 packages are looking for funding
+  run `npm fund` for details
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 4/6: COPY --from=builder /app/dist ./dist
+[2/2] STEP 5/6: EXPOSE 4321
+[2/2] STEP 6/6: CMD ["serve", "dist", "-l", "4321"]
+[2/2] COMMIT deploy-9e389c15-570b-4370-9e16-b33aea6083f7:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:456c796766e7b95d73dd82732ab8f0f1f9e97143366e4ab293f4bc84af2dcff8
+Copying config sha256:8beac672922e3687de68db3c05172277e05c29a0c1e38043c6458e48a2cd1387
+Writing manifest to image destination
+--> 8beac672922e
+Successfully tagged localhost/deploy-9e389c15-570b-4370-9e16-b33aea6083f7:latest
+8beac672922e3687de68db3c05172277e05c29a0c1e38043c6458e48a2cd1387
+2026-11-16T21:02:05.700Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-9e389c15-570b-4370-9e16-b33aea6083f7", "deployment_id": "9e389c15-570b-4370-9e16-b33aea6083f7", "tar_path": "/tmp/zerodevops-build/9e389c15-570b-4370-9e16-b33aea6083f7/examples/blog/9e389c15-570b-4370-9e16-b33aea6083f7.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:456c796766e7b95d73dd82732ab8f0f1f9e97143366e4ab293f4bc84af2dcff8
+Copying config sha256:8beac672922e3687de68db3c05172277e05c29a0c1e38043c6458e48a2cd1387
+Writing manifest to image destination
+2026-11-16T21:02:06.751Z	INFO	deployments/deployments.go:547	uploading image tar	{"request_id": "zdfix-9e389c15-570b-4370-9e16-b33aea6083f7", "deployment_id": "9e389c15-570b-4370-9e16-b33aea6083f7"}
+2026-11-16T21:02:06.751Z	INFO	upload/upload.go:37	opening file for upload	{"file": "/tmp/zerodevops-build/9e389c15-570b-4370-9e16-b33aea6083f7/examples/blog/9e389c15-570b-4370-9e16-b33aea6083f7.tar"}
+2026-11-16T21:02:06.751Z	INFO	upload/upload.go:48	uploading to S3	{"bucket": "testbucket", "key": "images/9e389c15-570b-4370-9e16-b33aea6083f7.tar"}
+2026-11-16T21:02:07.236Z	INFO	upload/upload.go:66	upload complete	{"url": "s3://testbucket/images/9e389c15-570b-4370-9e16-b33aea6083f7.tar"}
+2026-11-16T21:02:07.241Z	INFO	deployments/deployments.go:557	marking as finished	{"request_id": "zdfix-9e389c15-570b-4370-9e16-b33aea6083f7", "deployment_id": "9e389c15-570b-4370-9e16-b33aea6083f7"}
+2026-11-16T21:02:07.596Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-9e389c15-570b-4370-9e16-b33aea6083f7", "deployment_id": "9e389c15-570b-4370-9e16-b33aea6083f7"}
+2026-11-16T21:09:19.538Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-25821ac0-b5d6-407e-90fb-a93cca11550b", "delivery_tag": 18}
+2026-11-16T21:09:19.543Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-25821ac0-b5d6-407e-90fb-a93cca11550b", "deployment_id": "25821ac0-b5d6-407e-90fb-a93cca11550b"}
+2026-11-16T21:09:19.546Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-25821ac0-b5d6-407e-90fb-a93cca11550b", "deployment_id": "25821ac0-b5d6-407e-90fb-a93cca11550b"}
+2026-11-16T21:09:19.549Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-25821ac0-b5d6-407e-90fb-a93cca11550b", "deployment_id": "25821ac0-b5d6-407e-90fb-a93cca11550b"}
+2026-11-16T21:09:20.928Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-25821ac0-b5d6-407e-90fb-a93cca11550b", "deployment_id": "25821ac0-b5d6-407e-90fb-a93cca11550b"}
+2026-11-16T21:09:20.928Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-25821ac0-b5d6-407e-90fb-a93cca11550b", "deployment_id": "25821ac0-b5d6-407e-90fb-a93cca11550b", "framework": "rust", "package_manager": "npm"}
+2026-11-16T21:09:20.928Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-25821ac0-b5d6-407e-90fb-a93cca11550b", "deployment_id": "25821ac0-b5d6-407e-90fb-a93cca11550b", "template": "dynamic/Dockerfile.rust.tmpl"}
+2026-11-16T21:09:20.944Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-25821ac0-b5d6-407e-90fb-a93cca11550b", "deployment_id": "25821ac0-b5d6-407e-90fb-a93cca11550b", "image_tag": "deploy-25821ac0-b5d6-407e-90fb-a93cca11550b:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/rust:1-alpine AS builder
+Trying to pull docker.io/library/rust:1-alpine...
+Getting image source signatures
+Copying blob sha256:60151c82ea7d0e04a957cf42ef769cad19631df5decc8168acc690ec65b215d1
+Copying blob sha256:881fc932939efef04ca120ad44bbd2c0917851eb247aa4995428afb1e80ede17
+Copying blob sha256:3977ee8f9753be68192356e8059febeda0b0f533f3fb5f9f849287a89380a5df
+Copying config sha256:25c86c2c6b0d88ae0efc8294382f73963ac0a5ee0d7b5b942505b034b8300836
+Writing manifest to image destination
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: ENV CARGO_BUILD_JOBS=1
+[1/2] STEP 4/7: RUN apk add --no-cache musl-dev
+OK: 198.1 MiB in 31 packages
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN ["cargo","build","--release","--manifest-path","basics/hello-world/Cargo.toml","--package","hello-world","--bin","hello-world","--target-dir","/app/.zerodevops-target","--locked"]
+    Updating crates.io index

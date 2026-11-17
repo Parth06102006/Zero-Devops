@@ -1,0 +1,221 @@
+{
+  "case": {
+    "name": "laravel-skeleton",
+    "repo": "laravel/laravel",
+    "sha": "a255d7688770af9713daff1439c47ff9bc6abd47",
+    "path": ".",
+    "stack": "PHP/Laravel",
+    "kind": "php",
+    "reference_build": "composer install --no-interaction --prefer-dist && cp .env.example .env && php artisan key:generate && touch database/database.sqlite && php artisan migrate --force",
+    "reference_start": "php artisan serve --host 0.0.0.0 --port 8080",
+    "port": 8080,
+    "probe": "/up",
+    "static_output": null,
+    "context": ".",
+    "env": {
+      "SESSION_DRIVER": "array",
+      "CACHE_STORE": "array"
+    }
+  },
+  "reference_qualified": true,
+  "reference_eligibility": "preserved baseline; reference build/runtime not rerun",
+  "baseline_classification": "missing-lockfile/install-policy",
+  "baseline_worker": {
+    "deployment_id": "8ac765f3-3594-4805-ab19-f2d7ef55f1b7",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: build failed: exit status 1|",
+    "end_to_end_seconds": 4.318,
+    "resource_samples": [
+      {
+        "seconds": 0.81,
+        "stats": "28.05%|112.1MiB / 2GiB|143",
+        "cgroup": "cpu.stat\nusage_usec 922296419\nuser_usec 599008149\nsystem_usec 323288270\nnice_usec 0\nnr_periods 15632\nnr_throttled 2517\nthrottled_usec 388281569\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1839321088\nmemory.current\n130793472"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "composer",
+      "args": [],
+      "working_dir": ".",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "vite",
+    "phase_events": [
+      {
+        "at": "2026-11-16T16:09:32.558Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-16T16:09:32.563Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-16T16:09:32.571Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-16T16:09:32.573Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-16T16:09:34.056Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-16T16:09:34.056Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-16T16:09:34.056Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-16T16:09:34.057Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-16T16:09:35.797Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"8ac765f3-3594-4805-ab19-f2d7ef55f1b7\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 148,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"8ac765f3-3594-4805-ab19-f2d7ef55f1b7\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: build failed: exit status 1\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "clone_and_directory_resolution_seconds": 1.483,
+    "failed_build_seconds": 1.74
+  },
+  "started_at": "2026-11-17T14:14:19.609389+00:00",
+  "complete": true,
+  "worker": {
+    "lane": 2,
+    "worker_container": "zdfix2-worker",
+    "broker_vhost": "lane2",
+    "commit_sha": "a255d7688770af9713daff1439c47ff9bc6abd47",
+    "deployment_id": "0a489220-948b-4b2d-841e-1a8f7dc9acf3",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: detected server-side rendering (build succeeded but produced no static output): no runnable server entrypoint found (no \"start\" script in package.json) \u2014 set deployment_type manually in project settings|",
+    "end_to_end_seconds": 57.126,
+    "resource_samples": [
+      {
+        "seconds": 0.44,
+        "stats": "0.77%|459.1MiB / 2GiB|82",
+        "cgroup": "cpu.stat\nusage_usec 3036621935\nuser_usec 2271665640\nsystem_usec 764956295\nnice_usec 0\nnr_periods 33972\nnr_throttled 5069\nthrottled_usec 637543176\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n667627520"
+      },
+      {
+        "seconds": 24.01,
+        "stats": "38.30%|690.9MiB / 2GiB|118",
+        "cgroup": "cpu.stat\nusage_usec 3050019299\nuser_usec 2279818753\nsystem_usec 770200545\nnice_usec 0\nnr_periods 34179\nnr_throttled 5073\nthrottled_usec 637666966\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n1356460032"
+      },
+      {
+        "seconds": 49.24,
+        "stats": "150.52%|775.1MiB / 2GiB|118",
+        "cgroup": "cpu.stat\nusage_usec 3067195204\nuser_usec 2288458282\nsystem_usec 778736922\nnice_usec 0\nnr_periods 34359\nnr_throttled 5155\nthrottled_usec 643193362\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147758080\nmemory.current\n1441128448"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "composer",
+      "args": [],
+      "working_dir": ".",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "vite",
+    "phase_events": [
+      {
+        "at": "2026-11-17T14:14:19.719Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-17T14:14:19.723Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-17T14:14:19.725Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-17T14:14:19.728Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-17T14:14:21.418Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-17T14:14:21.418Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-17T14:14:21.418Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-17T14:14:21.427Z",
+        "event": "unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled"
+      },
+      {
+        "at": "2026-11-17T14:14:21.428Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-17T14:15:16.185Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"0a489220-948b-4b2d-841e-1a8f7dc9acf3\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 327,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"0a489220-948b-4b2d-841e-1a8f7dc9acf3\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: detected server-side rendering (build succeeded but produced no static output): no runnable server entrypoint found (no \\\"start\\\" script in package.json) \u2014 set deployment_type manually in project settings\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": false
+  },
+  "classification": "static-output-path/misleading-ssr"
+}

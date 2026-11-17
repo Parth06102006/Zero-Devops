@@ -1,0 +1,158 @@
+2026-11-17T13:34:33.612Z	INFO	worker/worker.go:93	received deploy job message	{"request_id": "zdfix-6708db9f-58e1-49f2-becb-26f4dd1bbd53", "delivery_tag": 3}
+2026-11-17T13:34:33.618Z	INFO	deployments/deployments.go:447	inserting worker deployment row	{"request_id": "zdfix-6708db9f-58e1-49f2-becb-26f4dd1bbd53", "deployment_id": "6708db9f-58e1-49f2-becb-26f4dd1bbd53"}
+2026-11-17T13:34:33.621Z	INFO	deployments/deployments.go:454	marking as building	{"request_id": "zdfix-6708db9f-58e1-49f2-becb-26f4dd1bbd53", "deployment_id": "6708db9f-58e1-49f2-becb-26f4dd1bbd53"}
+2026-11-17T13:34:33.624Z	INFO	deployments/deployments.go:459	publishing building status	{"request_id": "zdfix-6708db9f-58e1-49f2-becb-26f4dd1bbd53", "deployment_id": "6708db9f-58e1-49f2-becb-26f4dd1bbd53"}
+2026-11-17T13:34:35.556Z	INFO	deployments/deployments.go:464	detecting framework	{"request_id": "zdfix-6708db9f-58e1-49f2-becb-26f4dd1bbd53", "deployment_id": "6708db9f-58e1-49f2-becb-26f4dd1bbd53"}
+2026-11-17T13:34:35.556Z	INFO	deployments/deployments.go:470	framework detected	{"request_id": "zdfix-6708db9f-58e1-49f2-becb-26f4dd1bbd53", "deployment_id": "6708db9f-58e1-49f2-becb-26f4dd1bbd53", "framework": "react", "package_manager": "npm"}
+2026-11-17T13:34:35.556Z	INFO	deployments/deployments.go:478	writing Dockerfile from template	{"request_id": "zdfix-6708db9f-58e1-49f2-becb-26f4dd1bbd53", "deployment_id": "6708db9f-58e1-49f2-becb-26f4dd1bbd53", "template": "static/Dockerfile.react.tmpl"}
+2026-11-17T13:34:35.568Z	WARN	deployments/deployments.go:622	unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled	{"request_id": "zdfix-6708db9f-58e1-49f2-becb-26f4dd1bbd53", "deployment_id": "6708db9f-58e1-49f2-becb-26f4dd1bbd53"}
+Zero_Devops/worker_server/internal/deployments.ProcessDeployment
+	Zero_Devops/worker_server/internal/deployments/deployments.go:622
+Zero_Devops/worker_server/internal/worker.(*workerUsecase).StartWorker
+	Zero_Devops/worker_server/internal/worker/worker.go:99
+main.main
+	Zero_Devops/worker_server/cmd/worker-server/main.go:120
+runtime.main
+	runtime/proc.go:290
+2026-11-17T13:34:35.570Z	INFO	deployments/deployments.go:489	building image with buildah	{"request_id": "zdfix-6708db9f-58e1-49f2-becb-26f4dd1bbd53", "deployment_id": "6708db9f-58e1-49f2-becb-26f4dd1bbd53", "image_tag": "deploy-6708db9f-58e1-49f2-becb-26f4dd1bbd53:latest"}
+[1/2] STEP 1/7: FROM docker.io/library/node:24-alpine AS builder
+[1/2] STEP 2/7: WORKDIR /app
+[1/2] STEP 3/7: COPY package*.json ./
+[1/2] STEP 4/7: RUN npm install --ignore-scripts --package-lock=false
+npm warn deprecated resolve-url@0.2.1: https://github.com/lydell/resolve-url#deprecated
+npm warn deprecated path-dirname@1.0.2: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+npm warn deprecated source-map-url@0.4.1: See https://github.com/lydell/source-map-url#deprecated
+npm warn deprecated urix@0.1.0: Please see https://github.com/lydell/urix#deprecated
+npm warn deprecated source-map-resolve@0.5.3: See https://github.com/lydell/source-map-resolve#deprecated
+npm warn deprecated acorn-dynamic-import@2.0.2: This is probably built in to whatever tool you're using. If you still need it... idk
+npm warn deprecated lodash.template@4.18.1: This package is deprecated. Use https://socket.dev/npm/package/eta instead.
+npm warn deprecated q@1.5.1: You or someone you depend on is using Q, the JavaScript Promise library that gave JavaScript developers strong feelings about promises. They can almost certainly migrate to the native JavaScript promise now. Thank you literally everyone for joining me in this bet against the odds. Be excellent to each other.
+npm warn deprecated
+npm warn deprecated (For a CapTP with native promises, see @endo/eventual-send and @endo/captp)
+npm warn deprecated sw-precache@5.2.1: Please migrate to Workbox: https://developers.google.com/web/tools/workbox/guides/migrations/migrate-from-sw
+npm warn deprecated har-validator@5.1.5: this library is no longer supported
+npm warn deprecated formidable@1.2.6: Please upgrade to latest, formidable@v2 or formidable@v3! Check these notes: https://bit.ly/2ZEqIau
+npm warn deprecated flatten@1.0.3: flatten is deprecated in favor of utility frameworks such as lodash.
+npm warn deprecated content-type-parser@1.0.2: Use whatwg-mimetype instead
+npm warn deprecated whatwg-encoding@1.0.5: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+npm warn deprecated abab@1.0.4: Use your platform's native atob() and btoa() methods instead
+npm warn deprecated uuid@3.4.0: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+npm warn deprecated sane@1.6.0: some dependency vulnerabilities fixed, support for node < 10 dropped, and newer ECMAScript syntax/features added
+npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm warn deprecated sw-toolbox@3.6.0: Please migrate to Workbox: https://developers.google.com/web/tools/workbox/guides/migrations/migrate-from-sw
+npm warn deprecated deep-diff@0.3.8: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+npm warn deprecated circular-json@0.3.3: CircularJSON is in maintenance only, flatted is its successor.
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated request@2.88.2: request has been deprecated, see https://github.com/request/request/issues/3142
+npm warn deprecated eslint-loader@1.9.0: This loader has been deprecated. Please use eslint-webpack-plugin
+npm warn deprecated browserslist@2.11.3: Browserslist 2 could fail on reading Browserslist >3.0 config used in other tools.
+npm warn deprecated redux-devtools-extension@2.13.9: Package moved to @redux-devtools/extension.
+npm warn deprecated html-webpack-plugin@2.29.0: out of support
+npm warn deprecated browserslist@1.7.7: Browserslist 2 could fail on reading Browserslist >3.0 config used in other tools.
+npm warn deprecated rimraf@2.6.3: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated babel-eslint@7.2.3: babel-eslint is now @babel/eslint-parser. This package will no longer receive updates.
+npm warn deprecated browserslist@1.7.7: Browserslist 2 could fail on reading Browserslist >3.0 config used in other tools.
+npm warn deprecated browserslist@1.7.7: Browserslist 2 could fail on reading Browserslist >3.0 config used in other tools.
+npm warn deprecated extract-text-webpack-plugin@3.0.2: Deprecated. Please use https://github.com/webpack-contrib/mini-css-extract-plugin
+npm warn deprecated uuid@2.0.3: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+npm warn deprecated superagent@3.8.3: Please upgrade to superagent v10.2.2+, see release notes at https://github.com/forwardemail/superagent/releases/tag/v10.2.2 - maintenance is supported by Forward Email @ https://forwardemail.net
+npm warn deprecated svgo@0.7.2: This SVGO version is no longer supported. Upgrade to v2.x.x.
+npm warn deprecated eslint@4.10.0: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+npm warn deprecated core-js@2.6.12: core-js@<3.23.3 is no longer maintained and not recommended for usage due to the number of issues. Because of the V8 engine whims, feature detection in old core-js versions could cause a slowdown up to 100x even if nothing is polyfilled. Some versions have web compatibility issues. Please, upgrade your dependencies to the actual version of core-js.
+
+added 1448 packages, and audited 1449 packages in 4m
+
+127 packages are looking for funding
+  run `npm fund` for details
+
+164 vulnerabilities (7 low, 68 moderate, 43 high, 46 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[1/2] STEP 5/7: COPY . .
+[1/2] STEP 6/7: RUN npm run build
+
+> react-redux-realworld-example-app@0.1.0 build
+> react-scripts build
+
+(node:7338) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Creating an optimized production build...
+(node:7338) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+Compiled successfully.
+
+File sizes after gzip:
+
+  86.51 KB  build/static/js/main.eb352103.js
+
+The project was built assuming it is hosted at the server root.
+You can control this with the homepage field in your package.json.
+For example, add this to build it for GitHub Pages:
+
+  "homepage" : "http://myname.github.io/myapp",
+
+The build folder is ready to be deployed.
+You may serve it with a static server:
+
+  npm install -g serve
+  serve -s build
+
+Find out more about deployment here:
+
+  http://bit.ly/2vY88Kr
+
+[1/2] STEP 7/7: RUN test -f ./build/index.html || (echo "ZERODEVOPS_SSR_MISMATCH: no index.html in build after npm run build" && exit 1)
+[2/2] STEP 1/6: FROM docker.io/library/node:24-alpine AS runtime
+[2/2] STEP 2/6: WORKDIR /app
+[2/2] STEP 3/6: RUN npm install -g serve
+
+added 67 packages in 10s
+
+20 packages are looking for funding
+  run `npm fund` for details
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+[2/2] STEP 4/6: COPY --from=builder /app/build ./build
+[2/2] STEP 5/6: EXPOSE 3000
+[2/2] STEP 6/6: CMD ["serve", "-s", "build", "-l", "3000"]
+[2/2] COMMIT deploy-6708db9f-58e1-49f2-becb-26f4dd1bbd53:latest
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:7fba063ea1af6882948ca5fea81524c39a2278f0183c400772a0ae6143059831
+Copying config sha256:98fad41c234afac70bd6d316a8277b86b946c6b41d4fd01267089e7214d18cf8
+Writing manifest to image destination
+--> 98fad41c234a
+Successfully tagged localhost/deploy-6708db9f-58e1-49f2-becb-26f4dd1bbd53:latest
+98fad41c234afac70bd6d316a8277b86b946c6b41d4fd01267089e7214d18cf8
+2026-11-17T13:39:18.070Z	INFO	deployments/deployments.go:496	saving image tar	{"request_id": "zdfix-6708db9f-58e1-49f2-becb-26f4dd1bbd53", "deployment_id": "6708db9f-58e1-49f2-becb-26f4dd1bbd53", "tar_path": "/tmp/zerodevops-build/6708db9f-58e1-49f2-becb-26f4dd1bbd53/6708db9f-58e1-49f2-becb-26f4dd1bbd53.tar"}
+Getting image source signatures
+Copying blob sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064
+Copying blob sha256:cb540e45c2e50b1fc73164c6cd17239f87ae803f1e001e0494e2fa9eb90cbd8d
+Copying blob sha256:b4e5ae444e1da0b8c5fd0ff3893ac468322d35c57300012877997e15af6644a2
+Copying blob sha256:d9f34054bd2861ec76568b74a9673fbd94a817c25d81bffeaa54f5f1d384f204
+Copying blob sha256:7fba063ea1af6882948ca5fea81524c39a2278f0183c400772a0ae6143059831
+Copying config sha256:98fad41c234afac70bd6d316a8277b86b946c6b41d4fd01267089e7214d18cf8
+Writing manifest to image destination
+2026-11-17T13:39:19.725Z	INFO	deployments/deployments.go:547	uploading image tar	{"request_id": "zdfix-6708db9f-58e1-49f2-becb-26f4dd1bbd53", "deployment_id": "6708db9f-58e1-49f2-becb-26f4dd1bbd53"}
+2026-11-17T13:39:19.725Z	INFO	upload/upload.go:37	opening file for upload	{"file": "/tmp/zerodevops-build/6708db9f-58e1-49f2-becb-26f4dd1bbd53/6708db9f-58e1-49f2-becb-26f4dd1bbd53.tar"}
+2026-11-17T13:39:19.725Z	INFO	upload/upload.go:48	uploading to S3	{"bucket": "testbucket", "key": "images/6708db9f-58e1-49f2-becb-26f4dd1bbd53.tar"}
+2026-11-17T13:39:20.214Z	INFO	upload/upload.go:66	upload complete	{"url": "s3://testbucket/images/6708db9f-58e1-49f2-becb-26f4dd1bbd53.tar"}
+2026-11-17T13:39:20.216Z	INFO	deployments/deployments.go:557	marking as finished	{"request_id": "zdfix-6708db9f-58e1-49f2-becb-26f4dd1bbd53", "deployment_id": "6708db9f-58e1-49f2-becb-26f4dd1bbd53"}
+2026-11-17T13:39:20.238Z	INFO	worker/worker.go:143	deployment job completed	{"request_id": "zdfix-6708db9f-58e1-49f2-becb-26f4dd1bbd53", "deployment_id": "6708db9f-58e1-49f2-becb-26f4dd1bbd53"}

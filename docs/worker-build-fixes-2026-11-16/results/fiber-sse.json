@@ -1,0 +1,288 @@
+{
+  "case": {
+    "name": "fiber-sse",
+    "repo": "gofiber/recipes",
+    "sha": "258cf9908a6d53a700c0354f05c12b908e107596",
+    "path": "sse",
+    "stack": "Go/Fiber",
+    "kind": "go",
+    "reference_build": "GOMAXPROCS=1 go build -p 1 -o /app/app .",
+    "reference_start": "/app/app",
+    "port": 3000,
+    "probe": "/",
+    "static_output": null,
+    "context": "sse",
+    "env": {}
+  },
+  "reference_qualified": true,
+  "reference_eligibility": "preserved baseline; reference build/runtime not rerun",
+  "baseline_classification": "base-image-resolution",
+  "baseline_worker": {
+    "deployment_id": "81e864bb-8f05-4b31-8c06-b59dc4f65ff9",
+    "state": "canceled",
+    "database_row": "canceled|max retries (1) exceeded: build failed: exit status 125|",
+    "end_to_end_seconds": 4.222,
+    "resource_samples": [
+      {
+        "seconds": 0.64,
+        "stats": "0.56%|181.1MiB / 2GiB|111",
+        "cgroup": "cpu.stat\nusage_usec 830786922\nuser_usec 544340968\nsystem_usec 286445953\nnice_usec 0\nnr_periods 11807\nnr_throttled 2511\nthrottled_usec 387923458\nnr_bursts 0\nburst_usec 0\nmemory.peak\n1839321088\nmemory.current\n202797056"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "go",
+      "args": [],
+      "working_dir": "sse",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "go",
+    "phase_events": [
+      {
+        "at": "2026-11-16T15:06:54.305Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-16T15:06:54.308Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-16T15:06:54.311Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-16T15:06:54.312Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-16T15:06:58.109Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-16T15:06:58.109Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-16T15:06:58.109Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-16T15:06:58.109Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-16T15:06:58.152Z",
+        "event": "deployment job failed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"81e864bb-8f05-4b31-8c06-b59dc4f65ff9\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 150,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"81e864bb-8f05-4b31-8c06-b59dc4f65ff9\",\"status\":\"canceled\",\"error_message\":\"max retries (1) exceeded: build failed: exit status 125\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "clone_and_directory_resolution_seconds": 3.797,
+    "failed_build_seconds": 0.043
+  },
+  "started_at": "2026-11-17T13:52:18.770887+00:00",
+  "complete": true,
+  "worker": {
+    "lane": 2,
+    "worker_container": "zdfix2-worker",
+    "broker_vhost": "lane2",
+    "commit_sha": "258cf9908a6d53a700c0354f05c12b908e107596",
+    "deployment_id": "0f464b25-0523-4c12-a901-30d3ed800fe6",
+    "state": "success",
+    "database_row": "success||",
+    "end_to_end_seconds": 150.041,
+    "resource_samples": [
+      {
+        "seconds": 0.49,
+        "stats": "0.51%|265.5MiB / 2GiB|39",
+        "cgroup": "cpu.stat\nusage_usec 2078874618\nuser_usec 1632161936\nsystem_usec 446712681\nnice_usec 0\nnr_periods 22587\nnr_throttled 1006\nthrottled_usec 66744013\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n288858112"
+      },
+      {
+        "seconds": 22.03,
+        "stats": "26.67%|258.4MiB / 2GiB|44",
+        "cgroup": "cpu.stat\nusage_usec 2085585499\nuser_usec 1636514281\nsystem_usec 449071217\nnice_usec 0\nnr_periods 22790\nnr_throttled 1006\nthrottled_usec 66744013\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n365170688"
+      },
+      {
+        "seconds": 45.79,
+        "stats": "35.79%|468.6MiB / 2GiB|71",
+        "cgroup": "cpu.stat\nusage_usec 2100043982\nuser_usec 1643552331\nsystem_usec 456491651\nnice_usec 0\nnr_periods 23017\nnr_throttled 1034\nthrottled_usec 67228127\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n959987712"
+      },
+      {
+        "seconds": 73.01,
+        "stats": "108.15%|607.6MiB / 2GiB|71",
+        "cgroup": "cpu.stat\nusage_usec 2130284464\nuser_usec 1663000941\nsystem_usec 467283522\nnice_usec 0\nnr_periods 23297\nnr_throttled 1183\nthrottled_usec 84058752\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n1413541888"
+      },
+      {
+        "seconds": 98.38,
+        "stats": "147.19%|788.6MiB / 2GiB|79",
+        "cgroup": "cpu.stat\nusage_usec 2167436362\nuser_usec 1691847953\nsystem_usec 475588408\nnice_usec 0\nnr_periods 23545\nnr_throttled 1431\nthrottled_usec 125795533\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n1726124032"
+      },
+      {
+        "seconds": 124.08,
+        "stats": "148.86%|834.6MiB / 2GiB|81",
+        "cgroup": "cpu.stat\nusage_usec 2205797750\nuser_usec 1723023981\nsystem_usec 482773768\nnice_usec 0\nnr_periods 23800\nnr_throttled 1686\nthrottled_usec 170312759\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n1709953024"
+      },
+      {
+        "seconds": 146.44,
+        "stats": "103.90%|555.9MiB / 2GiB|54",
+        "cgroup": "cpu.stat\nusage_usec 2237407294\nuser_usec 1748229604\nsystem_usec 489177689\nnice_usec 0\nnr_periods 24023\nnr_throttled 1865\nthrottled_usec 193832253\nnr_bursts 0\nburst_usec 0\nmemory.peak\n2147483648\nmemory.current\n1107312640"
+      }
+    ],
+    "configuration_sent": {
+      "executable": "go",
+      "args": [],
+      "working_dir": "sse",
+      "scanner_policy_version": "v1"
+    },
+    "framework": "go",
+    "phase_events": [
+      {
+        "at": "2026-11-17T13:52:18.885Z",
+        "event": "received deploy job message"
+      },
+      {
+        "at": "2026-11-17T13:52:18.890Z",
+        "event": "inserting worker deployment row"
+      },
+      {
+        "at": "2026-11-17T13:52:18.893Z",
+        "event": "marking as building"
+      },
+      {
+        "at": "2026-11-17T13:52:18.897Z",
+        "event": "publishing building status"
+      },
+      {
+        "at": "2026-11-17T13:52:22.467Z",
+        "event": "detecting framework"
+      },
+      {
+        "at": "2026-11-17T13:52:22.467Z",
+        "event": "framework detected"
+      },
+      {
+        "at": "2026-11-17T13:52:22.467Z",
+        "event": "writing Dockerfile from template"
+      },
+      {
+        "at": "2026-11-17T13:52:22.475Z",
+        "event": "building image with buildah"
+      },
+      {
+        "at": "2026-11-17T13:54:48.181Z",
+        "event": "saving image tar"
+      },
+      {
+        "at": "2026-11-17T13:54:48.415Z",
+        "event": "dynamic build finished (stub finalize, no upload yet)"
+      },
+      {
+        "at": "2026-11-17T13:54:48.502Z",
+        "event": "deployment job completed"
+      }
+    ],
+    "upload_bytes": 0,
+    "status_messages": [
+      {
+        "payload_bytes": 76,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 1,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"0f464b25-0523-4c12-a901-30d3ed800fe6\",\"status\":\"building\"}",
+        "payload_encoding": "string"
+      },
+      {
+        "payload_bytes": 75,
+        "redelivered": false,
+        "exchange": "",
+        "routing_key": "deploy.status",
+        "message_count": 0,
+        "properties": {
+          "delivery_mode": 2,
+          "content_type": "application/json"
+        },
+        "payload": "{\"deployment_id\":\"0f464b25-0523-4c12-a901-30d3ed800fe6\",\"status\":\"success\"}",
+        "payload_encoding": "string"
+      }
+    ],
+    "image_built": true,
+    "image_layer_bytes": 29126656,
+    "image_config_bytes": 1569,
+    "runtime": {
+      "ready": true,
+      "port_closed_before_start": true,
+      "port_closed_after_stop": true,
+      "startup_seconds": 1.316,
+      "probe_url": "http://127.0.0.1:3000/",
+      "first_response": "200|0.002851|text/html; charset=utf-8",
+      "response_sample": "<!DOCTYPE html>\n<html>\n<body>\n\n<h1>SSE Messages</h1>\n<div id=\"result\"></div>\n\n<script>\nif(typeof(EventSource) !== \"undefined\") {\n  var source = new EventSource(\"/sse\");\n  source.onmessage = function(event) {\n    document.getElementById(\"result\").inne",
+      "warm_http": [
+        {
+          "status": 200,
+          "seconds": 0.000911
+        },
+        {
+          "status": 200,
+          "seconds": 0.00057
+        },
+        {
+          "status": 200,
+          "seconds": 0.000453
+        },
+        {
+          "status": 200,
+          "seconds": 0.000557
+        },
+        {
+          "status": 200,
+          "seconds": 0.000547
+        },
+        {
+          "status": 200,
+          "seconds": 0.000734
+        },
+        {
+          "status": 200,
+          "seconds": 0.000523
+        },
+        {
+          "status": 200,
+          "seconds": 0.000603
+        }
+      ],
+      "note": "Expected HTTP status confirms smoke endpoint only, not complete app behavior; status/body recorded"
+    }
+  },
+  "classification": "build-and-runtime-pass"
+}
