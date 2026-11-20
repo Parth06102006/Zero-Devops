@@ -1,0 +1,395 @@
+[
+  {
+    "slot": 14,
+    "name": "actual-budget",
+    "repo": "actualbudget/actual",
+    "sha": "647cf2ab06491c9ca26000860b0df66c88c9136a",
+    "path": "packages/sync-server",
+    "kind": "node",
+    "port": 5006,
+    "manifest": "package.json",
+    "file_hashes": {},
+    "images": [
+      "node:24-bookworm"
+    ],
+    "steps": "COPY . /app\nRUN corepack enable && yarn install --immutable && yarn build:server && test -f packages/sync-server/build/app.js\nRUN cd packages/sync-server && node --input-type=commonjs -e \"const db=new(require('better-sqlite3'))(':memory:'); if(db.prepare('select 1 as value').get().value!==1) process.exit(1)\"",
+    "start": null,
+    "endpoint": null,
+    "expected": null,
+    "reference_scope": "reference uses upstream Yarn scripts for native install; standalone native SQLite query, not server persistence or bank integrations"
+  },
+  {
+    "slot": 5,
+    "name": "angular-realworld",
+    "repo": "gothinkster/angular-realworld-example-app",
+    "sha": "d426ec804f7d035c374aa4a1b48ecdb05a03eb02",
+    "path": ".",
+    "kind": "node",
+    "port": 4200,
+    "file_hashes": {
+      "package.json": "d822151cf71979c3946bfcb50fc3a0f4860401fa749603c8189c9c55888e27c3",
+      "bun.lock": "9e511e9f7b4f82e2b916a1a72bc14e8c1b5f0a51f620cc80088af02ae72730bd"
+    },
+    "submodule": [
+      "realworld",
+      "https://github.com/realworld-apps/realworld.git",
+      "25588846c314b15a5e427ffe816e6b4af7be68c7"
+    ]
+  },
+  {
+    "slot": 20,
+    "name": "aspnet-min-api",
+    "repo": "dotnet/AspNetCore.Docs",
+    "sha": "7dd950be75bab1fabd1973854bc0ef4f7a99596b",
+    "path": "aspnetcore/tutorials/min-web-api/samples/10.x/TodoApi_VSC_Scalar",
+    "kind": "dotnet",
+    "port": 8080,
+    "manifest": ".",
+    "file_hashes": {},
+    "images": [
+      "mcr.microsoft.com/dotnet/sdk:10.0"
+    ],
+    "steps": "COPY aspnetcore/tutorials/min-web-api/samples/10.x/TodoApi_VSC_Scalar/ /app\nRUN dotnet publish -c Release -o /out && find /out -name '*.runtimeconfig.json' | grep -q .\nENV ASPNETCORE_URLS=http://0.0.0.0:8080",
+    "start": "dotnet /out/TodoApi.dll",
+    "endpoint": "/todoitems",
+    "expected": "todo",
+    "reference_scope": "in-memory EF API create/list; project and endpoint contract checked independently"
+  },
+  {
+    "slot": 4,
+    "name": "django-cms",
+    "repo": "django-cms/django-cms-quickstart",
+    "sha": "b89a0ee62b65b195d4f3db85456862b648dbafc3",
+    "path": ".",
+    "kind": "python",
+    "port": 80,
+    "file_hashes": {
+      "requirements.txt": "ccd9348d3ecd54bb65efe356a89809174d40d0cca1db34e4cfbf5e256add5e04",
+      "democontent/home.json": "29faf3d4c8a0a4388453f1a0a88a72358915bd8a1db77a00d7b0d1723c8ae19b"
+    }
+  },
+  {
+    "slot": 11,
+    "name": "drizzle-next",
+    "repo": "nextjs/saas-starter",
+    "sha": "6e33e58b1e553a41fe22e6b941a7229a002de361",
+    "path": ".",
+    "kind": "node",
+    "port": 3000,
+    "manifest": "package.json",
+    "file_hashes": {},
+    "images": [
+      "node:24-bookworm"
+    ],
+    "steps": "COPY . /app\nENV NEXT_TELEMETRY_DISABLED=1\nENV POSTGRES_URL=postgresql://unused:unused@127.0.0.1:1/unused BASE_URL=http://localhost:3000 AUTH_SECRET=diagnostic-placeholder-only\nRUN npm i -g pnpm@10.15.0 --ignore-scripts && pnpm install --frozen-lockfile --ignore-scripts && pnpm exec tsc --noEmit && test -d lib/db/migrations",
+    "start": null,
+    "endpoint": null,
+    "expected": null,
+    "reference_scope": "typecheck only; production build/pricing needs Stripe setup not approved for live use; no migrations, payment or functional pass"
+  },
+  {
+    "name": "fastapi-uv-sqlmodel",
+    "repo": "fastapi/full-stack-fastapi-template",
+    "sha": "77e550a73bb49dd2967622c5ed11bf7a49603c93",
+    "path": "backend",
+    "kind": "python",
+    "port": 8000
+  },
+  {
+    "slot": 16,
+    "name": "flask-admin",
+    "repo": "pallets-eco/flask-admin",
+    "sha": "861ba3806b47b28715ee3c394cf3d901d4e592b4",
+    "path": "examples/forms_files_images",
+    "kind": "python",
+    "port": 5000,
+    "manifest": "pyproject.toml",
+    "file_hashes": {},
+    "images": [
+      "python:3.12",
+      "ghcr.io/astral-sh/uv:0.9.26"
+    ],
+    "steps": "COPY --from=tool /uv /usr/local/bin/uv\nCOPY . /app\nWORKDIR /app/examples/forms_files_images\nRUN if test -f uv.lock; then uv sync --locked; else uv sync; fi && uv run --no-sync python -c \"import flask, flask_admin; from PIL import Image; assert Image.new('RGB',(2,2)).size==(2,2)\"",
+    "start": null,
+    "endpoint": null,
+    "expected": null,
+    "reference_scope": "dependency smoke only; documented example uses development server; upload not tested"
+  },
+  {
+    "slot": 7,
+    "name": "gin-multipart",
+    "repo": "gin-gonic/examples",
+    "sha": "2661f002ee5de912f23b03ec293c8ab741170d5e",
+    "path": "upload-file/single",
+    "kind": "go",
+    "port": 8080,
+    "file_hashes": {
+      "go.mod": "44d916674d2431c250f09a6e68e4a5f8252b045471e5e46a4e3938ceb157985d",
+      "go.sum": "ba85191ad340cb911bf16198040ac2f6d8b71b00684ea7c69b5eeeefde1124ef",
+      "upload-file/single/main.go": "9207f968a525b8c616ca9515ce9433e1aa38b4687503ab0a5b97dcbd2cea1cb8"
+    }
+  },
+  {
+    "slot": 22,
+    "name": "hexpm",
+    "repo": "hexpm/hexpm",
+    "sha": "f6f6c601c1b29fb07161d4824bb3cbc0e4c455d8",
+    "path": ".",
+    "kind": "elixir",
+    "port": 4000,
+    "manifest": "mix.exs",
+    "file_hashes": {},
+    "images": [],
+    "steps": null,
+    "start": null,
+    "endpoint": null,
+    "expected": null,
+    "reference_scope": "upstream release image build only; production release not started without reviewed local service configuration"
+  },
+  {
+    "slot": 17,
+    "name": "mealie",
+    "repo": "mealie-recipes/mealie",
+    "sha": "41e7fb98bd20b8a8a759adccc5ee486691ce6078",
+    "path": ".",
+    "kind": "python",
+    "port": 9000,
+    "manifest": "pyproject.toml",
+    "file_hashes": {},
+    "images": [],
+    "steps": null,
+    "start": null,
+    "endpoint": null,
+    "expected": null,
+    "reference_scope": "upstream docker/Dockerfile; complete image build only; recipe create/read not qualified"
+  },
+  {
+    "name": "nest-bull-redis",
+    "repo": "nestjs/nest",
+    "sha": "bbbfaf1765308826a581a75424a11d0f3e59521a",
+    "path": "sample/26-queues",
+    "kind": "node",
+    "port": 3000,
+    "env": {
+      "REDIS_HOST": "redis",
+      "REDIS_PORT": "6379"
+    }
+  },
+  {
+    "slot": 13,
+    "name": "nest-graphql",
+    "repo": "nestjs/nest",
+    "sha": "bbbfaf1765308826a581a75424a11d0f3e59521a",
+    "path": "sample/12-graphql-schema-first",
+    "kind": "node",
+    "port": 3000,
+    "manifest": "package.json",
+    "file_hashes": {},
+    "images": [
+      "node:24-alpine"
+    ],
+    "steps": "COPY sample/12-graphql-schema-first/ /app\nRUN npm install --no-package-lock --ignore-scripts && npm run build && test -f dist/main.js",
+    "start": "node dist/main.js",
+    "endpoint": "/graphql",
+    "expected": "graphql",
+    "reference_scope": "unlocked build; GraphQL schema check via HTTP POST"
+  },
+  {
+    "slot": 12,
+    "name": "nest-typeorm",
+    "repo": "nestjs/nest",
+    "sha": "bbbfaf1765308826a581a75424a11d0f3e59521a",
+    "path": "sample/05-sql-typeorm",
+    "kind": "node",
+    "port": 3000,
+    "manifest": "package.json",
+    "file_hashes": {},
+    "images": [
+      "node:24-alpine"
+    ],
+    "steps": "COPY sample/05-sql-typeorm/ /app\nRUN npm install --no-package-lock --ignore-scripts && npm run build && test -f dist/main.js",
+    "start": null,
+    "endpoint": null,
+    "expected": null,
+    "reference_scope": "unlocked build; runtime requires MySQL on loopback per source; no DB qualification"
+  },
+  {
+    "slot": 15,
+    "name": "netbox",
+    "repo": "netbox-community/netbox",
+    "sha": "691bb37fb891f64803eb7ec56fe5ebba287b0efe",
+    "path": ".",
+    "kind": "python",
+    "port": 8000,
+    "manifest": "pyproject.toml",
+    "file_hashes": {},
+    "images": [
+      "python:3.12"
+    ],
+    "steps": "COPY . /app\nRUN python -m pip install --no-cache-dir -r base_requirements.txt && python -c \"import django, rest_framework, psycopg; from PIL import Image; assert Image.new('RGB',(2,2)).size==(2,2)\"",
+    "start": null,
+    "endpoint": null,
+    "expected": null,
+    "reference_scope": "dependency imports/image construction only; no PostgreSQL/Redis application runtime"
+  },
+  {
+    "slot": 8,
+    "name": "nuxt-content",
+    "repo": "nuxt/content",
+    "sha": "3c49cff60fb8a5fcb4899269699a7ef9b73e539e",
+    "path": "examples/blog",
+    "kind": "node",
+    "port": 3000,
+    "manifest": "package.json",
+    "file_hashes": {},
+    "images": [
+      "node:24-alpine"
+    ],
+    "steps": "COPY examples/blog/ /app\nRUN npm install --no-package-lock --ignore-scripts && npm run build && test -f .output/server/index.mjs",
+    "start": "node .output/server/index.mjs",
+    "endpoint": "/",
+    "expected": null,
+    "reference_scope": "uses standalone published Nuxt Content rather than root workspace override; unlocked"
+  },
+  {
+    "slot": 19,
+    "name": "quarkus-panache",
+    "repo": "quarkusio/quarkus-quickstarts",
+    "sha": "b3e90af5f60b94a1acb14736be97e34127f079ec",
+    "path": "hibernate-orm-panache-quickstart",
+    "kind": "java",
+    "port": 8080,
+    "manifest": "pom.xml",
+    "file_hashes": {},
+    "images": [
+      "maven:3.9-eclipse-temurin-21"
+    ],
+    "steps": "COPY . /app\nRUN mvn -B -f hibernate-orm-panache-quickstart/pom.xml -DskipTests package && test -f hibernate-orm-panache-quickstart/target/quarkus-app/quarkus-run.jar",
+    "start": null,
+    "endpoint": null,
+    "expected": null,
+    "reference_scope": "fast-JAR build; no PostgreSQL-backed runtime test"
+  },
+  {
+    "slot": 6,
+    "name": "react-router-express",
+    "repo": "remix-run/react-router-templates",
+    "sha": "338a991a4c4d2474ea8d3699cfcd5a77a27c9424",
+    "path": "node-custom-server",
+    "kind": "node",
+    "port": 3000,
+    "file_hashes": {
+      "node-custom-server/package.json": "40fbc13ac2fae61b621179eb32e12a96ad790b69dc998a33da6c22333a8119db",
+      "node-custom-server/server.js": "9e840b24ca09a8150177d94b8a1989a0eb34e15506cf629dea7748a5cc2812bd"
+    },
+    "reference_dependency_policy": "unlocked npm install --no-package-lock --ignore-scripts"
+  },
+  {
+    "slot": 18,
+    "name": "spring-jpa",
+    "repo": "spring-guides/gs-accessing-data-jpa",
+    "sha": "9a2095581b70cac648dcc4ba6a6cd0622264d67d",
+    "path": "complete",
+    "kind": "java",
+    "port": 8080,
+    "manifest": "build.gradle",
+    "file_hashes": {},
+    "images": [
+      "eclipse-temurin:21-jdk"
+    ],
+    "steps": "COPY complete/ /app\nRUN sh gradlew --no-daemon test bootJar && test -n \"$(find build/libs -name '*.jar' -print -quit)\"\nRUN java -jar $(find build/libs -name '*.jar' ! -name '*-plain.jar' -print -quit) > /tmp/jpa.log && grep -q 'Customer' /tmp/jpa.log",
+    "start": null,
+    "endpoint": null,
+    "expected": null,
+    "reference_scope": "Gradle tests and CLI JPA customer output; no HTTP expected"
+  },
+  {
+    "slot": 23,
+    "name": "sqlx-axum",
+    "repo": "launchbadge/sqlx",
+    "sha": "30f4eae0793ecaafbf6808623c84ff57e8001222",
+    "path": "examples/postgres/axum-social-with-tests",
+    "kind": "rust",
+    "port": 3000,
+    "manifest": "Cargo.toml",
+    "file_hashes": {},
+    "images": [
+      "rust:1.100.0-bookworm"
+    ],
+    "steps": "COPY . /app\nRUN SQLX_OFFLINE=true cargo build --locked --manifest-path examples/postgres/axum-social-with-tests/Cargo.toml",
+    "start": null,
+    "endpoint": null,
+    "expected": null,
+    "reference_scope": "workspace build only; no live PostgreSQL/CRUD test"
+  },
+  {
+    "slot": 9,
+    "name": "sveltekit-workspace",
+    "repo": "sveltejs/kit",
+    "sha": "1cda796508aa14efd3b7832f3290a8f04eb88526",
+    "path": "packages/adapter-node/test/apps/basic",
+    "kind": "node",
+    "port": 3000,
+    "manifest": "package.json",
+    "file_hashes": {},
+    "images": [
+      "node:24-bookworm"
+    ],
+    "steps": "COPY . /app\nRUN npm i -g pnpm@12.21.0 --ignore-scripts && pnpm --filter test-node-basic... --filter kit-monorepo install --frozen-lockfile --ignore-scripts && pnpm -F @sveltejs/kit prepublishOnly && pnpm -F test-node-basic build && test -f packages/adapter-node/test/apps/basic/build/index.js",
+    "start": "node build/index.js",
+    "endpoint": "/",
+    "expected": null,
+    "reference_scope": "root lock plus explicit upstream Kit prepublish preparation; local apps and catalog"
+  },
+  {
+    "slot": 21,
+    "name": "symfony-demo",
+    "repo": "symfony/demo",
+    "sha": "f42980c690b4bf335fa41bbafdb075bb67b719c2",
+    "path": ".",
+    "kind": "php",
+    "port": 8000,
+    "manifest": "composer.json",
+    "file_hashes": {},
+    "images": [
+      "php:8.4-cli",
+      "composer:2"
+    ],
+    "steps": "COPY --from=tool /usr/bin/composer /usr/local/bin/composer\nRUN apt-get update && apt-get install -y --no-install-recommends unzip libicu-dev libonig-dev libsqlite3-dev && docker-php-ext-install intl mbstring pdo_sqlite\nCOPY . /app\nENV COMPOSER_ALLOW_SUPERUSER=1 APP_ENV=prod\nRUN composer install --no-dev --no-interaction --no-scripts && php bin/console list --no-interaction",
+    "start": null,
+    "endpoint": null,
+    "expected": null,
+    "reference_scope": "Composer and console boot only; no seeded Doctrine runtime"
+  },
+  {
+    "name": "tanstack-start-query",
+    "repo": "TanStack/router",
+    "sha": "53cee73787c45113722ef6130d6c3633786bf475",
+    "path": "examples/react/start-basic-react-query",
+    "kind": "node",
+    "port": 3000,
+    "env": {
+      "HOST": "0.0.0.0",
+      "PORT": "3000"
+    }
+  },
+  {
+    "slot": 10,
+    "name": "trpc-fastify",
+    "repo": "trpc/trpc",
+    "sha": "e57a6448bdb67fb5ceabcc5cf601cb74b25b8c92",
+    "path": "examples/fastify-server",
+    "kind": "node",
+    "port": 2022,
+    "manifest": "package.json",
+    "file_hashes": {},
+    "images": [
+      "node:24-bookworm"
+    ],
+    "steps": "COPY . /app\nRUN npm i -g pnpm@12.4.1 --ignore-scripts && pnpm --filter examples-fastify-server... install --frozen-lockfile --ignore-scripts && pnpm -F examples-fastify-server build && test -f examples/fastify-server/dist/server/index.js",
+    "start": null,
+    "endpoint": null,
+    "expected": null,
+    "reference_scope": "build only; RPC client/session probe not qualified"
+  }
+]

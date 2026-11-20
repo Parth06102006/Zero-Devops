@@ -3,3 +3,11 @@
 opencode.jsonc
 .cursor/
 .agents/skills/handoff/
+
+# Local Superpowers design notes
+docs/superpowers/
+
+# Campaign build evidence stays local; docs contains the consolidated final report.
+docs/worker-build-*/
+!docs/FINAL_REPORT.md
+docs/worker-build-*-2026-*.md
