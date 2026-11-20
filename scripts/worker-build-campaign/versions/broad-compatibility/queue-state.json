@@ -1,0 +1,419 @@
+{
+  "started_at": "2026-11-19T14:41:28.882688+00:00",
+  "product": "d15eae067cf77a8dcb5d6d6aaf8a59b166c65106",
+  "design_sha256": "0a1c1d5432b3074999367bd269abbd4174d883040f00d7141df88375f1ef9c95",
+  "harness_sha256": {
+    "broad_finish_all.py": "dde167cffa8d1cb1d8467e1092c3a5d1fc8c135b2675168c24a06cd2c5c7e024",
+    "broad_batch.py": "fc05bac2f4241b0efcdb8bda54c78283efcfd1827e57270f2d0b632596a821b8",
+    "broad_remaining.py": "d4c0e720942e9c7a8d4ab26dff0c1362be1fa6ebe935a1801ba62f332bfbf168",
+    "broad_fastapi.py": "ddb0b6dacda9545be8cb25220a156f3fe945bf6841db953d4fa028f621d869cd",
+    "rerun.py": "48783499add664975af28a003c35f5abc47fb07c1a007f4a56358be312d7beb8",
+    "round2_run.py": "aee318e3a01bc42be4161081b5d05de51b38f0d6bba84d8e28023b14b0aaea00"
+  },
+  "planned": [
+    {
+      "slot": 8,
+      "name": "nuxt-content",
+      "repo": "nuxt/content",
+      "sha": "3c49cff60fb8a5fcb4899269699a7ef9b73e539e",
+      "path": "examples/blog",
+      "kind": "node",
+      "port": 3000,
+      "manifest": "package.json",
+      "file_hashes": {},
+      "images": [
+        "node:24-alpine"
+      ],
+      "steps": "COPY examples/blog/ /app\nRUN npm install --no-package-lock --ignore-scripts && npm run build && test -f .output/server/index.mjs",
+      "start": "node .output/server/index.mjs",
+      "endpoint": "/",
+      "expected": null,
+      "reference_scope": "uses standalone published Nuxt Content rather than root workspace override; unlocked"
+    },
+    {
+      "slot": 9,
+      "name": "sveltekit-workspace",
+      "repo": "sveltejs/kit",
+      "sha": "1cda796508aa14efd3b7832f3290a8f04eb88526",
+      "path": "packages/adapter-node/test/apps/basic",
+      "kind": "node",
+      "port": 3000,
+      "manifest": "package.json",
+      "file_hashes": {},
+      "images": [
+        "node:24-bookworm"
+      ],
+      "steps": "COPY . /app\nRUN npm i -g pnpm@12.21.0 --ignore-scripts && pnpm --filter test-node-basic... --filter kit-monorepo install --frozen-lockfile --ignore-scripts && pnpm -F @sveltejs/kit prepublishOnly && pnpm -F test-node-basic build && test -f packages/adapter-node/test/apps/basic/build/index.js",
+      "start": "node build/index.js",
+      "endpoint": "/",
+      "expected": null,
+      "reference_scope": "root lock plus explicit upstream Kit prepublish preparation; local apps and catalog"
+    },
+    {
+      "slot": 10,
+      "name": "trpc-fastify",
+      "repo": "trpc/trpc",
+      "sha": "e57a6448bdb67fb5ceabcc5cf601cb74b25b8c92",
+      "path": "examples/fastify-server",
+      "kind": "node",
+      "port": 2022,
+      "manifest": "package.json",
+      "file_hashes": {},
+      "images": [
+        "node:24-bookworm"
+      ],
+      "steps": "COPY . /app\nRUN npm i -g pnpm@12.4.1 --ignore-scripts && pnpm --filter examples-fastify-server... install --frozen-lockfile --ignore-scripts && pnpm -F examples-fastify-server build && test -f examples/fastify-server/dist/server/index.js",
+      "start": null,
+      "endpoint": null,
+      "expected": null,
+      "reference_scope": "build only; RPC client/session probe not qualified"
+    },
+    {
+      "slot": 11,
+      "name": "drizzle-next",
+      "repo": "nextjs/saas-starter",
+      "sha": "6e33e58b1e553a41fe22e6b941a7229a002de361",
+      "path": ".",
+      "kind": "node",
+      "port": 3000,
+      "manifest": "package.json",
+      "file_hashes": {},
+      "images": [
+        "node:24-bookworm"
+      ],
+      "steps": "COPY . /app\nENV NEXT_TELEMETRY_DISABLED=1\nENV POSTGRES_URL=postgresql://unused:unused@127.0.0.1:1/unused BASE_URL=http://localhost:3000 AUTH_SECRET=diagnostic-placeholder-only\nRUN npm i -g pnpm@10.15.0 --ignore-scripts && pnpm install --frozen-lockfile --ignore-scripts && pnpm exec tsc --noEmit && test -d lib/db/migrations",
+      "start": null,
+      "endpoint": null,
+      "expected": null,
+      "reference_scope": "typecheck only; production build/pricing needs Stripe setup not approved for live use; no migrations, payment or functional pass"
+    },
+    {
+      "slot": 12,
+      "name": "nest-typeorm",
+      "repo": "nestjs/nest",
+      "sha": "bbbfaf1765308826a581a75424a11d0f3e59521a",
+      "path": "sample/05-sql-typeorm",
+      "kind": "node",
+      "port": 3000,
+      "manifest": "package.json",
+      "file_hashes": {},
+      "images": [
+        "node:24-alpine"
+      ],
+      "steps": "COPY sample/05-sql-typeorm/ /app\nRUN npm install --no-package-lock --ignore-scripts && npm run build && test -f dist/main.js",
+      "start": null,
+      "endpoint": null,
+      "expected": null,
+      "reference_scope": "unlocked build; runtime requires MySQL on loopback per source; no DB qualification"
+    },
+    {
+      "slot": 13,
+      "name": "nest-graphql",
+      "repo": "nestjs/nest",
+      "sha": "bbbfaf1765308826a581a75424a11d0f3e59521a",
+      "path": "sample/12-graphql-schema-first",
+      "kind": "node",
+      "port": 3000,
+      "manifest": "package.json",
+      "file_hashes": {},
+      "images": [
+        "node:24-alpine"
+      ],
+      "steps": "COPY sample/12-graphql-schema-first/ /app\nRUN npm install --no-package-lock --ignore-scripts && npm run build && test -f dist/main.js",
+      "start": "node dist/main.js",
+      "endpoint": "/graphql",
+      "expected": "graphql",
+      "reference_scope": "unlocked build; GraphQL schema check via HTTP POST"
+    },
+    {
+      "slot": 14,
+      "name": "actual-budget",
+      "repo": "actualbudget/actual",
+      "sha": "647cf2ab06491c9ca26000860b0df66c88c9136a",
+      "path": "packages/sync-server",
+      "kind": "node",
+      "port": 5006,
+      "manifest": "package.json",
+      "file_hashes": {},
+      "images": [
+        "node:24-bookworm"
+      ],
+      "steps": "COPY . /app\nRUN corepack enable && yarn install --immutable && yarn build:server && test -f packages/sync-server/build/app.js\nRUN cd packages/sync-server && node --input-type=commonjs -e \"const db=new(require('better-sqlite3'))(':memory:'); if(db.prepare('select 1 as value').get().value!==1) process.exit(1)\"",
+      "start": null,
+      "endpoint": null,
+      "expected": null,
+      "reference_scope": "reference uses upstream Yarn scripts for native install; standalone native SQLite query, not server persistence or bank integrations"
+    },
+    {
+      "slot": 15,
+      "name": "netbox",
+      "repo": "netbox-community/netbox",
+      "sha": "691bb37fb891f64803eb7ec56fe5ebba287b0efe",
+      "path": ".",
+      "kind": "python",
+      "port": 8000,
+      "manifest": "pyproject.toml",
+      "file_hashes": {},
+      "images": [
+        "python:3.12"
+      ],
+      "steps": "COPY . /app\nRUN python -m pip install --no-cache-dir -r base_requirements.txt && python -c \"import django, rest_framework, psycopg; from PIL import Image; assert Image.new('RGB',(2,2)).size==(2,2)\"",
+      "start": null,
+      "endpoint": null,
+      "expected": null,
+      "reference_scope": "dependency imports/image construction only; no PostgreSQL/Redis application runtime"
+    },
+    {
+      "slot": 16,
+      "name": "flask-admin",
+      "repo": "pallets-eco/flask-admin",
+      "sha": "861ba3806b47b28715ee3c394cf3d901d4e592b4",
+      "path": "examples/forms_files_images",
+      "kind": "python",
+      "port": 5000,
+      "manifest": "pyproject.toml",
+      "file_hashes": {},
+      "images": [
+        "python:3.12",
+        "ghcr.io/astral-sh/uv:0.9.26"
+      ],
+      "steps": "COPY --from=tool /uv /usr/local/bin/uv\nCOPY . /app\nWORKDIR /app/examples/forms_files_images\nRUN if test -f uv.lock; then uv sync --locked; else uv sync; fi && uv run --no-sync python -c \"import flask, flask_admin; from PIL import Image; assert Image.new('RGB',(2,2)).size==(2,2)\"",
+      "start": null,
+      "endpoint": null,
+      "expected": null,
+      "reference_scope": "dependency smoke only; documented example uses development server; upload not tested"
+    },
+    {
+      "slot": 17,
+      "name": "mealie",
+      "repo": "mealie-recipes/mealie",
+      "sha": "41e7fb98bd20b8a8a759adccc5ee486691ce6078",
+      "path": ".",
+      "kind": "python",
+      "port": 9000,
+      "manifest": "pyproject.toml",
+      "file_hashes": {},
+      "images": [],
+      "steps": null,
+      "start": null,
+      "endpoint": null,
+      "expected": null,
+      "reference_scope": "upstream docker/Dockerfile; complete image build only; recipe create/read not qualified"
+    },
+    {
+      "slot": 18,
+      "name": "spring-jpa",
+      "repo": "spring-guides/gs-accessing-data-jpa",
+      "sha": "9a2095581b70cac648dcc4ba6a6cd0622264d67d",
+      "path": "complete",
+      "kind": "java",
+      "port": 8080,
+      "manifest": "build.gradle",
+      "file_hashes": {},
+      "images": [
+        "eclipse-temurin:21-jdk"
+      ],
+      "steps": "COPY complete/ /app\nRUN sh gradlew --no-daemon test bootJar && test -n \"$(find build/libs -name '*.jar' -print -quit)\"\nRUN java -jar $(find build/libs -name '*.jar' ! -name '*-plain.jar' -print -quit) > /tmp/jpa.log && grep -q 'Customer' /tmp/jpa.log",
+      "start": null,
+      "endpoint": null,
+      "expected": null,
+      "reference_scope": "Gradle tests and CLI JPA customer output; no HTTP expected"
+    },
+    {
+      "slot": 19,
+      "name": "quarkus-panache",
+      "repo": "quarkusio/quarkus-quickstarts",
+      "sha": "b3e90af5f60b94a1acb14736be97e34127f079ec",
+      "path": "hibernate-orm-panache-quickstart",
+      "kind": "java",
+      "port": 8080,
+      "manifest": "pom.xml",
+      "file_hashes": {},
+      "images": [
+        "maven:3.9-eclipse-temurin-21"
+      ],
+      "steps": "COPY . /app\nRUN mvn -B -f hibernate-orm-panache-quickstart/pom.xml -DskipTests package && test -f hibernate-orm-panache-quickstart/target/quarkus-app/quarkus-run.jar",
+      "start": null,
+      "endpoint": null,
+      "expected": null,
+      "reference_scope": "fast-JAR build; no PostgreSQL-backed runtime test"
+    },
+    {
+      "slot": 20,
+      "name": "aspnet-min-api",
+      "repo": "dotnet/AspNetCore.Docs",
+      "sha": "7dd950be75bab1fabd1973854bc0ef4f7a99596b",
+      "path": "aspnetcore/tutorials/min-web-api/samples/10.x/TodoApi_VSC_Scalar",
+      "kind": "dotnet",
+      "port": 8080,
+      "manifest": ".",
+      "file_hashes": {},
+      "images": [
+        "mcr.microsoft.com/dotnet/sdk:10.0"
+      ],
+      "steps": "COPY aspnetcore/tutorials/min-web-api/samples/10.x/TodoApi_VSC_Scalar/ /app\nRUN dotnet publish -c Release -o /out && find /out -name '*.runtimeconfig.json' | grep -q .\nENV ASPNETCORE_URLS=http://0.0.0.0:8080",
+      "start": "dotnet /out/TodoApi.dll",
+      "endpoint": "/todoitems",
+      "expected": "todo",
+      "reference_scope": "in-memory EF API create/list; project and endpoint contract checked independently"
+    },
+    {
+      "slot": 21,
+      "name": "symfony-demo",
+      "repo": "symfony/demo",
+      "sha": "f42980c690b4bf335fa41bbafdb075bb67b719c2",
+      "path": ".",
+      "kind": "php",
+      "port": 8000,
+      "manifest": "composer.json",
+      "file_hashes": {},
+      "images": [
+        "php:8.4-cli",
+        "composer:2"
+      ],
+      "steps": "COPY --from=tool /usr/bin/composer /usr/local/bin/composer\nRUN apt-get update && apt-get install -y --no-install-recommends unzip libicu-dev libonig-dev libsqlite3-dev && docker-php-ext-install intl mbstring pdo_sqlite\nCOPY . /app\nENV COMPOSER_ALLOW_SUPERUSER=1 APP_ENV=prod\nRUN composer install --no-dev --no-interaction --no-scripts && php bin/console list --no-interaction",
+      "start": null,
+      "endpoint": null,
+      "expected": null,
+      "reference_scope": "Composer and console boot only; no seeded Doctrine runtime"
+    },
+    {
+      "slot": 22,
+      "name": "hexpm",
+      "repo": "hexpm/hexpm",
+      "sha": "f6f6c601c1b29fb07161d4824bb3cbc0e4c455d8",
+      "path": ".",
+      "kind": "elixir",
+      "port": 4000,
+      "manifest": "mix.exs",
+      "file_hashes": {},
+      "images": [],
+      "steps": null,
+      "start": null,
+      "endpoint": null,
+      "expected": null,
+      "reference_scope": "upstream release image build only; production release not started without reviewed local service configuration"
+    },
+    {
+      "slot": 23,
+      "name": "sqlx-axum",
+      "repo": "launchbadge/sqlx",
+      "sha": "30f4eae0793ecaafbf6808623c84ff57e8001222",
+      "path": "examples/postgres/axum-social-with-tests",
+      "kind": "rust",
+      "port": 3000,
+      "manifest": "Cargo.toml",
+      "file_hashes": {},
+      "images": [
+        "rust:1.100.0-bookworm"
+      ],
+      "steps": "COPY . /app\nRUN SQLX_OFFLINE=true cargo build --locked --manifest-path examples/postgres/axum-social-with-tests/Cargo.toml",
+      "start": null,
+      "endpoint": null,
+      "expected": null,
+      "reference_scope": "workspace build only; no live PostgreSQL/CRUD test"
+    }
+  ],
+  "outcomes": [
+    {
+      "case": "sveltekit-workspace",
+      "controller_exit": 0,
+      "complete": true,
+      "log": "queue-09-sveltekit-workspace.log"
+    },
+    {
+      "case": "nuxt-content",
+      "controller_exit": 0,
+      "complete": true,
+      "log": "queue-08-nuxt-content.log"
+    },
+    {
+      "case": "drizzle-next",
+      "controller_exit": 0,
+      "complete": true,
+      "log": "queue-11-drizzle-next.log"
+    },
+    {
+      "case": "nest-typeorm",
+      "controller_exit": 0,
+      "complete": true,
+      "log": "queue-12-nest-typeorm.log"
+    },
+    {
+      "case": "trpc-fastify",
+      "controller_exit": 0,
+      "complete": true,
+      "log": "queue-10-trpc-fastify.log"
+    },
+    {
+      "case": "nest-graphql",
+      "controller_exit": 0,
+      "complete": true,
+      "log": "queue-13-nest-graphql.log"
+    },
+    {
+      "case": "flask-admin",
+      "controller_exit": 0,
+      "complete": true,
+      "log": "queue-16-flask-admin.log"
+    },
+    {
+      "case": "spring-jpa",
+      "controller_exit": 0,
+      "complete": true,
+      "log": "queue-18-spring-jpa.log"
+    },
+    {
+      "case": "quarkus-panache",
+      "controller_exit": 0,
+      "complete": true,
+      "log": "queue-19-quarkus-panache.log"
+    },
+    {
+      "case": "aspnet-min-api",
+      "controller_exit": 0,
+      "complete": true,
+      "log": "queue-20-aspnet-min-api.log"
+    },
+    {
+      "case": "symfony-demo",
+      "controller_exit": 0,
+      "complete": true,
+      "log": "queue-21-symfony-demo.log"
+    },
+    {
+      "case": "sqlx-axum",
+      "controller_exit": 1,
+      "complete": false,
+      "log": "queue-23-sqlx-axum.log"
+    },
+    {
+      "case": "actual-budget",
+      "controller_exit": 0,
+      "complete": true,
+      "log": "queue-14-actual-budget.log"
+    },
+    {
+      "case": "netbox",
+      "controller_exit": 1,
+      "complete": false,
+      "log": "queue-15-netbox.log"
+    },
+    {
+      "case": "mealie",
+      "controller_exit": 1,
+      "complete": false,
+      "log": "queue-17-mealie.log"
+    },
+    {
+      "case": "hexpm",
+      "controller_exit": 1,
+      "complete": false,
+      "log": "queue-22-hexpm.log"
+    }
+  ],
+  "finished_at": "2026-11-19T16:09:37.661689+00:00",
+  "end_state": {
+    "active_campaign_containers": []
+  }
+}

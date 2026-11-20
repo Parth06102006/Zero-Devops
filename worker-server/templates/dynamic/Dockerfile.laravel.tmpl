@@ -1,0 +1,28 @@
+# Laravel owns the application; Vite is its frontend asset build.
+FROM docker.io/library/node:24-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --ignore-scripts
+COPY . .
+RUN npm run build
+RUN test -f public/build/manifest.json
+
+FROM docker.io/library/php:8.3-cli-alpine AS vendor
+RUN apk add --no-cache git unzip oniguruma-dev && docker-php-ext-install mbstring pdo_mysql
+COPY --from=docker.io/library/composer:2 /usr/bin/composer /usr/bin/composer
+WORKDIR /app
+COPY . .
+RUN composer install --no-dev --no-interaction --no-progress --optimize-autoloader
+
+FROM docker.io/library/php:8.3-cli-alpine
+RUN apk add --no-cache oniguruma
+COPY --from=vendor /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
+COPY --from=vendor /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
+WORKDIR /app
+COPY --from=vendor /app /app
+COPY --from=builder /app/public/build /app/public/build
+RUN test -f public/index.php && mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache
+USER www-data
+EXPOSE 8080
+# Local container runtime recipe, retaining the existing PHP server policy.
+CMD ["php", "-S", "0.0.0.0:8080", "-t", "public"]

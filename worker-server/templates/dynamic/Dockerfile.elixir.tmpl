@@ -2,7 +2,7 @@
 # which isn't known ahead of time — since exactly one release is built,
 # the generated start script is found by globbing rel/*/bin/* instead of
 # needing that name.
-FROM elixir:1.16-alpine AS builder
+FROM docker.io/library/elixir:1.16-alpine AS builder
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ RUN mix local.hex --force && mix local.rebar --force && mix deps.get --only prod
 COPY . .
 RUN mix compile && mix release
 
-FROM alpine:3.20
+FROM docker.io/library/alpine:3.20
 
 WORKDIR /app
 

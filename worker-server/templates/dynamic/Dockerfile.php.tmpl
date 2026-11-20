@@ -2,14 +2,14 @@
 # convention), falling back to the repo root for frameworks without one.
 # PHP's built-in server is single-threaded and not meant for real production
 # load — swap for php-fpm + nginx before this needs to handle real traffic.
-FROM composer:2 AS vendor
+FROM docker.io/library/composer:2 AS vendor
 
 WORKDIR /app
 
 COPY composer.json composer.lock* ./
 RUN composer install --no-dev --no-interaction --no-progress --optimize-autoloader
 
-FROM php:8.3-cli-alpine
+FROM docker.io/library/php:8.3-cli-alpine
 
 WORKDIR /app
 

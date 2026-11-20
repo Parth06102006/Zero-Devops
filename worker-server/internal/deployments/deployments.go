@@ -27,6 +27,8 @@ const (
 	pkgManagerYarn = "yarn"
 	pkgManagerBun  = "bun"
 
+	bunInstallFrozen = "bun install --frozen-lockfile --ignore-scripts"
+
 	// Python package managers
 	pkgManagerUV     = "uv"
 	pkgManagerPoetry = "poetry"
@@ -54,6 +56,7 @@ const (
 	frameworkVue       = "vue"
 	frameworkSolid     = "solid"
 	frameworkTanStack  = "tanstack-start"
+	frameworkNestJS    = "nestjs"
 
 	langNode       = "node"
 	langGo         = "go"
@@ -82,7 +85,7 @@ var pmInstallCommands = map[string]string{
 	pkgManagerNPM:  "npm ci --ignore-scripts",
 	pkgManagerPNPM: "pnpm install --frozen-lockfile --ignore-scripts",
 	pkgManagerYarn: "yarn install --frozen-lockfile --ignore-scripts",
-	pkgManagerBun:  "bun install --frozen-lockfile --ignore-scripts",
+	pkgManagerBun:  bunInstallFrozen,
 }
 
 // Production dependency installation is not a syntactic substitution for npm's
@@ -107,8 +110,6 @@ var buildRoot = func() string {
 	}
 	return filepath.Join(os.TempDir(), "zerodevops-build")
 }()
-
-const gitCloneTimeout = 60 * time.Second
 
 func validateCloneURL(rawURL string) error {
 	u, err := url.Parse(rawURL)
@@ -143,6 +144,10 @@ func cloneRepo(cloneURL, deploymentID, commitSHA string, credential domain.Clone
 	if !commitSHAPattern.MatchString(commitSHA) {
 		return "", fmt.Errorf("clone rejected: invalid commit SHA %q", commitSHA)
 	}
+	policy, err := readCheckoutPolicy()
+	if err != nil {
+		return "", err
+	}
 
 	destPath := filepath.Join(buildRoot, deploymentID)
 
@@ -154,7 +159,8 @@ func cloneRepo(cloneURL, deploymentID, commitSHA string, credential domain.Clone
 		return "", err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), gitCloneTimeout)
+	const gitCommandTimeout = 30 * time.Second
+	ctx, cancel := context.WithTimeout(context.Background(), gitCommandTimeout)
 	defer cancel()
 
 	//nolint:gosec // cloneURL validated by validateCloneURL and commitSHA by commitSHAPattern above
@@ -178,12 +184,25 @@ func cloneRepo(cloneURL, deploymentID, commitSHA string, credential domain.Clone
 		"GIT_ASKPASS=" + askpassPath,
 		"GITHUB_INSTALLATION_TOKEN=" + credential.Token,
 	}
-	if err := runGitWithEnv(ctx, []string{gitChangeDirFlag, destPath, "fetch", "--depth", "1", "origin", commitSHA}, gitEnv); err != nil {
+	if err := fetchPinned(policy, func(ctx context.Context) error {
+		return runGitWithEnv(ctx, []string{gitChangeDirFlag, destPath, "fetch", "--depth", "1", "origin", commitSHA}, gitEnv)
+	}); err != nil {
 		return "", fmt.Errorf("git fetch failed: %w", err)
 	}
-	if err := runGit(ctx, []string{gitChangeDirFlag, destPath, "checkout", "FETCH_HEAD"}); err != nil {
+	checkoutCtx, checkoutCancel := context.WithTimeout(context.Background(), policy.checkout)
+	defer checkoutCancel()
+	started := time.Now()
+	if err := runGit(checkoutCtx, []string{gitChangeDirFlag, destPath, "checkout", "--detach", commitSHA}); err != nil {
 		return "", fmt.Errorf("git checkout failed: %w", err)
 	}
+	//nolint:gosec // Command and fixed arguments are constants; destPath is created under the controlled build root.
+	verify := exec.CommandContext(checkoutCtx, "git", gitChangeDirFlag, destPath, "rev-parse", "HEAD")
+	verify.WaitDelay = gitWaitDelay
+	head, err := verify.Output()
+	if err != nil || strings.TrimSpace(string(head)) != commitSHA {
+		return "", errors.New("git checkout SHA verification failed")
+	}
+	fmt.Printf("ZERODEVOPS_GIT phase=checkout seconds=%.3f verified_sha=%s\n", time.Since(started).Seconds(), commitSHA)
 
 	return destPath, nil
 }
@@ -311,8 +330,8 @@ func renderNodePackageManagerTemplate(content, pm string) string {
 		// Only swap the builder stage and unnamed runtime stages — a stage named
 		// "AS runtime" serves static files via npm's bundled `serve` and must
 		// remain Node regardless of the package manager that built the project.
-		content = strings.ReplaceAll(content, "FROM node:20-alpine AS builder", "FROM docker.io/oven/bun:1-alpine AS builder")
-		content = strings.ReplaceAll(content, "FROM node:20-alpine\n", "FROM docker.io/oven/bun:1-alpine\n")
+		content = nodeBuilderBase.ReplaceAllString(content, "FROM docker.io/oven/bun:1-alpine AS builder")
+		content = nodeUnnamedBase.ReplaceAllString(content, "FROM docker.io/oven/bun:1-alpine")
 	}
 	return content
 }
@@ -379,9 +398,37 @@ func writeDockerfile(repoPath string, builder *Builder, pm string) error {
 	} else {
 		content = renderNodePackageManagerTemplate(content, pm)
 	}
+	content, err = renderNodeToolchain(repoPath, content)
+	if err != nil {
+		return err
+	}
+	content, err = renderInstallPolicy(repoPath, content, pm)
+	if err != nil {
+		return err
+	}
+	if builder.Name == langGo {
+		content, err = renderGoBuild(repoPath, content)
+		if err != nil {
+			return err
+		}
+	}
 
-	if outDir := resolveOutputDir(repoPath, builder); outDir != "" {
+	options, err := readBuildOptions(repoPath)
+	if err != nil {
+		return err
+	}
+	outDir, err := recipeOutput(repoPath, builder, options)
+	if err != nil {
+		return err
+	}
+	if outDir != "" {
 		content = strings.ReplaceAll(content, outputDirPlaceholder, outDir)
+	}
+	if builder.Name != langRust && builder.Name != langGo {
+		content, err = renderRuntime(repoPath, repoPath, content, builder)
+		if err != nil {
+			return err
+		}
 	}
 
 	//nolint:gosec // repoPath is from cloneRepo which returns a controlled path
@@ -391,11 +438,15 @@ func writeDockerfile(repoPath string, builder *Builder, pm string) error {
 // buildImage runs buildah, streaming output live while also capturing it so a
 // failure can be classified afterward (build error vs SSR mismatch).
 func buildImage(ctx context.Context, repoPath, imageTag string) (string, error) {
+	return buildImageWithContext(ctx, repoPath, repoPath, imageTag)
+}
+
+func buildImageWithContext(ctx context.Context, appDir, contextDir, imageTag string) (string, error) {
 	//nolint:gosec // repoPath is from cloneRepo which validates the URL
 	cmd := exec.CommandContext(ctx, "buildah", "bud",
 		"-t", imageTag,
-		"-f", filepath.Join(repoPath, templateDockerfile),
-		repoPath,
+		"-f", filepath.Join(appDir, templateDockerfile),
+		contextDir,
 	)
 	var captured bytes.Buffer
 	cmd.Stdout = io.MultiWriter(os.Stdout, &captured)
@@ -467,9 +518,11 @@ func cloneAndPrepare(appDir string, job domain.DeployJob, logger *zap.Logger, us
 
 // buildAndSaveImage builds the image and saves it to a tar, returning the captured
 // build output alongside any error so the caller can classify the failure.
-func buildAndSaveImage(ctx context.Context, job domain.DeployJob, appDir, imageTag string, logger *zap.Logger) (tarPath, buildOutput string, err error) {
+func buildAndSaveImage(
+	ctx context.Context, job domain.DeployJob, appDir, contextDir, imageTag string, logger *zap.Logger,
+) (tarPath, buildOutput string, err error) {
 	logger.Info("building image with buildah", zap.String("deployment_id", job.DeploymentID), zap.String("image_tag", imageTag))
-	buildOutput, err = buildImage(ctx, appDir, imageTag)
+	buildOutput, err = buildImageWithContext(ctx, appDir, contextDir, imageTag)
 	if err != nil {
 		return "", buildOutput, err
 	}
@@ -584,18 +637,36 @@ func ProcessDeployment(
 	if err != nil {
 		return markFailed(ctx, repo, job, "resolve application directory failed: "+err.Error())
 	}
+	if err := requireContainedPath(repoPath, appDir); err != nil {
+		return markFailed(ctx, repo, job, "application path rejected: "+err.Error())
+	}
+	if err := validateContextPaths(repoPath, appDir); err != nil {
+		return markFailed(ctx, repo, job, "application context rejected: "+err.Error())
+	}
 
 	builder, _, err := cloneAndPrepare(appDir, job, logger, false)
 	if err != nil {
 		return markFailed(ctx, repo, job, "clone/prepare failed: "+err.Error())
 	}
 	isStatic := builder.DefaultOutputDir != ""
+	contextDir, err := prepareBuildContext(repoPath, appDir, builder)
+	if err != nil {
+		return markFailed(ctx, repo, job, "build context rejected: "+err.Error())
+	}
+	if pm := detectPackageManager(appDir); pm == pkgManagerNPM &&
+		hasConfigFile(appDir, "package.json") && unlockedNPM(appDir) &&
+		os.Getenv("ALLOW_UNLOCKED_NPM_INSTALL") == "true" {
+		logger.Warn(
+			"unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled",
+			zap.String("deployment_id", job.DeploymentID),
+		)
+	}
 
 	const dockerBuildTimeout = 15 * time.Minute
 	buildCtx, cancel := context.WithTimeout(context.Background(), dockerBuildTimeout)
 	defer cancel()
 
-	tarPath, buildOutput, err := buildAndSaveImage(buildCtx, job, appDir, imageTag, logger)
+	tarPath, buildOutput, err := buildAndSaveImage(buildCtx, job, appDir, contextDir, imageTag, logger)
 	if err != nil {
 		if !strings.Contains(buildOutput, ssrMismatchSentinel) {
 			return markFailed(ctx, repo, job, "build failed: "+err.Error())

@@ -54,6 +54,8 @@ linters:
               - "github.com/moby/go-archive"
               - "github.com/moby/moby/client"
               - "github.com/santhosh-tekuri/jsonschema/v5"
+              - "github.com/pelletier/go-toml/v2"
+              - "github.com/Masterminds/semver/v3"
     dupl:
       threshold: 300
     funlen:
@@ -62,6 +64,9 @@ linters:
     goconst:
       min-len: 2
       min-occurrences: 3
+      # These are protocol tokens / language identifiers repeated across independent policies.
+      ignore-string-values:
+        - '^(true|go|node|build|\.git|\.\.|astro|vitepress|laravel|dynamic/Dockerfile\.(node|go|rust)\.tmpl|pnpm-lock\.yaml|yarn\.lock|bun\.lockb|package-lock\.json|npm-shrinkwrap\.json|vite\.config\.js|svelte\.config\.js)$'
     gocritic:
       enabled-tags:
         - diagnostic
@@ -70,11 +75,14 @@ linters:
         - style
         - opinionated
       disabled-checks:
+        - unnamedResult
         - dupImport
         - ifElseChain
         - octalLiteral
         - whyNoLint
         - wrapperFunc
+        # These joins intentionally build POSIX paths inside generated container instructions.
+        - filepathJoin
         - hugeParam
     gocyclo:
       min-complexity: 20
@@ -109,8 +117,19 @@ linters:
           - mnd
           - dupl
           - goconst
+          - gocyclo
+          - gosec
+          - lll
       - path: app
         text: "don't use `init` function"
+      - path: internal/deployments/build_policy\.go
+        text: "Function 'prepareBuildContext' has too many statements"
+        linters:
+          - funlen
+      - path: internal/deployments/recipes\.go
+        text: "Function 'renderRuntime' has too many statements"
+        linters:
+          - funlen
     paths: []
 formatters:
   enable:

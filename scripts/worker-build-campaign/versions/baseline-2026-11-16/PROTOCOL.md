@@ -1,0 +1,13 @@
+# Public application worker campaign: protocol
+
+Requested minimum: 50 public application cases, no repository owned by Parth06102006. This campaign uses independently named app directories plus standalone repositories; multiple examples from a common repository are **correlated**, not 50 independent randomly sampled repositories. Exact source commits and resolved dependency versions are recorded. Reserve candidates replace reference-inconclusive cases to reach 50 reference-qualified worker cases where feasible.
+
+Sequence per case: immutable source checkout -> reference build following actual application structure -> reference runtime HTTP/CLI check -> unchanged actual worker job -> worker image runtime check if built -> evidence preservation -> case cache cleanup. Never call a reference failure a repository defect without excluding toolchain, network, memory, secrets and harness causes. Reference-inconclusive cases are shown separately, not counted as worker failures.
+
+Limits: sequential builds, 1.5 CPUs/2 GiB per builder, 512 PIDs, disk stop guards (minimum 20 GiB free, campaign build storage maximum 25 GiB), reference deadline normally 20 minutes, worker normal build deadline 15 minutes. Large app references may be inconclusive under memory/time limits, which is recorded. No production secrets, no global Docker prune. Separate named build volumes. Unrelated services remain untouched. Logs, JSON, manifests, reference recipe and report survive cleanup. Downloaded sources, nested images/containers and campaign-only tool caches removed after completion.
+
+Metrics: source bytes/files, build-output bytes, reference and worker image bytes, image tar/upload bytes, build/end-to-end duration, clone/build/save/upload phase timings where logs allow, cold startup to readiness, repeated serial HTTP response timings (warm p50/p95), sampled CPU/memory/PIDs, cgroup CPU/peak memory where supported, disk growth, OOM events, dependency/tool versions, static/dynamic choice. Local HTTP probes are smoke checks, not production load tests; pipeline uses fake credentials/S3 and isolated real broker/database, not full API-server or real R2.
+
+Rates: separate worker compilation, runnable-image, and publication outcomes, conditioned on reference eligibility. Wilson 95% intervals for descriptive case counts, with explicit shared-repo correlation and non-random selection caveats. Stack/size subgroups and repeated worker trials on selected failures and successes help distinguish deterministic incompatibility from intermittent network/environment failures. No universal per-app probability inferred from one attempt.
+
+Stage status and progress are persisted in the campaign directory. Campaign setup does not change product code.

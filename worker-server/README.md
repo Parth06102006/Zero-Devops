@@ -1,6 +1,6 @@
 # Zero DevOps Worker Server
 
-Go build worker that consumes V1 `deploy.jobs` from RabbitMQ, checks out an exact commit SHA, builds with Docker, uploads an image tar to Cloudflare R2, and publishes status updates.
+Go build worker that consumes V1 `deploy.jobs` from RabbitMQ, checks out an exact commit SHA, builds images with Buildah, and publishes status updates. The static path uploads an image tar to Cloudflare R2; dynamic publication remains a stub.
 
 It does not expose an HTTP API. Jobs are produced only by the outbox dispatcher in `server/`. Shared contract: [`schemas/deploy-jobs-v1.schema.json`](../schemas/deploy-jobs-v1.schema.json). System overview: [`docs/architecture.md`](../docs/architecture.md). Target Buildah design notes: [`docs/buildah-webhook-worker-architecture.md`](../docs/buildah-webhook-worker-architecture.md).
 
@@ -9,7 +9,7 @@ It does not expose an HTTP API. Jobs are produced only by the outbox dispatcher 
 | Package | Responsibility |
 | --- | --- |
 | `internal/worker` | RabbitMQ consumer loop (manual ack, prefetch 1), retry / DLQ policy |
-| `internal/deployments` | Clone exact SHA, framework/package-manager detection, Dockerfile templating, Docker build + `docker save` |
+| `internal/deployments` | Clone exact SHA, framework/package-manager detection, Dockerfile templating, Buildah build + archive export |
 | `internal/deployments/contract` | V1 `deploy.jobs` Go types + validation (mirrors server) |
 | `internal/queue` | Queue setup, job / status publishing |
 | `internal/upload` | Image-tar upload to Cloudflare R2 (S3-compatible) |
@@ -21,7 +21,7 @@ It does not expose an HTTP API. Jobs are produced only by the outbox dispatcher 
 flowchart LR
     MQ[(RabbitMQ\ndeploy.jobs)] --> Worker[worker-server]
     Worker --> PG[(Worker PostgreSQL)]
-    Worker --> Docker[Docker build]
+    Worker --> Builder[Buildah build]
     Worker --> R2[(Cloudflare R2)]
     Worker -->|deploy.status| MQ
 ```
@@ -33,11 +33,11 @@ flowchart LR
 3. Insert/reset the worker’s own `deployments` row; publish `building` on `deploy.status`.
 4. Shallow-fetch and check out the exact `commit_sha` (never the moving branch tip).
 5. Detect framework / package manager; write a Dockerfile from `templates/` (or keep an existing one).
-6. `docker build` → `docker save` to a local tar → upload tar to R2.
-7. Update worker DB; publish terminal status (`failed` / `canceled`).
+6. `buildah bud` → `buildah push docker-archive:...` to a local tar. Static builds upload the tar; dynamic builds use the existing finalization stub.
+7. Update worker DB; publish `success` on completed builds or `canceled` after retry exhaustion. Local attempt failures remain eligible for retry.
 8. Ack on success path; on failure, re-publish the same V1 body with incremented `retry_count`, or mark canceled + DLQ when `MAX_RETRIES_COUNT` is exceeded.
 
-> Builds still use **Docker** (not Buildah) and produce a **node-local image tar** on R2 — not a digest-addressed OCI registry push.
+> Image creation and worker `success` do not establish deployment. Static finalization uploads a container-image tar, and dynamic finalization has no registry/runner publication yet.
 
 ### Supported templates
 
@@ -86,6 +86,110 @@ Example body (abbreviated):
 
 ## Configuration
 
+### Build dependency policy and native targets
+
+Application builds use Buildah. Generated templates use fully qualified image
+references. Go builder versions come from the greater of the `go` and released
+`toolchain` versions in the application's `go.mod`; `GOTOOLCHAIN=local` prevents
+an implicit toolchain download. Node templates default to Node 24 and select a compatible 20/22/24 image
+family from `engines.node`, with numeric `.node-version` / `.nvmrc` overrides.
+The actual pulled Node version is checked before dependency installation when
+an engine range is present; narrow ranges may need an exact numeric pin.
+Other language templates retain their existing version policy. Image tags are
+not immutable digests.
+
+Supported JavaScript lockfiles keep frozen installs, including npm shrinkwrap.
+Without a lockfile, npm builds fail early with an actionable diagnostic. An
+operator can explicitly set `ALLOW_UNLOCKED_NPM_INSTALL=true` in the worker's
+process environment to permit `npm install --ignore-scripts --package-lock=false`.
+The worker logs a reproducibility warning. Resolution can change between builds
+and between build/runtime installation stages; no lockfile is written to the
+checkout. Lifecycle install scripts remain disabled in both stages. This option
+applies to all jobs handled by that worker; use a separate worker when policies
+must differ. It is intentionally not an application-provided switch.
+
+For native targets, put `zero-devops.build.json` in the selected app directory:
+
+```json
+{
+  "build_context": ".",
+  "go_package": "./cmd/server"
+}
+```
+
+`build_context` is relative to the cloned repository root, while `go_package`
+is relative to the app directory. Go defaults to the app context and package
+`.`. One explicit local package is supported; wildcard targets are rejected.
+Use a larger context for repository-local Go replacements or a Go workspace.
+
+Rust defaults to the repository context, preserving workspace manifests and
+sibling path dependencies. It builds the selected manifest's package and one
+binary, using `--locked` when its workspace/app lockfile exists. For multiple
+binaries or a virtual workspace, select targets explicitly:
+
+```json
+{
+  "cargo_package": "web-server",
+  "cargo_binary": "web-server"
+}
+```
+
+`default-run` or a single discovered binary can supply the binary selection.
+The template copies that exact binary rather than searching for an arbitrary
+executable. Paths and symlinks must remain within the checkout; Cargo path
+dependencies must fit inside the chosen context. Native options are repository
+data, not shell commands. Queue command propagation remains a separate concern.
+These changes do not implement image publication, application routing, or
+external health checks. A build or local HTTP smoke pass is not a deployment.
+
+Framework selection checks owning frameworks before their supporting libraries:
+Astro plus Svelte is Astro; plain Svelte configuration does not imply SvelteKit;
+Laravel's Composer dependency selects a PHP application with a Vite asset build.
+Conflicting owning frameworks require an explicit selection. SvelteKit requires
+a literal supported Node/static adapter indication or an explicit recipe choice.
+Configuration is inspected as data, never evaluated on the host. VitePress's
+literal build-script root determines its `.vitepress/dist` output. Static recipes
+validate the selected `index.html`; Node SvelteKit validates `build/index.js`.
+Next's optional `public/` directory is normalized in the builder image.
+
+Additional fields in the same app-local `zero-devops.build.json` provide explicit
+recipe and runtime choices (use only fields applicable to the selected recipe):
+
+```json
+{
+  "framework": "vite",
+  "output_dir": "website/dist"
+}
+```
+
+```json
+{
+  "runtime_assets": ["static", "resources/banner.txt"],
+  "runtime_workdir": ".",
+  "runtime_command": ["node", "dist/main.js"]
+}
+```
+
+Output directories apply to static recipes. Runtime commands are exec argument
+arrays; no implicit shell is added. Runtime assets are existing app-relative
+source paths copied to the same paths under `/app`; workdir is relative to `/app`.
+Paths must remain inside the selected app, including symlink targets. Asset
+packaging requires a generated multistage recipe; explicit Dockerfiles own their
+packaging. Rust includes an existing conventional `static/` directory by default;
+`runtime_assets: []` disables that convention. Compiled Nest applications start
+with Node directly, using validated literal compiler/entry settings and a build
+artifact check. Dynamic or unsupported configuration needs an explicit command.
+The Laravel recipe retains the existing PHP CLI server policy for local runtime
+verification; production PHP serving infrastructure is not provisioned here.
+
+Git fetch and checkout have separate deadlines: fetch defaults to 180 seconds
+per attempt (at most two attempts), checkout to 120 seconds. Operators may set
+`GIT_FETCH_TIMEOUT_SECONDS` and `GIT_CHECKOUT_TIMEOUT_SECONDS` to 1–300. Only
+recognized transient fetch errors retry, with bounded backoff. Permanent
+authentication/ref errors fail immediately. Fetches remain shallow and pinned
+to the requested SHA; checkout verifies `HEAD` exactly and never substitutes a
+moving branch. Logs include phase timings without credentials.
+
 Copy `.env.example` → `.env` in `worker-server/`.
 
 ```env
@@ -106,7 +210,7 @@ APP_ENV=development
 # MAX_RETRIES_COUNT=3
 ```
 
-The worker needs a local Docker daemon reachable by the Docker client used in `internal/deployments`.
+The worker needs Buildah with usable container storage and the isolation privileges required by its runtime environment.
 
 ## Local development
 
@@ -146,11 +250,11 @@ go test ./internal/deployments/contract/... -v
 
 Aligned with [`docs/architecture.md`](../docs/architecture.md) §3:
 
-- **No `success` on `deploy.status`** — finalize path updates the worker DB but does not publish terminal success; the API server can leave successful builds stuck in `building`. Top priority fix.
+- **Publication is incomplete** — static output is an image tar rather than published web assets; dynamic finalization marks success without a registry/runner or runtime health check.
 - **`Insert` resets terminal rows** — `ON CONFLICT … status='pending'` can resurrect finished builds on redelivery.
 - **Retry path** re-publishes then acks; a crash between those steps can duplicate concurrent builds.
-- **`Configuration` from V1** is not applied to the build (approved executable/args/working-dir unused).
-- **Buildah isolation** not started — plain Docker, no CPU/mem/network limits or workspace sandbox.
+- **V1 command propagation** — the approved executable/args are not applied. Working directory selects the app; repository-native target options are documented above.
+- **Production build limits** — Buildah has a build timeout, but per-job CPU/memory/network isolation is not implemented by these fixes. The campaign applies limits through its separate test containers.
 - **No OCI registry** — tar on R2 only; no digest reported on status.
 
-Planned direction (Buildah executor, isolation, registry publish) is sketched in [`docs/buildah-webhook-worker-architecture.md`](../docs/buildah-webhook-worker-architecture.md); that is not the current runtime path.
+Further isolation and registry publication work is sketched in [`docs/buildah-webhook-worker-architecture.md`](../docs/buildah-webhook-worker-architecture.md).

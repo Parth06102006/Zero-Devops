@@ -1,0 +1,60 @@
+# Broad worker compatibility campaign — final queue report
+
+Tested worker source: `d15eae067cf77a8dcb5d6d6aaf8a59b166c65106`. No deployment or publication was attempted; the worker was configured to use an isolated local stub. Earlier measured worker trials were not rerun.
+
+**Queue exhausted: 23/23 identities accounted for; 19 complete harness records and 19 measured worker image outcomes.** An unmeasured case is not a worker failure.
+
+| Metric | Independent reference | Unchanged worker |
+|---|---:|---:|
+| Image built | 7/19 attempted | 1/19 attempted |
+| Local HTTP | 3/3 attempted | 0/0 attempted |
+| Cross-container HTTP | 3/3 attempted | 0/0 attempted |
+| Case-specific functional check | 1/3 attempted | 0/0 attempted |
+
+The image metric counts diagnostic reference stages where an image exists; a build-only or typecheck reference is not full application qualification. HTTP readiness is not dependency behavior. The functional row counts explicit runtime probes only; build-time diagnostics (if any) are described in each case scope. A dash means unmeasured or not applicable.
+
+| Case | Reference image / local / external / functional | Worker image / local / external / functional | First relevant failure or coverage limit |
+|---|---|---|---|
+| [nest-bull-redis](pilot-01/result.json) | fail / — / — / — | fail / — / — / — | Ref: npm error code ERESOLVE; Worker: npm error code ERESOLVE |
+| [tanstack-start-query](pilot-02/result.json) | fail / — / — / — | fail / — / — / — | Ref: [WARN] GET https://registry.npmjs.org/ipaddr.js/-/ipaddr.js-2.2.0.tgz error (Failed to fetch https://registry.npmjs.org/ipaddr.js/-/ipaddr.js-2.2.0.tgz: error decoding response body: request or response body error: operation timed out) — 1; Worker: Error: building at STEP "COPY --from=builder /app/.output ./.output": checking on sources under "/var/lib/containers/storage/overlay/5ee1bc445e7d0192e86f768983a984aeb115977ee824937585d7e667d5340b4d/merged": copier: stat: "/app/.output": no such file or directory |
+| [fastapi-uv-sqlmodel](pilot-03/result.json) | fail / — / — / — | fail / — / — / — | Ref: Error: creating build container: short-name resolution enforced but cannot prompt without a TTY; Worker: Error: building at STEP "COPY requirements.txt ./": checking on sources under "/tmp/zerodevops-build/b285d057-96cc-4133-be53-fb157f74b311/backend": copier: stat: "/requirements.txt": no such file or directory |
+| [django-cms](case-04-django-cms-setup-retry/result.json) | pass / pass / pass / fail | fail / — / — / — | Ref: FileNotFoundError: [Errno 2] No such file or directory: '/app/democontent/home.json'; Worker: Error: pg_config executable not found. |
+| [angular-realworld](case-05-angular-realworld/result.json) | fail / — / — / — | fail / — / — / — | Ref: Error: creating build container: short-name resolution enforced but cannot prompt without a TTY; Worker: ✘ [ERROR] Could not resolve "realworld/assets/theme/styles.css" |
+| [react-router-express](case-06-react-router-express/result.json) | fail / — / — / — | fail / — / — / — | Ref: Error: building at STEP "RUN unlocked npm install --no-package-lock --ignore-scripts && npm run build && test -f build/server/index.js && npm prune --omit=dev --ignore-scripts": exit status 127; Worker: Error: building at STEP "COPY --from=builder /app/dist ./dist": checking on sources under "/var/lib/containers/storage/overlay/cc19456b83dd217176ce2fca5c25005e50c3a94830ce82ddb547a5e6eedfe2ed/merged": copier: stat: "/app/dist": no such file or directory |
+| [gin-multipart](case-07-gin-multipart/result.json) | pass / pass / pass / fail | fail / — / — / — | Ref: Error: exit status 1; Worker: 2026-11-19T14:25:12.359Z	ERROR	worker/worker.go:109	deployment job failed	{"request_id": "zdround2-55fe619d-6d10-4f44-8c23-b767bdd6d0d1", "deployment_id": "55fe619d-6d10-4f44-8c23-b767bdd6d0d1", "error": "clone/prepare failed: no framework detected"} |
+| [nuxt-content](case-08-nuxt-content/result.json) | fail / — / — / — | fail / — / — / — | Ref: Error: building at STEP "RUN npm install --no-package-lock --ignore-scripts && npm run build && test -f .output/server/index.mjs": exit status 1; Worker: Error: building at STEP "RUN npm run build": exit status 1; Scope: uses standalone published Nuxt Content rather than root workspace override; unlocked |
+| [sveltekit-workspace](case-09-sveltekit-workspace/result.json) | fail / — / — / — | fail / — / — / — | Ref: Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL; Worker: 2026-11-19T14:46:33.710Z	ERROR	worker/worker.go:109	deployment job failed	{"request_id": "zdround2-b638f7fe-2e58-4ea0-ad2e-2cb9c783d184", "deployment_id": "b638f7fe-2e58-4ea0-ad2e-2cb9c783d184", "error": "clone/prepare failed: SvelteKit adapter is ambiguous or unsupported; select a; Scope: root lock plus explicit upstream Kit prepublish preparation; local apps and catalog |
+| [trpc-fastify](case-10-trpc-fastify/result.json) | pass / — / — / — | fail / — / — / — | Worker: 2026-11-19T15:08:24.829Z	ERROR	worker/worker.go:109	deployment job failed	{"request_id": "zdround2-bca2f3a9-8c89-4926-b154-ea2d308d7c18", "deployment_id": "bca2f3a9-8c89-4926-b154-ea2d308d7c18", "error": "build failed: signal: killed"}; Scope: build only; RPC client/session probe not qualified |
+| [drizzle-next](case-11-drizzle-next/result.json) | pass / — / — / — | fail / — / — / — | Worker: Error: POSTGRES_URL environment variable is not set; Scope: typecheck only; production build/pricing needs Stripe setup not approved for live use; no migrations, payment or functional pass |
+| [nest-typeorm](case-12-nest-typeorm/result.json) | fail / — / — / — | fail / — / — / — | Ref: npm error code ERESOLVE; Worker: npm error code ERESOLVE; Scope: unlocked build; runtime requires MySQL on loopback per source; no DB qualification |
+| [nest-graphql](case-13-nest-graphql/result.json) | fail / — / — / — | fail / — / — / — | Ref: npm error code ERESOLVE; Worker: npm error code ERESOLVE; Scope: unlocked build; GraphQL schema check via HTTP POST |
+| [actual-budget](case-14-actual-budget/result.json) | fail / — / — / — | fail / — / — / — | Ref: originalError: undefined,; Worker: npm error code EUNSUPPORTEDPROTOCOL; Scope: reference uses upstream Yarn scripts for native install; standalone native SQLite query, not server persistence or bank integrations |
+| [netbox](case-15-netbox/result.json) | — / — / — / — | — / — / — / — | Harness: RuntimeError: ('docker', 'network', 'create', '--label') exited 1: Error response from daemon: all predefined address pools have been fully subnetted ; Ref: no image result; Scope: dependency imports/image construction only; no PostgreSQL/Redis application runtime |
+| [flask-admin](case-16-flask-admin/result.json) | — / — / — / — | fail / — / — / — | Ref: ('docker', 'pull', 'ghcr.io/astral-sh/uv:0.9.26') exited 1: <3>WSL (53280 - ) ERROR: UtilAcceptVsock:281: accept4 failed 110 error getting credentials - err: exit status 1, out: '' ; Worker: Error: building at STEP "COPY requirements.txt ./": checking on sources under "/tmp/zerodevops-build/58481aee-f70c-4a86-927f-a83a9c64efb7/examples/forms_files_images": copier: stat: "/requirements.txt": no such file or directory; Scope: dependency smoke only; documented example uses development server; upload not tested |
+| [mealie](case-17-mealie/result.json) | — / — / — / — | — / — / — / — | Harness: RuntimeError: ('docker', 'network', 'create', '--label') exited 1: Error response from daemon: all predefined address pools have been fully subnetted ; Ref: no image result; Scope: upstream docker/Dockerfile; complete image build only; recipe create/read not qualified |
+| [spring-jpa](case-18-spring-jpa/result.json) | fail / — / — / — | pass / — / — / — | Ref: > Could not resolve all dependencies for configuration ':testRuntimeClasspath'.; Scope: Gradle tests and CLI JPA customer output; no HTTP expected |
+| [quarkus-panache](case-19-quarkus-panache/result.json) | pass / — / — / — | fail / — / — / — | Worker: time="2026-11-19T15:16:09Z" level=warning msg="Failed, retrying in 1s ... (1/3). Error: initializing source docker://eclipse-temurin:21-jdk-alpine: pinging container registry registry-1.docker.io: Get \"https://registry-1.docker.io/v2/\": net/http: TLS handshake timeout"; Scope: fast-JAR build; no PostgreSQL-backed runtime test |
+| [aspnet-min-api](case-20-aspnet-min-api/result.json) | pass / pass / pass / pass | fail / — / — / — | Worker: 2026-11-19T15:31:00.156Z	ERROR	worker/worker.go:109	deployment job failed	{"request_id": "zdround2-bf2961c4-a732-4626-b318-901caff1d7b0", "deployment_id": "bf2961c4-a732-4626-b318-901caff1d7b0", "error": "clone/prepare failed: no framework detected"}; Scope: in-memory EF API create/list; project and endpoint contract checked independently |
+| [symfony-demo](case-21-symfony-demo/result.json) | pass / — / — / — | fail / — / — / — | Worker: Error: building at STEP "RUN composer install --no-dev --no-interaction --no-progress --optimize-autoloader": exit status 1; Scope: Composer and console boot only; no seeded Doctrine runtime |
+| [hexpm](case-22-hexpm/result.json) | — / — / — / — | — / — / — / — | Harness: RuntimeError: ('docker', 'network', 'create', '--label') exited 1: Error response from daemon: all predefined address pools have been fully subnetted ; Ref: no image result; Scope: upstream release image build only; production release not started without reviewed local service configuration |
+| [sqlx-axum](case-23-sqlx-axum/result.json) | fail / — / — / — | — / — / — / — | Harness: TimeoutExpired: Command '['docker', 'exec', 'zdbroad-case23-db', 'psql', '-U', 'e2e', '-d', 'e2e', '-A', '-t', '-F', '/', '-c', "SELECT status, COALESCE(error_message,''), COALESCE(output_url,'') FROM deployments WHERE id='c4006b37-08ae-4e1d-b3b3-4552128ff8b6';"]' timed out after ; Ref: Error: building at STEP "RUN SQLX_OFFLINE=true cargo build --locked --manifest-path examples/postgres/axum-social-with-tests/Cargo.toml": exit status 1; Scope: workspace build only; no live PostgreSQL/CRUD test |
+
+## Raw-log clarifications
+
+- **Nuxt Content:** Both build logs explicitly report that `better-sqlite3` is required. This trial does not establish a worker-only native-module failure.
+- **Actual Budget:** The reference reported `fatal: not a git repository` when building from an exported source tree. The worker stopped earlier: its nested npm recipe rejected a `workspace:*` dependency. Native SQLite was not exercised.
+- **Quarkus Panache:** The worker log also contains a transient registry warning, but the terminal build error was `Directory '/app' does not contain a Gradle build`. The independent Maven fast-JAR reference built. PostgreSQL behavior was not tested.
+- **Symfony Demo:** Composer installed packages, then `cache:clear` failed with `Could not open input file: ./bin/console`. The independent reference copied the app first, disabled Composer scripts and booted the console; it did not test Doctrine runtime behavior.
+- **SQLx/Axum:** A read-only inspection of the retained worker log confirmed exact pinned checkout and entry into the Buildah build. The status-poll timeout still leaves the worker image outcome unmeasured.
+
+## Interpretation
+
+- Shared installation failures are not automatically worker-specific. An inconclusive reference does not erase a directly observed worker recipe or discovery mismatch.
+- The FastAPI reference-only repeats and the initial Django setup error are retained as separate attempts. They are not additional cases. See [interim evidence and repeat links](PROGRESS.md).
+- A reduced-memory parallel lane and a serial heavyweight lane are not comparable performance benchmarks. Unlocked resolutions are not reproducible.
+- The Drizzle build-only check does not qualify production Next/Stripe setup, Drizzle migrations or CRUD. External payment, cloud and production credentials were not supplied.
+- Runtime scopes and raw logs are linked above. No rate here establishes an updated outcome for the earlier cohorts.
+
+Campaign containers still running in final check: `[]`. No global pruning was performed.
+
+Queue evidence: [final controller state](queue-state.json).

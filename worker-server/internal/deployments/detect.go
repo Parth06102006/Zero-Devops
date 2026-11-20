@@ -49,10 +49,10 @@ var (
 		Template:    "dynamic/Dockerfile.nuxt.tmpl",
 	}
 	sveltekitBuilder = &Builder{
-		Name:        frameworkSvelteKit,
-		ConfigFiles: []string{"svelte.config.ts", "svelte.config.js", "svelte.config.cjs"},
-		Deps:        []string{"@sveltejs/kit"},
-		Template:    "dynamic/Dockerfile.sveltekit.tmpl",
+		Name: frameworkSvelteKit,
+		// Svelte config is shared with plain Svelte; Kit requires its own dependency.
+		Deps:     []string{"@sveltejs/kit"},
+		Template: "dynamic/Dockerfile.sveltekit.tmpl",
 	}
 	remixBuilder = &Builder{
 		Name:        frameworkRemix,
@@ -234,6 +234,7 @@ var packageManagers = []struct {
 	{"bun.lock", pkgManagerBun},  // text lockfile (Bun >= 1.1)
 	{"bun.lockb", pkgManagerBun}, // binary lockfile (Bun < 1.1)
 	{"package-lock.json", pkgManagerNPM},
+	{"npm-shrinkwrap.json", pkgManagerNPM},
 }
 
 // pythonPackageManagers defines Python package managers in priority order.
@@ -249,6 +250,7 @@ var pythonPackageManagers = []struct {
 }
 
 type packageJSON struct {
+	Engines         map[string]string `json:"engines"`
 	Dependencies    map[string]string `json:"dependencies"`
 	DevDependencies map[string]string `json:"devDependencies"`
 	Scripts         map[string]string `json:"scripts"`
@@ -529,6 +531,12 @@ func ResolveAppDir(repoPath, workingDir string) (string, error) {
 // detectFrameworkAtRoot identifies the framework or language of an application directory
 // by checking only root-level config files, package.json dependencies, and Dockerfile.
 func detectFrameworkAtRoot(appDir string) (*Builder, error) {
+	if b, err := selectRecipe(appDir); b != nil || err != nil {
+		if err != nil {
+			return nil, &recipeSelectionError{err}
+		}
+		return b, err
+	}
 	rootFiles := buildRootFileSet(appDir)
 
 	for _, b := range builders {
@@ -589,6 +597,10 @@ func detectFramework(appDir string) (*Builder, error) {
 	builder, err := detectFrameworkAtRoot(appDir)
 	if err == nil {
 		return builder, nil
+	}
+	var selectionErr *recipeSelectionError
+	if errors.As(err, &selectionErr) {
+		return nil, err
 	}
 	if strings.Contains(err.Error(), "no static or dynamic deployment recipe exists") {
 		return nil, err
