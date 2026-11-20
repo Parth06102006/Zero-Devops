@@ -17,6 +17,11 @@ import (
 
 // Build options are repository data, never shell commands. Context is relative
 // to the checkout root; package paths are relative to the selected application.
+const (
+	buildOptionsMaxBytes = 64 * 1024
+	generatedFileMode    = 0o600
+)
+
 type buildOptions struct {
 	BuildContext   string   `json:"build_context"`
 	GoPackage      string   `json:"go_package"`
@@ -32,6 +37,7 @@ type buildOptions struct {
 func readBuildOptions(appDir string) (buildOptions, error) {
 	var options buildOptions
 	path := filepath.Join(appDir, "zero-devops.build.json")
+	//nolint:gosec // path is formed from the app root and checked by requireContainedPath below.
 	f, err := os.Open(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return options, nil
@@ -39,11 +45,11 @@ func readBuildOptions(appDir string) (buildOptions, error) {
 	if err != nil {
 		return options, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	if err := requireContainedPath(appDir, path); err != nil {
 		return options, err
 	}
-	dec := json.NewDecoder(io.LimitReader(f, 64*1024))
+	dec := json.NewDecoder(io.LimitReader(f, buildOptionsMaxBytes))
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(&options); err != nil {
 		return options, fmt.Errorf("zero-devops.build.json: %w", err)
@@ -102,7 +108,9 @@ func renderInstallPolicy(appDir, content, pm string) (string, error) {
 		return content, nil
 	}
 	if os.Getenv("ALLOW_UNLOCKED_NPM_INSTALL") != "true" {
-		return "", errors.New("npm lockfile missing: commit package-lock.json or npm-shrinkwrap.json; an operator may opt in with ALLOW_UNLOCKED_NPM_INSTALL=true (non-reproducible dependency resolution; install scripts stay disabled)")
+		return "", errors.New("npm lockfile missing: commit package-lock.json or npm-shrinkwrap.json; " +
+			"an operator may opt in with ALLOW_UNLOCKED_NPM_INSTALL=true " +
+			"(non-reproducible dependency resolution; install scripts stay disabled)")
 	}
 	// Fresh resolution is confined to the image. Never write a lock into the
 	// checkout or claim that this reproduces a previous dependency tree.
@@ -110,7 +118,7 @@ func renderInstallPolicy(appDir, content, pm string) (string, error) {
 	return content, nil
 }
 
-var releasedGoVersion = regexp.MustCompile(`^1\.(0|[1-9][0-9]{0,2})(\.(0|[1-9][0-9]{0,3}))?$`)
+var releasedGoVersion = regexp.MustCompile(`^1\.(0|[1-9]\d{0,2})(\.(0|[1-9]\d{0,3}))?$`)
 var safeBuildPath = regexp.MustCompile(`^[A-Za-z0-9_./-]+$`)
 var cargoName = regexp.MustCompile(`^[A-Za-z0-9_-]+$`)
 
@@ -136,6 +144,8 @@ func goImageVersion(appDir string) (string, error) {
 	if err := requireContainedPath(appDir, path); err != nil {
 		return "", err
 	}
+	//nolint:gosec // path is formed from the app root and checked by requireContainedPath above.
+	//nolint:gosec // Cargo.toml path is constrained by requireContainedPath above.
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return "", err
@@ -223,6 +233,7 @@ func readCargo(root, dir string) (cargoManifest, error) {
 	if err := requireContainedPath(root, path); err != nil {
 		return manifest, err
 	}
+	//nolint:gosec // Cargo.toml is first constrained to the repository by requireContainedPath.
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return manifest, err
@@ -231,6 +242,8 @@ func readCargo(root, dir string) (cargoManifest, error) {
 	return manifest, err
 }
 
+//nolint:gocyclo // Cargo manifest discovery intentionally validates each supported binary source explicitly.
+//nolint:gocritic // The tuple is kept simple for internal call sites.
 func cargoBinary(appDir string, manifest cargoManifest, options buildOptions) (string, string, error) {
 	pkg := options.CargoPackage
 	if pkg == "" && manifest.Package != nil {
@@ -285,6 +298,9 @@ func cargoBinary(appDir string, manifest cargoManifest, options buildOptions) (s
 // prepareBuildContext returns the actual Buildah context independently of the
 // app directory. Rust defaults to its enclosing workspace; other recipes keep
 // their app context unless a native build explicitly requests a larger one.
+//
+//nolint:gocyclo // Build context selection combines language-specific containment and manifest policies.
+//nolint:funlen // Keeps language-specific build-context policy together for review.
 func prepareBuildContext(repoDir, appDir string, builder *Builder) (string, error) {
 	if err := requireContainedPath(repoDir, appDir); err != nil {
 		return "", err
@@ -316,12 +332,19 @@ func prepareBuildContext(repoDir, appDir string, builder *Builder) (string, erro
 				return "", errors.New("unsupported characters in Go application path")
 			}
 			path := filepath.Join(appDir, templateDockerfile)
+			//nolint:gosec // Dockerfile path is inside the validated application directory.
 			data, err := os.ReadFile(path)
 			if err != nil {
 				return "", err
 			}
-			content := strings.Replace(string(data), "COPY go.mod go.sum* ./\nRUN go mod download\n\nCOPY . .", "COPY . .\nWORKDIR /app/"+filepath.ToSlash(rel)+"\nRUN go mod download", 1)
-			if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+			content := strings.Replace(
+				string(data),
+				"COPY go.mod go.sum* ./\nRUN go mod download\n\nCOPY . .",
+				"COPY . .\nWORKDIR /app/"+filepath.ToSlash(rel)+"\nRUN go mod download",
+				1,
+			)
+			//nolint:gosec // path is the generated Dockerfile under the validated application directory.
+			if err := os.WriteFile(path, []byte(content), generatedFileMode); err != nil {
 				return "", err
 			}
 		}
@@ -334,7 +357,6 @@ func prepareBuildContext(repoDir, appDir string, builder *Builder) (string, erro
 	if err != nil {
 		return "", err
 	}
-	lockDir := appDir
 	if options.BuildContext == "" && manifest.Workspace == nil {
 		if manifest.Package != nil && manifest.Package.Workspace != "" {
 			contextDir = filepath.Join(appDir, manifest.Package.Workspace)
@@ -362,7 +384,7 @@ func prepareBuildContext(repoDir, appDir string, builder *Builder) (string, erro
 			}
 		}
 	}
-	lockDir = contextDir
+	lockDir := contextDir
 	// Keep the checkout, including sibling path dependencies, as the default
 	// Rust context. Cargo still builds only the selected package and binary.
 	if options.BuildContext == "" {
@@ -385,12 +407,17 @@ func prepareBuildContext(repoDir, appDir string, builder *Builder) (string, erro
 		return "", errors.New("invalid Cargo binary name")
 	}
 	rel, _ := filepath.Rel(contextDir, appDir)
-	args := []string{"cargo", "build", "--release", "--manifest-path", filepath.ToSlash(filepath.Join(rel, "Cargo.toml")), "--package", pkg, "--bin", bin, "--target-dir", "/app/.zerodevops-target"}
+	args := []string{
+		"cargo", "build", "--release", "--manifest-path",
+		filepath.ToSlash(filepath.Join(rel, "Cargo.toml")), "--package", pkg,
+		"--bin", bin, "--target-dir", "/app/.zerodevops-target",
+	}
 	if hasConfigFile(lockDir, "Cargo.lock") {
 		args = append(args, "--locked")
 	}
 	command, _ := json.Marshal(args)
 	path := filepath.Join(appDir, templateDockerfile)
+	//nolint:gosec // Dockerfile path is inside the validated application directory.
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return "", err
@@ -401,7 +428,8 @@ func prepareBuildContext(repoDir, appDir string, builder *Builder) (string, erro
 	if err != nil {
 		return "", err
 	}
-	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+	//nolint:gosec // path is the generated Dockerfile under the validated application directory.
+	if err := os.WriteFile(path, []byte(content), generatedFileMode); err != nil {
 		return "", err
 	}
 	return contextDir, nil
@@ -424,6 +452,8 @@ func validateContextPaths(repoDir, contextDir string) error {
 
 // Cargo can load path dependencies in workspace and target-specific tables.
 // Reject dependencies outside the supplied context before invoking the build.
+//
+//nolint:gocyclo // Recursively validates Cargo dependency tables before invoking Cargo.
 func validateCargoPaths(contextDir string) error {
 	return filepath.WalkDir(contextDir, func(path string, entry fs.DirEntry, err error) error {
 		if err != nil {
@@ -435,6 +465,7 @@ func validateCargoPaths(contextDir string) error {
 		if entry.Name() != "Cargo.toml" || entry.IsDir() {
 			return nil
 		}
+		//nolint:gosec // Cargo.toml entries are discovered by WalkDir under the validated context.
 		data, err := os.ReadFile(path)
 		if err != nil {
 			return err

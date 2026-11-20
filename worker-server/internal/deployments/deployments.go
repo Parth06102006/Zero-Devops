@@ -27,6 +27,8 @@ const (
 	pkgManagerYarn = "yarn"
 	pkgManagerBun  = "bun"
 
+	bunInstallFrozen = "bun install --frozen-lockfile --ignore-scripts"
+
 	// Python package managers
 	pkgManagerUV     = "uv"
 	pkgManagerPoetry = "poetry"
@@ -54,6 +56,7 @@ const (
 	frameworkVue       = "vue"
 	frameworkSolid     = "solid"
 	frameworkTanStack  = "tanstack-start"
+	frameworkNestJS    = "nestjs"
 
 	langNode       = "node"
 	langGo         = "go"
@@ -82,7 +85,7 @@ var pmInstallCommands = map[string]string{
 	pkgManagerNPM:  "npm ci --ignore-scripts",
 	pkgManagerPNPM: "pnpm install --frozen-lockfile --ignore-scripts",
 	pkgManagerYarn: "yarn install --frozen-lockfile --ignore-scripts",
-	pkgManagerBun:  "bun install --frozen-lockfile --ignore-scripts",
+	pkgManagerBun:  bunInstallFrozen,
 }
 
 // Production dependency installation is not a syntactic substitution for npm's
@@ -156,7 +159,8 @@ func cloneRepo(cloneURL, deploymentID, commitSHA string, credential domain.Clone
 		return "", err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	const gitCommandTimeout = 30 * time.Second
+	ctx, cancel := context.WithTimeout(context.Background(), gitCommandTimeout)
 	defer cancel()
 
 	//nolint:gosec // cloneURL validated by validateCloneURL and commitSHA by commitSHAPattern above
@@ -191,6 +195,7 @@ func cloneRepo(cloneURL, deploymentID, commitSHA string, credential domain.Clone
 	if err := runGit(checkoutCtx, []string{gitChangeDirFlag, destPath, "checkout", "--detach", commitSHA}); err != nil {
 		return "", fmt.Errorf("git checkout failed: %w", err)
 	}
+	//nolint:gosec // Command and fixed arguments are constants; destPath is created under the controlled build root.
 	verify := exec.CommandContext(checkoutCtx, "git", gitChangeDirFlag, destPath, "rev-parse", "HEAD")
 	verify.WaitDelay = gitWaitDelay
 	head, err := verify.Output()
@@ -513,7 +518,9 @@ func cloneAndPrepare(appDir string, job domain.DeployJob, logger *zap.Logger, us
 
 // buildAndSaveImage builds the image and saves it to a tar, returning the captured
 // build output alongside any error so the caller can classify the failure.
-func buildAndSaveImage(ctx context.Context, job domain.DeployJob, appDir, contextDir, imageTag string, logger *zap.Logger) (tarPath, buildOutput string, err error) {
+func buildAndSaveImage(
+	ctx context.Context, job domain.DeployJob, appDir, contextDir, imageTag string, logger *zap.Logger,
+) (tarPath, buildOutput string, err error) {
 	logger.Info("building image with buildah", zap.String("deployment_id", job.DeploymentID), zap.String("image_tag", imageTag))
 	buildOutput, err = buildImageWithContext(ctx, appDir, contextDir, imageTag)
 	if err != nil {
@@ -646,8 +653,13 @@ func ProcessDeployment(
 	if err != nil {
 		return markFailed(ctx, repo, job, "build context rejected: "+err.Error())
 	}
-	if pm := detectPackageManager(appDir); pm == pkgManagerNPM && hasConfigFile(appDir, "package.json") && unlockedNPM(appDir) && os.Getenv("ALLOW_UNLOCKED_NPM_INSTALL") == "true" {
-		logger.Warn("unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled", zap.String("deployment_id", job.DeploymentID))
+	if pm := detectPackageManager(appDir); pm == pkgManagerNPM &&
+		hasConfigFile(appDir, "package.json") && unlockedNPM(appDir) &&
+		os.Getenv("ALLOW_UNLOCKED_NPM_INSTALL") == "true" {
+		logger.Warn(
+			"unlocked npm install opted in: dependency resolution is not reproducible; install scripts remain disabled",
+			zap.String("deployment_id", job.DeploymentID),
+		)
 	}
 
 	const dockerBuildTimeout = 15 * time.Minute

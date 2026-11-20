@@ -68,8 +68,8 @@ func TestNativeBuildIntegration(t *testing.T) {
 				t.Fatalf("from: %v\n%s", err, output)
 			}
 			defer func() {
-				_ = exec.Command("buildah", "rm", container).Run()
-				_ = exec.Command("buildah", "rmi", tag).Run()
+				_ = exec.CommandContext(context.Background(), "buildah", "rm", container).Run()
+				_ = exec.CommandContext(context.Background(), "buildah", "rmi", tag).Run()
 			}()
 			binary := "/app/server"
 			want := map[string]string{"node-engine": "chosen-node-engine", "go-explicit-target": "chosen-go-server", "rust-standalone": "chosen-rust-admin", "rust-workspace": "chosen-workspace-server"}[name]

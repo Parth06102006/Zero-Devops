@@ -12,8 +12,8 @@ import (
 	"github.com/Masterminds/semver/v3"
 )
 
-var nodePin = regexp.MustCompile(`^v?(20|22|24)(\.(0|[1-9][0-9]*))?(\.(0|[1-9][0-9]*))?$`)
-var rangeVersion = regexp.MustCompile(`[0-9]+(?:\.[0-9]+){0,2}`)
+var nodePin = regexp.MustCompile(`^v?(20|22|24)(\.(0|[1-9]\d*))?(\.(0|[1-9]\d*))?$`)
+var rangeVersion = regexp.MustCompile(`\d+(?:\.\d+){0,2}`)
 var nodeBase = regexp.MustCompile(`(?m)^FROM docker\.io/library/node:[A-Za-z0-9_.-]+`)
 var nodeBuilderBase = regexp.MustCompile(`(?m)^FROM docker\.io/library/node:[A-Za-z0-9_.-]+ AS builder$`)
 var nodeUnnamedBase = regexp.MustCompile(`(?m)^FROM docker\.io/library/node:[A-Za-z0-9_.-]+$`)
@@ -21,6 +21,8 @@ var nodeUnnamedBase = regexp.MustCompile(`(?m)^FROM docker\.io/library/node:[A-Z
 // Choose a compatibility builder from the supported image families. Check the
 // actual pulled Node version again before installation; tags can move and a
 // bounded engine range might require an exact project-provided pin.
+//
+//nolint:gocyclo // Pin and engine-range selection handles each source and supported major explicitly.
 func selectNodeVersion(appDir, engine string) (string, error) {
 	var constraint *semver.Constraints
 	var err error
@@ -43,6 +45,7 @@ func selectNodeVersion(appDir, engine string) (string, error) {
 		if err := requireContainedPath(appDir, path); err != nil {
 			return "", err
 		}
+		//nolint:gosec // path uses only the fixed .node-version/.nvmrc names beneath appDir.
 		data, err := os.ReadFile(path)
 		if err != nil {
 			return "", err
@@ -61,7 +64,7 @@ func selectNodeVersion(appDir, engine string) (string, error) {
 		if constraint != nil && strings.Count(pin, ".") == 2 {
 			version, _ := semver.NewVersion(pin)
 			if !constraint.Check(version) {
-				return "", errors.New("Node version pin does not satisfy engines.node")
+				return "", errors.New("node version pin does not satisfy engines.node")
 			}
 		}
 		return pin, nil
@@ -105,7 +108,15 @@ func renderNodeToolchain(appDir, content string) (string, error) {
 	}
 	// npm ships semver in the official Node images. Read the engine range as
 	// data from the manifest; never interpolate repository strings into code.
-	code := `const s=require('/usr/local/lib/node_modules/npm/node_modules/semver');const r=require('./package.json').engines.node;if(!s.satisfies(process.versions.node,r)){console.error('Selected Node '+process.versions.node+' does not satisfy engines.node '+r+'; set a compatible exact .node-version');process.exit(1)}`
+	code := `const s=require('/usr/local/lib/node_modules/npm/node_modules/semver');
+` +
+		`const r=require('./package.json').engines.node;
+` +
+		`if(!s.satisfies(process.versions.node,r)){
+` +
+		`console.error('Selected Node '+process.versions.node+' does not satisfy engines.node '+r+'; set a compatible exact .node-version');
+` +
+		`process.exit(1)}`
 	command, _ := json.Marshal([]string{"node", "-e", code})
 	// Each Node dependency-install stage gets a check; Bun stages stay Bun.
 	blocks := strings.Split(content, "\nFROM ")

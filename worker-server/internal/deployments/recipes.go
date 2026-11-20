@@ -12,13 +12,16 @@ import (
 
 var vitepressBuilder = &Builder{Name: "vitepress", Template: "static/Dockerfile.vite.tmpl", DefaultOutputDir: ".vitepress/dist"}
 var laravelBuilder = &Builder{Name: "laravel", Template: "dynamic/Dockerfile.laravel.tmpl"}
-var nestBuilder = &Builder{Name: "nestjs", Template: "dynamic/Dockerfile.node.tmpl"}
+var nestBuilder = &Builder{Name: frameworkNestJS, Template: "dynamic/Dockerfile.node.tmpl"}
 
 type recipeSelectionError struct{ error }
 
+//nolint:gocyclo // Entry point resolution validates several independent Nest configuration sources.
+//nolint:gocritic // Return values are explicit to keep this helper easy to call.
 func nestEntrypoint(app string) (string, string, error) {
 	out := "dist"
 	root := ""
+	//nolint:gosec // tsconfig.json is a fixed filename under the selected application path.
 	if data, err := os.ReadFile(filepath.Join(app, "tsconfig.json")); err == nil {
 		var c struct {
 			CompilerOptions struct {
@@ -27,7 +30,7 @@ func nestEntrypoint(app string) (string, string, error) {
 			} `json:"compilerOptions"`
 		}
 		if err := json.Unmarshal(data, &c); err != nil {
-			return "", "", errors.New("Nest tsconfig is not literal JSON; specify runtime_command explicitly")
+			return "", "", errors.New("nest tsconfig is not literal JSON; specify runtime_command explicitly")
 		}
 		root = c.CompilerOptions.RootDir
 		if c.CompilerOptions.OutDir != "" {
@@ -39,6 +42,7 @@ func nestEntrypoint(app string) (string, string, error) {
 	}
 	source := "src"
 	entry := "main"
+	//nolint:gosec // nest-cli.json is a fixed config filename under app.
 	if data, err := os.ReadFile(filepath.Join(app, "nest-cli.json")); err == nil {
 		var c struct {
 			SourceRoot      string `json:"sourceRoot"`
@@ -48,7 +52,7 @@ func nestEntrypoint(app string) (string, string, error) {
 			} `json:"compilerOptions"`
 		}
 		if err := json.Unmarshal(data, &c); err != nil {
-			return "", "", errors.New("Nest config is not literal JSON; specify runtime_command explicitly")
+			return "", "", errors.New("nest config is not literal JSON; specify runtime_command explicitly")
 		}
 		if c.SourceRoot != "" {
 			source = c.SourceRoot
@@ -73,7 +77,7 @@ func nestEntrypoint(app string) (string, string, error) {
 	if root != "" {
 		rel, err := filepath.Rel(filepath.Clean(root), filepath.Clean(source))
 		if err != nil || rel == ".." || strings.HasPrefix(rel, "../") {
-			return "", "", errors.New("Nest sourceRoot escapes rootDir; specify runtime_command explicitly")
+			return "", "", errors.New("nest sourceRoot escapes rootDir; specify runtime_command explicitly")
 		}
 		folder = rel
 	}
@@ -94,6 +98,7 @@ func selectRecipe(app string) (*Builder, error) {
 		}
 		return nil, fmt.Errorf("unknown framework override %q", o.Framework)
 	}
+	//nolint:gosec // composer.json is a fixed config filename under app.
 	if data, err := os.ReadFile(filepath.Join(app, "composer.json")); err == nil {
 		var c struct {
 			Require map[string]string `json:"require"`
@@ -111,7 +116,11 @@ func selectRecipe(app string) (*Builder, error) {
 	for _, pair := range []struct {
 		dep string
 		b   *Builder
-	}{{"next", nextjsBuilder}, {"nuxt", nuxtBuilder}, {"astro", astroBuilder}, {"@sveltejs/kit", sveltekitBuilder}, {"vitepress", vitepressBuilder}, {"@nestjs/core", nestBuilder}} {
+	}{
+		{"next", nextjsBuilder}, {"nuxt", nuxtBuilder}, {"astro", astroBuilder},
+		{"@sveltejs/kit", sveltekitBuilder}, {"vitepress", vitepressBuilder},
+		{"@nestjs/core", nestBuilder},
+	} {
 		if hasDep(p, pair.dep) {
 			found = append(found, pair.b)
 		}
@@ -134,10 +143,11 @@ func selectRecipe(app string) (*Builder, error) {
 	return nil, nil
 }
 
-func kitRecipe(app string, p *packageJSON) (*Builder, error) {
+func kitRecipe(app string, _ *packageJSON) (*Builder, error) {
 	// Require one literal adapter import; arbitrary/dynamic config needs an explicit override.
 	var text string
 	for _, name := range []string{"svelte.config.js", "svelte.config.ts", "svelte.config.cjs"} {
+		//nolint:gosec // name is selected from the fixed Svelte config filename list.
 		b, _ := os.ReadFile(filepath.Join(app, name))
 		text += string(b)
 	}
@@ -189,6 +199,9 @@ func recipeOutput(app string, b *Builder, o buildOptions) (string, error) {
 
 // Produce validated runtime instructions for an app-root context. Native larger
 // contexts invoke this after their manifest path has been resolved.
+//
+//nolint:gocyclo // Runtime rendering applies independent validated command, asset, and workdir options.
+//nolint:funlen // Keeps validated runtime command, assets, and workdir rendering together.
 func renderRuntime(app, contextDir, content string, b *Builder) (string, error) {
 	o, err := readBuildOptions(app)
 	if err != nil {
@@ -297,6 +310,7 @@ func renderRuntime(app, contextDir, content string, b *Builder) (string, error) 
 
 func applyNativeRuntime(app, contextDir string, b *Builder) error {
 	path := filepath.Join(app, templateDockerfile)
+	//nolint:gosec // Generated Dockerfile path is derived from the selected app directory.
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
@@ -305,5 +319,6 @@ func applyNativeRuntime(app, contextDir string, b *Builder) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(path, []byte(content), 0o600)
+	//nolint:gosec // Generated Dockerfile path is under the selected application directory.
+	return os.WriteFile(path, []byte(content), generatedFileMode)
 }

@@ -39,12 +39,21 @@ func transientFetch(err error) bool {
 	}
 	text := strings.ToLower(err.Error())
 	// Permanent authorization, missing-ref and repository errors never retry.
-	for _, marker := range []string{"authentication failed", "repository not found", "could not read username", "not our ref", "unadvertised object", "403", "404", "401"} {
+	for _, marker := range []string{
+		"authentication failed", "repository not found", "could not read username",
+		"not our ref", "unadvertised object", "403", "404", "401",
+	} {
 		if strings.Contains(text, marker) {
 			return false
 		}
 	}
-	for _, marker := range []string{"could not resolve host", "connection reset", "connection timed out", "failed to connect", "remote end hung up", "early eof", "http/2 stream", "http2", "requested url returned error: 429", "requested url returned error: 500", "requested url returned error: 502", "requested url returned error: 503", "requested url returned error: 504"} {
+	for _, marker := range []string{
+		"could not resolve host", "connection reset", "connection timed out",
+		"failed to connect", "remote end hung up", "early eof",
+		"http/2 stream", "http2", "requested url returned error: 429",
+		"requested url returned error: 500", "requested url returned error: 502",
+		"requested url returned error: 503", "requested url returned error: 504",
+	} {
 		if strings.Contains(text, marker) {
 			return true
 		}
