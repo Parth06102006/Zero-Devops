@@ -1,9 +1,0 @@
-/bin/sh: set: line 0: can't access tty; job control turned off
-
-> nest-typescript-starter@1.0.0 start
-> nest start
-
-sh: nest: not found
-subprocess exited with status 127
-subprocess exited with status 127
-Error: exit status 127

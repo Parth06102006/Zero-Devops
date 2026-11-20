@@ -1,6 +1,0 @@
-zdfix2-worker-storage
-zdfix-cold-storage
-zdfix-db-data
-zdfix-native-storage
-zdfix-rabbit-data
-zdfix-worker-storage

@@ -379,7 +379,7 @@ The earlier `RESUME-HANDOFF.md` is retained as historical evidence and is supers
 - `REPORT.md`, `summary.json`, `metrics.csv`: final report, machine-readable summary and every case.
 - `INDEPENDENT-REVIEW.md`: read-only evidence review findings and addressed acceptance gaps.
 - `supplemental-evidence-audit.json`: 622 source files, six pinned upstream tree/blob inventories/modes, twelve dependency declarations, reference/worker isolation and warm HTTP records checked.
-- `worker-suite-final-acceptance.log` and `report-regression-tests.log`: full worker suite and reporting regression tests passed.
+- The final worker suite and reporting regression checks passed, as recorded in the campaign handoff.
 - `native-integration.json` and `cold-pulls.json`: live fixtures passed, ten of ten fresh-store image pulls passed.
 - `preservation-check.json`: all 63 product hashes, 460 prior evidence files and both manifests unchanged.
 - `recovery-20261117/`: original telemetry/controller failure evidence, measurement recovery of two already-built Next images without rebuilding, and serial completion of five unsubmitted cases.

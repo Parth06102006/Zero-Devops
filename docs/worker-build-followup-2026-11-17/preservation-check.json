@@ -1,9 +1,0 @@
-{
-  "at": "2026-11-17T20:08:37.104393+00:00",
-  "product_source_unchanged": true,
-  "prior_evidence_unchanged": true,
-  "manifests_unchanged": true,
-  "prior_files": 460,
-  "initial_controller_errors_preserved": "recovery-20261117",
-  "retained_image_recovery_without_rebuild": true
-}

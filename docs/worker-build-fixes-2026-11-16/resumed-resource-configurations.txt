@@ -1,2 +1,0 @@
-/zdfix-worker {"nano_cpus":1500000000,"memory_bytes":2147483648,"pids_limit":512,"image":"sha256:8e8dd9c411899b3c8a4fb437213282885360a27dd11232c59f86f3051f4cba54"}
-/zdfix2-worker {"nano_cpus":1500000000,"memory_bytes":2147483648,"pids_limit":512,"image":"sha256:8e8dd9c411899b3c8a4fb437213282885360a27dd11232c59f86f3051f4cba54"}

@@ -1,5 +1,0 @@
-v24.22.3
-11.19.1
-@example/with-markdoc@0.0.1 /app
-+-- @astrojs/markdoc@2.1.5
-`-- astro@7.4.12

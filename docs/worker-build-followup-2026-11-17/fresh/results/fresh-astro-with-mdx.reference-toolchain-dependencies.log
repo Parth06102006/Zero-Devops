@@ -1,7 +1,0 @@
-v24.22.3
-11.19.1
-@example/with-mdx@0.0.1 /app
-+-- @astrojs/mdx@8.1.6
-+-- @astrojs/preact@6.1.6
-+-- astro@7.4.12
-`-- preact@11.2.0

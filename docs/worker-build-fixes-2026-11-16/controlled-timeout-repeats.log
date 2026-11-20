@@ -1,9 +1,0 @@
-REPEAT START dotnet-insights-web
-REPEAT RESULT dotnet-insights-web detection-unsupported
-REPEAT START next-basic-css
-REPEAT RESULT next-basic-css other-build-failure
-REPEAT START next-hello-world
-REPEAT RESULT next-hello-world other-build-failure
-REPEAT START next-with-typescript
-REPEAT RESULT next-with-typescript other-build-failure
-Controlled repeats complete; primary evidence unchanged

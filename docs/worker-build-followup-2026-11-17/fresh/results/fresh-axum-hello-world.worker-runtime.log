@@ -1,6 +1,0 @@
-/bin/sh: set: line 0: can't access tty; job control turned off
-listening on 127.0.0.1:3000
-Terminated
-subprocess exited on killed
-subprocess exited with status 1
-Error: exit status 1

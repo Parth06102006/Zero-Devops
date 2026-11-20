@@ -1,2 +1,0 @@
-START lane=1 actix-hello-world
-START lane=2 actix-state
